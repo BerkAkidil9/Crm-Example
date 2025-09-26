@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load tailwind_filters %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+	<div class="py-5 border-b border-gray-200">
+		<a class="hover:text-blue-500 mt-3" href="{% url 'orders:order-list' %}">Go back to Orders</a>
+	</div>
+
+	<h1 class="text-gray-800 text-medium">Create a new Order</h1>
+	<form method="post" action="{% url 'orders:order-create' %}" class="form-small-text">
+		{% csrf_token %}
+		{{ form|crispy }}
+		{{ product_formset.management_form }}
+		<div id="product-formset-container">
+			{% for form in product_formset %}
+				<div class="product-form">
+					{{ form|crispy }}
+				</div>
+			{% endfor %}
+		</div>
+		<button type="button" id="add-product" class="w-full text-white bg-green-500 hover:bg-green-600 px-3 py-2 rounded-md">Add Product</button>
+		<button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
+	</form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const addProductButton = document.getElementById('add-product');
+	const productFormsetContainer = document.getElementById('product-formset-container');
+	const totalForms = document.querySelector('#id_orderproduct_set-TOTAL_FORMS');
+
+	addProductButton.addEventListener('click', function() {
+		const currentFormCount = productFormsetContainer.children.length;
+		const newForm = productFormsetContainer.children[0].cloneNode(true);
+		const formRegex = RegExp(`orderproduct_set-(\\d){1}-`, 'g');
+
+		newForm.innerHTML = newForm.innerHTML.replace(formRegex, `orderproduct_set-${currentFormCount}-`);
+		productFormsetContainer.appendChild(newForm);
+		totalForms.setAttribute('value', currentFormCount + 1);
+	});
+});
+</script>
+{% endblock content %}

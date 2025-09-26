@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="text-gray-600 body-font overflow-hidden">
+	<div class="container px-5 py-8 mx-auto"> <!-- Reduced top padding for starting a bit top -->
+	  <div class="flex justify-center"> <!-- Added for horizontal centering -->
+		<div class="lg:w-4/5 flex flex-wrap justify-center"> <!-- Adjusted for center alignment and wrapping -->
+		  <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
+			<h2 class="text-sm title-font text-gray-500 tracking-widest">ProductsAndStock</h2>
+			<h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ ProductAndStock.product_name }}</h1>
+			<div class="flex mb-4">
+			  <a href="{% url 'ProductsAndStock:ProductAndStock-detail' ProductAndStock.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
+				Overview
+			  </a>
+			  <a href="{% url 'ProductsAndStock:ProductAndStock-update' ProductAndStock.pk %}" class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1">
+				 Update Details
+			  </a>
+			</div>
+			<p class="leading-relaxed mb-4">{{ ProductAndStock.product_description }}</p>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Price</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_price }}</span>
+			</div>
+			<div class="flex border-t border-b border-gray-200 py-2">
+			  <span class="text-gray-500">Quantity</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_quantity }}</span>
+			</div>
+			<a class="hover:text-blue-500 mt-12 block text-left" href="{% url 'ProductsAndStock:ProductAndStock-list' %}">Go back to Products and Stock</a>
+		  </div>
+		</div>
+	  </div>
+	</div>
+</section>
+{% endblock content %}

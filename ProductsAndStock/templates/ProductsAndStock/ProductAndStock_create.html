@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load tailwind_filters %}
+
+{% block content %}
+
+<style>
+    /* Custom styles to make form fonts smaller */
+    .form-small-text input,
+    .form-small-text textarea,
+    .form-small-text select,
+    .form-small-text button {
+        font-size: 0.875rem; /* Adjust the size as needed, this is equivalent to Tailwind's text-sm */
+    }
+    /* Adjusting the size of the heading a bit larger than the small text but not too large */
+    .text-medium {
+        font-size: 1.25rem; /* This is equivalent to Tailwind's text-lg */
+        margin-bottom: 1rem; /* Adds space below the heading */
+    }
+</style>
+
+<div class="max-w-lg mx-auto">
+
+    <div class="py-5 border-b border-gray-200">
+        <a class="hover:text-blue-500 mt-3" href="{% url 'ProductsAndStock:ProductAndStock-list' %}">Go back to Products and Stock</a>
+    </div>
+
+    <h1 class="text-gray-800 text-medium">Create a new Products and Stock</h1> <!-- Applied medium text class with added space -->
+    <form method="post" class="form-small-text"> <!-- Keeping form text small -->
+        {% csrf_token %}  
+        {{ form|crispy }}
+        <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
+    </form>
+</div>
+{% endblock content %}
