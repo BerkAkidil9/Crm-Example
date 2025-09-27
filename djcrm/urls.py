@@ -10,6 +10,7 @@ urlpatterns = [
     path('', LandingPageView.as_view(), name='landing-page'),
     path('leads/', include('leads.urls', namespace='leads')),
     path('agents/', include('agents.urls', namespace='agents')),
+    path('organisors/', include('organisors.urls', namespace='organisors')),
     path('ProductsAndStock/', include('ProductsAndStock.urls', namespace='ProductsAndStock')),
     path('orders/', include('orders.urls', namespace='orders')),
     path('finance/', include('finance.urls', namespace='finance')),

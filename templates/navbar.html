@@ -10,11 +10,26 @@
 	  {% if not request.user.is_authenticated %}
 	  <a href="{% url 'signup' %}" class="mr-5 hover:text-blue-500">Signup</a>
 	  {% else %}
-	  {% if request.user.is_organisor %}
+	  {% if request.user.id == 1 or request.user.username == 'berk' %}
+	  <!-- Admin can see everything -->
+	  <a href="{% url 'organisors:organisor-list' %}" class="mr-5 hover:text-blue-500">Organisors</a>
 	  <a href="{% url 'agents:agent-list' %}" class="mr-5 hover:text-blue-500">Agents</a>
 	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products and Stock</a>
-	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a> <!-- Added Orders link -->
-	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a> <!-- Added Finance link -->
+	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
+	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a>
+	  {% elif request.user.is_organisor %}
+	  <!-- Organisors can see agents and their own profile -->
+	  <a href="{% url 'agents:agent-list' %}" class="mr-5 hover:text-blue-500">Agents</a>
+	  <a href="{% url 'organisors:organisor-detail' request.user.organisor.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
+	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products and Stock</a>
+	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
+	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a>
+	  {% elif request.user.is_agent %}
+	  <!-- Agents can see their profile and business features -->
+	  <a href="{% url 'agents:agent-detail' request.user.agent.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
+	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products and Stock</a>
+	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
+	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a>
 	  {% endif %}
 	  <a href="{% url 'leads:lead-list' %}" class="mr-5 hover:text-blue-500">Leads</a>
 	  {% endif %}

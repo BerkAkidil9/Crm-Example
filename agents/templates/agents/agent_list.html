@@ -15,8 +15,8 @@
            </div>
             <div class="flex flex-wrap -m-4">
                  {% for agent in object_list %}
-                 <div class="p-4 lg:w-1/2 md:w-full">
-                      <div class="flex border-2 rounded-lg border-gray-200 border-opacity-50 p-8 sm:flex-row flex-col">
+                 <div class="p-4 w-full">
+                     <div class="flex border-2 {% if agent.user == request.user %}border-blue-500 bg-blue-50{% else %}border-gray-600{% endif %} p-8 sm:flex-row flex-col">
                            <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
                                 <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
                                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
@@ -24,9 +24,15 @@
                            </div>
                            <div class="flex-grow">
                                <h2 class="text-gray-900 text-lg title-font font-medium mb-3">
-                                {{ agent.user.username }} </h2>
-                               <p class="leading-relaxed text-base">
-                                Blue bottle crucifix vinyl post-ironic four dollar toast vegan taxidermy. Gastropub indxgo juice poutine.</p>
+                                {{ agent.user.username }} {% if agent.user == request.user %}<span class="text-blue-600 text-sm">(You)</span>{% endif %}</h2>
+                          <div class="leading-relaxed text-base mb-3">
+                              <p class="mb-1"><strong>Name:</strong> {{ agent.user.first_name }} {{ agent.user.last_name }}</p>
+                              <p class="mb-1"><strong>Email:</strong> {{ agent.user.email }}</p>
+                              <p class="mb-1"><strong>Status:</strong> {% if agent.user.email_verified %}Verified{% else %}Pending Verification{% endif %}</p>
+                              {% if request.user.id == 1 or request.user.username == 'berk' %}
+                              <p class="mb-1"><strong>Organisation:</strong> <span class="text-purple-600 font-medium">{{ agent.organisation.user.username }}</span></p>
+                              {% endif %}
+                          </div>
                                <a href="{% url 'agents:agent-detail' agent.pk %}" class="mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">
                                 View agent
                                   <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">

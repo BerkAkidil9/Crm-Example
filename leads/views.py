@@ -20,23 +20,27 @@ class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     
     def form_invalid(self, form):
-        # Doğrulanmamış hesap için özel mesaj
-        username = form.cleaned_data.get('username', '')
-        if username:
-            try:
-                from django.db import models
-                from .models import User
-                user = User.objects.filter(
-                    models.Q(username__iexact=username) | models.Q(email__iexact=username)
-                ).first()
-                
-                if user and not user.email_verified:
-                    messages.error(self.request, "Please verify your account by clicking the verification link sent to your email address.")
-                    return super().form_invalid(form)
-            except:
-                pass
+        # Sadece gerçek form submission'da hata göster
+        if self.request.method == 'POST':
+            username = form.cleaned_data.get('username', '')
+            if username:
+                try:
+                    from django.db import models
+                    from .models import User
+                    user = User.objects.filter(
+                        models.Q(username__iexact=username) | models.Q(email__iexact=username)
+                    ).first()
+                    
+                    if user and not user.email_verified:
+                        messages.error(self.request, "Please verify your account by clicking the verification link sent to your email address.")
+                        return super().form_invalid(form)
+                except:
+                    pass
+            
+            # Sadece username ve password dolu ise hata mesajı göster
+            if username and form.cleaned_data.get('password', ''):
+                messages.error(self.request, "Invalid username/email or password.")
         
-        messages.error(self.request, "Invalid username/email or password.")
         return super().form_invalid(form)
 
 class SignupView(generic.CreateView):

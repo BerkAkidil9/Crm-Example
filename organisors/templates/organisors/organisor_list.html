@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="text-gray-600 body-font">
+   <div class="container px-5 py-24 mx-auto flex flex-wrap">
+      <div class="w-full mb-6 py-6 flex justify-between items-center borber-b border-gray-200">
+            <div>
+                   <h1 class="text-4xl text-gray-800">Organisors</h1>
+             </div>
+             <div>
+              <a class="text-gray-500 hover:text-blue-500 "href="{% url 'organisors:organisor-create' %}">Create a new organisor</a>
+              </div>
+      </div>
+       <div class="flex flex-wrap -m-4">
+            {% for organisor in organisors %}
+            <div class="p-4 w-full">
+                <div class="flex border-2 {% if organisor.user == request.user %}border-blue-500 bg-blue-50{% else %}border-gray-600{% endif %} p-8 sm:flex-row flex-col">
+                      <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+                           <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="m22 11l-3-3l3-3"></path>
+                                <path d="m19 8l-7 7l-3-3"></path>
+                           </svg>
+                      </div>
+                      <div class="flex-grow">
+                          <h2 class="text-gray-900 text-lg title-font font-medium mb-3">
+                           {{ organisor.user.username }} {% if organisor.user == request.user %}<span class="text-blue-600 text-sm">(You)</span>{% endif %}</h2>
+                          <div class="leading-relaxed text-base mb-3">
+                              <p class="mb-1"><strong>Name:</strong> {{ organisor.user.first_name }} {{ organisor.user.last_name }}</p>
+                              <p class="mb-1"><strong>Email:</strong> {{ organisor.user.email }}</p>
+                              <p class="mb-1"><strong>Status:</strong> {% if organisor.user.email_verified %}Verified{% else %}Pending Verification{% endif %}</p>
+                              <p class="mb-1"><strong>Role:</strong> <span class="text-purple-600 font-medium">Organisor</span></p>
+                          </div>
+                          <a href="{% url 'organisors:organisor-detail' organisor.pk %}" class="mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">
+                           View organisor
+                             <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+                             <path d="M5 12h14M12 5l7 7-7 7"></path>
+                             </svg>
+                          </a>
+                      </div>
+                  </div>
+            </div>
+            {% empty %}
+            <div class="w-full text-center py-8">
+                <p class="text-gray-500">No organisors found.</p>
+            </div>
+            {% endfor %}
+      </div>
+   </div>
+ </section>   
+
+{% endblock content %}
