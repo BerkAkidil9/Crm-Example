@@ -2,22 +2,49 @@ from typing import Any
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
 from django.views import generic
+from django.contrib import messages
+from django.conf import settings
 from agents.mixins import OrganisorAndLoginRequiredMixin
-from .models import Lead, Agent, Category, UserProfile
-from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm
+from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken
+from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm
 
 
 
 
+
+class CustomLoginView(LoginView):
+    form_class = CustomAuthenticationForm
+    template_name = 'registration/login.html'
+    
+    def form_invalid(self, form):
+        # Doğrulanmamış hesap için özel mesaj
+        username = form.cleaned_data.get('username', '')
+        if username:
+            try:
+                from django.db import models
+                from .models import User
+                user = User.objects.filter(
+                    models.Q(username__iexact=username) | models.Q(email__iexact=username)
+                ).first()
+                
+                if user and not user.email_verified:
+                    messages.error(self.request, "Please verify your account by clicking the verification link sent to your email address.")
+                    return super().form_invalid(form)
+            except:
+                pass
+        
+        messages.error(self.request, "Invalid username/email or password.")
+        return super().form_invalid(form)
 
 class SignupView(generic.CreateView):
     template_name = "registration/signup.html"
     form_class = CustomUserCreationForm
 
     def get_success_url(self):
-        return reverse("login")
+        return reverse("verify-email-sent")
 
     def form_valid(self, form):
         user = form.save(commit=False)
@@ -25,15 +52,82 @@ class SignupView(generic.CreateView):
         user.first_name = form.cleaned_data.get('first_name')
         user.last_name = form.cleaned_data.get('last_name')
         user.is_agent = True  # Set the user as an agent
+        user.email_verified = False  # Email doğrulanmamış olarak başlat
         user.save()
 
         # Create UserProfile and Agent
         user_profile, created = UserProfile.objects.get_or_create(user=user)
         Agent.objects.create(user=user, organisation=user_profile)
 
+        # Email doğrulama token'ı oluştur
+        verification_token = EmailVerificationToken.objects.create(user=user)
+        
+        # Email gönder
+        self.send_verification_email(user, verification_token.token)
+
         return super().form_valid(form)
+    
+    def send_verification_email(self, user, token):
+        subject = 'DJ CRM - Email Verification'
+        message = f"""
+        Hello {user.first_name},
+        
+        Welcome to DJ CRM! Please click the link below to activate your account:
+        
+        http://127.0.0.1:8000/verify-email/{token}/
+        
+        This link is valid for 24 hours.
+        
+        If you didn't perform this action, you can ignore this email.
+        
+        Best regards,
+        DJ CRM Team
+        """
+        
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
 
 
+
+class EmailVerificationSentView(generic.TemplateView):
+    template_name = "registration/verify_email_sent.html"
+
+class EmailVerificationView(generic.View):
+    def get(self, request, token):
+        try:
+            verification_token = EmailVerificationToken.objects.get(token=token)
+            
+            if verification_token.is_used:
+                messages.error(request, "This verification link has already been used.")
+                return redirect('verify-email-failed')
+            
+            if verification_token.is_expired():
+                messages.error(request, "This verification link has expired.")
+                return redirect('verify-email-failed')
+            
+            # Verify email
+            user = verification_token.user
+            user.email_verified = True
+            user.save()
+            
+            # Mark token as used
+            verification_token.is_used = True
+            verification_token.save()
+            
+            messages.success(request, "Your email has been successfully verified! You can now login.")
+            return redirect('login')
+            
+        except EmailVerificationToken.DoesNotExist:
+            messages.error(request, "Invalid verification link.")
+            return redirect('verify-email-failed')
+
+class EmailVerificationFailedView(generic.TemplateView):
+    template_name = "registration/verify_email_failed.html"
 
 class LandingPageView(generic.TemplateView):
 	template_name = "landing.html"

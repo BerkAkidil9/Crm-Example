@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="max-w-lg mx-auto">
+    <div class="bg-red-50 border border-red-200 rounded-md p-6 mb-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                    Email Verification Failed
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">Verification Failed</h1>
+        
+        <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+            <p class="text-red-800 text-sm">
+                <strong>The verification link is invalid or expired.</strong><br>
+                This could happen for the following reasons:
+            </p>
+            <ul class="text-red-700 text-sm mt-2 text-left">
+                <li>• Link has already been used</li>
+                <li>• Link has expired (24 hours)</li>
+                <li>• Link is corrupted or invalid</li>
+            </ul>
+        </div>
+
+        <div class="space-y-4">
+            <a href="{% url 'signup' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Create New Account
+            </a>
+            
+            <a href="{% url 'login' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Return to Login Page
+            </a>
+            
+            <p class="text-sm text-gray-600">
+                You can try again by creating a new account.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

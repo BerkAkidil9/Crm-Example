@@ -11,6 +11,24 @@
 		<a class="hover:text-blue-500 mt-3" href="{% url 'signup' %}">Don't have an account?</a>
 	</div>
 
+	<div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+		<p class="text-blue-800 text-sm">
+			<strong>Login Options:</strong> You can login using either your <strong>username</strong> or <strong>email address</strong>.
+		</p>
+	</div>
+
+	{% if messages %}
+		{% for message in messages %}
+			{% if message.tags == 'error' %}
+				<div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+					<p class="text-red-800 text-sm">
+						<strong>Login Failed:</strong> {{ message }}
+					</p>
+				</div>
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+
 	<form method="POST" class="mt-5">
 		{% csrf_token %}
 		{{ form|crispy }}

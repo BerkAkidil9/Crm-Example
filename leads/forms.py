@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm, UsernameField
+from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm
 from .models import Lead, Agent
 
 User = get_user_model()
@@ -54,3 +54,13 @@ class LeadCategoryUpdateForm(forms.ModelForm):
         fields = (
             'category',
         )
+
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        max_length=254,
+        widget=forms.TextInput(attrs={
+            'autofocus': True,
+            'placeholder': 'Username or Email',
+            'class': 'form-control'
+        })
+    )
