@@ -55,13 +55,15 @@ class SignupView(generic.CreateView):
         user.email = form.cleaned_data.get('email')
         user.first_name = form.cleaned_data.get('first_name')
         user.last_name = form.cleaned_data.get('last_name')
-        user.is_agent = True  # Set the user as an agent
+        user.is_organisor = True  # Set the user as an organisor (company owner)
+        user.is_agent = False
         user.email_verified = False  # Email doğrulanmamış olarak başlat
         user.save()
 
-        # Create UserProfile and Agent
+        # Create UserProfile and Organisor
         user_profile, created = UserProfile.objects.get_or_create(user=user)
-        Agent.objects.create(user=user, organisation=user_profile)
+        from organisors.models import Organisor
+        Organisor.objects.create(user=user, organisation=user_profile)
 
         # Email doğrulama token'ı oluştur
         verification_token = EmailVerificationToken.objects.create(user=user)
