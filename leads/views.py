@@ -189,7 +189,10 @@ class LeadDetailView(LoginRequiredMixin, generic.DetailView):
 	def get_queryset(self):
 		user = self.request.user
 
-		if user.is_organisor:
+		# Admin can see all leads
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			queryset = Lead.objects.all()
+		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile)
 		else:
 			queryset = Lead.objects.filter(organisation=user.agent.organisation)
@@ -212,7 +215,20 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 	
 	def form_valid(self, form):
 		lead = form.save(commit=False)
-		lead.organisation = self.request.user.userprofile
+		user = self.request.user
+		
+		# Admin needs to specify organisation (you might want to add this to form)
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			# For admin, use the first available organisation or handle differently
+			from leads.models import UserProfile
+			if not lead.organisation:
+				default_org = UserProfile.objects.first()
+				if default_org:
+					lead.organisation = default_org
+		else:
+			# Organisors use their own organisation
+			lead.organisation = user.userprofile
+			
 		lead.save()
 		send_mail(
 			subject="A lead has been created",
@@ -240,7 +256,12 @@ class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 
 	def get_queryset(self):
 		user = self.request.user
-		return Lead.objects.filter(organisation=user.userprofile)
+		# Admin can update all leads
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			return Lead.objects.all()
+		# Organisors can update their own leads
+		else:
+			return Lead.objects.filter(organisation=user.userprofile)
 
 	def get_success_url(self):
 		return reverse("leads:lead-list")
@@ -264,7 +285,12 @@ class LeadDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 	
 	def get_queryset(self):
 		user = self.request.user
-		return Lead.objects.filter(organisation=user.userprofile)
+		# Admin can delete all leads
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			return Lead.objects.all()
+		# Organisors can delete their own leads
+		else:
+			return Lead.objects.filter(organisation=user.userprofile)
 
 	def get_success_url(self):
 		return reverse("leads:lead-list")
@@ -358,7 +384,10 @@ class CategoryDetailView(LoginRequiredMixin, generic.DetailView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_organisor:
+        # Admin can see all categories
+        if user.is_superuser or user.id == 1 or user.username == 'berk':
+            queryset = Category.objects.all()
+        elif user.is_organisor:
             queryset = Category.objects.filter(organisation=user.userprofile)
         else:
             queryset = Category.objects.filter(organisation=user.agent.organisation)
@@ -375,7 +404,10 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 	def get_queryset(self):
 		user = self.request.user
 
-		if user.is_organisor:
+		# Admin can see all leads
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			queryset = Lead.objects.all()
+		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile)
 		else:
 			queryset = Lead.objects.filter(organisation=user.agent.organisation)
