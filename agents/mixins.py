@@ -55,3 +55,24 @@ class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
     
     def is_admin_user(self, user):
         return user.id == 1 or user.username == 'berk'
+
+
+class ProductsAndStockAccessMixin(AccessMixin):
+    """Allow agents and organisors to access products from their organization."""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("leads:lead-list")
+        
+        # Admin can access everything
+        if request.user.is_superuser or self.is_admin_user(request.user):
+            return super().dispatch(request, *args, **kwargs)
+        
+        # Organisors and agents can access
+        if request.user.is_organisor or request.user.is_agent:
+            return super().dispatch(request, *args, **kwargs)
+        
+        # Neither organisor nor agent - redirect
+        return redirect("leads:lead-list")
+    
+    def is_admin_user(self, user):
+        return user.id == 1 or user.username == 'berk'

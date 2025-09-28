@@ -148,7 +148,10 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 	def get_queryset(self):
 		user = self.request.user
 
-		if user.is_organisor:
+		# Admin can see all leads
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			queryset = Lead.objects.filter(agent__isnull=False)
+		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=False)
 		else:
 			queryset = Lead.objects.filter(organisation=user.agent.organisation, agent__isnull=False)
@@ -159,7 +162,13 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 		context = super(LeadListView, self).get_context_data(**kwargs)
 		user = self.request.user
 
-		if user.is_organisor:
+		# Admin can see all unassigned leads
+		if user.is_superuser or user.id == 1 or user.username == 'berk':
+			queryset = Lead.objects.filter(agent__isnull=True)
+			context.update({
+				"unassigned_leads": queryset
+			})
+		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=True)
 			context.update({
 				"unassigned_leads": queryset
@@ -297,7 +306,9 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
         user = self.request.user
 
         # Get the unassigned category for displaying the count
-        if user.is_organisor:
+        if user.is_superuser or user.id == 1 or user.username == 'berk':
+            unassigned_category = Category.objects.filter(name="Unassigned").first()
+        elif user.is_organisor:
             unassigned_category = Category.objects.filter(name="Unassigned", organisation=user.userprofile).first()
         else:
             unassigned_category = Category.objects.filter(name="Unassigned", organisation=user.agent.organisation).first()
@@ -310,7 +321,12 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_organisor:
+        # Admin can see all categories
+        if user.is_superuser or user.id == 1 or user.username == 'berk':
+            queryset = Category.objects.all().annotate(
+                lead_count=Count('leads')
+            )
+        elif user.is_organisor:
             queryset = Category.objects.filter(organisation=user.userprofile).annotate(
                 lead_count=Count('leads')
             )
