@@ -1,11 +1,58 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm
-from .models import Lead, Agent
+from .models import Lead, Agent, SourceCategory, ValueCategory, UserProfile
 
 User = get_user_model()
 
 class LeadModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
+        super(LeadModelForm, self).__init__(*args, **kwargs)
+        
+        if request:
+            user = request.user
+            
+            if user.is_organisor:
+                # Organisor için kendi organizasyonunun kategorilerini ve agentlarını filtrele
+                try:
+                    organisation = user.userprofile
+                    self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
+                    self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
+                    self.fields["agent"].queryset = Agent.objects.filter(organisation=organisation)
+                except Exception as e:
+                    # Fallback to all categories and agents if error
+                    self.fields["source_category"].queryset = SourceCategory.objects.all()
+                    self.fields["value_category"].queryset = ValueCategory.objects.all()
+                    self.fields["agent"].queryset = Agent.objects.all()
+            elif user.is_agent:
+                # Agent için kendi organizasyonunun kategorilerini ve agentlarını filtrele
+                try:
+                    organisation = user.agent.organisation
+                    self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
+                    self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
+                    self.fields["agent"].queryset = Agent.objects.filter(organisation=organisation)
+                except Exception as e:
+                    # Fallback to all categories and agents if error
+                    self.fields["source_category"].queryset = SourceCategory.objects.all()
+                    self.fields["value_category"].queryset = ValueCategory.objects.all()
+                    self.fields["agent"].queryset = Agent.objects.all()
+            elif user.is_superuser:
+                # Admin için tüm kategoriler ve agentlar
+                self.fields["source_category"].queryset = SourceCategory.objects.all()
+                self.fields["value_category"].queryset = ValueCategory.objects.all()
+                self.fields["agent"].queryset = Agent.objects.all()
+            else:
+                # Default fallback
+                self.fields["source_category"].queryset = SourceCategory.objects.all()
+                self.fields["value_category"].queryset = ValueCategory.objects.all()
+                self.fields["agent"].queryset = Agent.objects.all()
+        else:
+            # Default queryset when no request
+            self.fields["source_category"].queryset = SourceCategory.objects.all()
+            self.fields["value_category"].queryset = ValueCategory.objects.all()
+            self.fields["agent"].queryset = Agent.objects.all()
+    
     class Meta:
         model = Lead
         fields = [
@@ -13,12 +60,57 @@ class LeadModelForm(forms.ModelForm):
             'last_name',
             'age',
             'agent',
+            'source_category',
+            'value_category',
             'description',
             'phone_number',
             'email',
             'address',
-
         ]
+
+
+class AdminLeadModelForm(forms.ModelForm):
+    organisation = forms.ModelChoiceField(
+        queryset=UserProfile.objects.filter(
+            user__is_organisor=True,
+            user__is_superuser=False
+        ),
+        empty_label="Select Organisation",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
+        super(AdminLeadModelForm, self).__init__(*args, **kwargs)
+        
+        # Başlangıçta boş queryset'ler
+        self.fields["agent"].queryset = Agent.objects.none()
+        self.fields["source_category"].queryset = SourceCategory.objects.none()
+        self.fields["value_category"].queryset = ValueCategory.objects.none()
+        
+        # Eğer organizasyon seçilmişse (update durumunda), o organizasyonun verilerini yükle
+        if self.instance and hasattr(self.instance, 'organisation') and self.instance.organisation:
+            org = self.instance.organisation
+            self.fields["agent"].queryset = Agent.objects.filter(organisation=org)
+            self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=org)
+            self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=org)
+    
+    class Meta:
+        model = Lead
+        fields = [
+            'first_name',
+            'last_name', 
+            'age',
+            'organisation',
+            'agent',
+            'source_category',
+            'value_category',
+            'description',
+            'phone_number',
+            'email',
+            'address',
+        ]
+
 
 class LeadForm(forms.Form):
     first_name = forms.CharField()
@@ -55,10 +147,44 @@ class AssignAgentForm(forms.Form):
         self.fields["agent"].queryset = agents
 
 class LeadCategoryUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
+        super(LeadCategoryUpdateForm, self).__init__(*args, **kwargs)
+        
+        if request:
+            user = request.user
+            
+            if user.is_organisor:
+                try:
+                    organisation = user.userprofile
+                    self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
+                    self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
+                except Exception as e:
+                    self.fields["source_category"].queryset = SourceCategory.objects.all()
+                    self.fields["value_category"].queryset = ValueCategory.objects.all()
+            elif user.is_agent:
+                try:
+                    organisation = user.agent.organisation
+                    self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
+                    self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
+                except Exception as e:
+                    self.fields["source_category"].queryset = SourceCategory.objects.all()
+                    self.fields["value_category"].queryset = ValueCategory.objects.all()
+            elif user.is_superuser or user.id == 1 or user.username == 'berk':
+                self.fields["source_category"].queryset = SourceCategory.objects.all()
+                self.fields["value_category"].queryset = ValueCategory.objects.all()
+            else:
+                self.fields["source_category"].queryset = SourceCategory.objects.all()
+                self.fields["value_category"].queryset = ValueCategory.objects.all()
+        else:
+            self.fields["source_category"].queryset = SourceCategory.objects.all()
+            self.fields["value_category"].queryset = ValueCategory.objects.all()
+
     class Meta:
         model = Lead
         fields = (
-            'category',
+            'source_category',
+            'value_category',
         )
 
 class CustomAuthenticationForm(AuthenticationForm):

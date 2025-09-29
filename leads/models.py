@@ -27,6 +27,28 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class SourceCategory(models.Model):
+    """Kaynak bazlı kategoriler - Müşteri adayının nereden geldiği"""
+    name = models.CharField(max_length=50)
+    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Source Categories"
+
+class ValueCategory(models.Model):
+    """Değer bazlı kategoriler - Müşteri adayının potansiyel değeri"""
+    name = models.CharField(max_length=50)
+    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Value Categories"
+
 class Lead(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
@@ -34,6 +56,8 @@ class Lead(models.Model):
     organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     agent = models.ForeignKey("Agent", null=True, blank=True, on_delete=models.SET_NULL)
     category = models.ForeignKey("Category", related_name="leads", null=True, blank=True, on_delete=models.SET_NULL)
+    source_category = models.ForeignKey("SourceCategory", related_name="leads", null=True, blank=True, on_delete=models.SET_NULL)
+    value_category = models.ForeignKey("ValueCategory", related_name="leads", null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField()
     date_added = models.DateTimeField(auto_now_add=True)
     phone_number = models.CharField(max_length=20)
@@ -41,9 +65,33 @@ class Lead(models.Model):
     address = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
-        if not self.category:
-            unassigned_category, created = Category.objects.get_or_create(name="Unassigned", organisation=self.organisation)
-            self.category = unassigned_category
+        # Sadece yeni lead oluştururken kategorileri ata (pk yoksa)
+        is_new = self.pk is None
+        
+        if is_new:
+            # Eski category sistemi için backward compatibility
+            if not self.category:
+                try:
+                    unassigned_category = Category.objects.get(name="Unassigned", organisation=self.organisation)
+                except Category.DoesNotExist:
+                    unassigned_category = Category.objects.create(name="Unassigned", organisation=self.organisation)
+                self.category = unassigned_category
+            
+            # Yeni kategoriler için default değerler
+            if not self.source_category:
+                try:
+                    unassigned_source = SourceCategory.objects.get(name="Unassigned", organisation=self.organisation)
+                except SourceCategory.DoesNotExist:
+                    unassigned_source = SourceCategory.objects.create(name="Unassigned", organisation=self.organisation)
+                self.source_category = unassigned_source
+            
+            if not self.value_category:
+                try:
+                    unassigned_value = ValueCategory.objects.get(name="Unassigned", organisation=self.organisation)
+                except ValueCategory.DoesNotExist:
+                    unassigned_value = ValueCategory.objects.create(name="Unassigned", organisation=self.organisation)
+                self.value_category = unassigned_value
+            
         super().save(*args, **kwargs)
 
     def __str__(self):

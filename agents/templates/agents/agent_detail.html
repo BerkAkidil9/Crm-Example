@@ -39,7 +39,7 @@
 				{% endif %}
 			</span>
 		  </div>
-		  {% if request.user.id == 1 or request.user.username == 'berk' %}
+		  {% if request.user.is_superuser %}
 		  <div class="flex border-t border-b mb-6 border-gray-200 py-2">
 			<span class="text-gray-500">Organisation</span>
 			<span class="ml-auto text-purple-600 font-medium">{{ agent.organisation.user.username }}</span>
@@ -47,7 +47,11 @@
 		  {% else %}
 		  <div class="flex border-t border-b mb-6 border-gray-200 py-2"></div>
 		  {% endif %}
+		  {% if request.user.is_superuser or request.user.is_organisor %}
 		  <a class="hover:text-blue-500 mt-3" href="{% url 'agents:agent-list' %}">Go back to agents</a>
+		  {% else %}
+		  <a class="hover:text-blue-500 mt-3" href="{% url 'landing-page' %}">Go back to home</a>
+		  {% endif %}
 		</div>
 	  </div>
 	</div>

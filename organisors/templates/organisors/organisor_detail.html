@@ -43,7 +43,11 @@
 				{% endif %}
 			</span>
 		  </div>
+		  {% if request.user.is_superuser %}
 		  <a class="hover:text-blue-500 mt-3" href="{% url 'organisors:organisor-list' %}">Go back to organisors</a>
+		  {% else %}
+		  <a class="hover:text-blue-500 mt-3" href="{% url 'landing-page' %}">Go back to home</a>
+		  {% endif %}
 		</div>
 	  </div>
 	</div>

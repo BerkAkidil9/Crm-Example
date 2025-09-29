@@ -3,13 +3,14 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views import generic
 from django.contrib import messages
 from django.conf import settings
+from django.db import models
 from agents.mixins import OrganisorAndLoginRequiredMixin
-from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken
-from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm
+from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
+from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm
 
 
 
@@ -149,7 +150,7 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 		user = self.request.user
 
 		# Admin can see all leads
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
+		if user.is_superuser:
 			queryset = Lead.objects.filter(agent__isnull=False)
 		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=False)
@@ -163,7 +164,7 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 		user = self.request.user
 
 		# Admin can see all unassigned leads
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
+		if user.is_superuser:
 			queryset = Lead.objects.filter(agent__isnull=True)
 			context.update({
 				"unassigned_leads": queryset
@@ -208,7 +209,18 @@ def lead_detail(request, pk):
 
 class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 	template_name = "leads/lead_create.html"
-	form_class = LeadModelForm
+	
+	def get_form_class(self):
+		user = self.request.user
+		if user.is_superuser:
+			return AdminLeadModelForm
+		else:
+			return LeadModelForm
+
+	def get_form_kwargs(self):
+		kwargs = super().get_form_kwargs()
+		kwargs['request'] = self.request
+		return kwargs
 
 	def get_success_url(self):
 		return reverse("leads:lead-list")
@@ -217,12 +229,14 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 		lead = form.save(commit=False)
 		user = self.request.user
 		
-		# Admin needs to specify organisation (you might want to add this to form)
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
-			# For admin, use the first available organisation or handle differently
-			from leads.models import UserProfile
-			if not lead.organisation:
-				default_org = UserProfile.objects.first()
+		if user.is_superuser:
+			# Admin için form'dan seçilen organizasyonu kullan
+			if hasattr(form, 'cleaned_data') and 'organisation' in form.cleaned_data:
+				lead.organisation = form.cleaned_data['organisation']
+			else:
+				# Fallback - ilk organizasyonu kullan
+				from leads.models import UserProfile
+				default_org = UserProfile.objects.filter(user__is_organisor=True, user__is_superuser=False).first()
 				if default_org:
 					lead.organisation = default_org
 		else:
@@ -252,12 +266,23 @@ def lead_create(request):
 
 class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 	template_name = "leads/lead_update.html"
-	form_class = LeadModelForm
+	
+	def get_form_class(self):
+		user = self.request.user
+		if user.is_superuser:
+			return AdminLeadModelForm
+		else:
+			return LeadModelForm
+
+	def get_form_kwargs(self):
+		kwargs = super().get_form_kwargs()
+		kwargs['request'] = self.request
+		return kwargs
 
 	def get_queryset(self):
 		user = self.request.user
 		# Admin can update all leads
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
+		if user.is_superuser:
 			return Lead.objects.all()
 		# Organisors can update their own leads
 		else:
@@ -331,36 +356,100 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
         context = super(CategoryListView, self).get_context_data(**kwargs)
         user = self.request.user
 
-        # Get the unassigned category for displaying the count
+        # Get Categories with filtering for admin
         if user.is_superuser or user.id == 1 or user.username == 'berk':
-            unassigned_category = Category.objects.filter(name="Unassigned").first()
-        elif user.is_organisor:
-            unassigned_category = Category.objects.filter(name="Unassigned", organisation=user.userprofile).first()
+            # Get filter parameters
+            selected_org_id = self.request.GET.get('organization')
+            selected_agent_id = self.request.GET.get('agent')
+            
+            # Get all organizations for dropdown (only real organisors, exclude admin)
+            all_organizations = UserProfile.objects.filter(
+                user__is_organisor=True, 
+                user__is_superuser=False
+            ).exclude(user__id=1).exclude(user__username='berk')
+            
+            # Get agents based on selected organization
+            if selected_org_id:
+                try:
+                    selected_org = UserProfile.objects.get(id=selected_org_id)
+                    agents = Agent.objects.filter(organisation=selected_org)
+                except UserProfile.DoesNotExist:
+                    selected_org = None
+                    agents = Agent.objects.none()
+            else:
+                selected_org = None
+                agents = Agent.objects.all()
+            
+            # Get selected agent
+            selected_agent = None
+            if selected_agent_id:
+                try:
+                    selected_agent = Agent.objects.get(id=selected_agent_id)
+                except Agent.DoesNotExist:
+                    selected_agent = None
+            
+            # Filter categories based on selections
+            if selected_agent:
+                # Show categories for specific agent's leads
+                source_categories = SourceCategory.objects.filter(
+                    organisation=selected_agent.organisation
+                ).annotate(
+                    lead_count=Count('leads', filter=models.Q(leads__agent=selected_agent))
+                )
+                value_categories = ValueCategory.objects.filter(
+                    organisation=selected_agent.organisation
+                ).annotate(
+                    lead_count=Count('leads', filter=models.Q(leads__agent=selected_agent))
+                )
+                filter_title = f"Categories for Agent: {selected_agent.user.username} ({selected_agent.organisation.user.username})"
+                
+            elif selected_org:
+                # Show categories for specific organization
+                source_categories = SourceCategory.objects.filter(organisation=selected_org).annotate(lead_count=Count('leads'))
+                value_categories = ValueCategory.objects.filter(organisation=selected_org).annotate(lead_count=Count('leads'))
+                filter_title = f"Categories for Organization: {selected_org.user.username}"
+                
+            else:
+                # Show all categories aggregated
+                source_categories = SourceCategory.objects.values('name').annotate(
+                    lead_count=Count('leads')
+                ).order_by('name')
+                value_categories = ValueCategory.objects.values('name').annotate(
+                    lead_count=Count('leads')
+                ).order_by('name')
+                filter_title = "All Categories (Aggregated)"
+            
+            context.update({
+                "is_admin_view": True,
+                "all_organizations": all_organizations,
+                "agents": agents,
+                "selected_org": selected_org,
+                "selected_agent": selected_agent,
+                "source_categories": source_categories,
+                "value_categories": value_categories,
+                "filter_title": filter_title,
+            })
         else:
-            unassigned_category = Category.objects.filter(name="Unassigned", organisation=user.agent.organisation).first()
-
-        context.update({
-            "unassigned_category": unassigned_category
-        })
+            # For organisor/agent: show only their categories
+            if user.is_organisor:
+                organisation = user.userprofile
+            else:
+                organisation = user.agent.organisation
+                
+            source_categories = SourceCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads'))
+            value_categories = ValueCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads'))
+            
+            context.update({
+                "is_admin_view": False,
+                "source_categories": source_categories,
+                "value_categories": value_categories,
+            })
 
         return context
 
     def get_queryset(self):
-        user = self.request.user
-        # Admin can see all categories
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
-            queryset = Category.objects.all().annotate(
-                lead_count=Count('leads')
-            )
-        elif user.is_organisor:
-            queryset = Category.objects.filter(organisation=user.userprofile).annotate(
-                lead_count=Count('leads')
-            )
-        else:
-            queryset = Category.objects.filter(organisation=user.agent.organisation).annotate(
-                lead_count=Count('leads')
-            )
-        return queryset
+        # Return empty queryset since we're not using old categories anymore
+        return Category.objects.none()
 
 
 
@@ -401,11 +490,16 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 	template_name = "leads/lead_category_update.html"
 	form_class = LeadCategoryUpdateForm
 
+	def get_form_kwargs(self):
+		kwargs = super().get_form_kwargs()
+		kwargs['request'] = self.request
+		return kwargs
+
 	def get_queryset(self):
 		user = self.request.user
 
 		# Admin can see all leads
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
+		if user.is_superuser:
 			queryset = Lead.objects.all()
 		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile)
@@ -419,3 +513,35 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 		if lead.category and lead.category.id == 0:  # Assuming 0 is the ID for "Unassigned" category
 			return reverse("leads:category-detail", kwargs={"pk": 0})
 		return reverse("leads:lead-detail", kwargs={"pk": lead.id})
+
+
+def get_agents_by_org(request, org_id):
+	"""AJAX endpoint to get agents, source categories and value categories by organization"""
+	if not request.user.is_superuser:
+		return JsonResponse({'error': 'Unauthorized'}, status=403)
+	
+	try:
+		organisation = UserProfile.objects.get(id=org_id, user__is_organisor=True, user__is_superuser=False)
+		
+		# Agents - email'e göre sırala ve email'i göster
+		agents = Agent.objects.filter(organisation=organisation).order_by('user__email')
+		agents_data = [{'id': agent.id, 'name': f"{agent.user.email} ({agent.user.get_full_name() or agent.user.username})"} for agent in agents]
+		
+		# Source Categories
+		source_categories = SourceCategory.objects.filter(organisation=organisation)
+		source_categories_data = [{'id': cat.id, 'name': cat.name} for cat in source_categories]
+		
+		# Value Categories
+		value_categories = ValueCategory.objects.filter(organisation=organisation)
+		value_categories_data = [{'id': cat.id, 'name': cat.name} for cat in value_categories]
+		
+		return JsonResponse({
+			'agents': agents_data,
+			'source_categories': source_categories_data,
+			'value_categories': value_categories_data
+		})
+		
+	except UserProfile.DoesNotExist:
+		return JsonResponse({'error': 'Organisation not found'}, status=404)
+	except Exception as e:
+		return JsonResponse({'error': str(e)}, status=500)

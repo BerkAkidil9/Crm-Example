@@ -5,7 +5,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
 from leads.models import Agent, UserProfile, User, EmailVerificationToken
-from .forms import AgentModelForm, AgentCreateForm
+from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm
 from .mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
@@ -19,7 +19,7 @@ class AgentListView(OrganisorAndLoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         # Admin can see all agents
-        if self.request.user.id == 1 or self.request.user.username == 'berk':
+        if self.request.user.is_superuser:
             return Agent.objects.all()
         # Organisors see agents in their organisation
         else:
@@ -28,7 +28,13 @@ class AgentListView(OrganisorAndLoginRequiredMixin, generic.ListView):
     
 class AgentCreateView(LoginRequiredMixin, generic.CreateView):
     template_name = "agents/agent_create.html"
-    form_class = AgentCreateForm
+    
+    def get_form_class(self):
+        user = self.request.user
+        if user.is_superuser:
+            return AdminAgentCreateForm
+        else:
+            return AgentCreateForm
 
     def get_success_url(self):
         return reverse("agents:agent-list")
@@ -53,10 +59,19 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
                     logger.info(f"UserProfile for {user.username} already exists")
 
                 # Create Agent
-                Agent.objects.create(
-                    user=user,
-                    organisation=self.request.user.userprofile
-                )
+                if self.request.user.is_superuser:
+                    # Admin için form'dan seçilen organizasyonu kullan
+                    selected_organisation = form.cleaned_data.get('organisation')
+                    Agent.objects.create(
+                        user=user,
+                        organisation=selected_organisation
+                    )
+                else:
+                    # Organisor için kendi organizasyonunu kullan
+                    Agent.objects.create(
+                        user=user,
+                        organisation=self.request.user.userprofile
+                    )
                 logger.info(f"Agent for {user.username} created successfully")
 
                 # Email doğrulama token'ı oluştur

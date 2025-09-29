@@ -17,7 +17,10 @@ class ProductAndStockModelForm(forms.ModelForm):
 
 class AdminProductAndStockModelForm(forms.ModelForm):
     organisation = forms.ModelChoiceField(
-        queryset=UserProfile.objects.filter(user__is_organisor=True),
+        queryset=UserProfile.objects.filter(
+            user__is_organisor=True,
+            user__is_superuser=False
+        ),
         empty_label="Select Organisation",
         widget=forms.Select(attrs={'class': 'form-control'})
     )

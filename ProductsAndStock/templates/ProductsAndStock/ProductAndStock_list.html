@@ -8,7 +8,7 @@
                 <h1 class="text-4xl text-gray-800">Products and Stock</h1>
             </div>
             <div>
-                {% if request.user.is_organisor or request.user.id == 1 or request.user.username == 'berk' %}
+                {% if request.user.is_organisor or request.user.is_superuser %}
                 <a class="text-gray-500 hover:text-blue-500" href="{% url 'ProductsAndStock:ProductAndStock-create' %}">Add a new product</a>
                 {% endif %}
             </div>
@@ -29,7 +29,7 @@
                             <p class="mb-1"><strong>Description:</strong> {{ product.product_description }}</p>
                             <p class="mb-1"><strong>Price:</strong> ${{ product.product_price }}</p>
                             <p class="mb-1"><strong>Quantity:</strong> {{ product.product_quantity }}</p>
-                            {% if request.user.id == 1 or request.user.username == 'berk' %}
+                            {% if request.user.is_superuser %}
                             <p class="mb-1"><strong>Organisation:</strong> <span class="text-purple-600 font-medium">{{ product.organisation.user.username }}</span></p>
                             {% endif %}
                         </div>

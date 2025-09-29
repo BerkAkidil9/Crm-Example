@@ -14,6 +14,63 @@
         <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
     </form>
 </div>
+
+<script>
+// Admin için organizasyon seçimi değiştiğinde agent'ları güncelle
+document.addEventListener('DOMContentLoaded', function() {
+    const organisationSelect = document.getElementById('id_organisation');
+    const agentSelect = document.getElementById('id_agent');
+    const sourceCategorySelect = document.getElementById('id_source_category');
+    const valueCategorySelect = document.getElementById('id_value_category');
+    
+    if (organisationSelect && agentSelect) {
+        organisationSelect.addEventListener('change', function() {
+            const orgId = this.value;
+            
+            // Agent dropdown'ını temizle ve "Loading..." ekle
+            agentSelect.innerHTML = '<option value="">Loading...</option>';
+            sourceCategorySelect.innerHTML = '<option value="">Loading...</option>';
+            valueCategorySelect.innerHTML = '<option value="">Loading...</option>';
+            
+            if (orgId) {
+                // AJAX ile agent'ları getir
+                fetch(`/leads/get-agents-by-org/${orgId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Agent dropdown'ını güncelle
+                        agentSelect.innerHTML = '<option value="">Select Agent</option>';
+                        data.agents.forEach(agent => {
+                            agentSelect.innerHTML += `<option value="${agent.id}">${agent.name}</option>`;
+                        });
+                        
+                        // Source category dropdown'ını güncelle
+                        sourceCategorySelect.innerHTML = '<option value="">Select Source Category</option>';
+                        data.source_categories.forEach(cat => {
+                            sourceCategorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                        });
+                        
+                        // Value category dropdown'ını güncelle
+                        valueCategorySelect.innerHTML = '<option value="">Select Value Category</option>';
+                        data.value_categories.forEach(cat => {
+                            valueCategorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        agentSelect.innerHTML = '<option value="">Error loading agents</option>';
+                        sourceCategorySelect.innerHTML = '<option value="">Error loading categories</option>';
+                        valueCategorySelect.innerHTML = '<option value="">Error loading categories</option>';
+                    });
+            } else {
+                agentSelect.innerHTML = '<option value="">Select Agent</option>';
+                sourceCategorySelect.innerHTML = '<option value="">Select Source Category</option>';
+                valueCategorySelect.innerHTML = '<option value="">Select Value Category</option>';
+            }
+        });
+    }
+});
+</script>
+
 {% endblock content %}
 
 

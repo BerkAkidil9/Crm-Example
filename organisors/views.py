@@ -21,8 +21,8 @@ class OrganisorListView(AdminOnlyMixin, generic.ListView):
     context_object_name = "organisors"
 
     def get_queryset(self):
-        # Admin can see all organisors
-        return Organisor.objects.all()
+        # Admin can see all organisors except superusers
+        return Organisor.objects.exclude(user__is_superuser=True)
 
 
 class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):

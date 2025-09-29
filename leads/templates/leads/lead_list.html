@@ -36,9 +36,13 @@
                               <div class="leading-relaxed text-base mb-3">
                                    <p class="mb-1"><strong>Email:</strong> {{ lead.email|default:"Not provided" }}</p>
                                    <p class="mb-1"><strong>Phone:</strong> {{ lead.phone_number|default:"Not provided" }}</p>
-                                   <p class="mb-1"><strong>Description:</strong> {{ lead.description|default:"No description" }}</p>
+                                   <p class="mb-1"><strong>Source:</strong> <span class="text-blue-600 font-medium">{{ lead.source_category.name|default:"Unassigned" }}</span></p>
+                                   <p class="mb-1"><strong>Value:</strong> <span class="text-green-600 font-medium">{{ lead.value_category.name|default:"Unassigned" }}</span></p>
                                    {% if lead.agent %}
                                    <p class="mb-1"><strong>Agent:</strong> <span class="text-purple-600 font-medium">{{ lead.agent.user.username }}</span></p>
+                                   {% endif %}
+                                   {% if request.user.is_superuser %}
+                                   <p class="mb-1"><strong>Organisation:</strong> <span class="text-orange-600 font-medium">{{ lead.organisation.user.username }}</span></p>
                                    {% endif %}
                               </div>
                               <a href="{% url 'leads:lead-detail' lead.pk %}" class="view-lead-link mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">View this lead
@@ -51,43 +55,49 @@
                </div>
                {% endfor %}
           </div>
-          <!-- Unassigned Leads Section with top margin for visual separation -->
-          <div class="flex flex-wrap -m-4 mt-8">
-               {% if unassigned_leads.exists %}
-               <h1 class="w-full py-6 text-4xl text-gray-800 mb-2">Unassigned Leads</h1> <!-- Reduced mb-6 to mb-2 -->
-                    {% for lead in unassigned_leads %}
-                    <div class="p-4 w-full">
-                         <div class="flex border-2 rounded-lg border-gray-600 p-8 sm:flex-row flex-col">
-                              <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                                   <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
-                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+          <!-- Unassigned Leads Section -->
+          {% if unassigned_leads.exists %}
+          <div class="w-full mt-12 mb-6">
+               <h1 class="text-4xl text-gray-800 mb-6">Unassigned Leads</h1>
+          </div>
+          <div class="flex flex-wrap -m-4">
+               {% for lead in unassigned_leads %}
+               <div class="p-4 w-full">
+                    <div class="flex border-2 rounded-lg border-gray-600 p-8 sm:flex-row flex-col">
+                         <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
+                              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
+                                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                              </svg>
+                         </div>
+                         <div class="flex-grow">
+                              <h2 class="text-gray-900 text-lg title-font font-medium mb-3">{{ lead.first_name }} {{ lead.last_name }}</h2>
+                              <div class="leading-relaxed text-base mb-3">
+                                   <p class="mb-1"><strong>Email:</strong> {{ lead.email|default:"Not provided" }}</p>
+                                   <p class="mb-1"><strong>Phone:</strong> {{ lead.phone_number|default:"Not provided" }}</p>
+                                   <p class="mb-1"><strong>Source:</strong> <span class="text-blue-600 font-medium">{{ lead.source_category.name|default:"Unassigned" }}</span></p>
+                                   <p class="mb-1"><strong>Value:</strong> <span class="text-green-600 font-medium">{{ lead.value_category.name|default:"Unassigned" }}</span></p>
+                                   <p class="mb-1"><strong>Status:</strong> <span class="text-red-600 font-medium">Unassigned Agent</span></p>
+                                   {% if request.user.is_superuser %}
+                                   <p class="mb-1"><strong>Organisation:</strong> <span class="text-orange-600 font-medium">{{ lead.organisation.user.username }}</span></p>
+                                   {% endif %}
+                              </div>
+                              <a href="{% url 'leads:lead-detail' lead.pk %}" class="view-lead-link mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">View this lead
+                                   <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+                                        <path d="M5 12h14M12 5l7 7-7 7"></path>
                                    </svg>
-                              </div>
-                              <div class="flex-grow">
-                                   <h2 class="text-gray-900 text-lg title-font font-medium mb-3">{{ lead.first_name }} {{ lead.last_name }}</h2>
-                                   <div class="leading-relaxed text-base mb-3">
-                                        <p class="mb-1"><strong>Email:</strong> {{ lead.email|default:"Not provided" }}</p>
-                                        <p class="mb-1"><strong>Phone:</strong> {{ lead.phone_number|default:"Not provided" }}</p>
-                                        <p class="mb-1"><strong>Description:</strong> {{ lead.description|default:"No description" }}</p>
-                                        <p class="mb-1"><strong>Status:</strong> <span class="text-red-600 font-medium">Unassigned</span></p>
-                                   </div>
-                                   <a href="{% url 'leads:lead-detail' lead.pk %}" class="view-lead-link mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">View this lead
-                                        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
-                                             <path d="M5 12h14M12 5l7 7-7 7"></path>
-                                        </svg>
-                                   </a>
-                                   <span class="mx-2">|</span> <!-- Added a separator for visual space -->
-                                   <a href="{% url 'leads:assign-agent' lead.pk %}" class="assign-agent-link mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">Assign Agent
-                                        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
-                                             <path d="M5 12h14M12 5l7 7-7 7"></path>
-                                        </svg>
-                                   </a>
-                              </div>
+                              </a>
+                              <span class="mx-2">|</span>
+                              <a href="{% url 'leads:assign-agent' lead.pk %}" class="assign-agent-link mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">Assign Agent
+                                   <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+                                        <path d="M5 12h14M12 5l7 7-7 7"></path>
+                                   </svg>
+                              </a>
                          </div>
                     </div>
-                    {% endfor %}
-               {% endif %}
+               </div>
+               {% endfor %}
           </div>
+          {% endif %}
      </div>
 </section>
 
