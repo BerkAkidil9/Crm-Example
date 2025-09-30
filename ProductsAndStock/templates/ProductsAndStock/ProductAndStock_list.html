@@ -29,6 +29,12 @@
                             <p class="mb-1"><strong>Description:</strong> {{ product.product_description }}</p>
                             <p class="mb-1"><strong>Price:</strong> ${{ product.product_price }}</p>
                             <p class="mb-1"><strong>Quantity:</strong> {{ product.product_quantity }}</p>
+                            <p class="mb-1"><strong>Min Stock Level:</strong> {{ product.minimum_stock_level }}</p>
+                            <p class="mb-1"><strong>Stock Status:</strong> 
+                                <span class="{% if product.is_low_stock %}text-red-600{% else %}text-green-600{% endif %} font-medium">
+                                    {{ product.stock_status }}
+                                </span>
+                            </p>
                             {% if request.user.is_superuser %}
                             <p class="mb-1"><strong>Organisation:</strong> <span class="text-purple-600 font-medium">{{ product.organisation.user.username }}</span></p>
                             {% endif %}

@@ -2,11 +2,11 @@
 
 {% block content %}
 <section class="text-gray-600 body-font overflow-hidden">
-	<div class="container px-5 py-8 mx-auto"> <!-- Reduced top padding for starting a bit top -->
-	  <div class="flex justify-center"> <!-- Added for horizontal centering -->
-		<div class="lg:w-4/5 flex flex-wrap justify-center"> <!-- Adjusted for center alignment and wrapping -->
+	<div class="container px-5 py-8 mx-auto">
+	  <div class="flex justify-center">
+		<div class="lg:w-4/5 flex flex-wrap justify-center">
 		  <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
-			<h2 class="text-sm title-font text-gray-500 tracking-widest">ProductsAndStock</h2>
+			<h2 class="text-sm title-font text-gray-500 tracking-widest">PRODUCTSANDSTOCK</h2>
 			<h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ ProductAndStock.product_name }}</h1>
 			<div class="flex mb-4">
 			  <a href="{% url 'ProductsAndStock:ProductAndStock-detail' ProductAndStock.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
@@ -18,14 +18,48 @@
 			  </a>
 			  {% endif %}
 			</div>
-			<p class="leading-relaxed mb-4">{{ ProductAndStock.product_description }}</p>
+			<p class="leading-relaxed mb-4">Product and stock information</p>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Product Name</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_name }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Description</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_description }}</span>
+			</div>
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Price</span>
-			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_price }}</span>
+			  <span class="ml-auto text-gray-900">${{ ProductAndStock.product_price|floatformat:2 }}</span>
 			</div>
-			<div class="flex border-t border-b border-gray-200 py-2">
+			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Quantity</span>
 			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_quantity }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Minimum Stock Level</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.minimum_stock_level }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Stock Status</span>
+			  <span class="ml-auto {% if ProductAndStock.is_low_stock %}text-red-600{% else %}text-green-600{% endif %} font-medium">
+				{{ ProductAndStock.stock_status }}
+			  </span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Total Value</span>
+			  <span class="ml-auto text-purple-600 font-medium">${{ ProductAndStock.total_value|floatformat:2 }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Organization</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.organisation.user.username }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Contact Email</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.organisation.user.email }}</span>
+			</div>
+			<div class="flex border-t border-b border-gray-200 py-2">
+			  <span class="text-gray-500">Contact Phone</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.organisation.user.phone_number|default:"Not provided" }}</span>
 			</div>
 			<a class="hover:text-blue-500 mt-12 block text-left" href="{% url 'ProductsAndStock:ProductAndStock-list' %}">Go back to Products and Stock</a>
 		  </div>

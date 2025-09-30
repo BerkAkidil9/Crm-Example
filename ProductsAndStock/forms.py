@@ -13,12 +13,14 @@ class ProductAndStockModelForm(forms.ModelForm):
             'product_description',
             'product_price',
             'product_quantity',
+            'minimum_stock_level',
         ]
         widgets = {
             'product_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Product Name'}),
             'product_description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Product Description', 'rows': 3}),
             'product_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00', 'step': '0.01'}),
             'product_quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+            'minimum_stock_level': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0', 'help_text': 'Minimum stock level for alerts'}),
         }
     
     def clean_product_name(self):
@@ -60,6 +62,7 @@ class AdminProductAndStockModelForm(forms.ModelForm):
             'product_description',
             'product_price',
             'product_quantity',
+            'minimum_stock_level',
             'organisation',
         ]
         widgets = {
@@ -67,6 +70,7 @@ class AdminProductAndStockModelForm(forms.ModelForm):
             'product_description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Product Description', 'rows': 3}),
             'product_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0.00', 'step': '0.01'}),
             'product_quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+            'minimum_stock_level': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0', 'help_text': 'Minimum stock level for alerts'}),
         }
     
     def clean(self):

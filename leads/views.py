@@ -2,7 +2,7 @@ from typing import Any
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView
 from django.http import HttpResponse, JsonResponse
 from django.views import generic
 from django.contrib import messages
@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import models
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
-from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm
+from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
 
 
 
@@ -19,6 +19,14 @@ from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentF
 class CustomLoginView(LoginView):
     form_class = CustomAuthenticationForm
     template_name = 'registration/login.html'
+
+class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
+    template_name = 'registration/password_reset_form.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = CustomSetPasswordForm
+    template_name = 'registration/password_reset_confirm.html'
     
     def form_invalid(self, form):
         # Sadece gerçek form submission'da hata göster

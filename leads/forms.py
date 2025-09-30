@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm, PasswordResetForm, SetPasswordForm
 from .models import Lead, Agent, SourceCategory, ValueCategory, UserProfile
 from phonenumber_field.formfields import PhoneNumberField
 
@@ -454,3 +454,35 @@ class CustomAuthenticationForm(AuthenticationForm):
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
             'placeholder': 'Password'
         })
+
+class CustomPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(
+        label='Email',
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'autofocus': True,
+            'placeholder': 'Email',
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+        })
+    )
+
+class CustomSetPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        label='New password',
+        widget=forms.PasswordInput(attrs={
+            'autofocus': True,
+            'placeholder': 'New Password',
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+        }),
+        strip=False,
+        help_text="Your password can't be too similar to your other personal information, must contain at least 8 characters, can't be a commonly used password, and can't be entirely numeric.",
+    )
+    
+    new_password2 = forms.CharField(
+        label='New password confirmation',
+        strip=False,
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Confirm New Password',
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+        }),
+    )
