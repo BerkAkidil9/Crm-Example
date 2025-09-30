@@ -79,6 +79,8 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
             # Organisors use their own organisation
             try:
                 product.organisation = user.userprofile
+                # Form'a user_organisation'ı set et (clean metodunda kullanmak için)
+                form.user_organisation = user.userprofile
             except:
                 from django.contrib import messages
                 messages.error(self.request, "User profile not found. Please contact administrator.")
@@ -118,6 +120,18 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
             return ProductsAndStock.objects.filter(organisation=organisation)
         else:
             return ProductsAndStock.objects.none()
+    
+    def form_valid(self, form):
+        user = self.request.user
+        
+        # Organisors için user_organisation'ı set et (clean metodunda kullanmak için)
+        if not (user.is_superuser or user.id == 1 or user.username == 'berk'):
+            try:
+                form.user_organisation = user.userprofile
+            except:
+                pass  # Update'de organisation zaten mevcut
+        
+        return super().form_valid(form)
 
 class ProductAndStockDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
     template_name = "ProductsAndStock/ProductAndStock_delete.html"

@@ -2,6 +2,30 @@
 {% load tailwind_filters %}
 
 {% block content %}
+<style>
+    /* Phone number widget styling */
+    select[id*="phone_number"] {
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+        font-size: 14px !important;
+        background-color: white !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+    }
+    
+    /* Ensure emojis are displayed properly */
+    select[id*="phone_number"] option {
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+        padding: 4px 8px !important;
+    }
+    
+    /* Phone input styling */
+    input[id*="phone_number"] {
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+    }
+</style>
 <section class="text-gray-600 body-font overflow-hidden">
     <div class="container px-5 py-12 mx-auto">
         <div class="lg:w-4/5 mx-auto flex flex-wrap justify-center">

@@ -28,8 +28,11 @@
                           <div class="leading-relaxed text-base mb-3">
                               <p class="mb-1"><strong>Name:</strong> {{ agent.user.first_name }} {{ agent.user.last_name }}</p>
                               <p class="mb-1"><strong>Email:</strong> {{ agent.user.email }}</p>
+                              <p class="mb-1"><strong>Phone:</strong> {{ agent.user.phone_number|default:"Not provided" }}</p>
+                              <p class="mb-1"><strong>Date of Birth:</strong> {% if agent.user.date_of_birth %}{{ agent.user.date_of_birth|date:"d/m/Y" }}{% else %}Not provided{% endif %}</p>
+                              <p class="mb-1"><strong>Gender:</strong> {% if agent.user.gender %}{{ agent.user.get_gender_display }}{% else %}Not provided{% endif %}</p>
                               <p class="mb-1"><strong>Status:</strong> {% if agent.user.email_verified %}<span class="text-green-600 font-medium">✓ Verified</span>{% else %}<span class="text-orange-600 font-medium">⏳ Pending Verification</span>{% endif %}</p>
-                              {% if request.user.id == 1 or request.user.username == 'berk' %}
+                              {% if request.user.is_superuser %}
                               <p class="mb-1"><strong>Organisation:</strong> <span class="text-purple-600 font-medium">{{ agent.organisation.user.username }}</span></p>
                               {% endif %}
                           </div>

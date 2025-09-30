@@ -30,6 +30,9 @@
                           <div class="leading-relaxed text-base mb-3">
                               <p class="mb-1"><strong>Name:</strong> {{ organisor.user.first_name }} {{ organisor.user.last_name }}</p>
                               <p class="mb-1"><strong>Email:</strong> {{ organisor.user.email }}</p>
+                              <p class="mb-1"><strong>Phone:</strong> {{ organisor.user.phone_number|default:"Not provided" }}</p>
+                              <p class="mb-1"><strong>Date of Birth:</strong> {% if organisor.user.date_of_birth %}{{ organisor.user.date_of_birth|date:"d/m/Y" }}{% else %}Not provided{% endif %}</p>
+                              <p class="mb-1"><strong>Gender:</strong> {% if organisor.user.gender %}{{ organisor.user.get_gender_display }}{% else %}Not provided{% endif %}</p>
                               <p class="mb-1"><strong>Status:</strong> {% if organisor.user.email_verified %}<span class="text-green-600 font-medium">✓ Verified</span>{% else %}<span class="text-orange-600 font-medium">⏳ Pending Verification</span>{% endif %}</p>
                               <p class="mb-1"><strong>Role:</strong> <span class="text-purple-600 font-medium">Organisor</span></p>
                           </div>

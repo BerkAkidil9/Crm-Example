@@ -26,6 +26,18 @@
 			<span class="ml-auto text-gray-900">{{ organisor.user.email }}</span>
 		  </div>
 		  <div class="flex border-t border-gray-200 py-2">
+			<span class="text-gray-500">Phone</span>
+			<span class="ml-auto text-gray-900">{{ organisor.user.phone_number|default:"Not provided" }}</span>
+		  </div>
+		  <div class="flex border-t border-gray-200 py-2">
+			<span class="text-gray-500">Date of Birth</span>
+			<span class="ml-auto text-gray-900">{% if organisor.user.date_of_birth %}{{ organisor.user.date_of_birth|date:"d/m/Y" }}{% else %}Not provided{% endif %}</span>
+		  </div>
+		  <div class="flex border-t border-gray-200 py-2">
+			<span class="text-gray-500">Gender</span>
+			<span class="ml-auto text-gray-900">{% if organisor.user.gender %}{{ organisor.user.get_gender_display }}{% else %}Not provided{% endif %}</span>
+		  </div>
+		  <div class="flex border-t border-gray-200 py-2">
 			<span class="text-gray-500">Username</span>
 			<span class="ml-auto text-gray-900">{{ organisor.user.username }}</span>
 		  </div>

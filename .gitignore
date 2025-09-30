@@ -16,6 +16,7 @@ media/
 # Virtual environment
 venv/
 env/
+new_env/
 Scripts/
 pyvenv.cfg
 

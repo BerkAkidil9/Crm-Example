@@ -16,6 +16,29 @@
         font-size: 1.25rem; /* This is equivalent to Tailwind's text-lg */
         margin-bottom: 1rem; /* Adds space below the heading */
     }
+    
+    /* Phone number widget styling */
+    select[id*="phone_number"] {
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+        font-size: 14px !important;
+        background-color: white !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+    }
+    
+    /* Ensure emojis are displayed properly */
+    select[id*="phone_number"] option {
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+        padding: 4px 8px !important;
+    }
+    
+    /* Phone input styling */
+    input[id*="phone_number"] {
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+    }
 </style>
 
 <div class="max-w-lg mx-auto">

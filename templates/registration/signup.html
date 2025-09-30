@@ -2,7 +2,38 @@
 {% load tailwind_filters %}
 
 {% block content %}
-    <div class="max-w-lg mx-auto">    
+    <style>
+        /* Phone number widget styling */
+        select[id*="phone_number"] {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 14px !important;
+            background-color: white !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+        }
+        
+        /* Ensure emojis are displayed properly */
+        select[id*="phone_number"] option {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+            padding: 4px 8px !important;
+        }
+        
+        /* Phone input styling */
+        input[id*="phone_number"] {
+            border: 1px solid #d1d5db !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+        }
+    </style>
+    <div class="max-w-lg mx-auto">
+        <!-- Signup Header -->
+        <div class="text-center mb-8 mt-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Sign Up</h1>
+            <p class="text-gray-600 text-lg">Create your account to get started</p>
+            <div class="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded"></div>
+        </div>
+        
         <form method="POST" class="mt-5">
             {% csrf_token %}
             {{ form|crispy }}

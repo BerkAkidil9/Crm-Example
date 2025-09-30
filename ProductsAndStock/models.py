@@ -9,6 +9,9 @@ class ProductsAndStock(models.Model):
 	product_quantity = models.IntegerField()
 	organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
+	class Meta:
+		unique_together = ('product_name', 'organisation')
+
 	def __str__(self):
 		return self.product_name
 

@@ -5,11 +5,33 @@ from django.dispatch import receiver
 import uuid
 from django.utils import timezone
 from datetime import timedelta
+from phonenumber_field.modelfields import PhoneNumberField
 
 class User(AbstractUser):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+    
     is_organisor = models.BooleanField(default=True)
     is_agent = models.BooleanField(default=False)
     email_verified = models.BooleanField(default=False)
+    phone_number = PhoneNumberField(blank=True, null=True, unique=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
+    
+    # Email ve username unique olacak şekilde ayarla
+    email = models.EmailField(unique=True)
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
+        validators=[AbstractUser.username_validator],
+        error_messages={
+            'unique': "A user with that username already exists.",
+        },
+    )
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
@@ -60,8 +82,8 @@ class Lead(models.Model):
     value_category = models.ForeignKey("ValueCategory", related_name="leads", null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField()
     date_added = models.DateTimeField(auto_now_add=True)
-    phone_number = models.CharField(max_length=20)
-    email = models.EmailField()
+    phone_number = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(unique=True)
     address = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
