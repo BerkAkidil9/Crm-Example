@@ -22,10 +22,18 @@
 	  <a href="{% url 'agents:agent-list' %}" class="mr-5 hover:text-blue-500">Agents</a>
 	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products & Stock</a>
 	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a>
+	  {% if request.user.organisor %}
 	  <a href="{% url 'organisors:organisor-detail' request.user.organisor.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
+	  {% else %}
+	  <a href="{% url 'organisors:organisor-detail' request.user.userprofile.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
+	  {% endif %}
 	  {% elif request.user.is_agent %}
 	  <!-- Agents: Sales + Customer Work -->
+	  {% if request.user.agent %}
 	  <a href="{% url 'agents:agent-detail' request.user.agent.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
+	  {% else %}
+	  <a href="{% url 'agents:agent-detail' request.user.userprofile.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
+	  {% endif %}
 	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products & Stock</a>
 	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
 	  {% endif %}

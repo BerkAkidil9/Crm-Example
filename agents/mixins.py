@@ -21,7 +21,7 @@ class OrganisorAndLoginRequiredMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        return user.is_superuser or user.id == 1 or user.username == 'berk'
 
 
 class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
@@ -54,7 +54,7 @@ class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        return user.is_superuser or user.id == 1 or user.username == 'berk'
 
 
 class ProductsAndStockAccessMixin(AccessMixin):
@@ -75,4 +75,4 @@ class ProductsAndStockAccessMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        return user.is_superuser or user.id == 1 or user.username == 'berk'

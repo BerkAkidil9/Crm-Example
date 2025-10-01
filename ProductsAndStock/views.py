@@ -24,8 +24,8 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 			queryset = ProductsAndStock.objects.filter(organisation=organisation)
 		elif self.request.user.is_agent:
 			try:
-				# Agent sees products from their organisation
-				agent_organisation = self.request.user.agent.organisation
+				# Agent sees products from their organisation (via UserProfile)
+				agent_organisation = self.request.user.userprofile
 				queryset = ProductsAndStock.objects.filter(organisation=agent_organisation)
 			except Exception as e:
 				# If agent doesn't exist, return empty queryset
@@ -296,7 +296,14 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
                     
                     # Create price history record
                     price_change = new_price - old_price
-                    change_type = 'BULK_UPDATE'
+                    
+                    # Determine change type based on price change
+                    if price_change > 0:
+                        change_type = 'INCREASE'
+                    elif price_change < 0:
+                        change_type = 'DECREASE'
+                    else:
+                        change_type = 'BULK_UPDATE'
                     
                     PriceHistory.objects.create(
                         product=product,
