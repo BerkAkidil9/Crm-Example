@@ -28,9 +28,48 @@
 			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_description }}</span>
 			</div>
 			<div class="flex border-t border-gray-200 py-2">
-			  <span class="text-gray-500">Price</span>
+			  <span class="text-gray-500">Category</span>
+			  <span class="ml-auto text-gray-900">
+				{% if ProductAndStock.category.icon %}<i class="{{ ProductAndStock.category.icon }} mr-1"></i>{% endif %}
+				<span class="text-blue-600 font-medium">{{ ProductAndStock.category.name }}</span>
+			  </span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Sub Category</span>
+			  <span class="ml-auto text-gray-900">
+				<span class="text-blue-600 font-medium">{{ ProductAndStock.subcategory.name }}</span>
+			  </span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Selling Price</span>
 			  <span class="ml-auto text-gray-900">${{ ProductAndStock.product_price|floatformat:2 }}</span>
 			</div>
+			{% if ProductAndStock.cost_price > 0 %}
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Cost Price</span>
+			  <span class="ml-auto text-gray-900">${{ ProductAndStock.cost_price|floatformat:2 }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Profit Margin Amount</span>
+			  <span class="ml-auto text-green-600 font-medium">${{ ProductAndStock.profit_margin_amount|floatformat:2 }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Profit Margin %</span>
+			  <span class="ml-auto {% if ProductAndStock.profit_margin_percentage > 20 %}text-green-600{% elif ProductAndStock.profit_margin_percentage > 10 %}text-yellow-600{% else %}text-red-600{% endif %} font-medium">
+				{{ ProductAndStock.profit_margin_percentage|floatformat:1 }}%
+			  </span>
+			</div>
+			{% endif %}
+			{% if ProductAndStock.is_discount_active %}
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Discounted Price</span>
+			  <span class="ml-auto text-green-600 font-medium">${{ ProductAndStock.discounted_price|floatformat:2 }}</span>
+			</div>
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Discount</span>
+			  <span class="ml-auto text-green-600 font-medium">{{ ProductAndStock.discount_percentage }}% off</span>
+			</div>
+			{% endif %}
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Quantity</span>
 			  <span class="ml-auto text-gray-900">{{ ProductAndStock.product_quantity }}</span>
@@ -49,6 +88,32 @@
 			  <span class="text-gray-500">Total Value</span>
 			  <span class="ml-auto text-purple-600 font-medium">${{ ProductAndStock.total_value|floatformat:2 }}</span>
 			</div>
+    			{% if ProductAndStock.cost_price > 0 %}
+    			<div class="flex border-t border-gray-200 py-2">
+    			  <span class="text-gray-500">Total Profit</span>
+    			  <span class="ml-auto text-green-600 font-medium">${{ ProductAndStock.total_profit|floatformat:2 }}</span>
+    			</div>
+    			{% endif %}
+    			<div class="flex border-t border-gray-200 py-2">
+    			  <span class="text-gray-500">Total Sales</span>
+    			  <span class="ml-auto text-blue-600 font-medium">{{ ProductAndStock.total_sales_count }} units</span>
+    			</div>
+    			<div class="flex border-t border-gray-200 py-2">
+    			  <span class="text-gray-500">Sales Revenue</span>
+    			  <span class="ml-auto text-green-600 font-medium">${{ ProductAndStock.total_revenue_from_sales|floatformat:2 }}</span>
+    			</div>
+    			{% if ProductAndStock.last_sale_date %}
+    			<div class="flex border-t border-gray-200 py-2">
+    			  <span class="text-gray-500">Last Sale Date</span>
+    			  <span class="ml-auto text-gray-900">{{ ProductAndStock.last_sale_date|date:"M d, Y H:i" }}</span>
+    			</div>
+    			{% endif %}
+    			{% if ProductAndStock.sales_count_today > 0 %}
+    			<div class="flex border-t border-gray-200 py-2">
+    			  <span class="text-gray-500">Today's Sales</span>
+    			  <span class="ml-auto text-blue-600 font-medium">{{ ProductAndStock.sales_count_today }} units</span>
+    			</div>
+    			{% endif %}
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Organization</span>
 			  <span class="ml-auto text-gray-900">{{ ProductAndStock.organisation.user.username }}</span>
@@ -66,5 +131,115 @@
 		</div>
 	  </div>
 	</div>
-</section>
-{% endblock content %}
+	
+	<!-- Stock Movement History -->
+	{% if stock_movements %}
+	<div class="container px-5 py-8 mx-auto">
+	  <div class="flex justify-center">
+		<div class="lg:w-4/5 w-full">
+		  <h2 class="text-2xl font-bold text-gray-900 mb-6">Stock Movement History</h2>
+		  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+			<table class="min-w-full divide-y divide-gray-200">
+			  <thead class="bg-gray-50">
+				<tr>
+				  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+				  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+				  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Before</th>
+				  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">After</th>
+				  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
+				  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+				</tr>
+			  </thead>
+			  <tbody class="bg-white divide-y divide-gray-200">
+				{% for movement in stock_movements %}
+				<tr class="hover:bg-gray-50">
+				  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+					{{ movement.created_at|date:"M d, Y H:i" }}
+				  </td>
+				  <td class="px-6 py-4 whitespace-nowrap">
+					<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+					  {% if movement.movement_type == 'IN' %}bg-green-100 text-green-800
+					  {% elif movement.movement_type == 'OUT' %}bg-red-100 text-red-800
+					  {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+					  {{ movement.get_movement_type_display }}
+					</span>
+				  </td>
+				  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ movement.quantity_before }}</td>
+				  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ movement.quantity_after }}</td>
+				  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium 
+					{% if movement.quantity_change > 0 %}text-green-600
+					{% elif movement.quantity_change < 0 %}text-red-600
+					{% else %}text-gray-600{% endif %}">
+					{{ movement.quantity_change|add:0|floatformat:0|add:0 }}{% if movement.quantity_change > 0 %}+{% endif %}
+				  </td>
+				  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ movement.reason|default:"-" }}</td>
+				</tr>
+				{% endfor %}
+			  </tbody>
+			</table>
+		  </div>
+		</div>
+	  </div>
+		</div>
+		{% endif %}
+		
+		<!-- Price History -->
+		{% if price_history %}
+		<div class="container px-5 py-8 mx-auto">
+		  <div class="flex justify-center">
+			<div class="lg:w-4/5 w-full">
+			  <h2 class="text-2xl font-bold text-gray-900 mb-6">Price History</h2>
+			  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+				<table class="min-w-full divide-y divide-gray-200">
+				  <thead class="bg-gray-50">
+					<tr>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change Type</th>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Old Price</th>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Price</th>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change %</th>
+					  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+					</tr>
+				  </thead>
+				  <tbody class="bg-white divide-y divide-gray-200">
+					{% for history in price_history %}
+					<tr class="hover:bg-gray-50">
+					  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+						{{ history.created_at|date:"M d, Y H:i" }}
+					  </td>
+					  <td class="px-6 py-4 whitespace-nowrap">
+						<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+						  {% if history.change_type == 'INCREASE' %}bg-green-100 text-green-800
+						  {% elif history.change_type == 'DECREASE' %}bg-red-100 text-red-800
+						  {% elif history.change_type == 'DISCOUNT' %}bg-blue-100 text-blue-800
+						  {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+						  {{ history.get_change_type_display }}
+						</span>
+					  </td>
+					  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ history.old_price|floatformat:2 }}</td>
+					  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ history.new_price|floatformat:2 }}</td>
+					  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium 
+						{% if history.price_change > 0 %}text-green-600
+						{% elif history.price_change < 0 %}text-red-600
+						{% else %}text-gray-600{% endif %}">
+						{{ history.price_change|add:0|floatformat:2 }}{% if history.price_change > 0 %}+{% endif %}
+					  </td>
+					  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium 
+						{% if history.change_percentage > 0 %}text-green-600
+						{% elif history.change_percentage < 0 %}text-red-600
+						{% else %}text-gray-600{% endif %}">
+						{{ history.change_percentage|add:0|floatformat:1 }}{% if history.change_percentage > 0 %}+{% endif %}%
+					  </td>
+					  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ history.change_reason|default:"-" }}</td>
+					</tr>
+					{% endfor %}
+				  </tbody>
+				</table>
+			  </div>
+			</div>
+		  </div>
+		</div>
+		{% endif %}
+	</section>
+	{% endblock content %}

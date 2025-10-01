@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load tailwind_filters %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Bulk Price Update</h1>
+            <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="text-blue-600 hover:text-blue-800">
+                ← Back to Products
+            </a>
+        </div>
+
+        <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+            <h3 class="text-lg font-semibold text-blue-800 mb-2">📊 Update Information</h3>
+            <p class="text-blue-700">Total products available for update: <span class="font-bold">{{ total_products }}</span></p>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Update Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Update Type *</label>
+                    {{ form.update_type }}
+                    {% if form.update_type.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.update_type.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Products</label>
+                    {{ form.category_filter }}
+                    {% if form.category_filter.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.category_filter.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Category Selection (conditional) -->
+            <div id="category-section" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sub Category</label>
+                        {{ form.subcategory }}
+                        {% if form.subcategory.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.subcategory.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Values (conditional) -->
+            <div id="update-values" class="space-y-4">
+                <!-- Percentage Increase -->
+                <div id="percentage-increase-section" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Percentage Increase (%)</label>
+                    {{ form.percentage_increase }}
+                    {% if form.percentage_increase.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.percentage_increase.errors }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Enter the percentage to increase prices (e.g., 10 for 10% increase)</p>
+                </div>
+
+                <!-- Percentage Decrease -->
+                <div id="percentage-decrease-section" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Percentage Decrease (%)</label>
+                    {{ form.percentage_decrease }}
+                    {% if form.percentage_decrease.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.percentage_decrease.errors }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Enter the percentage to decrease prices (e.g., 15 for 15% decrease)</p>
+                </div>
+
+                <!-- Fixed Amount Increase -->
+                <div id="fixed-amount-increase-section" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fixed Amount Increase ($)</label>
+                    {{ form.fixed_amount_increase }}
+                    {% if form.fixed_amount_increase.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.fixed_amount_increase.errors }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Enter the fixed amount to add to current prices</p>
+                </div>
+
+                <!-- Fixed Amount Decrease -->
+                <div id="fixed-amount-decrease-section" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fixed Amount Decrease ($)</label>
+                    {{ form.fixed_amount_decrease }}
+                    {% if form.fixed_amount_decrease.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.fixed_amount_decrease.errors }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Enter the fixed amount to subtract from current prices</p>
+                </div>
+
+                <!-- Set New Price -->
+                <div id="set-price-section" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">New Price ($)</label>
+                    {{ form.new_price }}
+                    {% if form.new_price.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.new_price.errors }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Enter the new price for all selected products</p>
+                </div>
+            </div>
+
+            <!-- Reason -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Reason (Optional)</label>
+                {{ form.reason }}
+                {% if form.reason.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.reason.errors }}</div>
+                {% endif %}
+                <p class="text-sm text-gray-500 mt-1">Brief description of why prices are being updated</p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end space-x-4 pt-6 border-t">
+                <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" 
+                   class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Update Prices
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const updateTypeSelect = document.getElementById('id_update_type');
+    const categoryFilterSelect = document.getElementById('id_category_filter');
+    const categorySection = document.getElementById('category-section');
+    const percentageIncreaseSection = document.getElementById('percentage-increase-section');
+    const percentageDecreaseSection = document.getElementById('percentage-decrease-section');
+    const fixedAmountIncreaseSection = document.getElementById('fixed-amount-increase-section');
+    const fixedAmountDecreaseSection = document.getElementById('fixed-amount-decrease-section');
+    const setPriceSection = document.getElementById('set-price-section');
+
+    // Handle update type changes
+    function toggleUpdateSections() {
+        const updateType = updateTypeSelect.value;
+        
+        // Hide all sections
+        percentageIncreaseSection.classList.add('hidden');
+        percentageDecreaseSection.classList.add('hidden');
+        fixedAmountIncreaseSection.classList.add('hidden');
+        fixedAmountDecreaseSection.classList.add('hidden');
+        setPriceSection.classList.add('hidden');
+        
+        // Show relevant section
+        if (updateType === 'PERCENTAGE_INCREASE') {
+            percentageIncreaseSection.classList.remove('hidden');
+        } else if (updateType === 'PERCENTAGE_DECREASE') {
+            percentageDecreaseSection.classList.remove('hidden');
+        } else if (updateType === 'FIXED_AMOUNT_INCREASE') {
+            fixedAmountIncreaseSection.classList.remove('hidden');
+        } else if (updateType === 'FIXED_AMOUNT_DECREASE') {
+            fixedAmountDecreaseSection.classList.remove('hidden');
+        } else if (updateType === 'SET_PRICE') {
+            setPriceSection.classList.remove('hidden');
+        }
+    }
+
+    // Handle category filter changes
+    function toggleCategorySection() {
+        const categoryFilter = categoryFilterSelect.value;
+        
+        if (categoryFilter === 'CATEGORY' || categoryFilter === 'SUBCATEGORY') {
+            categorySection.classList.remove('hidden');
+        } else {
+            categorySection.classList.add('hidden');
+        }
+    }
+
+    // Event listeners
+    updateTypeSelect.addEventListener('change', toggleUpdateSections);
+    categoryFilterSelect.addEventListener('change', toggleCategorySection);
+
+    // Initialize on page load
+    toggleUpdateSections();
+    toggleCategorySection();
+});
+</script>
+{% endblock content %}

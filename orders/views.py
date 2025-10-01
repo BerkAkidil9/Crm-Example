@@ -68,15 +68,19 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
                     product = product_form.cleaned_data.get('product')
                     quantity = product_form.cleaned_data.get('product_quantity')
                     if product and quantity:
-                        order_product = OrderProduct.objects.create(
-                            order=order,
-                            product=product,
-                            product_quantity=quantity,
-                            total_price=quantity * product.product_price
-                        )
-                        total_price += order_product.total_price
-                        product.product_quantity -= quantity
-                        product.save()
+                        # Check if enough stock is available
+                        if product.product_quantity >= quantity:
+                            order_product = OrderProduct.objects.create(
+                                order=order,
+                                product=product,
+                                product_quantity=quantity,
+                                total_price=quantity * product.product_price
+                            )
+                            total_price += order_product.total_price
+                            # Stock will be automatically reduced by signal
+                        else:
+                            messages.error(self.request, f'Insufficient stock for {product.product_name}. Available: {product.product_quantity}, Required: {quantity}')
+                            return self.form_invalid(form)
 
                 # Create OrderFinanceReport entry
                 OrderFinanceReport.objects.create(
@@ -153,13 +157,7 @@ class OrderCancelView(View):
         
         try:
             with transaction.atomic():
-                # Access related products through the related manager
-                order_products = OrderProduct.objects.filter(order=order)
-                for order_product in order_products:
-                    product = order_product.product
-                    product.product_quantity += order_product.product_quantity
-                    product.save()
-                    
+                # Stock will be automatically restored by signal when is_cancelled is set to True
                 order.is_cancelled = True
                 order.save()
                 
@@ -201,11 +199,7 @@ class OrderDeleteView(LoginRequiredMixin, generic.DeleteView):
             messages.error(self.request, 'This order has already been canceled.')
             return HttpResponseRedirect(self.get_success_url())
         
-        order_products = OrderProduct.objects.filter(order=order)
-        for order_product in order_products:
-            product = order_product.product
-            product.product_quantity += order_product.product_quantity
-            product.save()
+        # Stock will be automatically restored by signal when is_cancelled is set to True
         order.is_cancelled = True
         order.save()
         messages.success(self.request, 'The order was successfully canceled.')

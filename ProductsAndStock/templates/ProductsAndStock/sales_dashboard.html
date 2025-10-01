@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📊 Sales Dashboard</h1>
+            <p class="text-gray-600 mt-2">Comprehensive overview of your inventory and sales performance</p>
+        </div>
+        <div class="flex space-x-4">
+            <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                📦 Products
+            </a>
+            <a href="{% url 'ProductsAndStock:bulk-price-update' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+                📈 Bulk Update
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Total Products</h3>
+                    <p class="text-2xl font-bold text-blue-600">{{ total_products }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Total Value</h3>
+                    <p class="text-2xl font-bold text-green-600">${{ total_value|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Total Profit</h3>
+                    <p class="text-2xl font-bold text-purple-600">${{ total_profit|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="w-8 h-8 {% if critical_alerts_count > 0 %}text-red-500{% else %}text-gray-500{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Critical Alerts</h3>
+                    <p class="text-2xl font-bold {% if critical_alerts_count > 0 %}text-red-600{% else %}text-gray-600{% endif %}">{{ critical_alerts_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Status Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">📦 Stock Status</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Low Stock Products</span>
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">{{ low_stock_products }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Out of Stock</span>
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">{{ out_of_stock_products }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">In Stock</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">{{ in_stock_products }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Alerts -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">🚨 Recent Alerts</h3>
+            {% if recent_alerts %}
+                <div class="space-y-3 max-h-64 overflow-y-auto">
+                    {% for alert in recent_alerts %}
+                    <div class="border-l-4 {% if alert.severity == 'CRITICAL' %}border-red-500{% elif alert.severity == 'HIGH' %}border-orange-500{% elif alert.severity == 'MEDIUM' %}border-yellow-500{% else %}border-blue-500{% endif %} pl-4 py-2">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">{{ alert.product.product_name }}</p>
+                                <p class="text-xs text-gray-600">{{ alert.message }}</p>
+                            </div>
+                            <span class="px-2 py-1 text-xs rounded-full {% if alert.severity == 'CRITICAL' %}bg-red-100 text-red-800{% elif alert.severity == 'HIGH' %}bg-orange-100 text-orange-800{% elif alert.severity == 'MEDIUM' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ alert.get_severity_display }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">{{ alert.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-sm">No recent alerts</p>
+            {% endif %}
+        </div>
+
+        <!-- Stock Recommendations -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">💡 Stock Recommendations</h3>
+            {% if stock_recommendations %}
+                <div class="space-y-3 max-h-64 overflow-y-auto">
+                    {% for rec in stock_recommendations %}
+                    <div class="border border-gray-200 rounded-lg p-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-sm font-medium text-gray-900">{{ rec.product.product_name }}</p>
+                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                {{ rec.get_recommendation_type_display }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-600 mb-2">{{ rec.reason }}</p>
+                        {% if rec.suggested_quantity %}
+                        <p class="text-xs text-gray-500">Suggested quantity: {{ rec.suggested_quantity }}</p>
+                        {% endif %}
+                        {% if rec.suggested_discount %}
+                        <p class="text-xs text-gray-500">Suggested discount: {{ rec.suggested_discount }}%</p>
+                        {% endif %}
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-gray-500">Confidence: {{ rec.confidence_score }}%</span>
+                            <span class="text-xs text-gray-500">{{ rec.created_at|date:"M d" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500 text-sm">No recommendations available</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">🏆 Top Selling Products</h3>
+        {% if top_selling_products %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for product in top_selling_products %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-purple-800">{{ product.product_name|slice:":2" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ product.product_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ product.product_description|truncatechars:30 }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ product.category.name }} - {{ product.subcategory.name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ product.product_price|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ product.total_sales_count }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${{ product.total_revenue_from_sales|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.product_quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if product.is_low_stock %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ product.stock_status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-sm">No products found</p>
+        {% endif %}
+    </div>
+
+    <!-- Products with Alerts -->
+    {% if products_with_alerts %}
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">⚠️ Products with Active Alerts</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for product in products_with_alerts %}
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-medium text-gray-900">{{ product.product_name }}</h4>
+                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                        {{ product.critical_alerts_count }} Critical
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">{{ product.stock_status }}</p>
+                <p class="text-sm text-gray-500">Stock: {{ product.product_quantity }} / Min: {{ product.minimum_stock_level }}</p>
+                <a href="{% url 'ProductsAndStock:ProductAndStock-detail' product.pk %}" class="text-blue-600 text-sm hover:text-blue-800 mt-2 inline-block">
+                    View Details →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

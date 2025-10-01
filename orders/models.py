@@ -1,8 +1,8 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from leads.models import User, UserProfile, Lead
-from ProductsAndStock.models import ProductsAndStock
+from ProductsAndStock.models import ProductsAndStock, StockMovement
 from django.utils import timezone
 
 class orders(models.Model):
@@ -30,5 +30,82 @@ class OrderProduct(models.Model):
     def save(self, *args, **kwargs):
         self.total_price = self.product_quantity * self.product.product_price
         super().save(*args, **kwargs)
+    
+    def reduce_stock(self):
+        """Reduce stock when order is confirmed"""
+        if not self.order.is_cancelled:
+            # Check if enough stock is available
+            if self.product.product_quantity >= self.product_quantity:
+                # Store previous quantity
+                previous_quantity = self.product.product_quantity
+                
+                # Reduce stock
+                self.product.product_quantity -= self.product_quantity
+                self.product.save()
+                
+                # Create stock movement record
+                StockMovement.objects.create(
+                    product=self.product,
+                    movement_type='OUT',
+                    quantity_before=previous_quantity,
+                    quantity_after=self.product.product_quantity,
+                    quantity_change=-self.product_quantity,
+                    reason=f'Sale - Order: {self.order.order_name}',
+                    created_by=getattr(self.order, '_current_user', None)
+                )
+                
+                return True
+            else:
+                # Not enough stock
+                return False
+        return True
+    
+    def restore_stock(self):
+        """Restore stock when order is cancelled"""
+        if self.order.is_cancelled:
+            # Store previous quantity
+            previous_quantity = self.product.product_quantity
+            
+            # Restore stock
+            self.product.product_quantity += self.product_quantity
+            self.product.save()
+            
+            # Create stock movement record
+            StockMovement.objects.create(
+                product=self.product,
+                movement_type='IN',
+                quantity_before=previous_quantity,
+                quantity_after=self.product.product_quantity,
+                quantity_change=self.product_quantity,
+                reason=f'Order Cancellation - Order: {self.order.order_name}',
+                created_by=getattr(self.order, '_current_user', None)
+            )
+
+# Signals for automatic stock management
+@receiver(post_save, sender=OrderProduct)
+def handle_order_product_created(sender, instance, created, **kwargs):
+    """Handle stock reduction when order product is created"""
+    if created and not instance.order.is_cancelled:
+        # Automatically reduce stock when order product is created
+        success = instance.reduce_stock()
+        if not success:
+            # If not enough stock, you might want to raise an exception
+            # or handle this differently based on your business logic
+            print(f"Insufficient stock for product {instance.product.product_name}")
+
+@receiver(pre_delete, sender=OrderProduct)
+def handle_order_product_deleted(sender, instance, **kwargs):
+    """Handle stock restoration when order product is deleted"""
+    if not instance.order.is_cancelled:
+        # Restore stock when order product is deleted
+        instance.restore_stock()
+
+@receiver(post_save, sender=orders)
+def handle_order_cancellation(sender, instance, **kwargs):
+    """Handle stock restoration when order is cancelled"""
+    if instance.is_cancelled:
+        # Restore stock for all products in cancelled order
+        for order_product in instance.orderproduct_set.all():
+            order_product.restore_stock()
 
 

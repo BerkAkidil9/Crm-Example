@@ -31,4 +31,51 @@
 	  </div>
 	</div>
   </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('id_category');
+    const subcategorySelect = document.getElementById('id_subcategory');
+    
+    if (categorySelect && subcategorySelect) {
+        // Store the current subcategory value
+        const currentSubcategoryId = subcategorySelect.value;
+        
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            
+            // Clear subcategory options
+            subcategorySelect.innerHTML = '<option value="">Select Sub Category *</option>';
+            
+            if (categoryId) {
+                // Make AJAX request to get subcategories
+                fetch(`/ProductsAndStock/get-subcategories/?category_id=${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.subcategories.forEach(subcategory => {
+                            const option = document.createElement('option');
+                            option.value = subcategory.id;
+                            option.textContent = subcategory.name;
+                            
+                            // Select the option if it matches the current subcategory
+                            if (currentSubcategoryId && subcategory.id == currentSubcategoryId) {
+                                option.selected = true;
+                            }
+                            
+                            subcategorySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading subcategories:', error);
+                    });
+            }
+        });
+        
+        // Trigger the change event on page load to populate subcategories
+        if (categorySelect.value) {
+            categorySelect.dispatchEvent(new Event('change'));
+        }
+    }
+});
+</script>
 {% endblock content %}
