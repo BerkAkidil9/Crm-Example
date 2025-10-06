@@ -1,0 +1,399 @@
+"""
+Finance Forms Test Dosyası
+Bu dosya Finance modülündeki tüm form'ları test eder.
+"""
+
+import os
+import sys
+import django
+from django.test import TestCase
+from django.core.exceptions import ValidationError
+from datetime import date, timedelta
+
+# Django ayarlarını yükle
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
+django.setup()
+
+from finance.forms import DateRangeForm
+
+
+class TestDateRangeForm(TestCase):
+    """DateRangeForm testleri"""
+    
+    def test_date_range_form_valid_data(self):
+        """DateRangeForm valid data testi"""
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        
+        form_data = {
+            'start_date': today,
+            'end_date': tomorrow
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], today)
+        self.assertEqual(form.cleaned_data['end_date'], tomorrow)
+    
+    def test_date_range_form_same_dates(self):
+        """DateRangeForm same dates testi"""
+        today = date.today()
+        
+        form_data = {
+            'start_date': today,
+            'end_date': today
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], today)
+        self.assertEqual(form.cleaned_data['end_date'], today)
+    
+    def test_date_range_form_end_date_before_start_date(self):
+        """DateRangeForm end_date before start_date testi"""
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        
+        form_data = {
+            'start_date': today,
+            'end_date': yesterday
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('End date must be after start date.', form.errors['__all__'])
+    
+    def test_date_range_form_empty_data(self):
+        """DateRangeForm empty data testi"""
+        form_data = {}
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('start_date', form.errors)
+        self.assertIn('end_date', form.errors)
+    
+    def test_date_range_form_missing_start_date(self):
+        """DateRangeForm missing start_date testi"""
+        today = date.today()
+        
+        form_data = {
+            'end_date': today
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('start_date', form.errors)
+        self.assertNotIn('end_date', form.errors)
+    
+    def test_date_range_form_missing_end_date(self):
+        """DateRangeForm missing end_date testi"""
+        today = date.today()
+        
+        form_data = {
+            'start_date': today
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertNotIn('start_date', form.errors)
+        self.assertIn('end_date', form.errors)
+    
+    def test_date_range_form_invalid_date_format(self):
+        """DateRangeForm invalid date format testi"""
+        form_data = {
+            'start_date': 'invalid_date',
+            'end_date': 'invalid_date'
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('start_date', form.errors)
+        self.assertIn('end_date', form.errors)
+    
+    def test_date_range_form_future_dates(self):
+        """DateRangeForm future dates testi"""
+        future_date1 = date.today() + timedelta(days=10)
+        future_date2 = date.today() + timedelta(days=20)
+        
+        form_data = {
+            'start_date': future_date1,
+            'end_date': future_date2
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], future_date1)
+        self.assertEqual(form.cleaned_data['end_date'], future_date2)
+    
+    def test_date_range_form_past_dates(self):
+        """DateRangeForm past dates testi"""
+        past_date1 = date.today() - timedelta(days=30)
+        past_date2 = date.today() - timedelta(days=10)
+        
+        form_data = {
+            'start_date': past_date1,
+            'end_date': past_date2
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], past_date1)
+        self.assertEqual(form.cleaned_data['end_date'], past_date2)
+    
+    def test_date_range_form_widget_years_range(self):
+        """DateRangeForm widget years range testi"""
+        form = DateRangeForm()
+        
+        # Widget'ların years range'i kontrol et
+        start_date_widget = form.fields['start_date'].widget
+        end_date_widget = form.fields['end_date'].widget
+        
+        # Range objesi ile karşılaştır
+        self.assertEqual(start_date_widget.years, range(2000, 2101))
+        self.assertEqual(end_date_widget.years, range(2000, 2101))
+    
+    def test_date_range_form_clean_method(self):
+        """DateRangeForm clean method testi"""
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        
+        form_data = {
+            'start_date': today,
+            'end_date': yesterday
+        }
+        
+        form = DateRangeForm(data=form_data)
+        
+        # Form'u validate et
+        self.assertFalse(form.is_valid())
+        self.assertIn('End date must be after start date.', form.errors['__all__'])
+    
+    def test_date_range_form_clean_method_valid(self):
+        """DateRangeForm clean method valid testi"""
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        
+        form_data = {
+            'start_date': today,
+            'end_date': tomorrow
+        }
+        
+        form = DateRangeForm(data=form_data)
+        
+        # Form valid olmalı
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], today)
+        self.assertEqual(form.cleaned_data['end_date'], tomorrow)
+    
+    def test_date_range_form_clean_method_same_dates(self):
+        """DateRangeForm clean method same dates testi"""
+        today = date.today()
+        
+        form_data = {
+            'start_date': today,
+            'end_date': today
+        }
+        
+        form = DateRangeForm(data=form_data)
+        
+        # Form valid olmalı (aynı tarihler geçerli)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], today)
+        self.assertEqual(form.cleaned_data['end_date'], today)
+    
+    def test_date_range_form_field_types(self):
+        """DateRangeForm field types testi"""
+        form = DateRangeForm()
+        
+        # Field tiplerini kontrol et
+        self.assertEqual(form.fields['start_date'].__class__.__name__, 'DateField')
+        self.assertEqual(form.fields['end_date'].__class__.__name__, 'DateField')
+    
+    def test_date_range_form_field_required(self):
+        """DateRangeForm field required testi"""
+        form = DateRangeForm()
+        
+        # Field'ların required olup olmadığını kontrol et
+        self.assertTrue(form.fields['start_date'].required)
+        self.assertTrue(form.fields['end_date'].required)
+    
+    def test_date_range_form_field_labels(self):
+        """DateRangeForm field labels testi"""
+        form = DateRangeForm()
+        
+        # Field label'larını kontrol et (Django otomatik label oluşturur)
+        # Label None ise, Django field name'den otomatik oluşturur
+        self.assertIsNone(form.fields['start_date'].label)  # None olmalı
+        self.assertIsNone(form.fields['end_date'].label)    # None olmalı
+    
+    def test_date_range_form_initial_data(self):
+        """DateRangeForm initial data testi"""
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        
+        initial_data = {
+            'start_date': today,
+            'end_date': tomorrow
+        }
+        
+        form = DateRangeForm(initial=initial_data)
+        
+        # Initial data doğru ayarlanmış olmalı
+        self.assertEqual(form.initial['start_date'], today)
+        self.assertEqual(form.initial['end_date'], tomorrow)
+    
+    def test_date_range_form_bound_vs_unbound(self):
+        """DateRangeForm bound vs unbound testi"""
+        # Unbound form
+        unbound_form = DateRangeForm()
+        self.assertFalse(unbound_form.is_bound)
+        
+        # Bound form
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        
+        bound_form = DateRangeForm(data={
+            'start_date': today,
+            'end_date': tomorrow
+        })
+        self.assertTrue(bound_form.is_bound)
+    
+    def test_date_range_form_clean_data_access(self):
+        """DateRangeForm clean_data access testi"""
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        
+        form_data = {
+            'start_date': today,
+            'end_date': tomorrow
+        }
+        
+        form = DateRangeForm(data=form_data)
+        
+        # Form valid olmadan önce cleaned_data'ya erişim
+        with self.assertRaises(AttributeError):
+            _ = form.cleaned_data
+        
+        # Form'u validate et
+        self.assertTrue(form.is_valid())
+        
+        # Şimdi cleaned_data'ya erişim olmalı
+        self.assertEqual(form.cleaned_data['start_date'], today)
+        self.assertEqual(form.cleaned_data['end_date'], tomorrow)
+    
+    def test_date_range_form_error_messages(self):
+        """DateRangeForm error messages testi"""
+        form_data = {
+            'start_date': 'invalid',
+            'end_date': 'invalid'
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        
+        # Error mesajlarını kontrol et
+        self.assertIn('start_date', form.errors)
+        self.assertIn('end_date', form.errors)
+        
+        # Error mesajları list olmalı
+        self.assertIsInstance(form.errors['start_date'], list)
+        self.assertIsInstance(form.errors['end_date'], list)
+    
+    def test_date_range_form_validation_error_format(self):
+        """DateRangeForm validation error format testi"""
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        
+        form_data = {
+            'start_date': today,
+            'end_date': yesterday
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        
+        # __all__ error'u kontrol et
+        self.assertIn('__all__', form.errors)
+        self.assertIn('End date must be after start date.', form.errors['__all__'])
+
+
+class TestDateRangeFormEdgeCases(TestCase):
+    """DateRangeForm edge cases testleri"""
+    
+    def test_date_range_form_extreme_date_range(self):
+        """DateRangeForm extreme date range testi"""
+        start_date = date(2000, 1, 1)
+        end_date = date(2099, 12, 31)
+        
+        form_data = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], start_date)
+        self.assertEqual(form.cleaned_data['end_date'], end_date)
+    
+    def test_date_range_form_leap_year_dates(self):
+        """DateRangeForm leap year dates testi"""
+        leap_year_start = date(2024, 2, 29)  # 2024 is a leap year
+        leap_year_end = date(2024, 3, 1)
+        
+        form_data = {
+            'start_date': leap_year_start,
+            'end_date': leap_year_end
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], leap_year_start)
+        self.assertEqual(form.cleaned_data['end_date'], leap_year_end)
+    
+    def test_date_range_form_year_boundary(self):
+        """DateRangeForm year boundary testi"""
+        year_end = date(2023, 12, 31)
+        year_start = date(2024, 1, 1)
+        
+        form_data = {
+            'start_date': year_end,
+            'end_date': year_start
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['start_date'], year_end)
+        self.assertEqual(form.cleaned_data['end_date'], year_start)
+    
+    def test_date_range_form_none_values(self):
+        """DateRangeForm None values testi"""
+        form_data = {
+            'start_date': None,
+            'end_date': None
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('start_date', form.errors)
+        self.assertIn('end_date', form.errors)
+    
+    def test_date_range_form_empty_strings(self):
+        """DateRangeForm empty strings testi"""
+        form_data = {
+            'start_date': '',
+            'end_date': ''
+        }
+        
+        form = DateRangeForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('start_date', form.errors)
+        self.assertIn('end_date', form.errors)
+
+
+if __name__ == "__main__":
+    print("Finance Forms Testleri Başlatılıyor...")
+    print("=" * 60)
+    
+    # Test çalıştırma
+    import unittest
+    unittest.main()
