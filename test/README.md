@@ -1,115 +1,189 @@
 # Test Sistemi
 
-Bu klasör ProductsAndStock modülü için organize edilmiş test dosyalarını içerir.
+Bu klasör tüm modüller için organize edilmiş test dosyalarını içerir.
 
 ## 📁 Klasör Yapısı
 
 ```
 test/
 ├── __init__.py
-├── products_and_stock/
-│   ├── __init__.py
-│   ├── working_tests/          # ✅ Çalışan testler
-│   │   ├── __init__.py
-│   │   └── simple_test.py
-│   ├── broken_tests/           # ❌ Çalışmayan testler (düzeltilmesi gereken)
-│   │   ├── __init__.py
-│   │   ├── test_models.py
-│   │   ├── test_views.py
-│   │   ├── test_forms.py
-│   │   └── test_integration.py
-│   └── test_runner.py          # İnteraktif test çalıştırıcı
-└── README.md
+├── README.md
+├── agents/                     # Agent testleri
+├── finance/                    # Finans testleri
+├── forget_password/            # Şifre sıfırlama testleri
+├── leads/                      # Lead testleri
+├── login/                      # Login testleri
+│   ├── working/               # ✅ Çalışan testler
+│   ├── broken_tests/          # ❌ Çalışmayan testler
+│   ├── test_runner.py
+│   └── README.md
+├── logout/                     # 🆕 Logout testleri
+│   ├── working/               # ✅ Çalışan testler (33 test)
+│   ├── test_runner.py
+│   ├── README.md
+│   └── TEST_RESULTS.md
+├── orders/                     # Sipariş testleri
+├── organisors/                 # Organizatör testleri
+├── products_and_stock/         # Ürün ve stok testleri
+└── signup/                     # Kayıt testleri
 ```
 
 ## 🚀 Test Çalıştırma
 
-### ✅ Çalışan Testler
+### 🆕 Logout Testleri (YENİ!)
 ```bash
-# Basit test (çalışan)
-python manage.py test test.products_and_stock.working_tests.simple_test
+# Tüm logout testleri (33 test - %100 başarılı!)
+python manage.py test test.logout.working
 
-# Verbose mod
-python manage.py test test.products_and_stock.working_tests.simple_test -v 2
+# Logout view testleri
+python manage.py test test.logout.working.test_logout_views
+
+# Logout entegrasyon testleri
+python manage.py test test.logout.working.test_logout_integration
+
+# İnteraktif test runner
+python test/logout/test_runner.py
 ```
 
-### ❌ Çalışmayan Testler (Düzeltilmesi Gereken)
+### Login Testleri
 ```bash
-# Model testleri (sorunlu)
-python manage.py test test.products_and_stock.broken_tests.test_models
+# Tüm login testleri
+python manage.py test test.login.working
 
-# View testleri (sorunlu)
-python manage.py test test.products_and_stock.broken_tests.test_views
+# Login view testleri
+python manage.py test test.login.working.test_login_views
 
-# Form testleri (sorunlu)
-python manage.py test test.products_and_stock.broken_tests.test_forms
+# Login authentication testleri
+python manage.py test test.login.working.test_login_authentication
+```
 
-# Entegrasyon testleri (sorunlu)
-python manage.py test test.products_and_stock.broken_tests.test_integration
+### Signup Testleri
+```bash
+# Tüm signup testleri
+python manage.py test test.signup.working
+```
+
+### Diğer Modül Testleri
+```bash
+# Agents testleri
+python manage.py test test.agents.working_tests
+
+# Finance testleri
+python manage.py test test.finance.working_tests
+
+# Orders testleri
+python manage.py test test.orders.working_tests
+
+# Organisors testleri
+python manage.py test test.organisors.working_tests
+
+# Products and Stock testleri
+python manage.py test test.products_and_stock.working_tests
 ```
 
 ## 📊 Test Durumu
 
-### ✅ Çalışan Testler (5 test)
-- **Dosya:** `working_tests/simple_test.py`
-- **Durum:** 5/5 test başarılı
-- **Kapsam:** Temel model testleri
-- **Süre:** ~1 saniye
+### 🆕 Logout Testleri (YENİ!)
+- **Status:** ✅ 33/33 test başarılı (%100)
+- **Kapsam:** Views, entegrasyon, güvenlik, performans
+- **Süre:** ~19 saniye
+- **Dosyalar:** 
+  - `test_logout_views.py` (19 test)
+  - `test_logout_integration.py` (14 test)
 
-### ❌ Çalışmayan Testler (80+ test)
-- **Dosya:** `broken_tests/` klasörü
-- **Durum:** 53 hata, 1 başarısız
-- **Sorunlar:** 
-  - UserProfile unique constraint hatası
-  - Form validasyon hataları
-  - Model uyumsuzlukları
+### Login Testleri
+- **Status:** ✅ Çalışan testler mevcut
+- **Kapsam:** Views, forms, authentication, entegrasyon
+- **Dosyalar:** 4 test dosyası
 
-## 🔧 Sorunlar ve Çözümler
+### Signup Testleri
+- **Status:** ✅ Çalışan testler mevcut
+- **Kapsam:** Views, forms, models, entegrasyon
+- **Dosyalar:** 4 test dosyası
 
-### 1. UserProfile Unique Constraint
-**Sorun:** Aynı kullanıcı adıyla birden fazla UserProfile oluşturulmaya çalışılıyor
-**Çözüm:** Her test sınıfında benzersiz kullanıcı adları kullanılmalı
+### Agents Testleri
+- **Status:** ✅ Çalışan testler mevcut
+- **Kapsam:** Views, forms, models, mixins, entegrasyon
+- **Dosyalar:** 6 test dosyası
 
-### 2. Model Uyumsuzlukları
-**Sorun:** Category modelinde `organisation` alanı yok
-**Çözüm:** Test dosyalarında model yapısına uygun testler yazılmalı
+### Finance Testleri
+- **Status:** ✅ Çalışan testler mevcut
+- **Kapsam:** Views, forms, models, entegrasyon
+- **Dosyalar:** 4 test dosyası
 
-### 3. Form Validasyon Hataları
-**Sorun:** Form validasyon testlerinde yanlış assertion'lar
-**Çözüm:** Form error mesajları doğru şekilde kontrol edilmeli
+### Orders Testleri
+- **Status:** ✅ Çalışan testler mevcut
+- **Kapsam:** Views, forms, models, entegrasyon
+- **Dosyalar:** 4 test dosyası
 
-## 📈 Test Kapsamı
+### Organisors Testleri
+- **Status:** ✅ Çalışan testler mevcut
+- **Kapsam:** Views, forms, models, mixins, entegrasyon
+- **Dosyalar:** 5 test dosyası
 
-### Models (8 model)
-- ✅ Category (çalışıyor)
-- ✅ SubCategory (çalışıyor)
-- ✅ ProductsAndStock (çalışıyor)
-- ❌ StockMovement (sorunlu)
-- ❌ PriceHistory (sorunlu)
-- ❌ SalesStatistics (sorunlu)
-- ❌ StockAlert (sorunlu)
-- ❌ StockRecommendation (sorunlu)
+### Products and Stock Testleri
+- **Status:** ⚠️ Kısmi başarılı (working_tests + broken_tests)
+- **Çalışan:** 5 test
+- **Sorunlu:** 80+ test
+- **Sorunlar:** UserProfile unique constraint, form validasyonları
 
-### Views (7 view)
-- ❌ ProductAndStockListView (sorunlu)
-- ❌ ProductAndStockDetailView (sorunlu)
-- ❌ ProductAndStockCreateView (sorunlu)
-- ❌ ProductAndStockUpdateView (sorunlu)
-- ❌ ProductAndStockDeleteView (sorunlu)
-- ❌ BulkPriceUpdateView (sorunlu)
-- ❌ SalesDashboardView (sorunlu)
+## 🎯 Test Kapsamı Genel
 
-### Forms (3 form)
-- ❌ ProductAndStockModelForm (sorunlu)
-- ❌ AdminProductAndStockModelForm (sorunlu)
-- ❌ BulkPriceUpdateForm (sorunlu)
+### Authentication & Authorization
+- ✅ Login (çoklu test dosyası)
+- ✅ **Logout (33 test - YENİ!)**
+- ✅ Signup (çoklu test dosyası)
+- ✅ Forget Password (test dosyaları)
+- ✅ Email Verification (login testlerinde kapsanmış)
+
+### Core Modules
+- ✅ Leads (5 test dosyası)
+- ✅ Agents (6 test dosyası)
+- ✅ Organisors (5 test dosyası)
+- ✅ Orders (4 test dosyası)
+- ✅ Finance (4 test dosyası)
+- ⚠️ Products and Stock (kısmi)
+
+### Test Türleri
+- ✅ View testleri
+- ✅ Form testleri
+- ✅ Model testleri
+- ✅ Authentication backend testleri
+- ✅ Entegrasyon testleri
+- ✅ Güvenlik testleri
+- ✅ Performans testleri
+- ✅ Mixin testleri
+
+## 🆕 Yenilikler
+
+### Logout Test Sistemi (12 Ekim 2025)
+- 🎉 **33 test** başarıyla eklendi
+- ✅ %100 test başarı oranı
+- 📁 Organize klasör yapısı
+- 📖 Detaylı dokümantasyon
+- 🏃 İnteraktif test runner
+- 🔒 Kapsamlı güvenlik testleri
+- ⚡ Performans testleri
+- 🔗 Entegrasyon testleri
+
+### Özellikler
+- Django LogoutView testi
+- Session yönetimi testleri
+- CSRF koruması testleri
+- Session hijacking koruması
+- Session fixation koruması
+- Token invalidation testleri
+- Çoklu session yönetimi
+- Farklı kullanıcı tipleri (organizer, agent, superuser)
+- Edge case senaryoları
 
 ## 🎯 Gelecek Planları
 
-1. **Çalışmayan testleri düzelt**
-2. **Daha fazla çalışan test ekle**
-3. **Diğer modüller için test klasörleri oluştur**
-4. **Test coverage raporu ekle**
+1. ✅ **Logout testleri eklendi** (TAMAMLANDI!)
+2. **Diğer modüller için test genişletmeleri**
+3. **Test coverage raporu ekle**
+4. **CI/CD entegrasyonu**
+5. **Performance benchmark testleri**
 
 ## 📝 Notlar
 
