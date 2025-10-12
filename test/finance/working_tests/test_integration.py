@@ -238,10 +238,18 @@ class TestFinanceOrdersIntegration(TestCase):
     
     def test_finance_report_date_filtering_with_orders(self):
         """Finance report tarih filtreleme order'larla entegrasyonu"""
-        # Farklı tarihlerde order'lar oluştur
-        yesterday = timezone.now() - timedelta(days=1)
-        today = timezone.now()
-        tomorrow = timezone.now() + timedelta(days=1)
+        # Farklı tarihlerde order'lar oluştur - günün başlangıcına sabitle
+        from datetime import datetime
+        now = timezone.now()
+        yesterday = timezone.make_aware(datetime.combine(
+            (now - timedelta(days=1)).date(), datetime.min.time()
+        ))
+        today = timezone.make_aware(datetime.combine(
+            now.date(), datetime.min.time()
+        ))
+        tomorrow = timezone.make_aware(datetime.combine(
+            (now + timedelta(days=1)).date(), datetime.min.time()
+        ))
         
         dates_and_orders = [
             (yesterday, 'Yesterday Order'),
@@ -255,7 +263,8 @@ class TestFinanceOrdersIntegration(TestCase):
                 order_name=order_name,
                 order_description=f'{order_name} description',
                 organisation=self.organisor_profile,
-                lead=self.lead
+                lead=self.lead,
+                creation_date=order_date  # creation_date manuel set et
             )
             
             OrderFinanceReport.objects.create(
@@ -263,12 +272,12 @@ class TestFinanceOrdersIntegration(TestCase):
                 earned_amount=1000.0
             )
         
-        # Bugünkü order'ları filtrele (tüm order'lar bugün oluşturuldu)
+        # Bugünkü order'ları filtrele
         today_reports = OrderFinanceReport.objects.filter(
             order__creation_date__date=today.date()
         )
         
-        self.assertEqual(today_reports.count(), 3)  # Tüm order'lar bugün oluşturuldu
+        self.assertEqual(today_reports.count(), 1)  # Sadece bugünkü order
         self.assertIn('Today Order', [report.order.order_name for report in today_reports])
     
     def test_finance_report_organisation_filtering(self):
@@ -569,6 +578,13 @@ class TestFinanceViewsIntegration(TestCase):
             subcategory=self.subcategory,
             organisation=self.organisor_profile
         )
+        
+        # Tarih değişkenleri
+        from datetime import datetime
+        now = timezone.now()
+        self.today = timezone.make_aware(datetime.combine(
+            now.date(), datetime.min.time()
+        ))
     
     def test_financial_report_view_full_workflow(self):
         """FinancialReportView tam workflow testi"""
@@ -578,11 +594,12 @@ class TestFinanceViewsIntegration(TestCase):
         
         # Order ve finance report oluştur
         order = orders.objects.create(
-            order_day=timezone.now(),
+            order_day=self.today,
             order_name='Full Workflow Order',
             order_description='Order for full workflow testing',
             organisation=self.organisor_profile,
-            lead=self.lead
+            lead=self.lead,
+            creation_date=self.today
         )
         
         order_product = OrderProduct.objects.create(
@@ -602,7 +619,7 @@ class TestFinanceViewsIntegration(TestCase):
         self.assertContains(response, 'Financial Report')
         
         # POST request with date range
-        today = timezone.now().date()
+        today = self.today.date()
         response = client.post(reverse('finance:financial_report'), {
             'start_date': today,
             'end_date': today

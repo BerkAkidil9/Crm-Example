@@ -116,8 +116,9 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin normal kullanıcıları redirect etmiyor, normal response döndürüyor
-        self.assertEqual(response.status_code, 200)
+        # Mixin normal kullanıcıları redirect etmeli (ne organisor ne admin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/leads/')
     
     def test_anonymous_user_access_denied(self):
         """Anonim kullanıcı erişimi reddedilme testi"""
@@ -247,8 +248,9 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin normal kullanıcıları redirect etmiyor, normal response döndürüyor
-        self.assertEqual(response.status_code, 200)
+        # Mixin normal kullanıcıları redirect etmeli (ne agent ne organisor ne admin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/leads/')
 
 
 class TestProductsAndStockAccessMixin(TestCase):
@@ -365,8 +367,9 @@ class TestProductsAndStockAccessMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin normal kullanıcıları redirect etmiyor, normal response döndürüyor
-        self.assertEqual(response.status_code, 200)
+        # Mixin normal kullanıcıları redirect etmeli (ne agent ne organisor ne admin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/leads/')
 
 
 if __name__ == "__main__":

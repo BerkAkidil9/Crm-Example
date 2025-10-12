@@ -16,10 +16,11 @@ class AdminOnlyMixin(AccessMixin):
         return super().dispatch(request, *args, **kwargs)
     
     def is_admin_user(self, user):
-        """Check if user is the main admin (first organisor created)"""
-        # You can customize this logic based on your needs
-        # For now, let's say user with id=1 or username='berk' is admin
-        return user.id == 1 or user.username == 'berk'
+        """
+        Check if user is admin/superuser.
+        Uses Django's is_superuser flag for proper admin detection.
+        """
+        return user.is_superuser
 
 
 class OrganisorAndAdminMixin(AccessMixin):
@@ -39,7 +40,11 @@ class OrganisorAndAdminMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        """
+        Check if user is admin/superuser.
+        Uses Django's is_superuser flag for proper admin detection.
+        """
+        return user.is_superuser
 
 
 class SelfProfileOnlyMixin(AccessMixin):
@@ -65,4 +70,8 @@ class SelfProfileOnlyMixin(AccessMixin):
         return super().dispatch(request, *args, **kwargs)
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        """
+        Check if user is admin/superuser.
+        Uses Django's is_superuser flag for proper admin detection.
+        """
+        return user.is_superuser

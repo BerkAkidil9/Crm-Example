@@ -369,17 +369,26 @@ class TestOrderFinanceReportModelIntegration(TestCase):
     
     def test_order_finance_report_date_filtering(self):
         """OrderFinanceReport tarih filtreleme testi"""
-        # Farklı tarihlerde order'lar oluştur
-        yesterday = timezone.now() - timedelta(days=1)
-        today = timezone.now()
-        tomorrow = timezone.now() + timedelta(days=1)
+        # Farklı tarihlerde order'lar oluştur - günün başlangıcına sabitle
+        from datetime import datetime
+        now = timezone.now()
+        yesterday = timezone.make_aware(datetime.combine(
+            (now - timedelta(days=1)).date(), datetime.min.time()
+        ))
+        today = timezone.make_aware(datetime.combine(
+            now.date(), datetime.min.time()
+        ))
+        tomorrow = timezone.make_aware(datetime.combine(
+            (now + timedelta(days=1)).date(), datetime.min.time()
+        ))
         
         order1 = orders.objects.create(
             order_day=yesterday,
             order_name='Yesterday Order',
             order_description='Order from yesterday',
             organisation=self.organisor_profile,
-            lead=self.lead
+            lead=self.lead,
+            creation_date=yesterday
         )
         
         order2 = orders.objects.create(
@@ -387,7 +396,8 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             order_name='Today Order',
             order_description='Order from today',
             organisation=self.organisor_profile,
-            lead=self.lead
+            lead=self.lead,
+            creation_date=today
         )
         
         order3 = orders.objects.create(
@@ -395,7 +405,8 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             order_name='Tomorrow Order',
             order_description='Order from tomorrow',
             organisation=self.organisor_profile,
-            lead=self.lead
+            lead=self.lead,
+            creation_date=tomorrow
         )
         
         # Finance report'lar oluştur
@@ -419,8 +430,9 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             order__creation_date__date=today.date()
         )
         
-        # En az bir bugünkü report olmalı
+        # Bir bugünkü report olmalı
         self.assertTrue(today_reports.exists())
+        self.assertEqual(today_reports.count(), 1)
         
         # Tüm report'ları al
         all_reports = OrderFinanceReport.objects.all()

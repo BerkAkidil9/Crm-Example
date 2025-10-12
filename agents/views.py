@@ -134,7 +134,7 @@ class AgentDetailView(AgentAndOrganisorLoginRequiredMixin, generic.DetailView):
     
     def get_queryset(self):
         # Admin can see all agents
-        if self.request.user.id == 1 or self.request.user.username == 'berk':
+        if self.request.user.is_superuser:
             logger.info(f"Admin fetching all agents")
             return Agent.objects.all()
         # Organisor ise tüm agent'ları görebilir
@@ -178,7 +178,7 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
     
     def get_queryset(self):
         # Admin can update all agents
-        if self.request.user.id == 1 or self.request.user.username == 'berk':
+        if self.request.user.is_superuser:
             logger.info(f"Admin fetching all agents for update")
             return Agent.objects.all()
         # Organisor ise tüm agent'ları güncelleyebilir
@@ -208,7 +208,7 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Get the agent object for template context using the same logic as get_queryset
-        if self.request.user.id == 1 or self.request.user.username == 'berk':
+        if self.request.user.is_superuser:
             agent_queryset = Agent.objects.all()
         elif self.request.user.is_organisor:
             agent_queryset = Agent.objects.filter(organisation=self.request.user.userprofile)
@@ -241,7 +241,7 @@ class AgentDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 
     def get_queryset(self):
         # Admin can delete all agents
-        if self.request.user.id == 1 or self.request.user.username == 'berk':
+        if self.request.user.is_superuser:
             return Agent.objects.all()
         # Organisors can delete agents in their organisation
         else:

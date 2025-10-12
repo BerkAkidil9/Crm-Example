@@ -415,7 +415,7 @@ class LeadCategoryUpdateForm(forms.ModelForm):
                 except Exception as e:
                     self.fields["source_category"].queryset = SourceCategory.objects.all()
                     self.fields["value_category"].queryset = ValueCategory.objects.all()
-            elif user.is_superuser or user.id == 1 or user.username == 'berk':
+            elif user.is_superuser:
                 self.fields["source_category"].queryset = SourceCategory.objects.all()
                 self.fields["value_category"].queryset = ValueCategory.objects.all()
             else:

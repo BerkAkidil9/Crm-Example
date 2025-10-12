@@ -21,7 +21,11 @@ class OrganisorAndLoginRequiredMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.is_superuser or user.id == 1 or user.username == 'berk'
+        """
+        Check if user is admin/superuser.
+        Uses Django's is_superuser flag for proper admin detection.
+        """
+        return user.is_superuser
 
 
 class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
@@ -54,7 +58,11 @@ class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.is_superuser or user.id == 1 or user.username == 'berk'
+        """
+        Check if user is admin/superuser.
+        Uses Django's is_superuser flag for proper admin detection.
+        """
+        return user.is_superuser
 
 
 class ProductsAndStockAccessMixin(AccessMixin):
@@ -75,4 +83,8 @@ class ProductsAndStockAccessMixin(AccessMixin):
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
-        return user.is_superuser or user.id == 1 or user.username == 'berk'
+        """
+        Check if user is admin/superuser.
+        Uses Django's is_superuser flag for proper admin detection.
+        """
+        return user.is_superuser

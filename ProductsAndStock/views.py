@@ -16,7 +16,7 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 
 	def get_queryset(self):
 		# Admin can see all products
-		if self.request.user.id == 1 or self.request.user.username == 'berk':
+		if self.request.user.is_superuser:
 			queryset = ProductsAndStock.objects.all()
 		# Organisors and Agents can see products from their organisation
 		elif self.request.user.is_organisor:
@@ -87,7 +87,7 @@ class ProductAndStockDetailView(ProductsAndStockAccessMixin, generic.DetailView)
     
     def get_queryset(self):
         # Admin can see all products
-        if self.request.user.id == 1 or self.request.user.username == 'berk':
+        if self.request.user.is_superuser:
             return ProductsAndStock.objects.all()
         # Organisors and Agents can see products from their organisation
         elif self.request.user.is_organisor:
@@ -126,7 +126,7 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
     
     def get_form_class(self):
         user = self.request.user
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             return AdminProductAndStockModelForm
         else:
             return ProductAndStockModelForm
@@ -165,7 +165,7 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
     
     def get_form_class(self):
         user = self.request.user
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             return AdminProductAndStockModelForm
         else:
             return ProductAndStockModelForm
@@ -176,7 +176,7 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
     def get_queryset(self):
         user = self.request.user
         # Admin can update all products
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             return ProductsAndStock.objects.all()
         # Organisors can update their own products
         elif user.is_organisor:
@@ -206,7 +206,7 @@ class ProductAndStockDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteVi
     def get_queryset(self):
         user = self.request.user
         # Admin can delete all products
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             return ProductsAndStock.objects.all()
         # Organisors can delete their own products
         elif user.is_organisor:
@@ -241,7 +241,7 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
     def get_queryset(self):
         """Get products that can be updated by current user"""
         user = self.request.user
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             return ProductsAndStock.objects.all()
         elif user.is_organisor:
             organisation = user.userprofile
@@ -341,7 +341,7 @@ class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
     def get_queryset(self):
         """Get products that can be viewed by current user"""
         user = self.request.user
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             return ProductsAndStock.objects.all()
         elif user.is_organisor:
             organisation = user.userprofile

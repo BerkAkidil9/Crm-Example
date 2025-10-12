@@ -10,7 +10,7 @@
 	  {% if not request.user.is_authenticated %}
 	  <a href="{% url 'signup' %}" class="mr-5 hover:text-blue-500">Signup</a>
 	  {% else %}
-	  {% if request.user.id == 1 or request.user.username == 'berk' %}
+	  {% if request.user.is_superuser %}
 	  <!-- Admin can see everything -->
 	  <a href="{% url 'organisors:organisor-list' %}" class="mr-5 hover:text-blue-500">Organisors</a>
 	  <a href="{% url 'agents:agent-list' %}" class="mr-5 hover:text-blue-500">Agents</a>

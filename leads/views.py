@@ -199,7 +199,7 @@ class LeadDetailView(LoginRequiredMixin, generic.DetailView):
 		user = self.request.user
 
 		# Admin can see all leads
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
+		if user.is_superuser:
 			queryset = Lead.objects.all()
 		elif user.is_organisor:
 			queryset = Lead.objects.filter(organisation=user.userprofile)
@@ -319,7 +319,7 @@ class LeadDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 	def get_queryset(self):
 		user = self.request.user
 		# Admin can delete all leads
-		if user.is_superuser or user.id == 1 or user.username == 'berk':
+		if user.is_superuser:
 			return Lead.objects.all()
 		# Organisors can delete their own leads
 		else:
@@ -365,7 +365,7 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
         user = self.request.user
 
         # Get Categories with filtering for admin
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             # Get filter parameters
             selected_org_id = self.request.GET.get('organization')
             selected_agent_id = self.request.GET.get('agent')
@@ -482,7 +482,7 @@ class CategoryDetailView(LoginRequiredMixin, generic.DetailView):
     def get_queryset(self):
         user = self.request.user
         # Admin can see all categories
-        if user.is_superuser or user.id == 1 or user.username == 'berk':
+        if user.is_superuser:
             queryset = Category.objects.all()
         elif user.is_organisor:
             queryset = Category.objects.filter(organisation=user.userprofile)

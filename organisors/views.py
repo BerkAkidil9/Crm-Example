@@ -116,7 +116,8 @@ class OrganisorDetailView(SelfProfileOnlyMixin, generic.DetailView):
             return Organisor.objects.none()
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        """Check if user is admin/superuser."""
+        return user.is_superuser
 
 
 class OrganisorUpdateView(SelfProfileOnlyMixin, generic.UpdateView):
@@ -154,7 +155,8 @@ class OrganisorUpdateView(SelfProfileOnlyMixin, generic.UpdateView):
         return reverse("organisors:organisor-detail", kwargs={"pk": self.kwargs['pk']})
     
     def is_admin_user(self, user):
-        return user.id == 1 or user.username == 'berk'
+        """Check if user is admin/superuser."""
+        return user.is_superuser
 
 
 class OrganisorDeleteView(AdminOnlyMixin, generic.DeleteView):
