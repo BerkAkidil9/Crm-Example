@@ -30,19 +30,19 @@ class TestOrganisorListView(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_organisor_views',
             email='admin_organisor_views@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
@@ -98,7 +98,8 @@ class TestOrganisorListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Organisors')
         self.assertIn('organisors', response.context)
-        self.assertEqual(len(response.context['organisors']), 2)  # Admin + Normal organisor
+        # Superuser'lar listeden exclude edilir, sadece normal organisor görünür
+        self.assertEqual(len(response.context['organisors']), 1)  # Sadece normal organisor
     
     def test_organisor_list_view_agent_access(self):
         """Agent kullanıcısı erişim testi"""
@@ -134,8 +135,10 @@ class TestOrganisorListView(TestCase):
         
         self.assertIn('organisors', response.context)
         organisors = response.context['organisors']
-        self.assertEqual(organisors.count(), 2)
-        self.assertIn(self.admin_organisor, organisors)
+        # Superuser'lar listeden exclude edilir
+        self.assertEqual(organisors.count(), 1)
+        # Admin artık superuser, sadece normal_organisor görünür
+        self.assertNotIn(self.admin_organisor, organisors)
         self.assertIn(self.normal_organisor, organisors)
     
     def test_organisor_list_view_excludes_superuser(self):
@@ -162,7 +165,8 @@ class TestOrganisorListView(TestCase):
         # Superuser organisor listede görünmemeli
         organisors = response.context['organisors']
         self.assertNotIn(superuser_organisor, organisors)
-        self.assertEqual(organisors.count(), 2)  # Sadece normal organisorlar
+        # admin_user da artık superuser, sadece normal_organisor görünür
+        self.assertEqual(organisors.count(), 1)  # Sadece normal organisor
 
 
 class TestOrganisorCreateView(TestCase):
@@ -172,19 +176,19 @@ class TestOrganisorCreateView(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_create_organisor_views',
             email='admin_create_organisor_views@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
@@ -379,19 +383,19 @@ class TestOrganisorDetailView(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_detail_organisor_views',
             email='admin_detail_organisor_views@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
@@ -522,19 +526,19 @@ class TestOrganisorUpdateView(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_update_organisor_views',
             email='admin_update_organisor_views@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
@@ -685,19 +689,19 @@ class TestOrganisorDeleteView(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_delete_organisor_views',
             email='admin_delete_organisor_views@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
@@ -817,19 +821,19 @@ class TestOrganisorViewIntegration(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_integration_organisor_views',
             email='admin_integration_organisor_views@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)

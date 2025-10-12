@@ -32,19 +32,19 @@ class TestOrganisorCompleteIntegration(TestCase):
         """Test verilerini hazırla"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur
-        self.admin_user = User.objects.create_user(
+        # Admin kullanıcısı oluştur (superuser)
+        self.admin_user = User.objects.create_superuser(
             username='admin_integration_test',
             email='admin_integration_test@example.com',
             password='testpass123',
             first_name='Admin',
-            last_name='User',
-            phone_number='+905551111111',
-            date_of_birth='1985-01-01',
-            gender='M',
-            is_organisor=True,
-            email_verified=True
+            last_name='User'
         )
+        self.admin_user.phone_number = '+905551111111'
+        self.admin_user.date_of_birth = '1985-01-01'
+        self.admin_user.gender = 'M'
+        self.admin_user.email_verified = True
+        self.admin_user.save()
         
         # Admin UserProfile oluştur
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
