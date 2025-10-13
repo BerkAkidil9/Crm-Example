@@ -16,13 +16,19 @@
             {% for organisor in organisors %}
             <div class="p-4 w-full">
                 <div class="flex border-2 {% if organisor.user == request.user %}border-blue-500 bg-blue-50{% else %}border-gray-600{% endif %} p-8 sm:flex-row flex-col">
-                      <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                           <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="m22 11l-3-3l3-3"></path>
-                                <path d="m19 8l-7 7l-3-3"></path>
-                           </svg>
+                      <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full flex-shrink-0">
+                           {% if organisor.user.profile_image %}
+                                <img src="{{ organisor.user.profile_image.url }}" alt="Profile Image" class="w-16 h-16 rounded-full object-cover">
+                           {% else %}
+                                <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center">
+                                    <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8 text-indigo-500" viewBox="0 0 24 24">
+                                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                         <circle cx="9" cy="7" r="4"></circle>
+                                         <path d="m22 11l-3-3l3-3"></path>
+                                         <path d="m19 8l-7 7l-3-3"></path>
+                                    </svg>
+                                </div>
+                           {% endif %}
                       </div>
                       <div class="flex-grow">
                           <h2 class="text-gray-900 text-lg title-font font-medium mb-3">

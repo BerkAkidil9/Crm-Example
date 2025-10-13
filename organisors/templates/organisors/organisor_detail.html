@@ -7,7 +7,18 @@
 	  <div class="lg:w-4/5 flex flex-wrap justify-center">
 		<div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
 		  <h2 class="text-sm title-font text-gray-500 tracking-widest">ORGANISOR</h2>
-		  <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{organisor.user.username}}</h1>
+		  <div class="flex items-center mb-4">
+		  	{% if organisor.user.profile_image %}
+		  		<img src="{{ organisor.user.profile_image.url }}" alt="Profile Image" class="w-16 h-16 rounded-full object-cover mr-4">
+		  	{% else %}
+		  		<div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center mr-4">
+		  			<svg class="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+		  				<path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+		  			</svg>
+		  		</div>
+		  	{% endif %}
+		  	<h1 class="text-gray-900 text-3xl title-font font-medium">{{organisor.user.username}}</h1>
+		  </div>
 		  <div class="flex mb-4">
 			<a href="{% url 'organisors:organisor-detail' organisor.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
 			  Overview

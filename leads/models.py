@@ -20,6 +20,7 @@ class User(AbstractUser):
     phone_number = PhoneNumberField(blank=True, null=True, unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
+    profile_image = models.FileField(upload_to='profile_images/', blank=True, null=True, help_text="Upload a profile picture")
     
     # Email ve username unique olacak şekilde ayarla
     email = models.EmailField(unique=True)

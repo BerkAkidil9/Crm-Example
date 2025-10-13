@@ -46,7 +46,7 @@
     </div>
 
     <h1 class="text-gray-800 text-medium">Create a new organisor</h1>
-    <form method="post" class="form-small-text">
+    <form method="post" class="form-small-text" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form|crispy }}
         <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
