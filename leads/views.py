@@ -19,10 +19,17 @@ from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentF
 class CustomLoginView(LoginView):
     form_class = CustomAuthenticationForm
     template_name = 'registration/login.html'
+    redirect_authenticated_user = True
 
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
     template_name = 'registration/password_reset_form.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Giriş yapmış kullanıcıları ana sayfaya yönlendir
+        if request.user.is_authenticated:
+            return redirect('landing-page')
+        return super().dispatch(request, *args, **kwargs)
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
@@ -55,6 +62,12 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 class SignupView(generic.CreateView):
     template_name = "registration/signup.html"
     form_class = CustomUserCreationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        # Giriş yapmış kullanıcıları ana sayfaya yönlendir
+        if request.user.is_authenticated:
+            return redirect('landing-page')
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse("verify-email-sent")

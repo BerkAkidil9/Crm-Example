@@ -34,7 +34,6 @@
                               <p class="mb-1"><strong>Date of Birth:</strong> {% if organisor.user.date_of_birth %}{{ organisor.user.date_of_birth|date:"d/m/Y" }}{% else %}Not provided{% endif %}</p>
                               <p class="mb-1"><strong>Gender:</strong> {% if organisor.user.gender %}{{ organisor.user.get_gender_display }}{% else %}Not provided{% endif %}</p>
                               <p class="mb-1"><strong>Status:</strong> {% if organisor.user.email_verified %}<span class="text-green-600 font-medium">✓ Verified</span>{% else %}<span class="text-orange-600 font-medium">⏳ Pending Verification</span>{% endif %}</p>
-                              <p class="mb-1"><strong>Role:</strong> <span class="text-purple-600 font-medium">Organisor</span></p>
                           </div>
                           <a href="{% url 'organisors:organisor-detail' organisor.pk %}" class="mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">
                            View organisor
