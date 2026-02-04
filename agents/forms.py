@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
 from leads.models import UserProfile
 from phonenumber_field.formfields import PhoneNumberField
 from leads.forms import PhoneNumberWidget
@@ -150,6 +151,16 @@ class AdminAgentModelForm(forms.ModelForm):
 		required=False,
 		help_text='Enter the same password as above, for verification'
 	)
+	organisation = forms.ModelChoiceField(
+		queryset=UserProfile.objects.filter(
+			user__is_organisor=True,
+			user__is_superuser=False
+		).order_by('user__username'),
+		empty_label="Select Organisation",
+		widget=forms.Select(attrs={'class': 'form-control'}),
+		required=True,
+		help_text='Select the organisation for this agent'
+	)
 
 	class Meta:
 		model = User
@@ -162,14 +173,18 @@ class AdminAgentModelForm(forms.ModelForm):
 		}
 
 	def __init__(self, *args, **kwargs):
+		self.agent = kwargs.pop('agent', None)
 		self.user_instance = kwargs.get('instance')
 		super().__init__(*args, **kwargs)
 		for f in ('username', 'first_name', 'last_name', 'date_of_birth', 'gender'):
 			self.fields[f].required = True
+		if self.agent:
+			self.fields['organisation'].initial = self.agent.organisation
 
 	def clean_profile_image(self):
 		upload = self.cleaned_data.get('profile_image')
-		if upload:
+		# Only validate when user uploaded a NEW file; skip validation for existing image (leave empty to keep)
+		if upload and isinstance(upload, UploadedFile):
 			allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
 			if getattr(upload, 'content_type', None) not in allowed:
 				raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
@@ -180,7 +195,7 @@ class AdminAgentModelForm(forms.ModelForm):
 	def save(self, commit=True):
 		user = super().save(commit=False)
 		new_image = self.cleaned_data.get('profile_image')
-		if new_image:
+		if new_image and isinstance(new_image, UploadedFile):
 			user.profile_image = new_image
 		password = self.cleaned_data.get('password1')
 		if password:

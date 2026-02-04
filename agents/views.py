@@ -191,9 +191,26 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs.setdefault('files', self.request.FILES)
+        if self.request.method != 'POST':
+            kwargs.pop('data', None)
+            kwargs.pop('files', None)
+        else:
+            kwargs.setdefault('files', self.request.FILES)
+        # Ensure form is bound to the agent's User instance so fields are pre-filled
+        if 'instance' not in kwargs and self.request.method != 'POST':
+            try:
+                agent = self.get_queryset().get(pk=self.kwargs['pk'])
+                kwargs['instance'] = agent.user
+            except Agent.DoesNotExist:
+                pass
+        # For admin: pass agent so form can show/update organisation
+        if self.request.user.is_superuser:
+            try:
+                kwargs['agent'] = self.get_queryset().get(pk=self.kwargs['pk'])
+            except Agent.DoesNotExist:
+                pass
         return kwargs
-    
+
     def get_queryset(self):
         # Admin can update all agents
         if self.request.user.is_superuser:
@@ -238,6 +255,18 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
         agent = agent_queryset.get(pk=self.kwargs['pk'])
         context['agent'] = agent
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Admin can change agent's organisation
+        if self.request.user.is_superuser and hasattr(form, 'cleaned_data') and 'organisation' in form.cleaned_data:
+            try:
+                agent = self.get_queryset().get(pk=self.kwargs['pk'])
+                agent.organisation = form.cleaned_data['organisation']
+                agent.save()
+            except Agent.DoesNotExist:
+                pass
+        return response
 
     def get_success_url(self):
         return reverse("agents:agent-detail", kwargs={"pk": self.kwargs['pk']})

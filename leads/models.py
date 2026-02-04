@@ -86,6 +86,7 @@ class Lead(models.Model):
     phone_number = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
     address = models.CharField(max_length=255)
+    profile_image = models.FileField(upload_to='lead_photos/', blank=True, null=True, help_text="Lead profile photo")
 
     def save(self, *args, **kwargs):
         # Sadece yeni lead oluştururken kategorileri ata (pk yoksa)

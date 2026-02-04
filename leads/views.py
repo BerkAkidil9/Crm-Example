@@ -280,6 +280,17 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 		kwargs['request'] = self.request
 		return kwargs
 
+	def get_initial(self):
+		initial = super().get_initial()
+		if self.request.user.is_superuser and self.request.method != 'POST':
+			first_org = UserProfile.objects.filter(
+				user__is_organisor=True,
+				user__is_superuser=False
+			).order_by('user__username').first()
+			if first_org:
+				initial['organisation'] = first_org.pk
+		return initial
+
 	def get_success_url(self):
 		return reverse("leads:lead-list")
 	
@@ -302,12 +313,6 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 			lead.organisation = user.userprofile
 			
 		lead.save()
-		send_mail(
-			subject="A lead has been created",
-			message="Go to the site to see the new lead",
-			from_email="test@test.com",
-			recipient_list=["test2@test.com"]
-		)
 		return super(LeadCreateView, self).form_valid(form)
 
 def lead_create(request):
@@ -575,15 +580,30 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 
 def get_agents_by_org(request, org_id):
 	"""AJAX endpoint to get agents, source categories and value categories by organization"""
-	if not request.user.is_superuser:
+	if not request.user.is_authenticated:
 		return JsonResponse({'error': 'Unauthorized'}, status=403)
-	
 	try:
+		# Organisation dropdown only lists organisors, so this is always an organisor org
 		organisation = UserProfile.objects.get(id=org_id, user__is_organisor=True, user__is_superuser=False)
-		
-		# Agents - sort by email and show email
-		agents = Agent.objects.filter(organisation=organisation).order_by('user__email')
-		agents_data = [{'id': agent.id, 'name': f"{agent.user.email} ({agent.user.get_full_name() or agent.user.username})"} for agent in agents]
+		# Seçilen org için varsayılan kategoriler yoksa oluştur (org 2, 3... seçildiğinde de dolu gelsin)
+		_default_source = [
+			"Website", "Social Media", "Email Campaign", "Cold Call", "Referral",
+			"Trade Show", "Advertisement", "Direct Mail", "SEO/Google", "Unassigned"
+		]
+		_default_value = [
+			"Enterprise", "SMB", "Small Business", "Individual",
+			"High Value", "Medium Value", "Low Value", "Unassigned"
+		]
+		for name in _default_source:
+			SourceCategory.objects.get_or_create(name=name, organisation=organisation)
+		for name in _default_value:
+			ValueCategory.objects.get_or_create(name=name, organisation=organisation)
+		# Agents - isim soyisim (email) formatında
+		agents = Agent.objects.filter(organisation=organisation).select_related('user').order_by('user__email')
+		agents_data = [
+			{'id': agent.id, 'name': f"{agent.user.get_full_name() or agent.user.username} ({agent.user.email})"}
+			for agent in agents
+		]
 		
 		# Source Categories
 		source_categories = SourceCategory.objects.filter(organisation=organisation)

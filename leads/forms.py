@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.core.files.uploadedfile import UploadedFile
 from .models import Lead, Agent, SourceCategory, ValueCategory, UserProfile
 from phonenumber_field.formfields import PhoneNumberField
 
@@ -239,29 +240,94 @@ class LeadModelForm(forms.ModelForm):
 
 class AdminLeadModelForm(forms.ModelForm):
     organisation = forms.ModelChoiceField(
-        queryset=UserProfile.objects.filter(
-            user__is_organisor=True,
-            user__is_superuser=False
-        ),
+        queryset=UserProfile.objects.none(),  # Set fresh in __init__
         empty_label="Select Organisation",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    
+    profile_image = forms.FileField(
+        required=True,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*',
+            'id': 'id_lead_profile_image'
+        }),
+        help_text='Profile photo (required). JPG, PNG, GIF, WebP. Max 5 MB.'
+    )
+
     def __init__(self, *args, **kwargs):
         request = kwargs.pop("request", None)
         super(AdminLeadModelForm, self).__init__(*args, **kwargs)
-        
+        # Her istekte tüm organisor'ları göster (2. organisor sonradan eklenmiş olsa da)
+        self.fields['organisation'].queryset = UserProfile.objects.filter(
+            user__is_organisor=True,
+            user__is_superuser=False
+        ).order_by('user__username')
+        # On update, profile_image can be left empty to keep current
+        if self.instance and self.instance.pk and self.instance.profile_image:
+            self.fields['profile_image'].required = False
+            self.fields['profile_image'].help_text = 'Upload a new photo to change. Leave empty to keep current. JPG, PNG, GIF, WebP. Max 5 MB.'
         # Start with empty querysets
         self.fields["agent"].queryset = Agent.objects.none()
         self.fields["source_category"].queryset = SourceCategory.objects.none()
         self.fields["value_category"].queryset = ValueCategory.objects.none()
         
-        # If organisation is set (e.g. on update), load that organisation's data
+        # Determine organisation: from instance (update), from submitted data (POST), or from initial (admin create GET)
+        org = None
         if self.instance and hasattr(self.instance, 'organisation') and self.instance.organisation:
             org = self.instance.organisation
-            self.fields["agent"].queryset = Agent.objects.filter(organisation=org)
+        elif self.data and self.data.get('organisation'):
+            try:
+                org = UserProfile.objects.get(pk=self.data.get('organisation'))
+            except (ValueError, UserProfile.DoesNotExist):
+                pass
+        elif not self.instance or not self.instance.pk:
+            # Admin create (GET): org can come from view's get_initial()
+            org_id = self.initial.get('organisation') if self.initial else None
+            if org_id:
+                try:
+                    org = UserProfile.objects.get(pk=org_id)
+                except (ValueError, UserProfile.DoesNotExist):
+                    pass
+            if org is None:
+                first_org = UserProfile.objects.filter(
+                    user__is_organisor=True,
+                    user__is_superuser=False
+                ).order_by('user__username').first()
+                if first_org:
+                    org = first_org
+                    self.initial.setdefault('organisation', org.pk)
+                    self.fields['organisation'].initial = org.pk
+        
+        if org:
+            # Varsayılan source ve value kategorilerini yoksa oluştur (sadece Unassigned değil, hepsi)
+            _default_source = [
+                "Website", "Social Media", "Email Campaign", "Cold Call", "Referral",
+                "Trade Show", "Advertisement", "Direct Mail", "SEO/Google", "Unassigned"
+            ]
+            _default_value = [
+                "Enterprise", "SMB", "Small Business", "Individual",
+                "High Value", "Medium Value", "Low Value", "Unassigned"
+            ]
+            for name in _default_source:
+                SourceCategory.objects.get_or_create(name=name, organisation=org)
+            for name in _default_value:
+                ValueCategory.objects.get_or_create(name=name, organisation=org)
+            self.fields["agent"].queryset = Agent.objects.filter(organisation=org).select_related('user')
+            self.fields["agent"].label_from_instance = lambda obj: f"{obj.user.get_full_name() or obj.user.username} ({obj.user.email})"
             self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=org)
             self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=org)
+
+    def clean_profile_image(self):
+        upload = self.cleaned_data.get('profile_image')
+        if upload and isinstance(upload, UploadedFile):
+            allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
+            if getattr(upload, 'content_type', None) not in allowed:
+                raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
+            if upload.size > 5 * 1024 * 1024:
+                raise forms.ValidationError('File size must be less than 5 MB.')
+        elif not upload and (not self.instance or not self.instance.pk or not getattr(self.instance, 'profile_image', None) or not self.instance.profile_image):
+            raise forms.ValidationError('Profile photo is required.')
+        return upload
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -289,6 +355,15 @@ class AdminLeadModelForm(forms.ModelForm):
                     raise forms.ValidationError("A lead with this phone number already exists.")
         return phone_number
     
+    def save(self, commit=True):
+        lead = super().save(commit=False)
+        new_image = self.cleaned_data.get('profile_image')
+        if new_image and isinstance(new_image, UploadedFile):
+            lead.profile_image = new_image
+        if commit:
+            lead.save()
+        return lead
+
     class Meta:
         model = Lead
         fields = [
@@ -401,31 +476,36 @@ class LeadCategoryUpdateForm(forms.ModelForm):
         request = kwargs.pop("request", None)
         super(LeadCategoryUpdateForm, self).__init__(*args, **kwargs)
         
+        organisation = None
         if request:
             user = request.user
-            
-            if user.is_organisor:
+            if user.is_superuser and self.instance and getattr(self.instance, 'organisation', None):
+                organisation = self.instance.organisation
+            elif user.is_organisor:
                 try:
                     organisation = user.userprofile
-                    self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
-                    self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
-                except Exception as e:
-                    self.fields["source_category"].queryset = SourceCategory.objects.all()
-                    self.fields["value_category"].queryset = ValueCategory.objects.all()
+                except Exception:
+                    pass
             elif user.is_agent:
                 try:
                     organisation = user.agent.organisation
-                    self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
-                    self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
-                except Exception as e:
-                    self.fields["source_category"].queryset = SourceCategory.objects.all()
-                    self.fields["value_category"].queryset = ValueCategory.objects.all()
-            elif user.is_superuser:
-                self.fields["source_category"].queryset = SourceCategory.objects.all()
-                self.fields["value_category"].queryset = ValueCategory.objects.all()
-            else:
-                self.fields["source_category"].queryset = SourceCategory.objects.all()
-                self.fields["value_category"].queryset = ValueCategory.objects.all()
+                except Exception:
+                    pass
+        if organisation:
+            _default_source = [
+                "Website", "Social Media", "Email Campaign", "Cold Call", "Referral",
+                "Trade Show", "Advertisement", "Direct Mail", "SEO/Google", "Unassigned"
+            ]
+            _default_value = [
+                "Enterprise", "SMB", "Small Business", "Individual",
+                "High Value", "Medium Value", "Low Value", "Unassigned"
+            ]
+            for name in _default_source:
+                SourceCategory.objects.get_or_create(name=name, organisation=organisation)
+            for name in _default_value:
+                ValueCategory.objects.get_or_create(name=name, organisation=organisation)
+            self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
+            self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
         else:
             self.fields["source_category"].queryset = SourceCategory.objects.all()
             self.fields["value_category"].queryset = ValueCategory.objects.all()
