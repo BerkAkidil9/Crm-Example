@@ -184,9 +184,9 @@ class TestEmailVerificationViews(TestCase):
         """Email verification view geçerli token testi"""
         response = self.client.get(reverse('verify-email', kwargs={'token': self.token.token}))
         
-        # Redirect olmalı
+        # Redirect to success page
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse('login'))
+        self.assertEqual(response.url, reverse('verify-email-success'))
         
         # User email doğrulanmış olmalı
         self.user.refresh_from_db()

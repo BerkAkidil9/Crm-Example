@@ -21,12 +21,21 @@ class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     redirect_authenticated_user = True
 
+    def form_invalid(self, form):
+        # Show specific message if email is not verified
+        error_reason = self.request.session.pop('login_error_reason', None)
+        if error_reason == 'email_not_verified':
+            form._errors = {'__all__': form.error_class([
+                "Please verify your email by clicking the verification link sent to your email address."
+            ])}
+        return super().form_invalid(form)
+
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
     template_name = 'registration/password_reset_form.html'
     
     def dispatch(self, request, *args, **kwargs):
-        # Giriş yapmış kullanıcıları ana sayfaya yönlendir
+        # Redirect authenticated users to landing page
         if request.user.is_authenticated:
             return redirect('landing-page')
         return super().dispatch(request, *args, **kwargs)
@@ -34,9 +43,33 @@ class CustomPasswordResetView(PasswordResetView):
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
     template_name = 'registration/password_reset_confirm.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = form.user
+        subject = 'DJ CRM - Password Reset Successful'
+        message = f"""Hello {user.first_name or user.username},
+
+Your password has been successfully reset.
+
+You can now login with your new password at: http://127.0.0.1:8000/login/
+
+If you did not perform this action, please contact support immediately.
+
+Best regards,
+DJ CRM Team
+"""
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        return response
     
     def form_invalid(self, form):
-        # Sadece gerçek form submission'da hata göster
+        # Only show errors on actual form submission
         if self.request.method == 'POST':
             username = form.cleaned_data.get('username', '')
             if username:
@@ -53,7 +86,7 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
                 except:
                     pass
             
-            # Sadece username ve password dolu ise hata mesajı göster
+            # Only show error message when both username and password are filled
             if username and form.cleaned_data.get('password', ''):
                 messages.error(self.request, "Invalid username/email or password.")
         
@@ -64,7 +97,7 @@ class SignupView(generic.CreateView):
     form_class = CustomUserCreationForm
 
     def dispatch(self, request, *args, **kwargs):
-        # Giriş yapmış kullanıcıları ana sayfaya yönlendir
+        # Redirect authenticated users to landing page
         if request.user.is_authenticated:
             return redirect('landing-page')
         return super().dispatch(request, *args, **kwargs)
@@ -79,7 +112,7 @@ class SignupView(generic.CreateView):
         user.last_name = form.cleaned_data.get('last_name')
         user.is_organisor = True  # Set the user as an organisor (company owner)
         user.is_agent = False
-        user.email_verified = False  # Email doğrulanmamış olarak başlat
+        user.email_verified = False  # Start with email unverified
         user.save()
 
         # Create UserProfile and Organisor
@@ -87,10 +120,10 @@ class SignupView(generic.CreateView):
         from organisors.models import Organisor
         Organisor.objects.create(user=user, organisation=user_profile)
 
-        # Email doğrulama token'ı oluştur
+        # Create email verification token
         verification_token = EmailVerificationToken.objects.create(user=user)
         
-        # Email gönder
+        # Send verification email
         self.send_verification_email(user, verification_token.token)
 
         return super().form_valid(form)
@@ -147,12 +180,16 @@ class EmailVerificationView(generic.View):
             verification_token.is_used = True
             verification_token.save()
             
-            messages.success(request, "Your email has been successfully verified! You can now login.")
-            return redirect('login')
+            return redirect('verify-email-success')
             
         except EmailVerificationToken.DoesNotExist:
             messages.error(request, "Invalid verification link.")
             return redirect('verify-email-failed')
+
+
+class EmailVerificationSuccessView(generic.TemplateView):
+    template_name = "registration/verify_email_success.html"
+
 
 class EmailVerificationFailedView(generic.TemplateView):
     template_name = "registration/verify_email_failed.html"
@@ -251,11 +288,11 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 		user = self.request.user
 		
 		if user.is_superuser:
-			# Admin için form'dan seçilen organizasyonu kullan
+			# Use organisation selected in form (admin flow)
 			if hasattr(form, 'cleaned_data') and 'organisation' in form.cleaned_data:
 				lead.organisation = form.cleaned_data['organisation']
 			else:
-				# Fallback - ilk organizasyonu kullan
+				# Fallback - use first organisation
 				from leads.models import UserProfile
 				default_org = UserProfile.objects.filter(user__is_organisor=True, user__is_superuser=False).first()
 				if default_org:
@@ -544,7 +581,7 @@ def get_agents_by_org(request, org_id):
 	try:
 		organisation = UserProfile.objects.get(id=org_id, user__is_organisor=True, user__is_superuser=False)
 		
-		# Agents - email'e göre sırala ve email'i göster
+		# Agents - sort by email and show email
 		agents = Agent.objects.filter(organisation=organisation).order_by('user__email')
 		agents_data = [{'id': agent.id, 'name': f"{agent.user.email} ({agent.user.get_full_name() or agent.user.username})"} for agent in agents]
 		

@@ -49,6 +49,14 @@
     <form method="post" class="form-small-text" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form|crispy }}
+        <div class="flex items-center mt-2 mb-3">
+            <input id="show-password-organisor-create" type="checkbox" class="mr-2">
+            <label for="show-password-organisor-create">Show Password</label>
+        </div>
+        <div id="profile-preview-container" class="mt-3 hidden">
+            <p class="text-sm text-gray-600 mb-2">Profile Photo Preview:</p>
+            <img id="profile-preview" src="" alt="Preview" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
+        </div>
         <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
         {% for error in form.non_field_errors %}
           <div class="alert alert-danger mt-2 text-red-500">{{ error }}</div>
@@ -56,4 +64,36 @@
     </form>
 </div>
 
+<script>
+    (function() {
+        var showPasswordCheckbox = document.getElementById('show-password-organisor-create');
+        if (showPasswordCheckbox) {
+            showPasswordCheckbox.addEventListener('change', function() {
+                var passwordFields = document.querySelectorAll('input[name="password1"], input[name="password2"]');
+                passwordFields.forEach(function(field) {
+                    field.type = this.checked ? 'text' : 'password';
+                }.bind(this));
+            });
+        }
+        var profileInput = document.getElementById('id_profile_image') || document.querySelector('input[name="profile_image"]');
+        if (profileInput) {
+            profileInput.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                var preview = document.getElementById('profile-preview');
+                var container = document.getElementById('profile-preview-container');
+                if (file && file.type.startsWith('image/')) {
+                    var reader = new FileReader();
+                    reader.onload = function(ev) {
+                        preview.src = ev.target.result;
+                        container.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.src = '';
+                    container.classList.add('hidden');
+                }
+            });
+        }
+    })();
+</script>
 {% endblock content %}

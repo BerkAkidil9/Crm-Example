@@ -26,8 +26,10 @@ class EmailOrUsernameModelBackend(ModelBackend):
             ).first()
 
         if user.check_password(password) and self.user_can_authenticate(user):
-            # Email doğrulanmamışsa giriş yapmasına izin verme
-            if not user.email_verified:
+            # Email verification not required for Admin/Staff; required for others
+            if not user.email_verified and not (user.is_staff or user.is_superuser):
+                if request:
+                    request.session['login_error_reason'] = 'email_not_verified'
                 return None
             return user
         return None

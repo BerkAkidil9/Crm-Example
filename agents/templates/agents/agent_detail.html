@@ -7,7 +7,16 @@
 	  <div class="lg:w-4/5 flex flex-wrap justify-center"> <!-- Adjusted for center alignment -->
 		<div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
 		  <h2 class="text-sm title-font text-gray-500 tracking-widest">AGENT</h2>
-		  <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{agent.user.username}}</h1>
+		  <div class="flex items-center gap-4 mb-4">
+		    {% if agent.user.profile_image %}
+		    <img src="{{ agent.user.profile_image.url }}" alt="Profile" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+		    {% else %}
+		    <div class="w-20 h-20 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center flex-shrink-0">
+		      <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-10 h-10" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM5 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"></path></svg>
+		    </div>
+		    {% endif %}
+		    <h1 class="text-gray-900 text-3xl title-font font-medium">{{ agent.user.username }}</h1>
+		  </div>
 		  <div class="flex mb-4">
 			<a href="{% url 'agents:agent-detail' agent.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
 			  Overview

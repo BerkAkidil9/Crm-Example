@@ -10,49 +10,49 @@ from ProductsAndStock.models import ProductsAndStock, PriceHistory
 from leads.models import User
 
 def test_price_history():
-    print("=== Fiyat Geçmişi Testi ===")
+    print("=== Price History Test ===")
     
-    # İlk ürünü al
+    # Get first product
     product = ProductsAndStock.objects.first()
     if not product:
-        print("❌ Ürün bulunamadı!")
+        print("❌ No product found!")
         return
     
-    print(f"📦 Ürün: {product.product_name}")
-    print(f"💰 Mevcut fiyat: ${product.product_price}")
+    print(f"📦 Product: {product.product_name}")
+    print(f"💰 Current price: ${product.product_price}")
     
-    # Mevcut price history sayısı
+    # Current price history count
     initial_count = product.price_history.count()
-    print(f"📊 Başlangıç price history sayısı: {initial_count}")
+    print(f"📊 Initial price history count: {initial_count}")
     
-    # Fiyatı değiştir
+    # Change price
     old_price = product.product_price
     new_price = old_price + 10
     product.product_price = new_price
     
-    print(f"🔄 Fiyat değiştiriliyor: ${old_price} -> ${new_price}")
+    print(f"🔄 Changing price: ${old_price} -> ${new_price}")
     product.save()
     
-    # Price history kontrol et
+    # Check price history
     final_count = product.price_history.count()
-    print(f"📊 Son price history sayısı: {final_count}")
+    print(f"📊 Final price history count: {final_count}")
     
     if final_count > initial_count:
         latest = product.price_history.first()
-        print(f"✅ Yeni kayıt oluştu: {latest.old_price} -> {latest.new_price}")
-        print(f"📝 Değişiklik türü: {latest.get_change_type_display()}")
-        print(f"📅 Tarih: {latest.created_at}")
+        print(f"✅ New record created: {latest.old_price} -> {latest.new_price}")
+        print(f"📝 Change type: {latest.get_change_type_display()}")
+        print(f"📅 Date: {latest.created_at}")
     else:
-        print("❌ Price history kaydı oluşmamış!")
+        print("❌ No price history record was created!")
     
-    # Stock movement kontrol et
+    # Check stock movement
     stock_movements = product.stock_movements.count()
-    print(f"📦 Stock movement sayısı: {stock_movements}")
+    print(f"📦 Stock movement count: {stock_movements}")
     
     if stock_movements > 0:
         latest_movement = product.stock_movements.first()
-        print(f"📈 Son stock movement: {latest_movement.get_movement_type_display()}")
-        print(f"📊 Miktar: {latest_movement.quantity_before} -> {latest_movement.quantity_after}")
+        print(f"📈 Latest stock movement: {latest_movement.get_movement_type_display()}")
+        print(f"📊 Quantity: {latest_movement.quantity_before} -> {latest_movement.quantity_after}")
 
 if __name__ == "__main__":
     test_price_history()

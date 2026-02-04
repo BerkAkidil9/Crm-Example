@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load tailwind_filters %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 
@@ -39,6 +40,17 @@
         border-radius: 6px !important;
         padding: 8px 12px !important;
     }
+    /* Hide validation errors on first load; show only after form submit (data-show-errors is set by server when form has errors) */
+    #agent-create-form:not([data-show-errors="true"]) .errorlist,
+    #agent-create-form:not([data-show-errors="true"]) .agent-field-error,
+    #agent-create-form:not([data-show-errors="true"]) .agent-nonfield-error {
+        display: none !important;
+    }
+    #agent-create-form:not([data-show-errors="true"]) input.border-red-500,
+    #agent-create-form:not([data-show-errors="true"]) select.border-red-500,
+    #agent-create-form:not([data-show-errors="true"]) textarea.border-red-500 {
+        border-color: #d1d5db !important;
+    }
 </style>
 
 <div class="max-w-lg mx-auto">
@@ -48,15 +60,99 @@
     </div>
 
     <h1 class="text-gray-800 text-medium">Create a new agent</h1> <!-- Applied medium text class with added space -->
-    <form method="post" class="form-small-text"> <!-- Keeping form text small -->
+    <form method="post" enctype="multipart/form-data" class="form-small-text" id="agent-create-form" {% if form.is_bound and form.errors %}data-show-errors="true"{% endif %} novalidate>
         {% csrf_token %}
-        {{ form|crispy }}
-        <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
-        <!-- Display form errors if any -->
-        {% for error in form.non_field_errors %}
-          <div class="alert alert-danger mt-2 text-red-500">{{ error }}</div>
+        {% if form.profile_image %}
+        <div class="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div class="flex items-center gap-4 flex-wrap">
+                <div class="w-24 h-24 rounded-full border-2 border-gray-300 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0">
+                    <img id="profile-image-preview" src="" alt="Preview" class="w-full h-full object-cover hidden" />
+                    <span id="profile-image-placeholder" class="text-gray-400 text-xs text-center px-2">No image selected</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    {{ form.profile_image }}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.profile_image.help_text }}</p>
+                    {% if form.is_bound and form.profile_image.errors %}
+                    <p class="text-red-500 text-sm mt-1 agent-field-error">{{ form.profile_image.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% for field in form %}
+          {% if field.name != 'profile_image' %}
+          <div class="mb-3">
+            {{ field|as_crispy_field }}
+          </div>
+          {% endif %}
         {% endfor %}
+        <div class="flex items-center mt-2 mb-3">
+            <input id="show-password-agent-create" type="checkbox" class="mr-2">
+            <label for="show-password-agent-create">Show Password</label>
+        </div>
+        <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
+        {% if form.is_bound %}
+        {% for error in form.non_field_errors %}
+          <div class="alert alert-danger mt-2 text-red-500 agent-nonfield-error">{{ error }}</div>
+        {% endfor %}
+        {% endif %}
     </form>
 </div>
 
+<script>
+(function() {
+    function hideRequiredErrors() {
+        var form = document.getElementById('agent-create-form');
+        if (!form || form.getAttribute('data-show-errors') === 'true') return;
+        var requiredText = 'This field is required';
+        [].forEach.call(form.querySelectorAll('ul.errorlist, .errorlist'), function(el) {
+            el.style.setProperty('display', 'none', 'important');
+        });
+        [].forEach.call(form.querySelectorAll('*'), function(el) {
+            var t = (el.textContent || '').trim();
+            if (t === requiredText || t === requiredText + '.' || (t.indexOf(requiredText) === 0 && t.length < 60)) {
+                el.style.setProperty('display', 'none', 'important');
+            }
+        });
+        [].forEach.call(form.querySelectorAll('input, select, textarea'), function(el) {
+            if (el.classList.contains('border-red-500')) el.style.setProperty('border-color', '#d1d5db', 'important');
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { hideRequiredErrors(); setTimeout(hideRequiredErrors, 100); });
+    } else {
+        hideRequiredErrors();
+        setTimeout(hideRequiredErrors, 100);
+    }
+    var input = document.getElementById('id_profile_image');
+    if (input) {
+        var preview = document.getElementById('profile-image-preview');
+        var placeholder = document.getElementById('profile-image-placeholder');
+        input.addEventListener('change', function(e) {
+            var file = e.target.files && e.target.files[0];
+            if (file && file.type.indexOf('image/') === 0) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    if (placeholder) placeholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                if (placeholder) placeholder.classList.remove('hidden');
+            }
+        });
+    }
+    var showPasswordCheckbox = document.getElementById('show-password-agent-create');
+    if (showPasswordCheckbox) {
+        showPasswordCheckbox.addEventListener('change', function() {
+            document.querySelectorAll('input[name="password1"], input[name="password2"]').forEach(function(field) {
+                field.type = this.checked ? 'text' : 'password';
+            }.bind(this));
+        });
+    }
+})();
+</script>
 {% endblock content %}

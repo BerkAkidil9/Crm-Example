@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load tailwind_filters %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <style>
@@ -31,7 +32,7 @@
         <div class="lg:w-4/5 mx-auto flex flex-wrap justify-center">
             <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
                 <h2 class="text-sm title-font text-gray-500 tracking-widest">AGENT</h2>
-                <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ agent.username }}</h1>
+                <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ agent.user.username }}</h1>
                 <div class="flex mb-4">
                     <a href="{% url 'agents:agent-detail' agent.pk %}" class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1">
                         Overview
@@ -40,9 +41,40 @@
                         Update Details
                     </a>
                 </div>
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {{ form|crispy }}
+                    {% if form.profile_image %}
+                    <div class="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <div class="w-24 h-24 rounded-full border-2 border-gray-300 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0">
+                                {% if agent.user.profile_image %}
+                                <img id="profile-image-preview" src="{{ agent.user.profile_image.url }}" alt="Preview" class="w-full h-full object-cover">
+                                {% else %}
+                                <img id="profile-image-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                                <span id="profile-image-placeholder" class="text-gray-400 text-xs text-center px-2">No image selected</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                {{ form.profile_image }}
+                                <p class="text-xs text-gray-500 mt-1">{{ form.profile_image.help_text }}</p>
+                                {% if form.profile_image.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.profile_image.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% for field in form %}
+                      {% if field.name != 'profile_image' %}
+                      <div class="mb-3">
+                        {{ field|as_crispy_field }}
+                      </div>
+                      {% endif %}
+                    {% endfor %}
+                    <div class="flex items-center mt-2 mb-3">
+                        <input id="show-password-agent-update" type="checkbox" class="mr-2">
+                        <label for="show-password-agent-update">Show Password</label>
+                    </div>
                     <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Update</button>
                 </form>
                 <div class="mt-5 py-5 border-t border-gray-200">
@@ -55,4 +87,37 @@
         </div>
     </div>
 </section>
+<script>
+(function() {
+    var input = document.getElementById('id_profile_image');
+    if (input) {
+        var preview = document.getElementById('profile-image-preview');
+        var placeholder = document.getElementById('profile-image-placeholder');
+        input.addEventListener('change', function(e) {
+            var file = e.target.files && e.target.files[0];
+            if (file && file.type.indexOf('image/') === 0) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    if (placeholder) placeholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else if (preview && !file) {
+                preview.src = '';
+                preview.classList.add('hidden');
+                if (placeholder) placeholder.classList.remove('hidden');
+            }
+        });
+    }
+    var showPasswordCheckbox = document.getElementById('show-password-agent-update');
+    if (showPasswordCheckbox) {
+        showPasswordCheckbox.addEventListener('change', function() {
+            document.querySelectorAll('input[name="password1"], input[name="password2"]').forEach(function(field) {
+                field.type = this.checked ? 'text' : 'password';
+            }.bind(this));
+        });
+    }
+})();
+</script>
 {% endblock content %}

@@ -115,13 +115,13 @@ class PhoneNumberWidget(forms.MultiWidget):
     
     def decompress(self, value):
         if value:
-            # PhoneNumber objesi ise string'e çevir
+            # Convert PhoneNumber to string if needed
             value_str = str(value) if value else ''
             if value_str.startswith('+'):
-                # Ülke kodunu ve numarayı ayır - en uzun koddan başlayarak kontrol et
+                # Split country code and number - check from longest code first
                 country_codes = ['+966', '+971', '+972', '+880', '+358', '+420', '+421', '+359', '+385', '+381', '+351', '+353', '+370', '+371', '+372', '+374', '+995', '+994', '+993', '+992', '+996', '+998', '+375', '+380', '+373', '+212', '+213', '+216', '+218', '+251', '+254', '+255', '+256', '+234', '+233', '+225', '+221', '+502', '+503', '+504', '+505', '+506', '+507', '+593', '+595', '+598', '+591', '+90', '+44', '+49', '+33', '+39', '+34', '+31', '+91', '+81', '+82', '+55', '+52', '+61', '+64', '+27', '+20', '+98', '+92', '+66', '+84', '+60', '+65', '+62', '+63', '+32', '+41', '+43', '+45', '+46', '+47', '+48', '+36', '+40', '+30', '+77', '+56', '+54', '+51', '+57', '+58', '+7', '+1']
                 
-                # En uzun eşleşen kodu bul
+                # Find longest matching code
                 for code in country_codes:
                     if value_str.startswith(code):
                         return [code, value_str[len(code):].strip()]
@@ -147,7 +147,7 @@ class LeadModelForm(forms.ModelForm):
             user = request.user
             
             if user.is_organisor:
-                # Organisor için kendi organizasyonunun kategorilerini ve agentlarını filtrele
+                # Filter categories and agents for organisor's organisation
                 try:
                     organisation = user.userprofile
                     self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
@@ -159,7 +159,7 @@ class LeadModelForm(forms.ModelForm):
                     self.fields["value_category"].queryset = ValueCategory.objects.all()
                     self.fields["agent"].queryset = Agent.objects.all()
             elif user.is_agent:
-                # Agent için kendi organizasyonunun kategorilerini ve agentlarını filtrele
+                # Filter categories and agents for agent's organisation
                 try:
                     organisation = user.agent.organisation
                     self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
@@ -171,7 +171,7 @@ class LeadModelForm(forms.ModelForm):
                     self.fields["value_category"].queryset = ValueCategory.objects.all()
                     self.fields["agent"].queryset = Agent.objects.all()
             elif user.is_superuser:
-                # Admin için tüm kategoriler ve agentlar
+                # Admin sees all categories and agents
                 self.fields["source_category"].queryset = SourceCategory.objects.all()
                 self.fields["value_category"].queryset = ValueCategory.objects.all()
                 self.fields["agent"].queryset = Agent.objects.all()
@@ -189,12 +189,12 @@ class LeadModelForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
-            # Mevcut instance varsa (güncelleme), kendisi hariç kontrol et
+            # If updating existing instance, exclude self from check
             if self.instance and self.instance.pk:
                 if Lead.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
                     raise forms.ValidationError("A lead with this email already exists.")
             else:
-                # Yeni lead oluştururken kontrol et
+                # When creating new lead, check for duplicates
                 if Lead.objects.filter(email=email).exists():
                     raise forms.ValidationError("A lead with this email already exists.")
         return email
@@ -202,12 +202,12 @@ class LeadModelForm(forms.ModelForm):
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
         if phone_number:
-            # Mevcut instance varsa (güncelleme), kendisi hariç kontrol et
+            # If updating existing instance, exclude self from check
             if self.instance and self.instance.pk:
                 if Lead.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
                     raise forms.ValidationError("A lead with this phone number already exists.")
             else:
-                # Yeni lead oluştururken kontrol et
+                # When creating new lead, check for duplicates
                 if Lead.objects.filter(phone_number=phone_number).exists():
                     raise forms.ValidationError("A lead with this phone number already exists.")
         return phone_number
@@ -251,12 +251,12 @@ class AdminLeadModelForm(forms.ModelForm):
         request = kwargs.pop("request", None)
         super(AdminLeadModelForm, self).__init__(*args, **kwargs)
         
-        # Başlangıçta boş queryset'ler
+        # Start with empty querysets
         self.fields["agent"].queryset = Agent.objects.none()
         self.fields["source_category"].queryset = SourceCategory.objects.none()
         self.fields["value_category"].queryset = ValueCategory.objects.none()
         
-        # Eğer organizasyon seçilmişse (update durumunda), o organizasyonun verilerini yükle
+        # If organisation is set (e.g. on update), load that organisation's data
         if self.instance and hasattr(self.instance, 'organisation') and self.instance.organisation:
             org = self.instance.organisation
             self.fields["agent"].queryset = Agent.objects.filter(organisation=org)
@@ -266,12 +266,12 @@ class AdminLeadModelForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
-            # Mevcut instance varsa (güncelleme), kendisi hariç kontrol et
+            # If updating existing instance, exclude self from check
             if self.instance and self.instance.pk:
                 if Lead.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
                     raise forms.ValidationError("A lead with this email already exists.")
             else:
-                # Yeni lead oluştururken kontrol et
+                # When creating new lead, check for duplicates
                 if Lead.objects.filter(email=email).exists():
                     raise forms.ValidationError("A lead with this email already exists.")
         return email
@@ -279,12 +279,12 @@ class AdminLeadModelForm(forms.ModelForm):
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get('phone_number')
         if phone_number:
-            # Mevcut instance varsa (güncelleme), kendisi hariç kontrol et
+            # If updating existing instance, exclude self from check
             if self.instance and self.instance.pk:
                 if Lead.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
                     raise forms.ValidationError("A lead with this phone number already exists.")
             else:
-                # Yeni lead oluştururken kontrol et
+                # When creating new lead, check for duplicates
                 if Lead.objects.filter(phone_number=phone_number).exists():
                     raise forms.ValidationError("A lead with this phone number already exists.")
         return phone_number
@@ -351,10 +351,15 @@ class CustomUserCreationForm(UserCreationForm):
         help_text="Date of birth is required"
     )
     gender = forms.ChoiceField(required=True, choices=User.GENDER_CHOICES, help_text="Gender is required")
+    profile_image = forms.FileField(
+        required=True,
+        widget=forms.FileInput(attrs={'accept': 'image/*', 'id': 'id_profile_image', 'class': 'form-control'}),
+        help_text="Upload a profile picture (required)."
+    )
 
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "phone_number", "date_of_birth", "gender", "password1", "password2")
+        fields = ("username", "first_name", "last_name", "email", "phone_number", "date_of_birth", "gender", "profile_image", "password1", "password2")
         field_classes = {'username': UsernameField}
         widgets = {
             'username': forms.TextInput(attrs={'placeholder': 'Username'}),
@@ -433,6 +438,10 @@ class LeadCategoryUpdateForm(forms.ModelForm):
         )
 
 class CustomAuthenticationForm(AuthenticationForm):
+    error_messages = {
+        'invalid_login': "Wrong username or password. Please try again.",
+        'inactive': "This account is inactive.",
+    }
     username = forms.CharField(
         label='Username or Email',
         max_length=254,
@@ -445,11 +454,11 @@ class CustomAuthenticationForm(AuthenticationForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Error mesajlarını kaldır
+        # Remove default error messages
         self.fields['username'].error_messages = {'required': ''}
         self.fields['password'].error_messages = {'required': ''}
         
-        # Password field için de styling ekle
+        # Add styling to password field
         self.fields['password'].widget.attrs.update({
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
             'placeholder': 'Password'

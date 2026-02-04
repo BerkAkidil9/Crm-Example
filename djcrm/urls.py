@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import path, include
-from leads.views import landing_page, LandingPageView, SignupView, CustomLoginView, CustomPasswordResetView, CustomPasswordResetConfirmView, EmailVerificationSentView, EmailVerificationView, EmailVerificationFailedView
+from leads.views import landing_page, LandingPageView, SignupView, CustomLoginView, CustomPasswordResetView, CustomPasswordResetConfirmView, EmailVerificationSentView, EmailVerificationView, EmailVerificationSuccessView, EmailVerificationFailedView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -17,6 +17,7 @@ urlpatterns = [
     path('signup/', SignupView.as_view(), name='signup'),
     path('verify-email-sent/', EmailVerificationSentView.as_view(), name='verify-email-sent'),
     path('verify-email/<uuid:token>/', EmailVerificationView.as_view(), name='verify-email'),
+    path('verify-email-success/', EmailVerificationSuccessView.as_view(), name='verify-email-success'),
     path('verify-email-failed/', EmailVerificationFailedView.as_view(), name='verify-email-failed'),
     path('reset-password/', CustomPasswordResetView.as_view(), name='reset-password'),
     path('password-reset-done/', PasswordResetDoneView.as_view(), name='password_reset_done'),

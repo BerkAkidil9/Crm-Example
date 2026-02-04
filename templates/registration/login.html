@@ -13,16 +13,10 @@
 		<div class="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded"></div>
 	</div>
 
-	{% if messages %}
-		{% for message in messages %}
-			{% if message.tags == 'error' %}
-				<div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-					<p class="text-red-800 text-sm">
-						<strong>Login Failed:</strong> {{ message }}
-					</p>
-				</div>
-			{% endif %}
-		{% endfor %}
+	{% if form.is_bound and form.non_field_errors %}
+		<div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+			<p class="text-red-800 text-sm font-semibold">{{ form.non_field_errors.0 }}</p>
+		</div>
 	{% endif %}
 
 	<form method="POST" class="mt-5">

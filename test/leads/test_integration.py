@@ -265,7 +265,7 @@ class TestUserRegistrationWorkflow(TestCase):
         
         # Email doğrulanmış olmalı
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse('login'))
+        self.assertEqual(response.url, reverse('verify-email-success'))
         
         user.refresh_from_db()
         self.assertTrue(user.email_verified)

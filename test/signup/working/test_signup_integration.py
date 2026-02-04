@@ -98,7 +98,7 @@ class TestSignupCompleteFlow(TestCase):
             reverse('verify-email', kwargs={'token': verification_token.token})
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('verify-email-success'))
         
         # 11. Kullanıcı email'i doğrulandı mı
         updated_user = User.objects.get(pk=user.pk)
@@ -205,9 +205,9 @@ class TestEmailVerificationFlow(TestCase):
             reverse('verify-email', kwargs={'token': self.verification_token.token})
         )
         
-        # 2. Login sayfasına yönlendirilmeli
+        # 2. Verification success sayfasına yönlendirilmeli
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('verify-email-success'))
         
         # 3. Kullanıcı email'i doğrulandı mı
         updated_user = User.objects.get(pk=self.user.pk)

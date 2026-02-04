@@ -5,7 +5,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
 from leads.models import Agent, UserProfile, User, EmailVerificationToken
-from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm
+from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm, AdminAgentModelForm
 from .mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
@@ -35,6 +35,15 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
             return AdminAgentCreateForm
         else:
             return AgentCreateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.method != 'POST':
+            kwargs.pop('data', None)
+            kwargs.pop('files', None)
+        else:
+            kwargs.setdefault('files', self.request.FILES)
+        return kwargs
 
     def get_success_url(self):
         return reverse("agents:agent-list")
@@ -173,8 +182,17 @@ class AgentDetailView(AgentAndOrganisorLoginRequiredMixin, generic.DetailView):
 
 class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
     template_name = "agents/agent_update.html"
-    form_class = AgentModelForm
     context_object_name = 'agent'
+
+    def get_form_class(self):
+        if self.request.user.is_superuser:
+            return AdminAgentModelForm
+        return AgentModelForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.setdefault('files', self.request.FILES)
+        return kwargs
     
     def get_queryset(self):
         # Admin can update all agents

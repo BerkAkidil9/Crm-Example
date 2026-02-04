@@ -21,13 +21,13 @@ class OrganisorModelForm(forms.ModelForm):
     password1 = forms.CharField(
         label='New Password',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter new password'}),
-        required=False,
-        help_text='Leave blank to keep current password.<br><strong>If changing password:</strong><ul><li>At least 8 characters</li><li>Cannot be entirely numeric</li><li>Cannot be too common (like "password123")</li><li>Cannot be too similar to your username or email</li></ul>'
+        required=True,
+        help_text='<strong>Required.</strong> <ul><li>At least 8 characters</li><li>Cannot be entirely numeric</li><li>Cannot be too common (like "password123")</li><li>Cannot be too similar to your username or email</li></ul>'
     )
     password2 = forms.CharField(
         label='Confirm New Password',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm new password'}),
-        required=False,
+        required=True,
         help_text='Enter the same password as above, for verification'
     )
 
@@ -39,12 +39,15 @@ class OrganisorModelForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'profile_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'profile_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'id': 'id_profile_image'}),
         }
 
     def __init__(self, *args, **kwargs):
         self.user_instance = kwargs.get('instance')
         super().__init__(*args, **kwargs)
+        for field_name in ('username', 'first_name', 'last_name', 'date_of_birth', 'gender', 'profile_image'):
+            if field_name in self.fields:
+                self.fields[field_name].required = True
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -90,15 +93,15 @@ class OrganisorModelForm(forms.ModelForm):
         password1 = self.cleaned_data.get('password1')
         password2 = self.cleaned_data.get('password2')
         
-        # Eğer password1 girilmişse password2 de girilmeli
+        # If password1 is entered, password2 must be entered too
         if password1 and not password2:
             raise forms.ValidationError("Please confirm your new password.")
         
-        # Eğer password2 girilmişse password1 de girilmeli
+        # If password2 is entered, password1 must be entered too
         if password2 and not password1:
             raise forms.ValidationError("Please enter your new password first.")
         
-        # Her ikisi de girildiyse eşleşmeli
+        # If both are entered they must match
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("The two password fields didn't match.")
         
@@ -107,11 +110,8 @@ class OrganisorModelForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         password = self.cleaned_data.get('password1')
-        
-        # Eğer yeni şifre girildiyse güncelle
         if password:
             user.set_password(password)
-        
         if commit:
             user.save()
         return user
@@ -149,8 +149,14 @@ class OrganisorCreateForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'profile_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'profile_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'id': 'id_profile_image'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in ('username', 'first_name', 'last_name', 'date_of_birth', 'gender', 'profile_image'):
+            if field_name in self.fields:
+                self.fields[field_name].required = True
 
     def clean_email(self):
         email = self.cleaned_data.get('email')

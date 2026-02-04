@@ -257,9 +257,9 @@ class TestEmailVerificationView(TestCase):
             reverse('verify-email', kwargs={'token': self.verification_token.token})
         )
         
-        # Login sayfasına yönlendirilmeli
+        # Verification success sayfasına yönlendirilmeli
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('verify-email-success'))
         
         # Kullanıcı email'i doğrulandı mı
         updated_user = User.objects.get(pk=self.user.pk)
@@ -334,7 +334,7 @@ class TestEmailVerificationView(TestCase):
         
         # Yine de doğrulama işlemi gerçekleşmeli (token kullanılmış olarak işaretlenir)
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('verify-email-success'))
         
         # Token kullanıldı olarak işaretlendi mi
         updated_token = EmailVerificationToken.objects.get(pk=self.verification_token.pk)
@@ -413,7 +413,7 @@ class TestSignupIntegration(TestCase):
             reverse('verify-email', kwargs={'token': verification_token.token})
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('verify-email-success'))
         
         # 7. Kullanıcı email'i doğrulandı mı
         updated_user = User.objects.get(pk=user.pk)
