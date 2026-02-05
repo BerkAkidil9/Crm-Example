@@ -8,9 +8,10 @@ from django.views import generic
 from django.contrib import messages
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
-from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
+from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, OrganisorLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
 
 
 
@@ -209,29 +210,85 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 
 		# Admin can see all leads
 		if user.is_superuser:
-			queryset = Lead.objects.filter(agent__isnull=False)
+			queryset = Lead.objects.filter(agent__isnull=False).select_related("organisation", "agent", "source_category", "value_category")
 		elif user.is_organisor:
-			queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=False)
+			queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=False).select_related("organisation", "agent", "source_category", "value_category")
 		else:
-			queryset = Lead.objects.filter(organisation=user.agent.organisation, agent__isnull=False)
+			queryset = Lead.objects.filter(organisation=user.agent.organisation, agent__isnull=False).select_related("organisation", "agent", "source_category", "value_category")
 			queryset = queryset.filter(agent__user=user)
+
+		# Search (all roles)
+		search = (self.request.GET.get("q") or "").strip()
+		if search:
+			queryset = queryset.filter(
+				Q(first_name__icontains=search) |
+				Q(last_name__icontains=search) |
+				Q(email__icontains=search) |
+				Q(phone_number__icontains=search)
+			)
+
+		# Admin-only filters
+		if user.is_superuser:
+			org_id = self.request.GET.get("organisation")
+			if org_id:
+				queryset = queryset.filter(organisation_id=org_id)
+			agent_id = self.request.GET.get("agent")
+			if agent_id:
+				queryset = queryset.filter(agent_id=agent_id)
+		# Organisor: filter by own agents
+		elif user.is_organisor:
+			agent_id = self.request.GET.get("agent")
+			if agent_id:
+				queryset = queryset.filter(agent_id=agent_id, agent__organisation=user.userprofile)
+
 		return queryset
-	
+
 	def get_context_data(self, **kwargs):
 		context = super(LeadListView, self).get_context_data(**kwargs)
 		user = self.request.user
 
-		# Admin can see all unassigned leads
+		# Unassigned leads (with same search and admin filters)
 		if user.is_superuser:
-			queryset = Lead.objects.filter(agent__isnull=True)
-			context.update({
-				"unassigned_leads": queryset
-			})
+			unassigned = Lead.objects.filter(agent__isnull=True)
 		elif user.is_organisor:
-			queryset = Lead.objects.filter(organisation=user.userprofile, agent__isnull=True)
-			context.update({
-				"unassigned_leads": queryset
-			})
+			unassigned = Lead.objects.filter(organisation=user.userprofile, agent__isnull=True)
+		else:
+			unassigned = Lead.objects.none()
+
+		search = (self.request.GET.get("q") or "").strip()
+		if search:
+			unassigned = unassigned.filter(
+				Q(first_name__icontains=search) |
+				Q(last_name__icontains=search) |
+				Q(email__icontains=search) |
+				Q(phone_number__icontains=search)
+			)
+		if user.is_superuser:
+			org_id = self.request.GET.get("organisation")
+			if org_id:
+				unassigned = unassigned.filter(organisation_id=org_id)
+			agent_id = self.request.GET.get("agent")
+			if agent_id:
+				unassigned = unassigned.filter(agent_id=agent_id)
+
+		context["unassigned_leads"] = unassigned
+
+		# Filter options for admin (always pass all agents so JS can filter by org without reload)
+		if user.is_superuser:
+			context["filter_organisations"] = UserProfile.objects.filter(user__is_organisor=True, user__is_superuser=False).order_by("user__username")
+			context["filter_agents"] = Agent.objects.all().select_related("user", "organisation").order_by("user__username")
+			org_id = self.request.GET.get("organisation") or ""
+			agent_id = self.request.GET.get("agent") or ""
+			if org_id and agent_id and not Agent.objects.filter(pk=agent_id, organisation_id=org_id).exists():
+				agent_id = ""
+			context["current_organisation_id"] = org_id
+			context["current_agent_id"] = agent_id
+		# Organisor: filter by own organisation's agents
+		elif user.is_organisor:
+			context["filter_agents"] = Agent.objects.filter(organisation=user.userprofile).select_related("user", "organisation").order_by("user__username")
+			context["current_agent_id"] = self.request.GET.get("agent") or ""
+		context["search_query"] = self.request.GET.get("q") or ""
+
 		return context
 
 def lead_list(request):
@@ -272,8 +329,9 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 		user = self.request.user
 		if user.is_superuser:
 			return AdminLeadModelForm
-		else:
-			return LeadModelForm
+		if user.is_organisor:
+			return OrganisorLeadModelForm
+		return LeadModelForm
 
 	def get_form_kwargs(self):
 		kwargs = super().get_form_kwargs()
@@ -334,8 +392,9 @@ class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 		user = self.request.user
 		if user.is_superuser:
 			return AdminLeadModelForm
-		else:
-			return LeadModelForm
+		if user.is_organisor:
+			return OrganisorLeadModelForm
+		return LeadModelForm
 
 	def get_form_kwargs(self):
 		kwargs = super().get_form_kwargs()
@@ -458,22 +517,38 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
                     organisation=selected_agent.organisation
                 ).annotate(
                     lead_count=Count('leads', filter=models.Q(leads__agent=selected_agent))
-                )
+                ).order_by('name')
                 value_categories = ValueCategory.objects.filter(
                     organisation=selected_agent.organisation
                 ).annotate(
                     lead_count=Count('leads', filter=models.Q(leads__agent=selected_agent))
-                )
+                ).order_by('name')
                 filter_title = f"Categories for Agent: {selected_agent.user.username} ({selected_agent.organisation.user.username})"
+                source_categories_with_leads = [
+                    {"category": cat, "leads": list(Lead.objects.filter(source_category=cat, agent=selected_agent).select_related("agent"))}
+                    for cat in source_categories
+                ]
+                value_categories_with_leads = [
+                    {"category": cat, "leads": list(Lead.objects.filter(value_category=cat, agent=selected_agent).select_related("agent"))}
+                    for cat in value_categories
+                ]
                 
             elif selected_org:
                 # Show categories for specific organization
-                source_categories = SourceCategory.objects.filter(organisation=selected_org).annotate(lead_count=Count('leads'))
-                value_categories = ValueCategory.objects.filter(organisation=selected_org).annotate(lead_count=Count('leads'))
+                source_categories = SourceCategory.objects.filter(organisation=selected_org).annotate(lead_count=Count('leads')).order_by('name')
+                value_categories = ValueCategory.objects.filter(organisation=selected_org).annotate(lead_count=Count('leads')).order_by('name')
                 filter_title = f"Categories for Organization: {selected_org.user.username}"
+                source_categories_with_leads = [
+                    {"category": cat, "leads": list(Lead.objects.filter(source_category=cat).select_related("agent"))}
+                    for cat in source_categories
+                ]
+                value_categories_with_leads = [
+                    {"category": cat, "leads": list(Lead.objects.filter(value_category=cat).select_related("agent"))}
+                    for cat in value_categories
+                ]
                 
             else:
-                # Show all categories aggregated
+                # Show all categories aggregated; still provide lead list per category name
                 source_categories = SourceCategory.objects.values('name').annotate(
                     lead_count=Count('leads')
                 ).order_by('name')
@@ -481,6 +556,14 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
                     lead_count=Count('leads')
                 ).order_by('name')
                 filter_title = "All Categories (Aggregated)"
+                source_categories_with_leads = [
+                    {"category": {"name": s["name"], "lead_count": s["lead_count"]}, "leads": list(Lead.objects.filter(source_category__name=s["name"]).select_related("agent", "organisation"))}
+                    for s in source_categories
+                ]
+                value_categories_with_leads = [
+                    {"category": {"name": v["name"], "lead_count": v["lead_count"]}, "leads": list(Lead.objects.filter(value_category__name=v["name"]).select_related("agent", "organisation"))}
+                    for v in value_categories
+                ]
             
             context.update({
                 "is_admin_view": True,
@@ -490,23 +573,78 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
                 "selected_agent": selected_agent,
                 "source_categories": source_categories,
                 "value_categories": value_categories,
+                "source_categories_with_leads": source_categories_with_leads,
+                "value_categories_with_leads": value_categories_with_leads,
                 "filter_title": filter_title,
             })
         else:
-            # For organisor/agent: show only their categories
+            # For organisor/agent: show only their categories, with optional agent filter and leads per category
             if user.is_organisor:
                 organisation = user.userprofile
+                filter_agents = Agent.objects.filter(organisation=organisation).select_related("user", "organisation").order_by("user__username")
+                selected_agent_id = self.request.GET.get('agent')
+                selected_agent = None
+                if selected_agent_id:
+                    try:
+                        selected_agent = Agent.objects.filter(pk=selected_agent_id, organisation=organisation).select_related("user").first()
+                    except (ValueError, Agent.DoesNotExist):
+                        pass
+                if selected_agent:
+                    source_categories = SourceCategory.objects.filter(organisation=organisation).annotate(
+                        lead_count=Count('leads', filter=models.Q(leads__agent=selected_agent))
+                    ).order_by('name')
+                    value_categories = ValueCategory.objects.filter(organisation=organisation).annotate(
+                        lead_count=Count('leads', filter=models.Q(leads__agent=selected_agent))
+                    ).order_by('name')
+                    source_categories_with_leads = [
+                        {"category": cat, "leads": list(Lead.objects.filter(source_category=cat, agent=selected_agent).select_related("agent"))}
+                        for cat in source_categories
+                    ]
+                    value_categories_with_leads = [
+                        {"category": cat, "leads": list(Lead.objects.filter(value_category=cat, agent=selected_agent).select_related("agent"))}
+                        for cat in value_categories
+                    ]
+                else:
+                    source_categories = SourceCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads')).order_by('name')
+                    value_categories = ValueCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads')).order_by('name')
+                    source_categories_with_leads = [
+                        {"category": cat, "leads": list(Lead.objects.filter(source_category=cat).select_related("agent"))}
+                        for cat in source_categories
+                    ]
+                    value_categories_with_leads = [
+                        {"category": cat, "leads": list(Lead.objects.filter(value_category=cat).select_related("agent"))}
+                        for cat in value_categories
+                    ]
+                context.update({
+                    "is_admin_view": False,
+                    "is_organisor_view": True,
+                    "filter_agents": filter_agents,
+                    "selected_agent": selected_agent,
+                    "source_categories": source_categories,
+                    "value_categories": value_categories,
+                    "source_categories_with_leads": source_categories_with_leads,
+                    "value_categories_with_leads": value_categories_with_leads,
+                })
             else:
                 organisation = user.agent.organisation
-                
-            source_categories = SourceCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads'))
-            value_categories = ValueCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads'))
-            
-            context.update({
-                "is_admin_view": False,
-                "source_categories": source_categories,
-                "value_categories": value_categories,
-            })
+                source_categories = SourceCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads')).order_by('name')
+                value_categories = ValueCategory.objects.filter(organisation=organisation).annotate(lead_count=Count('leads')).order_by('name')
+                source_categories_with_leads = [
+                    {"category": cat, "leads": list(Lead.objects.filter(source_category=cat, agent=user.agent).select_related("agent"))}
+                    for cat in source_categories
+                ]
+                value_categories_with_leads = [
+                    {"category": cat, "leads": list(Lead.objects.filter(value_category=cat, agent=user.agent).select_related("agent"))}
+                    for cat in value_categories
+                ]
+                context.update({
+                    "is_admin_view": False,
+                    "is_organisor_view": False,
+                    "source_categories": source_categories,
+                    "value_categories": value_categories,
+                    "source_categories_with_leads": source_categories_with_leads,
+                    "value_categories_with_leads": value_categories_with_leads,
+                })
 
         return context
 

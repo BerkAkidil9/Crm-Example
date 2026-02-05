@@ -238,6 +238,108 @@ class LeadModelForm(forms.ModelForm):
         }
 
 
+class OrganisorLeadModelForm(forms.ModelForm):
+    """Organisor lead create/update: profile photo required on create, optional on update (leave empty to keep)."""
+    profile_image = forms.FileField(
+        required=True,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*',
+            'id': 'id_lead_profile_image',
+        }),
+        help_text='Profil fotoğrafı (zorunlu). JPG, PNG, GIF, WebP. Max 5 MB.'
+    )
+
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
+        super(OrganisorLeadModelForm, self).__init__(*args, **kwargs)
+        if request and request.user.is_organisor:
+            try:
+                organisation = request.user.userprofile
+                self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
+                self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
+                self.fields["agent"].queryset = Agent.objects.filter(organisation=organisation)
+            except Exception:
+                self.fields["source_category"].queryset = SourceCategory.objects.all()
+                self.fields["value_category"].queryset = ValueCategory.objects.all()
+                self.fields["agent"].queryset = Agent.objects.all()
+        else:
+            self.fields["source_category"].queryset = SourceCategory.objects.all()
+            self.fields["value_category"].queryset = ValueCategory.objects.all()
+            self.fields["agent"].queryset = Agent.objects.all()
+        if self.instance and self.instance.pk and self.instance.profile_image:
+            self.fields['profile_image'].required = False
+            self.fields['profile_image'].help_text = 'Yeni fotoğraf yükleyin veya mevcut kalsın. Boş bırakırsanız değişmez. JPG, PNG, GIF, WebP. Max 5 MB.'
+
+    def clean_profile_image(self):
+        upload = self.cleaned_data.get('profile_image')
+        if upload and isinstance(upload, UploadedFile):
+            allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
+            if getattr(upload, 'content_type', None) not in allowed:
+                raise forms.ValidationError('Lütfen geçerli bir resim yükleyin (JPG, PNG, GIF veya WebP).')
+            if upload.size > 5 * 1024 * 1024:
+                raise forms.ValidationError('Dosya boyutu 5 MB\'dan küçük olmalıdır.')
+        elif not upload and (not self.instance or not self.instance.pk or not getattr(self.instance, 'profile_image', None) or not self.instance.profile_image):
+            raise forms.ValidationError('Profil fotoğrafı zorunludur.')
+        return upload
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            if self.instance and self.instance.pk:
+                if Lead.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                    raise forms.ValidationError("Bu e-posta adresi zaten kullanılıyor.")
+            else:
+                if Lead.objects.filter(email=email).exists():
+                    raise forms.ValidationError("Bu e-posta adresi zaten kullanılıyor.")
+        return email
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data.get('phone_number')
+        if phone_number:
+            if self.instance and self.instance.pk:
+                if Lead.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
+                    raise forms.ValidationError("Bu telefon numarası zaten kullanılıyor.")
+            else:
+                if Lead.objects.filter(phone_number=phone_number).exists():
+                    raise forms.ValidationError("Bu telefon numarası zaten kullanılıyor.")
+        return phone_number
+
+    def save(self, commit=True):
+        lead = super().save(commit=False)
+        new_image = self.cleaned_data.get('profile_image')
+        if new_image and isinstance(new_image, UploadedFile):
+            lead.profile_image = new_image
+        if commit:
+            lead.save()
+        return lead
+
+    class Meta:
+        model = Lead
+        fields = [
+            'first_name',
+            'last_name',
+            'age',
+            'agent',
+            'source_category',
+            'value_category',
+            'description',
+            'phone_number',
+            'email',
+            'address',
+            'profile_image',
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'age': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Description', 'rows': 3}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address'}),
+        }
+
+
 class AdminLeadModelForm(forms.ModelForm):
     organisation = forms.ModelChoiceField(
         queryset=UserProfile.objects.none(),  # Set fresh in __init__

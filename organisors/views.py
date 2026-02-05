@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 
 from leads.models import UserProfile, EmailVerificationToken
@@ -21,8 +22,21 @@ class OrganisorListView(AdminOnlyMixin, generic.ListView):
     context_object_name = "organisors"
 
     def get_queryset(self):
-        # Admin can see all organisors except superusers
-        return Organisor.objects.exclude(user__is_superuser=True)
+        queryset = Organisor.objects.exclude(user__is_superuser=True).select_related("user")
+        search = (self.request.GET.get("q") or "").strip()
+        if search:
+            queryset = queryset.filter(
+                Q(user__username__icontains=search) |
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(user__email__icontains=search)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q") or ""
+        return context
 
 
 class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):

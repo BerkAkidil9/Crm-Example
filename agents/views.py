@@ -5,9 +5,10 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
 from leads.models import Agent, UserProfile, User, EmailVerificationToken
-from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm, AdminAgentModelForm
+from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm, AdminAgentModelForm, OrganisorAgentCreateForm, OrganisorAgentModelForm
 from .mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.http import Http404, HttpResponseRedirect
 
@@ -20,11 +21,36 @@ class AgentListView(OrganisorAndLoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         # Admin can see all agents
         if self.request.user.is_superuser:
-            return Agent.objects.all()
-        # Organisors see agents in their organisation
+            queryset = Agent.objects.all().select_related("user", "organisation")
         else:
             organisation = self.request.user.userprofile
-            return Agent.objects.filter(organisation=organisation)
+            queryset = Agent.objects.filter(organisation=organisation).select_related("user", "organisation")
+
+        # Search: username, first_name, last_name, email
+        search = (self.request.GET.get("q") or "").strip()
+        if search:
+            queryset = queryset.filter(
+                Q(user__username__icontains=search) |
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(user__email__icontains=search)
+            )
+
+        # Admin-only: filter by organisation
+        if self.request.user.is_superuser:
+            org_id = self.request.GET.get("organisation")
+            if org_id:
+                queryset = queryset.filter(organisation_id=org_id)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_superuser:
+            context["filter_organisations"] = UserProfile.objects.filter(user__is_organisor=True, user__is_superuser=False).order_by("user__username")
+            context["current_organisation_id"] = self.request.GET.get("organisation") or ""
+        context["search_query"] = self.request.GET.get("q") or ""
+        return context
     
 class AgentCreateView(LoginRequiredMixin, generic.CreateView):
     template_name = "agents/agent_create.html"
@@ -33,8 +59,9 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
         user = self.request.user
         if user.is_superuser:
             return AdminAgentCreateForm
-        else:
-            return AgentCreateForm
+        if user.is_organisor:
+            return OrganisorAgentCreateForm
+        return AgentCreateForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -187,6 +214,8 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
     def get_form_class(self):
         if self.request.user.is_superuser:
             return AdminAgentModelForm
+        if self.request.user.is_organisor:
+            return OrganisorAgentModelForm
         return AgentModelForm
 
     def get_form_kwargs(self):

@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    .category-leads-cell { max-width: 320px; }
+    .category-leads-details summary { cursor: pointer; color: #4f46e5; font-size: 0.875rem; font-weight: 500; }
+    .category-leads-details summary:hover { text-decoration: underline; }
+    .category-leads-list { max-height: 200px; overflow-y: auto; overflow-x: hidden; padding: 6px 8px; margin-top: 6px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fafafa; }
+    .category-leads-list::-webkit-scrollbar { width: 6px; }
+    .category-leads-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .category-leads-list::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+    .category-leads-list .lead-link { display: block; padding: 4px 0; text-decoration: none; font-size: 0.875rem; color: #374151; border-bottom: 1px solid #f3f4f6; }
+    .category-leads-list .lead-link:last-child { border-bottom: none; }
+    .category-leads-list .lead-link:hover { color: #4f46e5; }
+    .category-leads-list .lead-name { font-weight: 500; }
+    .category-leads-list .lead-email { display: block; font-size: 0.75rem; color: #6b7280; margin-top: 1px; }
+</style>
 <section class="text-gray-600 body-font">
     <div class="container px-5 py-24 mx-auto">
         <div class="flex flex-col text-center w-full mb-20">
@@ -73,12 +87,25 @@
                     <div class="bg-blue-50 rounded-lg p-6">
                         <h3 class="text-xl font-semibold text-blue-700 mb-4">📍 Source Categories</h3>
                         <div class="space-y-2">
-                            {% for category in source_categories %}
-                            <div class="flex justify-between items-center bg-white rounded p-3 shadow-sm">
-                                <span class="font-medium">
-                                    {% if category.name %}{{ category.name }}{% else %}{{ category.name }}{% endif %}
-                                </span>
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">{{ category.lead_count }}</span>
+                            {% for item in source_categories_with_leads %}
+                            <div class="bg-white rounded p-3 shadow-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">{{ item.category.name }}</span>
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">{{ item.category.lead_count }}</span>
+                                </div>
+                                {% if item.leads %}
+                                <details class="category-leads-details mt-2">
+                                    <summary>View leads ({{ item.category.lead_count }})</summary>
+                                    <div class="category-leads-list">
+                                        {% for lead in item.leads %}
+                                        <a href="{% url 'leads:lead-detail' lead.pk %}" class="lead-link">
+                                            <span class="lead-name">{{ lead.first_name }} {{ lead.last_name }}</span>
+                                            <span class="lead-email">{{ lead.email }}</span>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                                {% endif %}
                             </div>
                             {% empty %}
                             <p class="text-blue-600 italic">No source categories found</p>
@@ -90,12 +117,25 @@
                     <div class="bg-green-50 rounded-lg p-6">
                         <h3 class="text-xl font-semibold text-green-700 mb-4">💰 Value Categories</h3>
                         <div class="space-y-2">
-                            {% for category in value_categories %}
-                            <div class="flex justify-between items-center bg-white rounded p-3 shadow-sm">
-                                <span class="font-medium">
-                                    {% if category.name %}{{ category.name }}{% else %}{{ category.name }}{% endif %}
-                                </span>
-                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">{{ category.lead_count }}</span>
+                            {% for item in value_categories_with_leads %}
+                            <div class="bg-white rounded p-3 shadow-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">{{ item.category.name }}</span>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">{{ item.category.lead_count }}</span>
+                                </div>
+                                {% if item.leads %}
+                                <details class="category-leads-details mt-2">
+                                    <summary>View leads ({{ item.category.lead_count }})</summary>
+                                    <div class="category-leads-list">
+                                        {% for lead in item.leads %}
+                                        <a href="{% url 'leads:lead-detail' lead.pk %}" class="lead-link">
+                                            <span class="lead-name">{{ lead.first_name }} {{ lead.last_name }}</span>
+                                            <span class="lead-email">{{ lead.email }}</span>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                                {% endif %}
                             </div>
                             {% empty %}
                             <p class="text-green-600 italic">No value categories found</p>
@@ -106,57 +146,111 @@
             </div>
             
         {% else %}
-            <!-- ORGANISOR/AGENT VIEW: Simple Table View -->
-            <!-- Source Categories -->
-            <div class="lg:w-2/3 w-full mx-auto overflow-auto mb-10">
-                <h2 class="text-2xl font-medium title-font mb-4 text-blue-600">📍 Source Categories</h2>
-                <p class="mb-4 text-gray-600">Categories based on where leads come from</p>
-                <table class="table-auto w-full text-left whitespace-no-wrap">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-blue-50 rounded-tl rounded-bl">Name</th>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-blue-50">Lead Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category in source_categories %}
-                        <tr>
-                            <td class="px-4 py-3 border-b border-gray-200">{{ category.name }}</td>
-                            <td class="px-4 py-3 border-b border-gray-200">{{ category.lead_count }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td class="px-4 py-3 text-gray-500" colspan="2">No source categories found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <!-- ORGANISOR/AGENT VIEW: Same visual design as admin (filter + gradient header + grid cards) -->
+            <div class="w-full mx-auto mb-8">
+                <!-- Filter (organisor only) -->
+                {% if is_organisor_view and filter_agents %}
+                <div class="bg-gray-100 rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🔍 Filtrele</h2>
+                    <form method="GET" class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="agent-filter" class="block text-sm font-medium text-gray-700 mb-2">Agent</label>
+                            <select name="agent" id="agent-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="this.form.submit()">
+                                <option value="">Tüm agentlar</option>
+                                {% for agent in filter_agents %}
+                                <option value="{{ agent.id }}" {% if selected_agent and selected_agent.id == agent.id %}selected{% endif %}>{{ agent.user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <a href="{% url 'leads:category-list' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-200">Temizle</a>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
 
-            <!-- Value Categories -->
-            <div class="lg:w-2/3 w-full mx-auto overflow-auto mb-10">
-                <h2 class="text-2xl font-medium title-font mb-4 text-green-600">💰 Value Categories</h2>
-                <p class="mb-4 text-gray-600">Categories based on lead potential value</p>
-                <table class="table-auto w-full text-left whitespace-no-wrap">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-green-50 rounded-tl rounded-bl">Name</th>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-green-50">Lead Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category in value_categories %}
-                        <tr>
-                            <td class="px-4 py-3 border-b border-gray-200">{{ category.name }}</td>
-                            <td class="px-4 py-3 border-b border-gray-200">{{ category.lead_count }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td class="px-4 py-3 text-gray-500" colspan="2">No value categories found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <!-- Results Header (same gradient as admin) -->
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-white">
+                        {% if is_organisor_view and selected_agent %}
+                        Kategoriler — Agent: {{ selected_agent.user.username }}
+                        {% else %}
+                        Kategoriler
+                        {% endif %}
+                    </h2>
+                    {% if is_organisor_view and selected_agent %}
+                    <p class="text-indigo-100 mt-2">👤 Seçili agent'a ait kategoriler ve lead'ler. Lead'leri görmek için "Lead'leri göster"e tıklayın.</p>
+                    {% else %}
+                    <p class="text-indigo-100 mt-2">Kaynak ve değer kategorileri. Lead sayısı görünür; hangi lead'ler olduğunu görmek için "Lead'leri göster"e tıklayın.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Categories Display: same grid as admin -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Source Categories -->
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-blue-700 mb-4">📍 Source Categories</h3>
+                        <div class="space-y-2">
+                            {% for item in source_categories_with_leads %}
+                            <div class="bg-white rounded p-3 shadow-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">{{ item.category.name }}</span>
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">{{ item.category.lead_count }}</span>
+                                </div>
+                                {% if item.leads %}
+                                <details class="category-leads-details mt-2">
+                                    <summary>Lead'leri göster ({{ item.category.lead_count }})</summary>
+                                    <div class="category-leads-list">
+                                        {% for lead in item.leads %}
+                                        <a href="{% url 'leads:lead-detail' lead.pk %}" class="lead-link">
+                                            <span class="lead-name">{{ lead.first_name }} {{ lead.last_name }}</span>
+                                            <span class="lead-email">{{ lead.email }}</span>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                                {% else %}
+                                <span class="text-gray-400 text-sm mt-1 block">—</span>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <p class="text-blue-600 italic">Kaynak kategorisi yok.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Value Categories -->
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-green-700 mb-4">💰 Value Categories</h3>
+                        <div class="space-y-2">
+                            {% for item in value_categories_with_leads %}
+                            <div class="bg-white rounded p-3 shadow-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">{{ item.category.name }}</span>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">{{ item.category.lead_count }}</span>
+                                </div>
+                                {% if item.leads %}
+                                <details class="category-leads-details mt-2">
+                                    <summary>Lead'leri göster ({{ item.category.lead_count }})</summary>
+                                    <div class="category-leads-list">
+                                        {% for lead in item.leads %}
+                                        <a href="{% url 'leads:lead-detail' lead.pk %}" class="lead-link">
+                                            <span class="lead-name">{{ lead.first_name }} {{ lead.last_name }}</span>
+                                            <span class="lead-email">{{ lead.email }}</span>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                                {% else %}
+                                <span class="text-gray-400 text-sm mt-1 block">—</span>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <p class="text-green-600 italic">Değer kategorisi yok.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
         {% endif %}
 

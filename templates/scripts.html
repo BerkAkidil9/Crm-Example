@@ -1,3 +1,22 @@
 {% load static %}
 
 <script src="{% static 'main.js' %}"></script>
+<script>
+(function() {
+    function disablePasswordCopyPaste() {
+        var selectors = 'input[type="password"], input[name="password"], input[name="password1"], input[name="password2"], input[type="text"][data-type="password"]';
+        document.querySelectorAll(selectors).forEach(function(el) {
+            if (el._passwordCopyPasteDisabled) return;
+            el._passwordCopyPasteDisabled = true;
+            el.addEventListener('copy', function(e) { e.preventDefault(); });
+            el.addEventListener('paste', function(e) { e.preventDefault(); });
+            el.addEventListener('cut', function(e) { e.preventDefault(); });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', disablePasswordCopyPaste);
+    } else {
+        disablePasswordCopyPaste();
+    }
+})();
+</script>

@@ -10,6 +10,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import patch, MagicMock
 
 # Django ayarlarını yükle
@@ -126,22 +127,26 @@ class TestAgentViewsSimple(TestCase):
     
     @patch('agents.views.send_mail')
     def test_agent_create_view_valid_data_organisor(self, mock_send_mail):
-        """Organisor ile geçerli veri ile agent oluşturma testi"""
+        """Organisor ile geçerli veri ile agent oluşturma testi (profile_image zorunlu)"""
         self.client.login(username='organisor_simple', password='testpass123')
-        
+        profile_image = SimpleUploadedFile(
+            "agent_photo.jpg",
+            b"fake_jpeg_content",
+            content_type="image/jpeg"
+        )
         agent_data = {
             'username': 'new_agent',
             'email': 'new_agent@example.com',
             'first_name': 'New',
             'last_name': 'Agent',
             'phone_number_0': '+90',
-            'phone_number_1': '5559999999',  # Farklı telefon numarası
+            'phone_number_1': '5559999999',
             'date_of_birth': '1990-01-01',
             'gender': 'M',
             'password1': 'testpass123!',
-            'password2': 'testpass123!'
+            'password2': 'testpass123!',
+            'profile_image': profile_image,
         }
-        
         response = self.client.post(reverse('agents:agent-create'), data=agent_data)
         
         # Form validation hatası olabilir, 200 döndürüyor olabilir

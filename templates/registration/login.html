@@ -36,6 +36,8 @@
 			</label>
 			<input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" 
 				   placeholder="Password" required
+				   autocomplete="current-password"
+				   oncopy="return false" onpaste="return false" oncut="return false"
 				   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 		</div>
 		<div class="flex items-center mt-2">

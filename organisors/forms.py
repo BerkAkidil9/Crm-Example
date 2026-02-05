@@ -21,14 +21,14 @@ class OrganisorModelForm(forms.ModelForm):
     password1 = forms.CharField(
         label='New Password',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter new password'}),
-        required=True,
-        help_text='<strong>Required.</strong> <ul><li>At least 8 characters</li><li>Cannot be entirely numeric</li><li>Cannot be too common (like "password123")</li><li>Cannot be too similar to your username or email</li></ul>'
+        required=False,
+        help_text='Leave blank to keep your current password. If changing: at least 8 characters, not entirely numeric, not too common.'
     )
     password2 = forms.CharField(
         label='Confirm New Password',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm new password'}),
-        required=True,
-        help_text='Enter the same password as above, for verification'
+        required=False,
+        help_text='Enter the same password as above, for verification. Leave blank to keep current password.'
     )
 
     class Meta:
