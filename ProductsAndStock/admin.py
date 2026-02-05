@@ -1,5 +1,26 @@
 from django.contrib import admin
 from .models import ProductsAndStock, StockMovement, Category, SubCategory, PriceHistory, SalesStatistics, StockAlert, StockRecommendation
+from leads.models import UserProfile
+
+
+class OrganisorListFilter(admin.SimpleListFilter):
+	title = 'Organisor'
+	parameter_name = 'organisation'
+
+	def lookups(self, request, model_admin):
+		# Organisor olan ve en az bir urunu olan UserProfile'lar (admin'de urun olan tum org'lar)
+		org_ids = ProductsAndStock.objects.values_list('organisation_id', flat=True).distinct()
+		for profile in UserProfile.objects.filter(pk__in=org_ids).select_related('user').order_by('user__username'):
+			label = f"{profile.user.username}"
+			if profile.user.email:
+				label += f" ({profile.user.email})"
+			yield (str(profile.pk), label)
+
+	def queryset(self, request, queryset):
+		if self.value():
+			return queryset.filter(organisation_id=self.value())
+		return queryset
+
 
 class StockMovementInline(admin.TabularInline):
 	model = StockMovement
@@ -31,7 +52,7 @@ class StockRecommendationInline(admin.TabularInline):
 @admin.register(ProductsAndStock)
 class ProductsAndStockAdmin(admin.ModelAdmin):
 	list_display = ('product_name', 'category', 'subcategory', 'product_quantity', 'minimum_stock_level', 'stock_status', 'product_price', 'cost_price', 'profit_margin_percentage', 'organisation')
-	list_filter = ('organisation', 'category', 'subcategory', 'minimum_stock_level', 'discount_percentage')
+	list_filter = (OrganisorListFilter, 'category', 'subcategory', 'minimum_stock_level', 'discount_percentage')
 	search_fields = ('product_name', 'product_description')
 	readonly_fields = ('total_value', 'is_low_stock', 'stock_status', 'profit_margin_amount', 'profit_margin_percentage', 'discounted_price', 'is_discount_active', 'total_sales_today', 'total_revenue_today', 'has_active_alerts', 'critical_alerts_count', 'days_since_last_sale', 'total_sales_count', 'total_revenue_from_sales', 'sales_count_today', 'last_sale_date')
 	inlines = [StockMovementInline, PriceHistoryInline, StockAlertInline, StockRecommendationInline]

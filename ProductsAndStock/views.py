@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db import models
 from .models import ProductsAndStock, Category, SubCategory, PriceHistory, SalesStatistics, StockAlert, StockRecommendation
+from leads.models import UserProfile
 from agents.mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin, ProductsAndStockAccessMixin
 from .forms import ProductAndStockModelForm, AdminProductAndStockModelForm
 from .bulk_price_form import BulkPriceUpdateForm
@@ -46,6 +47,12 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 		if subcategory_id:
 			queryset = queryset.filter(subcategory_id=subcategory_id)
 		
+		# Admin only: filter by organisation (organisor)
+		if self.request.user.is_superuser:
+			organisation_id = self.request.GET.get('organisation')
+			if organisation_id:
+				queryset = queryset.filter(organisation_id=organisation_id)
+		
 		return queryset
 	
 	def get_context_data(self, **kwargs):
@@ -69,6 +76,15 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 			except (ValueError, TypeError):
 				pass
 		
+		# Admin only: only organisors (exclude superuser/admin) in filter dropdown
+		organisations = []
+		selected_organisation_id = self.request.GET.get('organisation') or ''
+		if self.request.user.is_superuser:
+			organisations = UserProfile.objects.filter(
+				user__is_organisor=True,
+				user__is_superuser=False,
+			).select_related('user').order_by('user__username')
+		
 		context.update({
 			'total_products': total_products,
 			'total_quantity': total_quantity,
@@ -77,6 +93,8 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 			'subcategories': subcategories,
 			'selected_category_id': selected_category_id,
 			'selected_subcategory_id': self.request.GET.get('subcategory'),
+			'organisations': organisations,
+			'selected_organisation_id': selected_organisation_id,
 		})
 		
 		return context

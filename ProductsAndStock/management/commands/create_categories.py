@@ -1,120 +1,89 @@
 from django.core.management.base import BaseCommand
-from ProductsAndStock.models import Category, SubCategory
+from ProductsAndStock.models import Category, SubCategory, ProductsAndStock
+
+
+# Default category/subcategory for products when replacing (must exist in categories_data)
+DEFAULT_CATEGORY_NAME = 'Products'
+DEFAULT_SUBCATEGORY_NAME = 'Other'
+
 
 class Command(BaseCommand):
-    help = 'Create sample categories and subcategories'
+    help = 'Create CRM-oriented categories and subcategories. Use --replace to remove old ones and apply only the new set.'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--replace',
+            action='store_true',
+            help='Remove ALL old categories/subcategories and apply only the new CRM set. Existing products are moved to "Services" / "Other Services".',
+        )
 
     def handle(self, *args, **options):
-        # Define categories with their subcategories
+        # Basit set: 5 kategori, her birinde 3-4 alt kategori
         categories_data = [
             {
-                'name': 'Electronics',
-                'description': 'Electronic devices and gadgets',
-                'icon': 'fas fa-laptop',
+                'name': 'Products',
+                'description': 'Fiziksel ürünler',
+                'icon': 'fas fa-box',
                 'subcategories': [
-                    {'name': 'Smartphones', 'description': 'Mobile phones and accessories'},
-                    {'name': 'Laptops', 'description': 'Portable computers and accessories'},
-                    {'name': 'Tablets', 'description': 'Tablet computers and accessories'},
-                    {'name': 'Audio', 'description': 'Headphones, speakers, and audio equipment'},
-                    {'name': 'Cameras', 'description': 'Digital cameras and photography equipment'},
-                    {'name': 'Gaming', 'description': 'Gaming consoles and accessories'},
+                    {'name': 'Merchandise', 'description': 'Ürün ve promosyon'},
+                    {'name': 'Inventory', 'description': 'Stok kalemleri'},
+                    {'name': 'Other', 'description': 'Diğer'},
                 ]
             },
             {
-                'name': 'Clothing',
-                'description': 'Fashion and apparel',
-                'icon': 'fas fa-tshirt',
+                'name': 'Services',
+                'description': 'Hizmetler',
+                'icon': 'fas fa-handshake',
                 'subcategories': [
-                    {'name': 'Men\'s Clothing', 'description': 'Clothing for men'},
-                    {'name': 'Women\'s Clothing', 'description': 'Clothing for women'},
-                    {'name': 'Children\'s Clothing', 'description': 'Clothing for children'},
-                    {'name': 'Shoes', 'description': 'Footwear for all ages'},
-                    {'name': 'Accessories', 'description': 'Bags, belts, jewelry, and other accessories'},
-                    {'name': 'Sportswear', 'description': 'Athletic and sports clothing'},
+                    {'name': 'Consulting', 'description': 'Danışmanlık'},
+                    {'name': 'Support', 'description': 'Destek'},
+                    {'name': 'Training', 'description': 'Eğitim'},
+                    {'name': 'Other', 'description': 'Diğer'},
                 ]
             },
             {
-                'name': 'Food & Beverages',
-                'description': 'Food and drink products',
-                'icon': 'fas fa-utensils',
+                'name': 'Software',
+                'description': 'Yazılım ve dijital',
+                'icon': 'fas fa-laptop-code',
                 'subcategories': [
-                    {'name': 'Fresh Produce', 'description': 'Fruits and vegetables'},
-                    {'name': 'Meat & Seafood', 'description': 'Fresh and frozen meat and seafood'},
-                    {'name': 'Dairy Products', 'description': 'Milk, cheese, yogurt, and dairy items'},
-                    {'name': 'Bakery', 'description': 'Bread, pastries, and baked goods'},
-                    {'name': 'Beverages', 'description': 'Drinks, juices, and liquid refreshments'},
-                    {'name': 'Snacks', 'description': 'Chips, nuts, and snack foods'},
+                    {'name': 'Licenses', 'description': 'Lisanslar'},
+                    {'name': 'SaaS', 'description': 'Bulut / abonelik'},
+                    {'name': 'Other', 'description': 'Diğer'},
                 ]
             },
             {
-                'name': 'Home & Garden',
-                'description': 'Home improvement and garden supplies',
-                'icon': 'fas fa-home',
+                'name': 'Subscriptions',
+                'description': 'Abonelik ve tekrarlayan',
+                'icon': 'fas fa-sync-alt',
                 'subcategories': [
-                    {'name': 'Furniture', 'description': 'Tables, chairs, and home furniture'},
-                    {'name': 'Decor', 'description': 'Home decoration and accessories'},
-                    {'name': 'Kitchen & Dining', 'description': 'Kitchen utensils and dining accessories'},
-                    {'name': 'Garden Tools', 'description': 'Tools for gardening and outdoor work'},
-                    {'name': 'Plants', 'description': 'Indoor and outdoor plants'},
-                    {'name': 'Cleaning Supplies', 'description': 'Household cleaning products'},
+                    {'name': 'Monthly', 'description': 'Aylık'},
+                    {'name': 'Annual', 'description': 'Yıllık'},
+                    {'name': 'Other', 'description': 'Diğer'},
                 ]
             },
             {
-                'name': 'Sports & Outdoors',
-                'description': 'Sports equipment and outdoor gear',
-                'icon': 'fas fa-dumbbell',
+                'name': 'Other',
+                'description': 'Diğer kategoriler',
+                'icon': 'fas fa-folder',
                 'subcategories': [
-                    {'name': 'Fitness Equipment', 'description': 'Exercise machines and fitness gear'},
-                    {'name': 'Team Sports', 'description': 'Balls, equipment for team sports'},
-                    {'name': 'Outdoor Gear', 'description': 'Camping, hiking, and outdoor equipment'},
-                    {'name': 'Water Sports', 'description': 'Swimming and water activity equipment'},
-                    {'name': 'Winter Sports', 'description': 'Skiing, snowboarding, and winter gear'},
-                    {'name': 'Cycling', 'description': 'Bicycles and cycling accessories'},
+                    {'name': 'General', 'description': 'Genel'},
+                    {'name': 'Misc', 'description': 'Çeşitli'},
                 ]
             },
-            {
-                'name': 'Books & Media',
-                'description': 'Books, movies, music, and educational materials',
-                'icon': 'fas fa-book',
-                'subcategories': [
-                    {'name': 'Books', 'description': 'Fiction and non-fiction books'},
-                    {'name': 'Movies & TV', 'description': 'DVDs, Blu-rays, and streaming media'},
-                    {'name': 'Music', 'description': 'CDs, vinyl records, and digital music'},
-                    {'name': 'Educational', 'description': 'Textbooks and educational materials'},
-                    {'name': 'Magazines', 'description': 'Periodicals and magazines'},
-                    {'name': 'Games', 'description': 'Board games, puzzles, and entertainment'},
-                ]
-            },
-            {
-                'name': 'Health & Beauty',
-                'description': 'Health, beauty, and personal care products',
-                'icon': 'fas fa-heart',
-                'subcategories': [
-                    {'name': 'Skincare', 'description': 'Facial and body care products'},
-                    {'name': 'Makeup', 'description': 'Cosmetics and beauty products'},
-                    {'name': 'Hair Care', 'description': 'Shampoos, conditioners, and hair products'},
-                    {'name': 'Personal Care', 'description': 'Hygiene and personal care items'},
-                    {'name': 'Supplements', 'description': 'Vitamins and health supplements'},
-                    {'name': 'Medical', 'description': 'First aid and medical supplies'},
-                ]
-            },
-            {
-                'name': 'Automotive',
-                'description': 'Car parts, accessories, and automotive supplies',
-                'icon': 'fas fa-car',
-                'subcategories': [
-                    {'name': 'Car Parts', 'description': 'Engine, brake, and other car components'},
-                    {'name': 'Accessories', 'description': 'Car accessories and customization'},
-                    {'name': 'Tools', 'description': 'Automotive tools and equipment'},
-                    {'name': 'Maintenance', 'description': 'Oil, filters, and maintenance supplies'},
-                    {'name': 'Electronics', 'description': 'Car audio, GPS, and electronic accessories'},
-                    {'name': 'Tires', 'description': 'Tires and wheel accessories'},
-                ]
-            }
         ]
 
+        new_category_names = {c['name'] for c in categories_data}
+        new_subcategory_keys = {
+            (c['name'], sc['name'])
+            for c in categories_data
+            for sc in c['subcategories']
+        }
+
+        # 1) Create all new CRM categories and subcategories
         created_categories = 0
         created_subcategories = 0
+        default_category = None
+        default_subcategory = None
 
         for category_data in categories_data:
             category, created = Category.objects.get_or_create(
@@ -124,33 +93,66 @@ class Command(BaseCommand):
                     'icon': category_data['icon']
                 }
             )
-            
+            if category.name == DEFAULT_CATEGORY_NAME:
+                default_category = category
             if created:
                 created_categories += 1
-                self.stdout.write(
-                    self.style.SUCCESS(f'Created category: {category.name}')
-                )
+                self.stdout.write(self.style.SUCCESS(f'Created category: {category.name}'))
             else:
-                self.stdout.write(
-                    self.style.WARNING(f'Category already exists: {category.name}')
-                )
+                self.stdout.write(self.style.WARNING(f'Category already exists: {category.name}'))
 
-            # Create subcategories
             for subcat_data in category_data['subcategories']:
                 subcategory, created = SubCategory.objects.get_or_create(
                     name=subcat_data['name'],
                     category=category,
                     defaults={'description': subcat_data['description']}
                 )
-                
+                if category.name == DEFAULT_CATEGORY_NAME and subcategory.name == DEFAULT_SUBCATEGORY_NAME:
+                    default_subcategory = subcategory
                 if created:
                     created_subcategories += 1
-                    self.stdout.write(
-                        self.style.SUCCESS(f'  Created subcategory: {subcategory.name}')
+                    self.stdout.write(self.style.SUCCESS(f'  Created subcategory: {subcategory.name}'))
+
+        if options.get('replace'):
+            if not default_category or not default_subcategory:
+                self.stdout.write(
+                    self.style.ERROR(
+                        f'Default "{DEFAULT_CATEGORY_NAME}" / "{DEFAULT_SUBCATEGORY_NAME}" not found. Cannot replace.'
                     )
+                )
+                return
+
+            # 2) Point all products to the default new category/subcategory
+            updated = ProductsAndStock.objects.exclude(
+                category=default_category,
+                subcategory=default_subcategory,
+            ).update(category=default_category, subcategory=default_subcategory)
+            if updated:
+                self.stdout.write(
+                    self.style.WARNING(f'Updated {updated} product(s) to "{DEFAULT_CATEGORY_NAME}" / "{DEFAULT_SUBCATEGORY_NAME}".')
+                )
+
+            # 3) Delete subcategories that are not in the new CRM set
+            deleted_sub = 0
+            for sub in SubCategory.objects.select_related('category').all():
+                key = (sub.category.name, sub.name)
+                if key not in new_subcategory_keys:
+                    sub.delete()
+                    deleted_sub += 1
+            if deleted_sub:
+                self.stdout.write(self.style.WARNING(f'Removed {deleted_sub} old subcategories.'))
+
+            # 4) Delete categories that are not in the new CRM set
+            deleted_cat = 0
+            for cat in Category.objects.all():
+                if cat.name not in new_category_names:
+                    cat.delete()
+                    deleted_cat += 1
+            if deleted_cat:
+                self.stdout.write(self.style.WARNING(f'Removed {deleted_cat} old categories.'))
 
         self.stdout.write(
             self.style.SUCCESS(
-                f'\nSuccessfully created {created_categories} categories and {created_subcategories} subcategories!'
+                f'\nDone. Created {created_categories} categories and {created_subcategories} subcategories.'
             )
         )
