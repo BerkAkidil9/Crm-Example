@@ -66,15 +66,31 @@
 			<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
 				<h2 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">Details</h2>
 				<dl class="space-y-3">
+					{% if request.user.is_superuser and order.organisation %}
+					<div>
+						<dt class="text-xs text-gray-500">Organisation</dt>
+						<dd class="text-sm font-medium text-gray-900 mt-0.5">{{ order.organisation.user.username }}{% if order.organisation.user.email %} <span class="text-gray-500 font-normal">({{ order.organisation.user.email }})</span>{% endif %}</dd>
+					</div>
+					{% endif %}
 					<div>
 						<dt class="text-xs text-gray-500">Lead / Customer</dt>
 						<dd class="text-sm font-medium text-gray-900 mt-0.5">
 							{% if order.lead %}{{ order.lead.first_name }} {{ order.lead.last_name }}{% if order.lead.email %} <span class="text-gray-500 font-normal">({{ order.lead.email }})</span>{% endif %}{% else %}<span class="text-gray-400">— Not set</span>{% endif %}
 						</dd>
 					</div>
+					{% if order.lead and order.lead.agent %}
 					<div>
-						<dt class="text-xs text-gray-500">Order date</dt>
+						<dt class="text-xs text-gray-500">Agent</dt>
+						<dd class="text-sm font-medium text-gray-900 mt-0.5">{{ order.lead.agent.user.username }}{% if order.lead.agent.user.email %} <span class="text-gray-500 font-normal">({{ order.lead.agent.user.email }})</span>{% endif %}</dd>
+					</div>
+					{% endif %}
+					<div>
+						<dt class="text-xs text-gray-500">Order date / time</dt>
 						<dd class="text-sm font-medium text-gray-900 mt-0.5">{{ order.order_day|date:"M d, Y H:i" }}</dd>
+					</div>
+					<div>
+						<dt class="text-xs text-gray-500">Created</dt>
+						<dd class="text-sm font-medium text-gray-900 mt-0.5">{{ order.creation_date|date:"M d, Y H:i" }}</dd>
 					</div>
 					<div>
 						<dt class="text-xs text-gray-500">Items</dt>

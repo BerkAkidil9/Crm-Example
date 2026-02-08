@@ -24,14 +24,15 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
         user = self.request.user
         org_id = self.request.GET.get("organisation")
         agent_id = self.request.GET.get("agent")
+        base = orders.objects.select_related("organisation", "organisation__user", "lead", "lead__agent", "lead__agent__user")
         if user.is_superuser:
-            qs = orders.objects.all()
+            qs = base
             if org_id:
                 qs = qs.filter(organisation_id=org_id)
             if agent_id:
                 qs = qs.filter(lead__agent_id=agent_id)
             return qs.order_by("-creation_date")
-        qs = orders.objects.filter(organisation=user.userprofile)
+        qs = base.filter(organisation=user.userprofile)
         if agent_id and (user.is_superuser or user.is_organisor):
             qs = qs.filter(lead__agent_id=agent_id)
         return qs.order_by("-creation_date")
@@ -77,9 +78,13 @@ class OrderDetailView(LoginRequiredMixin, generic.DetailView):
     context_object_name = "order"
 
     def get_queryset(self):
+        qs = orders.objects.select_related(
+            "organisation", "organisation__user",
+            "lead", "lead__agent", "lead__agent__user",
+        )
         if self.request.user.is_superuser:
-            return orders.objects.all()
-        return orders.objects.filter(organisation=self.request.user.userprofile)
+            return qs
+        return qs.filter(organisation=self.request.user.userprofile)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -120,11 +125,13 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
                 empty_label="-- Select organisation --"
             )
             form.fields["organisation"].widget.attrs["id"] = "id_organisation"
-            # Lead queryset: only when agent is selected (admin must select agent first to see leads)
-            selected_org = self.request.GET.get("organisation")
-            selected_agent = self.request.GET.get("agent")
+            # Lead queryset: use POST on submit (GET is empty on form post), else GET for initial load
+            selected_org = self.request.POST.get("organisation") or self.request.GET.get("organisation")
+            selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent")
             if selected_agent:
                 form.fields["lead"].queryset = Lead.objects.filter(agent_id=selected_agent).select_related("organisation").order_by("first_name", "last_name")
+            elif selected_org:
+                form.fields["lead"].queryset = Lead.objects.filter(organisation_id=selected_org).select_related("organisation").order_by("first_name", "last_name")
             else:
                 form.fields["lead"].queryset = Lead.objects.none()
             form.fields["lead"].required = True
@@ -207,8 +214,9 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        selected_org = self.request.GET.get("organisation")
-        selected_agent = self.request.GET.get("agent")
+        # Use POST on submit so dropdowns and product formset keep correct options when re-rendering
+        selected_org = self.request.POST.get("organisation") or self.request.GET.get("organisation")
+        selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent")
         if self.request.user.is_superuser:
             org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
             profile = getattr(self.request.user, "userprofile", None)
@@ -256,21 +264,70 @@ class OrderUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
         return reverse("orders:order-list")
 
     def get_queryset(self):
+        qs = orders.objects.select_related("organisation", "organisation__user", "lead", "lead__agent")
         if self.request.user.is_superuser:
-            return orders.objects.all()
-        return orders.objects.filter(organisation=self.request.user.userprofile)
+            return qs
+        return qs.filter(organisation=self.request.user.userprofile)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        order = self.get_object()
+        if self.request.user.is_superuser:
+            selected_org = self.request.POST.get("organisation") or str(order.organisation_id)
+            selected_agent = self.request.POST.get("filter_agent") or (str(order.lead.agent_id) if order.lead and order.lead.agent_id else "")
+            if selected_agent:
+                form.fields["lead"].queryset = Lead.objects.filter(agent_id=selected_agent).select_related("organisation").order_by("first_name", "last_name")
+            elif selected_org:
+                form.fields["lead"].queryset = Lead.objects.filter(organisation_id=selected_org).select_related("organisation").order_by("first_name", "last_name")
+            else:
+                form.fields["lead"].queryset = Lead.objects.filter(organisation_id=order.organisation_id).select_related("organisation").order_by("first_name", "last_name")
+        else:
+            form.fields["lead"].queryset = Lead.objects.filter(organisation=order.organisation).select_related("organisation").order_by("first_name", "last_name")
+        return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        organisation = self.request.user.userprofile
-        context['leads'] = Lead.objects.filter(organisation=organisation)
-        context['products'] = ProductsAndStock.objects.filter(organisation=organisation)
+        order = self.get_object()
+        org_id = str(order.organisation_id)
+        agent_id = str(order.lead.agent_id) if order.lead and order.lead.agent_id else ""
+        selected_org = self.request.POST.get("organisation") or self.request.GET.get("organisation") or org_id
+        selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent") or agent_id
+        if self.request.user.is_superuser:
+            org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
+            profile = getattr(self.request.user, "userprofile", None)
+            if profile:
+                org_qs = org_qs.exclude(pk=profile.pk)
+            context["create_organisations"] = org_qs
+            context["selected_organisation_id"] = selected_org or ""
+            context["selected_agent_id"] = selected_agent or ""
+            context["create_agents"] = Agent.objects.filter(organisation_id=order.organisation_id).select_related("user").order_by("user__username")
+            context["create_products"] = ProductsAndStock.objects.filter(organisation_id=order.organisation_id)
+        else:
+            context["create_organisations"] = []
+            context["create_agents"] = []
+            context["selected_organisation_id"] = context["selected_agent_id"] = ""
+            context["create_products"] = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
+        context["leads"] = Lead.objects.filter(organisation=order.organisation)
+        context["products"] = ProductsAndStock.objects.filter(organisation=order.organisation)
+        if self.request.POST:
+            context["product_formset"] = OrderProductFormSet(self.request.POST, instance=order)
+        else:
+            context["product_formset"] = OrderProductFormSet(instance=order)
+        products_qs = context["create_products"]
+        for form in context["product_formset"]:
+            form.fields["product"].queryset = products_qs
+        context["order_categories"] = Category.objects.filter(productsandstock__in=products_qs).distinct().order_by("name")
+        context["order_subcategories"] = SubCategory.objects.filter(category__in=context["order_categories"]).select_related("category").order_by("category__name", "name")
         return context
 
     def form_valid(self, form):
-        # Save the order without affecting products
         order = form.save()
-        return super().form_valid(form)
+        product_formset = OrderProductFormSet(self.request.POST, instance=order)
+        if product_formset.is_valid():
+            product_formset.save()
+            messages.success(self.request, "Order updated successfully.")
+            return super().form_valid(form)
+        return self.form_invalid(form)
 
 class OrderCancelView(LoginRequiredMixin, View):
     success_url = reverse_lazy('orders:order-list')

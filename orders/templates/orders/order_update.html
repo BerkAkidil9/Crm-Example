@@ -2,7 +2,7 @@
 {% load tailwind_filters %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto py-8 px-4">
+<div class="max-w-3xl mx-auto py-8 px-4">
 	<div class="flex justify-between items-center mb-8">
 		<div>
 			<h1 class="text-3xl font-bold text-gray-800">Edit order</h1>
@@ -11,22 +11,203 @@
 		<a href="{% url 'orders:order-detail' object.pk %}" class="text-gray-500 hover:text-gray-700 font-medium">← Back to order</a>
 	</div>
 
-	<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-		<form method="post">
-			{% csrf_token %}
-			{{ form|crispy }}
-			<div class="flex gap-3 mt-6">
-				<button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save changes</button>
-				<a href="{% url 'orders:order-detail' object.pk %}" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300">Cancel</a>
-			</div>
-		</form>
-	</div>
+	<form method="post" class="space-y-8">
+		{% csrf_token %}
+		{% if form.non_field_errors %}<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{{ form.non_field_errors }}</div>{% endif %}
+		{% if form.errors %}<div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800"><strong>Please fix the errors below.</strong><ul class="list-disc list-inside mt-1">{% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}</ul></div>{% endif %}
+		{% if product_formset.non_form_errors %}<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{{ product_formset.non_form_errors }}</div>{% endif %}
 
-	<div class="border-t border-gray-200 pt-6">
+		<!-- Order details -->
+		<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+			<h2 class="text-lg font-semibold text-gray-800 mb-4">Order details</h2>
+			<div class="space-y-4">
+				{% if request.user.is_superuser %}
+				<div class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-500 mb-1">Organisation</label>
+						<p class="text-sm font-medium text-gray-900">{{ object.organisation.user.username }}{% if object.organisation.user.email %} ({{ object.organisation.user.email }}){% endif %}</p>
+						<p class="text-xs text-gray-400 mt-0.5">Cannot be changed when editing.</p>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Agent (filter leads)</label>
+						<select name="filter_agent" id="filter_agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">---------</option>
+							{% for agent in create_agents %}
+							<option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div>
+						<label for="id_lead" class="block text-sm font-medium text-gray-700 mb-1">Lead</label>
+						<select name="lead" id="id_lead" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">---------</option>
+							{% for lead in form.fields.lead.queryset %}
+							<option value="{{ lead.pk }}" {% if form.lead.value == lead.pk or form.initial.lead == lead.pk %}selected{% endif %}>{{ lead }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					{{ form.order_day|as_crispy_field }}
+					{{ form.order_name|as_crispy_field }}
+					{{ form.order_description|as_crispy_field }}
+				</div>
+				{% else %}
+				{{ form|crispy }}
+				{% endif %}
+			</div>
+		</div>
+
+		<!-- Products -->
+		<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+			<div class="flex justify-between items-center mb-4">
+				<h2 class="text-lg font-semibold text-gray-800">Products</h2>
+				<button type="button" id="add-product" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100">
+					<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+					Add product
+				</button>
+			</div>
+			<div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+				<h3 class="text-sm font-medium text-gray-700 mb-2">Filter by category</h3>
+				<div class="flex flex-wrap gap-4 items-end">
+					<div class="min-w-[160px]">
+						<label for="order-filter-category" class="block text-xs font-medium text-gray-500 mb-1">Category</label>
+						<select id="order-filter-category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+							<option value="">All categories</option>
+							{% for cat in order_categories %}
+							<option value="{{ cat.pk }}">{{ cat.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="min-w-[160px]">
+						<label for="order-filter-subcategory" class="block text-xs font-medium text-gray-500 mb-1">Sub category</label>
+						<select id="order-filter-subcategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+							<option value="">All sub categories</option>
+							{% for sub in order_subcategories %}
+							<option value="{{ sub.pk }}" data-category-id="{{ sub.category_id }}">{{ sub.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+			</div>
+			{{ product_formset.management_form }}
+			<div id="product-formset-container" class="space-y-4">
+				{% for form in product_formset %}
+				<div class="product-form-row flex flex-wrap gap-4 items-end p-4 bg-gray-50 rounded-lg border border-gray-200">
+					{{ form.id }}
+					<div class="flex-1 min-w-[200px]">
+						<label for="{{ form.product.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+						<select name="{{ form.product.html_name }}" id="{{ form.product.id_for_label }}" class="order-product-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">---------</option>
+							{% for product in form.fields.product.queryset %}
+							<option value="{{ product.pk }}" data-category-id="{{ product.category_id }}" data-subcategory-id="{{ product.subcategory_id }}" {% if form.product.value == product.pk %}selected{% endif %}>{{ product.product_name }} ({{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}) — ${{ product.product_price|floatformat:2 }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="w-28">{{ form.product_quantity|as_crispy_field }}</div>
+					<div class="flex items-center">
+						{% if form.DELETE %}<span class="hidden">{{ form.DELETE }}</span><button type="button" class="order-row-delete px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500" title="Remove this row">Delete</button>{% endif %}
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+
+		<div class="flex gap-3">
+			<button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save changes</button>
+			<a href="{% url 'orders:order-detail' object.pk %}" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300">Cancel</a>
+		</div>
+	</form>
+
+	<div class="mt-8 pt-6 border-t border-gray-200">
 		<a href="{% url 'orders:order-delete' object.pk %}" class="inline-flex items-center px-4 py-2 text-red-600 hover:text-red-800 font-medium rounded-lg hover:bg-red-50">
 			<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
 			Delete or cancel order
 		</a>
 	</div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	var filterCategory = document.getElementById('order-filter-category');
+	var filterSubcategory = document.getElementById('order-filter-subcategory');
+	function filterSubcategories() {
+		var catId = filterCategory ? filterCategory.value : '';
+		if (!filterSubcategory) return;
+		var opts = filterSubcategory.querySelectorAll('option');
+		opts.forEach(function(opt) {
+			if (opt.value === '') { opt.style.display = ''; opt.disabled = false; return; }
+			var match = !catId || opt.getAttribute('data-category-id') === catId;
+			opt.style.display = match ? '' : 'none';
+			opt.disabled = !match;
+		});
+		filterSubcategory.value = '';
+		filterProducts();
+	}
+	function filterProducts() {
+		var catId = filterCategory ? filterCategory.value : '';
+		var subId = filterSubcategory ? filterSubcategory.value : '';
+		document.querySelectorAll('.order-product-select').forEach(function(sel) {
+			var currentValue = sel.value;
+			var visible = [];
+			sel.querySelectorAll('option').forEach(function(opt) {
+				if (opt.value === '') { opt.style.display = ''; opt.disabled = false; return; }
+				var catMatch = !catId || opt.getAttribute('data-category-id') === catId;
+				var subMatch = !subId || opt.getAttribute('data-subcategory-id') === subId;
+				var isSelected = (opt.value === currentValue);
+				var show = (catMatch && subMatch) || isSelected;
+				opt.style.display = show ? '' : 'none';
+				opt.disabled = !show;
+				if (show) visible.push(opt);
+			});
+			if (!currentValue && subId && visible.length === 1) sel.value = visible[0].value;
+		});
+	}
+	if (filterCategory) filterCategory.addEventListener('change', filterSubcategories);
+	if (filterSubcategory) filterSubcategory.addEventListener('change', filterProducts);
+
+	var container = document.getElementById('product-formset-container');
+	if (container) {
+		container.addEventListener('click', function(e) {
+			if (e.target.classList.contains('order-row-delete')) {
+				var row = e.target.closest('.product-form-row');
+				if (!row) return;
+				var cb = row.querySelector('input[name$="-DELETE"]');
+				if (cb) cb.checked = true;
+				row.style.display = 'none';
+			}
+		});
+	}
+
+	var addBtn = document.getElementById('add-product');
+	var totalInput = document.querySelector('input[name="orderproduct_set-TOTAL_FORMS"]') || document.querySelector('#id_orderproduct_set-TOTAL_FORMS');
+	function getTotalForms() { return totalInput ? parseInt(totalInput.value, 10) : 0; }
+	function setTotalForms(n) { if (totalInput) totalInput.value = n; }
+	if (addBtn && container && totalInput) {
+		addBtn.addEventListener('click', function() {
+			var total = getTotalForms();
+			var rowToClone = container.querySelector('.product-form-row');
+			if (!rowToClone) return;
+			var clone = rowToClone.cloneNode(true);
+			clone.style.display = '';
+			var newPrefix = 'orderproduct_set-' + total + '-';
+			var newIdPrefix = 'id_orderproduct_set-' + total + '-';
+			clone.querySelectorAll('input, select').forEach(function(el) {
+				el.value = '';
+				el.checked = false;
+				var name = el.getAttribute('name');
+				if (name) el.setAttribute('name', name.replace(/orderproduct_set-\d+-/, newPrefix));
+				var id = el.getAttribute('id');
+				if (id) el.setAttribute('id', id.replace(/id_orderproduct_set-\d+-/, newIdPrefix));
+			});
+			clone.querySelectorAll('label').forEach(function(lbl) {
+				var forAttr = lbl.getAttribute('for');
+				if (forAttr) lbl.setAttribute('for', forAttr.replace(/id_orderproduct_set-\d+-/, newIdPrefix));
+			});
+			var delCb = clone.querySelector('input[name$="-DELETE"]');
+			if (delCb) delCb.checked = false;
+			container.appendChild(clone);
+			setTotalForms(total + 1);
+		});
+	}
+});
+</script>
 {% endblock %}

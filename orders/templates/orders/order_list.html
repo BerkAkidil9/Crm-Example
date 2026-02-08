@@ -55,10 +55,23 @@
 						<h3 class="font-semibold text-gray-900 truncate">{{ order.order_name }}</h3>
 						<span class="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
 					</div>
-					<p class="text-sm text-gray-500 line-clamp-2 mb-4">{{ order.order_description|truncatewords:15 }}</p>
-					<div class="flex items-center justify-between text-sm text-gray-500">
-						<span>{{ order.order_day|date:"M d, Y" }}</span>
-						<span class="font-medium text-gray-700">${{ order.total_order_price|floatformat:2 }}</span>
+					<p class="text-sm text-gray-500 line-clamp-2 mb-3">{{ order.order_description|truncatewords:15 }}</p>
+					<dl class="space-y-1.5 text-sm text-gray-600 mb-4">
+						{% if request.user.is_superuser and order.organisation %}
+						<div class="flex justify-between"><dt class="text-gray-500">Organisation</dt><dd class="font-medium text-gray-800">{{ order.organisation.user.username }}</dd></div>
+						{% endif %}
+						{% if order.lead %}
+						<div class="flex justify-between"><dt class="text-gray-500">Lead</dt><dd class="font-medium text-gray-800">{{ order.lead.first_name }} {{ order.lead.last_name }}</dd></div>
+						{% if order.lead.agent %}
+						<div class="flex justify-between"><dt class="text-gray-500">Agent</dt><dd class="font-medium text-gray-800">{{ order.lead.agent.user.username }}</dd></div>
+						{% endif %}
+						{% endif %}
+						<div class="flex justify-between"><dt class="text-gray-500">Order day</dt><dd>{{ order.order_day|date:"M d, Y H:i" }}</dd></div>
+						<div class="flex justify-between"><dt class="text-gray-500">Created</dt><dd>{{ order.creation_date|date:"M d, Y" }}</dd></div>
+					</dl>
+					<div class="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
+						<span class="text-gray-500">{{ order.items_count }} item(s)</span>
+						<span class="font-semibold text-gray-900">${{ order.total_order_price|floatformat:2 }}</span>
 					</div>
 					<div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
 						<a href="{% url 'orders:order-detail' order.pk %}" class="flex-1 text-center py-2 text-sm font-medium text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-50">View</a>
@@ -86,9 +99,22 @@
 						<h3 class="font-semibold text-gray-600 truncate">{{ order.order_name }}</h3>
 						<span class="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">Cancelled</span>
 					</div>
-					<p class="text-sm text-gray-500 line-clamp-2 mb-4">{{ order.order_description|truncatewords:15 }}</p>
-					<div class="flex items-center justify-between text-sm text-gray-500">
-						<span>{{ order.order_day|date:"M d, Y" }}</span>
+					<p class="text-sm text-gray-500 line-clamp-2 mb-3">{{ order.order_description|truncatewords:15 }}</p>
+					<dl class="space-y-1.5 text-sm text-gray-600 mb-4">
+						{% if request.user.is_superuser and order.organisation %}
+						<div class="flex justify-between"><dt class="text-gray-500">Organisation</dt><dd class="font-medium text-gray-700">{{ order.organisation.user.username }}</dd></div>
+						{% endif %}
+						{% if order.lead %}
+						<div class="flex justify-between"><dt class="text-gray-500">Lead</dt><dd class="font-medium text-gray-700">{{ order.lead.first_name }} {{ order.lead.last_name }}</dd></div>
+						{% if order.lead.agent %}
+						<div class="flex justify-between"><dt class="text-gray-500">Agent</dt><dd class="font-medium text-gray-700">{{ order.lead.agent.user.username }}</dd></div>
+						{% endif %}
+						{% endif %}
+						<div class="flex justify-between"><dt class="text-gray-500">Order day</dt><dd>{{ order.order_day|date:"M d, Y H:i" }}</dd></div>
+						<div class="flex justify-between"><dt class="text-gray-500">Created</dt><dd>{{ order.creation_date|date:"M d, Y" }}</dd></div>
+					</dl>
+					<div class="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
+						<span class="text-gray-500">{{ order.items_count }} item(s)</span>
 						<span class="font-medium text-gray-600">${{ order.total_order_price|floatformat:2 }}</span>
 					</div>
 					<div class="mt-4 pt-4 border-t border-gray-100">

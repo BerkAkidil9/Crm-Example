@@ -13,6 +13,8 @@
 
 	<form method="post" action="{% url 'orders:order-create' %}" class="space-y-8">
 		{% csrf_token %}
+		{% if form.non_field_errors %}<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{{ form.non_field_errors }}</div>{% endif %}
+		{% if form.errors %}<div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800"><strong>Please fix the errors below.</strong><ul class="list-disc list-inside mt-1">{% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}</ul></div>{% endif %}
 
 		<!-- Order details -->
 		<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -136,22 +138,21 @@ document.addEventListener('DOMContentLoaded', function() {
 		var catId = filterCategory ? filterCategory.value : '';
 		var subId = filterSubcategory ? filterSubcategory.value : '';
 		document.querySelectorAll('.order-product-select').forEach(function(sel) {
+			var currentValue = sel.value;
 			var visible = [];
 			sel.querySelectorAll('option').forEach(function(opt) {
 				if (opt.value === '') { opt.style.display = ''; opt.disabled = false; return; }
 				var catMatch = !catId || opt.getAttribute('data-category-id') === catId;
 				var subMatch = !subId || opt.getAttribute('data-subcategory-id') === subId;
-				var show = catMatch && subMatch;
+				// Always show and enable the currently selected option so filter doesn't clear it
+				var isSelected = (opt.value === currentValue);
+				var show = (catMatch && subMatch) || isSelected;
 				opt.style.display = show ? '' : 'none';
 				opt.disabled = !show;
 				if (show) visible.push(opt);
 			});
-			if (sel.value) {
-				var selectedOpt = sel.querySelector('option[value="' + sel.value + '"]');
-				if (!selectedOpt || selectedOpt.disabled) sel.value = '';
-			}
-			// When subcategory is selected and exactly one product matches, auto-select it
-			if (subId && visible.length === 1) sel.value = visible[0].value;
+			// Only auto-select when this dropdown is empty and exactly one product matches
+			if (!currentValue && subId && visible.length === 1) sel.value = visible[0].value;
 		});
 	}
 	if (filterCategory) filterCategory.addEventListener('change', filterSubcategories);

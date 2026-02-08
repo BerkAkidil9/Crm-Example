@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django import forms
 from django.utils import timezone
 from .models import orders, OrderProduct
@@ -48,9 +50,15 @@ class OrderModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['order_day'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']
+        now = timezone.now()
+        self.fields['order_day'].widget.attrs['min'] = now.strftime('%Y-%m-%dT%H:%M')
 
     def clean_order_day(self):
         order_day = self.cleaned_data.get('order_day')
-        if order_day and timezone.is_naive(order_day):
-            order_day = timezone.make_aware(order_day, timezone.get_current_timezone())
+        if order_day:
+            if timezone.is_naive(order_day):
+                order_day = timezone.make_aware(order_day, timezone.get_current_timezone())
+            # Allow up to 1 minute in the past to avoid validation failure due to submit delay
+            if order_day < timezone.now() - timedelta(minutes=1):
+                raise forms.ValidationError('Order day cannot be in the past. Please select current time or a future date.')
         return order_day
