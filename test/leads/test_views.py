@@ -145,7 +145,7 @@ class TestSignupView(TestCase):
             # Email parametreleri doğru mu
             call_args = mock_send_mail.call_args
             # call_args[0] = positional args, [1] = kwargs veya message içeriği
-            self.assertEqual(call_args[0][0], 'DJ CRM - Email Verification')
+            self.assertEqual(call_args[0][0], 'Darkenyas CRM - Email Verification')
             # Email adresi ya ikinci parametre ya da message içinde
             if len(call_args[0]) > 2:
                 # call_args[0][1] = message, [2] = from_email, [3] = recipient_list

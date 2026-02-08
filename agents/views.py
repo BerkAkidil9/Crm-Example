@@ -126,11 +126,11 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
             return self.form_invalid(form)
 
     def send_verification_email(self, user, token):
-        subject = 'DJ CRM - Agent Account Verification'
+        subject = 'Darkenyas CRM - Agent Account Verification'
         message = f"""
         Hello {user.first_name},
         
-        You have been invited to be an agent on DJ CRM! Please click the link below to verify your email and activate your account:
+        You have been invited to be an agent on Darkenyas CRM! Please click the link below to verify your email and activate your account:
         
         http://127.0.0.1:8000/verify-email/{token}/
         
@@ -143,7 +143,7 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
         If you didn't expect this invitation, you can ignore this email.
         
         Best regards,
-        DJ CRM Team
+        Darkenyas CRM Team
         """
         
         send_mail(

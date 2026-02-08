@@ -1,4 +1,4 @@
-# DJ CRM - Django Customer Relationship Management
+# Darkenyas CRM - Django Customer Relationship Management
 
 A Django-based CRM system with email verification and authentication features.
 

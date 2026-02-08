@@ -114,7 +114,7 @@
                                    <p class="mb-1"><strong>Phone:</strong> {{ lead.phone_number|default:"Not provided" }}</p>
                                    <p class="mb-1"><strong>Source:</strong> <span class="text-blue-600 font-medium">{{ lead.source_category.name|default:"Unassigned" }}</span></p>
                                    <p class="mb-1"><strong>Value:</strong> <span class="text-green-600 font-medium">{{ lead.value_category.name|default:"Unassigned" }}</span></p>
-                                   {% if lead.agent %}
+                                   {% if lead.agent and not request.user.is_agent %}
                                    <p class="mb-1"><strong>Agent:</strong> <span class="text-purple-600 font-medium">{{ lead.agent.user.username }}</span></p>
                                    {% endif %}
                                    {% if request.user.is_superuser %}

@@ -50,8 +50,9 @@ class OrderProduct(models.Model):
                 # Store previous quantity
                 previous_quantity = self.product.product_quantity
                 
-                # Reduce stock
+                # Reduce stock (skip ProductsAndStock post_save stock movement to avoid duplicate)
                 self.product.product_quantity -= self.product_quantity
+                self.product._skip_stock_movement_signal = True
                 self.product.save()
                 
                 # Create stock movement record
@@ -77,8 +78,9 @@ class OrderProduct(models.Model):
             # Store previous quantity
             previous_quantity = self.product.product_quantity
             
-            # Restore stock
+            # Restore stock (skip ProductsAndStock post_save stock movement to avoid duplicate)
             self.product.product_quantity += self.product_quantity
+            self.product._skip_stock_movement_signal = True
             self.product.save()
             
             # Create stock movement record

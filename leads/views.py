@@ -48,7 +48,7 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     def form_valid(self, form):
         response = super().form_valid(form)
         user = form.user
-        subject = 'DJ CRM - Password Reset Successful'
+        subject = 'Darkenyas CRM - Password Reset Successful'
         message = f"""Hello {user.first_name or user.username},
 
 Your password has been successfully reset.
@@ -58,7 +58,7 @@ You can now login with your new password at: http://127.0.0.1:8000/login/
 If you did not perform this action, please contact support immediately.
 
 Best regards,
-DJ CRM Team
+Darkenyas CRM Team
 """
         send_mail(
             subject,
@@ -130,11 +130,11 @@ class SignupView(generic.CreateView):
         return super().form_valid(form)
     
     def send_verification_email(self, user, token):
-        subject = 'DJ CRM - Email Verification'
+        subject = 'Darkenyas CRM - Email Verification'
         message = f"""
         Hello {user.first_name},
         
-        Welcome to DJ CRM! Please click the link below to activate your account:
+        Welcome to Darkenyas CRM! Please click the link below to activate your account:
         
         http://127.0.0.1:8000/verify-email/{token}/
         
@@ -143,7 +143,7 @@ class SignupView(generic.CreateView):
         If you didn't perform this action, you can ignore this email.
         
         Best regards,
-        DJ CRM Team
+        Darkenyas CRM Team
         """
         
         send_mail(

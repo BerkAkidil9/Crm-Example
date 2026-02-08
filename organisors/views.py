@@ -84,11 +84,11 @@ class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):
             return self.form_invalid(form)
 
     def send_verification_email(self, user, token):
-        subject = 'DJ CRM - Organisor Account Verification'
+        subject = 'Darkenyas CRM - Organisor Account Verification'
         message = f"""
         Hello {user.first_name},
         
-        You have been invited to be an organisor on DJ CRM! Please click the link below to verify your email and activate your account:
+        You have been invited to be an organisor on Darkenyas CRM! Please click the link below to verify your email and activate your account:
         
         http://127.0.0.1:8000/verify-email/{token}/
         
@@ -103,7 +103,7 @@ class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):
         If you didn't expect this invitation, you can ignore this email.
         
         Best regards,
-        DJ CRM Team
+        Darkenyas CRM Team
         """
         
         send_mail(

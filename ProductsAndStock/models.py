@@ -281,7 +281,7 @@ Your {self.product_name} product stock level is critical!
 ⚠️ Urgent stock replenishment is recommended.
 
 This message was sent automatically.
-DJCrm System
+Darkenyas CRM System
 			"""
 			
 			try:
@@ -323,7 +323,13 @@ def store_previous_data(sender, instance, **kwargs):
 			pass
 
 def create_stock_movement(sender, instance, created, **kwargs):
-	"""Create stock movement record after save"""
+	"""Create stock movement record after save. Skip when order already created one (avoid duplicate)."""
+	if not created:
+		# OrderProduct.reduce_stock/restore_stock create their own StockMovement; skip duplicate
+		if getattr(instance, '_skip_stock_movement_signal', False):
+			if instance.pk in _previous_data:
+				del _previous_data[instance.pk]
+			return
 	if created:
 		# For new products, create initial stock movement
 		StockMovement.objects.create(

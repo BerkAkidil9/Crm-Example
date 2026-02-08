@@ -50,6 +50,48 @@
 					{{ form.order_name|as_crispy_field }}
 					{{ form.order_description|as_crispy_field }}
 				</div>
+				{% elif request.user.is_organisor %}
+				<div class="space-y-4">
+					<p class="text-sm text-gray-500">Select in order: agent, then lead. (All required.)</p>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Agent</label>
+						<select name="filter_agent" id="filter_agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+							<option value="">---------</option>
+							{% for agent in create_agents %}
+							<option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div>
+						<label for="id_lead" class="block text-sm font-medium text-gray-700 mb-1">Lead {% if not selected_agent_id %}<span class="text-gray-400">— select agent first</span>{% endif %}</label>
+						<select name="lead" id="id_lead" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" {% if not selected_agent_id %}disabled{% endif %} required>
+							<option value="">---------</option>
+							{% for lead in form.fields.lead.queryset %}
+							<option value="{{ lead.pk }}" {% if form.lead.value == lead.pk or form.initial.lead == lead.pk %}selected{% endif %}>{{ lead }}</option>
+							{% endfor %}
+						</select>
+						{% if not selected_agent_id %}<input type="hidden" name="lead" value="">{% endif %}
+					</div>
+					{{ form.order_day|as_crispy_field }}
+					{{ form.order_name|as_crispy_field }}
+					{{ form.order_description|as_crispy_field }}
+				</div>
+				{% elif request.user.is_agent %}
+				<div class="space-y-4">
+					<p class="text-sm text-gray-500">Lead (only your assigned leads). All fields required.</p>
+					<div>
+						<label for="id_lead" class="block text-sm font-medium text-gray-700 mb-1">Lead</label>
+						<select name="lead" id="id_lead" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+							<option value="">---------</option>
+							{% for lead in form.fields.lead.queryset %}
+							<option value="{{ lead.pk }}" {% if form.lead.value == lead.pk or form.initial.lead == lead.pk %}selected{% endif %}>{{ lead }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					{{ form.order_day|as_crispy_field }}
+					{{ form.order_name|as_crispy_field }}
+					{{ form.order_description|as_crispy_field }}
+				</div>
 				{% else %}
 				{{ form|crispy }}
 				{% endif %}
@@ -98,7 +140,7 @@
 						<select name="{{ form.product.html_name }}" id="{{ form.product.id_for_label }}" class="order-product-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
 							<option value="">---------</option>
 							{% for product in form.fields.product.queryset %}
-							<option value="{{ product.pk }}" data-category-id="{{ product.category_id }}" data-subcategory-id="{{ product.subcategory_id }}" {% if form.product.value == product.pk %}selected{% endif %}>{{ product.product_name }} ({{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}) — ${{ product.product_price|floatformat:2 }}</option>
+							<option value="{{ product.pk }}" data-category-id="{{ product.category_id }}" data-subcategory-id="{{ product.subcategory_id }}" data-price="{{ product.product_price }}" data-stock="{{ product.product_quantity|default:0 }}" {% if form.product.value == product.pk %}selected{% endif %}>{{ product.product_name }} ({{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}) — ${{ product.product_price|floatformat:2 }}, {{ product.product_quantity|default:"0" }} in stock</option>
 							{% endfor %}
 						</select>
 					</div>
@@ -109,6 +151,10 @@
 				</div>
 				{% endfor %}
 			</div>
+		</div>
+
+		<div class="mt-6 p-4 bg-gray-100 rounded-xl border border-gray-200">
+			<p class="text-lg font-semibold text-gray-800">Order total: $<span id="order-total-amount">0.00</span></p>
 		</div>
 
 		<div class="flex gap-3">
@@ -164,6 +210,14 @@ document.addEventListener('DOMContentLoaded', function() {
 	if (filterCategory) filterCategory.addEventListener('change', filterSubcategories);
 	if (filterSubcategory) filterSubcategory.addEventListener('change', filterProducts);
 
+	var agentSelect = document.getElementById('filter_agent');
+	if (agentSelect) {
+		agentSelect.addEventListener('change', function() {
+			var agent = this.value;
+			window.location = '{% url "orders:order-update" object.pk %}' + (agent ? '?agent=' + encodeURIComponent(agent) : '');
+		});
+	}
+
 	var container = document.getElementById('product-formset-container');
 	if (container) {
 		container.addEventListener('click', function(e) {
@@ -206,8 +260,44 @@ document.addEventListener('DOMContentLoaded', function() {
 			if (delCb) delCb.checked = false;
 			container.appendChild(clone);
 			setTotalForms(total + 1);
+			updateOrderTotal();
 		});
 	}
+
+	function parsePrice(val) {
+		if (val === '' || val === null || val === undefined) return 0;
+		var s = String(val).replace(',', '.');
+		return isNaN(parseFloat(s)) ? 0 : parseFloat(s);
+	}
+
+	function updateOrderTotal() {
+		var total = 0;
+		var rows = document.querySelectorAll('#product-formset-container .product-form-row');
+		rows.forEach(function(row) {
+			if (row.style.display === 'none') return;
+			var delCb = row.querySelector('input[name$="-DELETE"]');
+			if (delCb && delCb.checked) return;
+			var sel = row.querySelector('.order-product-select');
+			var qtyInput = row.querySelector('input[name*="-product_quantity"]');
+			if (!sel || !qtyInput) return;
+			var opt = sel.options[sel.selectedIndex];
+			var price = opt && opt.getAttribute('data-price') ? parsePrice(opt.getAttribute('data-price')) : 0;
+			var qty = parsePrice(qtyInput.value) || 0;
+			total += price * qty;
+		});
+		var el = document.getElementById('order-total-amount');
+		if (el) el.textContent = total.toFixed(2);
+	}
+
+	if (container) {
+		container.addEventListener('change', function(e) {
+			if (e.target.classList.contains('order-product-select') || (e.target.name && e.target.name.indexOf('product_quantity') !== -1)) updateOrderTotal();
+		});
+		container.addEventListener('input', function(e) {
+			if (e.target.name && e.target.name.indexOf('product_quantity') !== -1) updateOrderTotal();
+		});
+	}
+	updateOrderTotal();
 });
 </script>
 {% endblock %}

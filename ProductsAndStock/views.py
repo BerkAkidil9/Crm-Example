@@ -25,14 +25,10 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 			queryset = ProductsAndStock.objects.filter(organisation=organisation)
 		elif self.request.user.is_agent:
 			try:
-				# Agent sees products from their organisation (via UserProfile)
-				agent_organisation = self.request.user.userprofile
+				# Agent sees products from their organisation (via Agent.organisation)
+				agent_organisation = self.request.user.agent.organisation
 				queryset = ProductsAndStock.objects.filter(organisation=agent_organisation)
-			except Exception as e:
-				# If agent doesn't exist, return empty queryset
-				print(f"Agent access error: {e}")
-				print(f"User: {self.request.user.username}")
-				print(f"Is agent: {self.request.user.is_agent}")
+			except Exception:
 				queryset = ProductsAndStock.objects.none()
 		else:
 			queryset = ProductsAndStock.objects.none()
@@ -46,6 +42,11 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 		subcategory_id = self.request.GET.get('subcategory')
 		if subcategory_id:
 			queryset = queryset.filter(subcategory_id=subcategory_id)
+		
+		# Filter by product name (case-insensitive partial match)
+		search = (self.request.GET.get('search') or self.request.GET.get('name') or '').strip()
+		if search:
+			queryset = queryset.filter(product_name__icontains=search)
 		
 		# Admin only: filter by organisation (organisor)
 		if self.request.user.is_superuser:
@@ -85,6 +86,7 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 				user__is_superuser=False,
 			).select_related('user').order_by('user__username')
 		
+		search_query = (self.request.GET.get('search') or self.request.GET.get('name') or '').strip()
 		context.update({
 			'total_products': total_products,
 			'total_quantity': total_quantity,
@@ -95,6 +97,7 @@ class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 			'selected_subcategory_id': self.request.GET.get('subcategory'),
 			'organisations': organisations,
 			'selected_organisation_id': selected_organisation_id,
+			'search_query': search_query,
 		})
 		
 		return context

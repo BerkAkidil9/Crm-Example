@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic, View
-from agents.mixins import OrganisorAndLoginRequiredMixin
 from django.core.mail import send_mail
 from .models import orders, OrderProduct
 from leads.models import Lead, Agent
@@ -15,6 +14,19 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from finance.models import OrderFinanceReport
 from django.utils import timezone
+
+
+def get_organisation_for_user(user):
+    """Return the UserProfile (organisation) to use for filtering orders/products. Agents see their organisation's data."""
+    if user.is_superuser:
+        return None
+    if getattr(user, "is_agent", False):
+        try:
+            return Agent.objects.get(user=user).organisation
+        except Agent.DoesNotExist:
+            return user.userprofile
+    return user.userprofile
+
 
 class OrderListView(LoginRequiredMixin, generic.ListView):
     template_name = "orders/order_list.html"
@@ -32,8 +44,18 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
             if agent_id:
                 qs = qs.filter(lead__agent_id=agent_id)
             return qs.order_by("-creation_date")
-        qs = base.filter(organisation=user.userprofile)
-        if agent_id and (user.is_superuser or user.is_organisor):
+        org = get_organisation_for_user(user)
+        if org is None:
+            return base.order_by("-creation_date")
+        qs = base.filter(organisation=org)
+        # Agent only sees orders where the lead is assigned to them
+        if user.is_agent:
+            try:
+                agent_obj = Agent.objects.get(user=user)
+                qs = qs.filter(lead__agent=agent_obj)
+            except Agent.DoesNotExist:
+                qs = qs.none()
+        elif agent_id and (user.is_superuser or user.is_organisor):
             qs = qs.filter(lead__agent_id=agent_id)
         return qs.order_by("-creation_date")
 
@@ -64,7 +86,8 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
             else:
                 context["organisations"] = []
                 context["show_organisation_filter"] = False
-                context["agents"] = Agent.objects.filter(organisation=self.request.user.userprofile).select_related("user").order_by("user__username")
+                org = get_organisation_for_user(self.request.user)
+                context["agents"] = Agent.objects.filter(organisation=org).select_related("user").order_by("user__username") if org else []
         else:
             context["show_organisation_filter"] = False
             context["organisations"] = []
@@ -84,7 +107,17 @@ class OrderDetailView(LoginRequiredMixin, generic.DetailView):
         )
         if self.request.user.is_superuser:
             return qs
-        return qs.filter(organisation=self.request.user.userprofile)
+        org = get_organisation_for_user(self.request.user)
+        if not org:
+            return qs
+        qs = qs.filter(organisation=org)
+        if self.request.user.is_agent:
+            try:
+                agent_obj = Agent.objects.get(user=self.request.user)
+                qs = qs.filter(lead__agent=agent_obj)
+            except Agent.DoesNotExist:
+                qs = qs.none()
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -94,8 +127,13 @@ class OrderDetailView(LoginRequiredMixin, generic.DetailView):
         # Calculate total order price
         total_order_price = sum(item.total_price for item in order_items)
 
-        context['leads'] = Lead.objects.filter(organisation=self.request.user.userprofile)
-        context['products'] = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
+        org = get_organisation_for_user(self.request.user)
+        if org:
+            context['leads'] = Lead.objects.filter(organisation=org)
+            context['products'] = ProductsAndStock.objects.filter(organisation=org)
+        else:
+            context['leads'] = Lead.objects.none()
+            context['products'] = ProductsAndStock.objects.none()
         context['order_items'] = order_items
         context['total_order_price'] = total_order_price  # Pass total order price to template
         return context
@@ -112,10 +150,11 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        if self.request.user.is_superuser:
+        user = self.request.user
+        if user.is_superuser:
             from django.forms import ModelChoiceField
             org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
-            profile = getattr(self.request.user, "userprofile", None)
+            profile = getattr(user, "userprofile", None)
             if profile:
                 org_qs = org_qs.exclude(pk=profile.pk)
             form.fields["organisation"] = ModelChoiceField(
@@ -125,7 +164,6 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
                 empty_label="-- Select organisation --"
             )
             form.fields["organisation"].widget.attrs["id"] = "id_organisation"
-            # Lead queryset: use POST on submit (GET is empty on form post), else GET for initial load
             selected_org = self.request.POST.get("organisation") or self.request.GET.get("organisation")
             selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent")
             if selected_agent:
@@ -142,6 +180,29 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
             fields = OrderedDict([("organisation", form.fields.pop("organisation"))])
             fields.update(form.fields)
             form.fields = fields
+        elif user.is_organisor:
+            # Organisor: same as admin but no organisation (they are the org); agents/leads/products from their org
+            selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent")
+            org_profile = user.userprofile
+            if selected_agent:
+                form.fields["lead"].queryset = Lead.objects.filter(agent_id=selected_agent).select_related("organisation").order_by("first_name", "last_name")
+            else:
+                form.fields["lead"].queryset = Lead.objects.filter(organisation=org_profile).select_related("organisation").order_by("first_name", "last_name")
+            form.fields["lead"].required = True
+            form.fields["order_day"].required = True
+            form.fields["order_name"].required = True
+            form.fields["order_description"].required = True
+        elif user.is_agent:
+            # Agent: only leads assigned to them
+            try:
+                agent_obj = Agent.objects.get(user=user)
+                form.fields["lead"].queryset = Lead.objects.filter(agent=agent_obj).select_related("organisation").order_by("first_name", "last_name")
+            except Agent.DoesNotExist:
+                form.fields["lead"].queryset = Lead.objects.none()
+            form.fields["lead"].required = True
+            form.fields["order_day"].required = True
+            form.fields["order_name"].required = True
+            form.fields["order_description"].required = True
         return form
 
     def get_initial(self):
@@ -159,7 +220,7 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
         context = self.get_context_data()
         product_formset = context['product_formset']
         if product_formset.is_valid():
-            if self.request.user.is_superuser:
+            if self.request.user.is_superuser or self.request.user.is_organisor or self.request.user.is_agent:
                 has_product_row = any(
                     f.cleaned_data.get("product") and f.cleaned_data.get("product_quantity")
                     for f in product_formset
@@ -171,7 +232,8 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
             if self.request.user.is_superuser and form.cleaned_data.get("organisation"):
                 order.organisation = form.cleaned_data["organisation"]
             else:
-                order.organisation = self.request.user.userprofile
+                org = get_organisation_for_user(self.request.user)
+                order.organisation = org if org else self.request.user.userprofile
             order.creation_date = timezone.now()  # Set the creation date to now
             order.save()
             total_price = 0
@@ -214,12 +276,12 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Use POST on submit so dropdowns and product formset keep correct options when re-rendering
+        user = self.request.user
         selected_org = self.request.POST.get("organisation") or self.request.GET.get("organisation")
         selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent")
-        if self.request.user.is_superuser:
+        if user.is_superuser:
             org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
-            profile = getattr(self.request.user, "userprofile", None)
+            profile = getattr(user, "userprofile", None)
             if profile:
                 org_qs = org_qs.exclude(pk=profile.pk)
             context["create_organisations"] = org_qs
@@ -231,20 +293,30 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
             else:
                 context["create_agents"] = []
                 context["create_products"] = ProductsAndStock.objects.none()
+        elif user.is_organisor:
+            org_profile = user.userprofile
+            context["create_organisations"] = []
+            context["selected_organisation_id"] = ""
+            context["selected_agent_id"] = selected_agent or ""
+            context["create_agents"] = Agent.objects.filter(organisation=org_profile).select_related("user").order_by("user__username")
+            context["create_products"] = ProductsAndStock.objects.filter(organisation=org_profile)
         else:
             context["create_organisations"] = []
             context["create_agents"] = []
             context["selected_organisation_id"] = context["selected_agent_id"] = ""
-            context["create_products"] = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
-        context['leads'] = Lead.objects.filter(organisation=self.request.user.userprofile)
-        context['products'] = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
+            org = get_organisation_for_user(user)
+            context["create_products"] = ProductsAndStock.objects.filter(organisation=org) if org else ProductsAndStock.objects.none()
+        org = get_organisation_for_user(user)
+        context['leads'] = Lead.objects.filter(organisation=org) if org else Lead.objects.none()
+        context['products'] = ProductsAndStock.objects.filter(organisation=org) if org else ProductsAndStock.objects.none()
         if self.request.POST:
             context['product_formset'] = OrderProductFormSet(self.request.POST)
         else:
             context['product_formset'] = OrderProductFormSet()
         products_qs = context.get("create_products")
         if products_qs is None:
-            products_qs = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
+            org = get_organisation_for_user(self.request.user)
+            products_qs = ProductsAndStock.objects.filter(organisation=org) if org else ProductsAndStock.objects.none()
         for form in context['product_formset']:
             form.fields['product'].queryset = products_qs
         context["order_categories"] = Category.objects.filter(productsandstock__in=products_qs).distinct().order_by("name")
@@ -256,7 +328,7 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
 
 
 
-class OrderUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
+class OrderUpdateView(LoginRequiredMixin, generic.UpdateView):
     template_name = "orders/order_update.html"
     form_class = OrderModelForm
 
@@ -267,12 +339,23 @@ class OrderUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
         qs = orders.objects.select_related("organisation", "organisation__user", "lead", "lead__agent")
         if self.request.user.is_superuser:
             return qs
-        return qs.filter(organisation=self.request.user.userprofile)
+        org = get_organisation_for_user(self.request.user)
+        if not org:
+            return qs
+        qs = qs.filter(organisation=org)
+        if self.request.user.is_agent:
+            try:
+                agent_obj = Agent.objects.get(user=self.request.user)
+                qs = qs.filter(lead__agent=agent_obj)
+            except Agent.DoesNotExist:
+                qs = qs.none()
+        return qs
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         order = self.get_object()
-        if self.request.user.is_superuser:
+        user = self.request.user
+        if user.is_superuser:
             selected_org = self.request.POST.get("organisation") or str(order.organisation_id)
             selected_agent = self.request.POST.get("filter_agent") or (str(order.lead.agent_id) if order.lead and order.lead.agent_id else "")
             if selected_agent:
@@ -281,6 +364,18 @@ class OrderUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
                 form.fields["lead"].queryset = Lead.objects.filter(organisation_id=selected_org).select_related("organisation").order_by("first_name", "last_name")
             else:
                 form.fields["lead"].queryset = Lead.objects.filter(organisation_id=order.organisation_id).select_related("organisation").order_by("first_name", "last_name")
+        elif user.is_organisor:
+            selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent") or (str(order.lead.agent_id) if order.lead and order.lead.agent_id else "")
+            if selected_agent:
+                form.fields["lead"].queryset = Lead.objects.filter(agent_id=selected_agent).select_related("organisation").order_by("first_name", "last_name")
+            else:
+                form.fields["lead"].queryset = Lead.objects.filter(organisation=order.organisation).select_related("organisation").order_by("first_name", "last_name")
+        elif user.is_agent:
+            try:
+                agent_obj = Agent.objects.get(user=user)
+                form.fields["lead"].queryset = Lead.objects.filter(agent=agent_obj).select_related("organisation").order_by("first_name", "last_name")
+            except Agent.DoesNotExist:
+                form.fields["lead"].queryset = Lead.objects.none()
         else:
             form.fields["lead"].queryset = Lead.objects.filter(organisation=order.organisation).select_related("organisation").order_by("first_name", "last_name")
         return form
@@ -288,13 +383,14 @@ class OrderUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         order = self.get_object()
+        user = self.request.user
         org_id = str(order.organisation_id)
         agent_id = str(order.lead.agent_id) if order.lead and order.lead.agent_id else ""
         selected_org = self.request.POST.get("organisation") or self.request.GET.get("organisation") or org_id
         selected_agent = self.request.POST.get("filter_agent") or self.request.GET.get("agent") or agent_id
-        if self.request.user.is_superuser:
+        if user.is_superuser:
             org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
-            profile = getattr(self.request.user, "userprofile", None)
+            profile = getattr(user, "userprofile", None)
             if profile:
                 org_qs = org_qs.exclude(pk=profile.pk)
             context["create_organisations"] = org_qs
@@ -302,13 +398,21 @@ class OrderUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
             context["selected_agent_id"] = selected_agent or ""
             context["create_agents"] = Agent.objects.filter(organisation_id=order.organisation_id).select_related("user").order_by("user__username")
             context["create_products"] = ProductsAndStock.objects.filter(organisation_id=order.organisation_id)
+        elif user.is_organisor:
+            context["create_organisations"] = []
+            context["selected_organisation_id"] = ""
+            context["selected_agent_id"] = selected_agent or ""
+            context["create_agents"] = Agent.objects.filter(organisation=order.organisation).select_related("user").order_by("user__username")
+            context["create_products"] = ProductsAndStock.objects.filter(organisation=order.organisation)
         else:
             context["create_organisations"] = []
             context["create_agents"] = []
             context["selected_organisation_id"] = context["selected_agent_id"] = ""
-            context["create_products"] = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
-        context["leads"] = Lead.objects.filter(organisation=order.organisation)
-        context["products"] = ProductsAndStock.objects.filter(organisation=order.organisation)
+            org = get_organisation_for_user(user)
+            context["create_products"] = ProductsAndStock.objects.filter(organisation=org) if org else ProductsAndStock.objects.none()
+        org = get_organisation_for_user(user)
+        context["leads"] = Lead.objects.filter(organisation=org) if org else Lead.objects.none()
+        context["products"] = ProductsAndStock.objects.filter(organisation=org) if org else ProductsAndStock.objects.none()
         if self.request.POST:
             context["product_formset"] = OrderProductFormSet(self.request.POST, instance=order)
         else:
@@ -334,7 +438,19 @@ class OrderCancelView(LoginRequiredMixin, View):
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get('pk')
-        qs = orders.objects.all() if self.request.user.is_superuser else orders.objects.filter(organisation=self.request.user.userprofile)
+        org = get_organisation_for_user(self.request.user)
+        if self.request.user.is_superuser:
+            qs = orders.objects.all()
+        elif org:
+            qs = orders.objects.filter(organisation=org)
+            if self.request.user.is_agent:
+                try:
+                    agent_obj = Agent.objects.get(user=self.request.user)
+                    qs = qs.filter(lead__agent=agent_obj)
+                except Agent.DoesNotExist:
+                    qs = orders.objects.none()
+        else:
+            qs = orders.objects.none()
         return get_object_or_404(qs, pk=pk)
 
     def post(self, request, *args, **kwargs):
@@ -372,12 +488,23 @@ class OrderDeleteView(LoginRequiredMixin, generic.DeleteView):
     def get_queryset(self):
         if self.request.user.is_superuser:
             return orders.objects.all()
-        return orders.objects.filter(organisation=self.request.user.userprofile)
+        org = get_organisation_for_user(self.request.user)
+        if not org:
+            return orders.objects.none()
+        qs = orders.objects.filter(organisation=org)
+        if self.request.user.is_agent:
+            try:
+                agent_obj = Agent.objects.get(user=self.request.user)
+                qs = qs.filter(lead__agent=agent_obj)
+            except Agent.DoesNotExist:
+                qs = orders.objects.none()
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['leads'] = Lead.objects.filter(organisation=self.request.user.userprofile)
-        context['products'] = ProductsAndStock.objects.filter(organisation=self.request.user.userprofile)
+        org = get_organisation_for_user(self.request.user)
+        context['leads'] = Lead.objects.filter(organisation=org) if org else Lead.objects.none()
+        context['products'] = ProductsAndStock.objects.filter(organisation=org) if org else ProductsAndStock.objects.none()
         return context
 
     def post(self, request, *args, **kwargs):

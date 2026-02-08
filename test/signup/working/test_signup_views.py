@@ -177,7 +177,7 @@ class TestSignupView(TestCase):
         # Email içeriği doğru mu
         call_args = mock_send_mail.call_args
         # send_mail positional args: subject, message, from_email, recipient_list
-        self.assertEqual(call_args[0][0], 'DJ CRM - Email Verification')  # subject
+        self.assertEqual(call_args[0][0], 'Darkenyas CRM - Email Verification')  # subject
         self.assertIn('test_signup_views@example.com', call_args[0][3])  # recipient_list
         self.assertIn('Test', call_args[0][1])  # message - First name
         self.assertIn('verify-email', call_args[0][1])  # message - Verification link

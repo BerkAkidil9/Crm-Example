@@ -62,7 +62,7 @@
 						{% endif %}
 						{% if order.lead %}
 						<div class="flex justify-between"><dt class="text-gray-500">Lead</dt><dd class="font-medium text-gray-800">{{ order.lead.first_name }} {{ order.lead.last_name }}</dd></div>
-						{% if order.lead.agent %}
+						{% if order.lead.agent and not request.user.is_agent %}
 						<div class="flex justify-between"><dt class="text-gray-500">Agent</dt><dd class="font-medium text-gray-800">{{ order.lead.agent.user.username }}</dd></div>
 						{% endif %}
 						{% endif %}
@@ -106,7 +106,7 @@
 						{% endif %}
 						{% if order.lead %}
 						<div class="flex justify-between"><dt class="text-gray-500">Lead</dt><dd class="font-medium text-gray-700">{{ order.lead.first_name }} {{ order.lead.last_name }}</dd></div>
-						{% if order.lead.agent %}
+						{% if order.lead.agent and not request.user.is_agent %}
 						<div class="flex justify-between"><dt class="text-gray-500">Agent</dt><dd class="font-medium text-gray-700">{{ order.lead.agent.user.username }}</dd></div>
 						{% endif %}
 						{% endif %}
