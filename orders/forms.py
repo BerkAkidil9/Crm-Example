@@ -38,6 +38,16 @@ class OrderModelForm(forms.ModelForm):
             'order_description',
             'lead',
         ]
+        widgets = {
+            'order_day': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'},
+                format='%Y-%m-%dT%H:%M',
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['order_day'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']
 
     def clean_order_day(self):
         order_day = self.cleaned_data.get('order_day')

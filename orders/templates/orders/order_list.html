@@ -1,80 +1,107 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="text-gray-600 body-font">
-	<div class="container px-5 py-24 mx-auto">
-		<div class="w-full mb-6 py-6 flex justify-between items-center border-b border-gray-200">
-			<div>
-				<h1 class="text-4xl text-gray-800">Orders</h1>
-			</div>
-			<div>
-				<a class="text-gray-500 hover:text-blue-500" href="{% url 'orders:order-create' %}">Add a new order</a>
-			</div>
+<div class="max-w-7xl mx-auto py-8 px-4">
+	<div class="flex justify-between items-center mb-8 border-b border-gray-200 pb-6">
+		<div>
+			<h1 class="text-3xl font-bold text-gray-800">Orders</h1>
+			<p class="text-gray-500 mt-1">Manage your orders</p>
 		</div>
-		<div class="flex flex-wrap -m-4">
-			{% for order in object_list %}
-			{% if not order.is_cancelled %}
-			<div class="p-4 lg:w-1/2 md:w-full">
-				<div class="flex border-2 rounded-lg border-gray-600 p-8 sm:flex-row flex-col w-full h-auto">
-					<div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-						<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
-							<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-						</svg>
-					</div>
-					<div class="flex-grow">
-						<h2 class="text-gray-900 text-lg title-font font-medium mb-3">
-							{{ order.order_name }} </h2>
-						<p class="leading-relaxed text-base">
-							{{ order.order_description }}</p>
-						<a href="{% url 'orders:order-detail' order.pk %}" class="mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">
-							View product
-							<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
-								<path d="M5 12h14M12 5l7 7-7 7"></path>
-							</svg>
-						</a>
-					</div>
-				</div>
-			</div>
-			{% endif %}
-			{% endfor %}
-		</div>
+		<a href="{% url 'orders:order-create' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+			<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+			New order
+		</a>
 	</div>
-</section>
 
-<section class="text-gray-600 body-font">
-	<div class="container px-5 py-24 mx-auto">
-		<div class="w-full mb-6 py-6 flex justify-between items-center border-b border-gray-200">
-			<div>
-				<h1 class="text-4xl text-gray-800">Cancelled Orders</h1>
+	{% if request.user.is_superuser or request.user.is_organisor %}
+	<div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+		<h3 class="text-lg font-semibold text-gray-800 mb-3">Filter by organisation & agent</h3>
+		<form method="get" class="flex flex-wrap gap-4 items-end">
+			{% if show_organisation_filter %}
+			<div class="min-w-[200px]">
+				<label for="organisation" class="block text-sm font-medium text-gray-700 mb-1">Organisation</label>
+				<select name="organisation" id="organisation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+					<option value="">All organisations</option>
+					{% for org in organisations %}
+					<option value="{{ org.pk }}" {% if selected_organisation_id == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.user.username }}{% if org.user.email %} ({{ org.user.email }}){% endif %}</option>
+					{% endfor %}
+				</select>
 			</div>
-		</div>
-		<div class="flex flex-wrap -m-4">
-			{% for order in object_list %}
-			{% if order.is_cancelled %}
-			<div class="p-4 lg:w-1/2 md:w-full">
-				<div class="flex border-2 rounded-lg border-gray-600 p-8 sm:flex-row flex-col w-full h-auto">
-					<div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-red-100 text-red-500 flex-shrink-0">
-						<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
-							<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-						</svg>
+			{% endif %}
+			<div class="min-w-[200px]">
+				<label for="agent" class="block text-sm font-medium text-gray-700 mb-1">Agent (lead’s agent) {% if show_organisation_filter and not selected_organisation_id %}<span class="text-gray-400 font-normal">— select organisation first</span>{% endif %}</label>
+				<select name="agent" id="agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" {% if show_organisation_filter and not selected_organisation_id %}disabled{% endif %}>
+					<option value="">All agents</option>
+					{% for agent in agents %}
+					<option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
+					{% endfor %}
+				</select>
+				{% if show_organisation_filter and not selected_organisation_id %}<input type="hidden" name="agent" value="">{% endif %}
+			</div>
+			<button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Filter</button>
+			<a href="{% url 'orders:order-list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Clear</a>
+		</form>
+	</div>
+	{% endif %}
+
+	<!-- Active orders -->
+	<div class="mb-10">
+		<h2 class="text-lg font-semibold text-gray-800 mb-4">Active orders</h2>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			{% for order in active_orders %}
+			<div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+				<div class="p-5">
+					<div class="flex items-start justify-between gap-3 mb-3">
+						<h3 class="font-semibold text-gray-900 truncate">{{ order.order_name }}</h3>
+						<span class="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
 					</div>
-					<div class="flex-grow">
-						<h2 class="text-gray-900 text-lg title-font font-medium mb-3">
-							{{ order.order_name }} </h2>
-						<p class="leading-relaxed text-base">
-							{{ order.order_description }}</p>
-						<a href="{% url 'orders:order-detail' order.pk %}" class="mt-3 text-indigo-500 inline-flex items-center hover:text-blue-900">
-							View product
-							<svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
-								<path d="M5 12h14M12 5l7 7-7 7"></path>
-							</svg>
-						</a>
+					<p class="text-sm text-gray-500 line-clamp-2 mb-4">{{ order.order_description|truncatewords:15 }}</p>
+					<div class="flex items-center justify-between text-sm text-gray-500">
+						<span>{{ order.order_day|date:"M d, Y" }}</span>
+						<span class="font-medium text-gray-700">${{ order.total_order_price|floatformat:2 }}</span>
+					</div>
+					<div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+						<a href="{% url 'orders:order-detail' order.pk %}" class="flex-1 text-center py-2 text-sm font-medium text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-50">View</a>
+						<a href="{% url 'orders:order-update' order.pk %}" class="flex-1 text-center py-2 text-sm font-medium text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100">Edit</a>
 					</div>
 				</div>
 			</div>
-			{% endif %}
+			{% empty %}
+			<div class="col-span-full py-12 text-center text-gray-500 bg-gray-50 rounded-xl border border-gray-200">
+				<p>No active orders.</p>
+				<a href="{% url 'orders:order-create' %}" class="mt-2 inline-block text-blue-600 hover:text-blue-800">Create one</a>
+			</div>
 			{% endfor %}
 		</div>
 	</div>
-</section>
-{% endblock content %}
+
+	<!-- Cancelled orders -->
+	<div>
+		<h2 class="text-lg font-semibold text-gray-800 mb-4">Cancelled orders</h2>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			{% for order in cancelled_orders %}
+			<div class="bg-white rounded-xl border border-gray-200 shadow-sm opacity-90">
+				<div class="p-5">
+					<div class="flex items-start justify-between gap-3 mb-3">
+						<h3 class="font-semibold text-gray-600 truncate">{{ order.order_name }}</h3>
+						<span class="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">Cancelled</span>
+					</div>
+					<p class="text-sm text-gray-500 line-clamp-2 mb-4">{{ order.order_description|truncatewords:15 }}</p>
+					<div class="flex items-center justify-between text-sm text-gray-500">
+						<span>{{ order.order_day|date:"M d, Y" }}</span>
+						<span class="font-medium text-gray-600">${{ order.total_order_price|floatformat:2 }}</span>
+					</div>
+					<div class="mt-4 pt-4 border-t border-gray-100">
+						<a href="{% url 'orders:order-detail' order.pk %}" class="block text-center py-2 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50">View details</a>
+					</div>
+				</div>
+			</div>
+			{% empty %}
+			<div class="col-span-full py-8 text-center text-gray-400 text-sm bg-gray-50 rounded-xl border border-gray-200">
+				No cancelled orders.
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>
+{% endblock %}

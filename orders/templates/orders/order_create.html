@@ -2,43 +2,232 @@
 {% load tailwind_filters %}
 
 {% block content %}
-<div class="max-w-lg mx-auto">
-	<div class="py-5 border-b border-gray-200">
-		<a class="hover:text-blue-500 mt-3" href="{% url 'orders:order-list' %}">Go back to Orders</a>
+<div class="max-w-3xl mx-auto py-8 px-4">
+	<div class="flex justify-between items-center mb-8">
+		<div>
+			<h1 class="text-3xl font-bold text-gray-800">New order</h1>
+			<p class="text-gray-500 mt-1">Create a new order and add products</p>
+		</div>
+		<a href="{% url 'orders:order-list' %}" class="text-gray-500 hover:text-gray-700 font-medium">← Back to orders</a>
 	</div>
 
-	<h1 class="text-gray-800 text-medium">Create a new Order</h1>
-	<form method="post" action="{% url 'orders:order-create' %}" class="form-small-text">
+	<form method="post" action="{% url 'orders:order-create' %}" class="space-y-8">
 		{% csrf_token %}
-		{{ form|crispy }}
-		{{ product_formset.management_form }}
-		<div id="product-formset-container">
-			{% for form in product_formset %}
-				<div class="product-form">
-					{{ form|crispy }}
+
+		<!-- Order details -->
+		<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+			<h2 class="text-lg font-semibold text-gray-800 mb-4">Order details</h2>
+			<div class="space-y-4">
+				{% if request.user.is_superuser %}
+				<div class="space-y-4">
+					{{ form.organisation|as_crispy_field }}
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-1">Agent (filter leads) {% if not selected_organisation_id %}<span class="text-gray-400">— select organisation first</span>{% endif %}</label>
+						<select name="filter_agent" id="filter_agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" {% if not selected_organisation_id %}disabled{% endif %}>
+							<option value="">---------</option>
+							{% for agent in create_agents %}
+							<option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div>
+						<label for="id_lead" class="block text-sm font-medium text-gray-700 mb-1">Lead {% if not selected_agent_id %}<span class="text-gray-400">— select agent first</span>{% endif %}</label>
+						<select name="lead" id="id_lead" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" {% if not selected_agent_id %}disabled{% endif %}>
+							<option value="">---------</option>
+							{% for lead in form.fields.lead.queryset %}
+							<option value="{{ lead.pk }}" {% if form.lead.value == lead.pk or form.initial.lead == lead.pk or form.initial.lead == lead %}selected{% endif %}>{{ lead }}</option>
+							{% endfor %}
+						</select>
+						{% if not selected_agent_id %}<input type="hidden" name="lead" value="">{% endif %}
+					</div>
+					{{ form.order_day|as_crispy_field }}
+					{{ form.order_name|as_crispy_field }}
+					{{ form.order_description|as_crispy_field }}
 				</div>
-			{% endfor %}
+				{% else %}
+				{{ form|crispy }}
+				{% endif %}
+			</div>
 		</div>
-		<button type="button" id="add-product" class="w-full text-white bg-green-500 hover:bg-green-600 px-3 py-2 rounded-md">Add Product</button>
-		<button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
+
+		<!-- Products -->
+		<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+			<div class="flex justify-between items-center mb-4">
+				<h2 class="text-lg font-semibold text-gray-800">Products</h2>
+				<button type="button" id="add-product" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100">
+					<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+					Add product
+				</button>
+			</div>
+			<div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+				<h3 class="text-sm font-medium text-gray-700 mb-2">Filter by category</h3>
+				<div class="flex flex-wrap gap-4 items-end">
+					<div class="min-w-[160px]">
+						<label for="order-filter-category" class="block text-xs font-medium text-gray-500 mb-1">Category</label>
+						<select id="order-filter-category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+							<option value="">All categories</option>
+							{% for cat in order_categories %}
+							<option value="{{ cat.pk }}">{{ cat.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="min-w-[160px]">
+						<label for="order-filter-subcategory" class="block text-xs font-medium text-gray-500 mb-1">Sub category</label>
+						<select id="order-filter-subcategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+							<option value="">All sub categories</option>
+							{% for sub in order_subcategories %}
+							<option value="{{ sub.pk }}" data-category-id="{{ sub.category_id }}">{{ sub.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+			</div>
+			{{ product_formset.management_form }}
+			<div id="product-formset-container" class="space-y-4">
+				{% for form in product_formset %}
+				<div class="product-form-row flex flex-wrap gap-4 items-end p-4 bg-gray-50 rounded-lg border border-gray-200">
+					{{ form.id }}
+					<div class="flex-1 min-w-[200px]">
+						<label for="{{ form.product.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Product *</label>
+						<select name="{{ form.product.html_name }}" id="{{ form.product.id_for_label }}" class="order-product-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">---------</option>
+							{% for product in form.fields.product.queryset %}
+							<option value="{{ product.pk }}" data-category-id="{{ product.category_id }}" data-subcategory-id="{{ product.subcategory_id }}" {% if form.product.value == product.pk %}selected{% endif %}>{{ product.product_name }} ({{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}) — ${{ product.product_price|floatformat:2 }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="w-28">{{ form.product_quantity|as_crispy_field }}</div>
+					<div class="flex items-center">
+						{% if form.DELETE %}<span class="hidden">{{ form.DELETE }}</span><button type="button" class="order-row-delete px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500" title="Remove this row">Delete</button>{% endif %}
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+
+		<div class="flex gap-3">
+			<button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+				Create order
+			</button>
+			<a href="{% url 'orders:order-list' %}" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300">Cancel</a>
+		</div>
 	</form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-	const addProductButton = document.getElementById('add-product');
-	const productFormsetContainer = document.getElementById('product-formset-container');
-	const totalForms = document.querySelector('#id_orderproduct_set-TOTAL_FORMS');
+	// Category / Subcategory filter for product dropdowns
+	var filterCategory = document.getElementById('order-filter-category');
+	var filterSubcategory = document.getElementById('order-filter-subcategory');
+	function filterSubcategories() {
+		var catId = filterCategory ? filterCategory.value : '';
+		if (!filterSubcategory) return;
+		var opts = filterSubcategory.querySelectorAll('option');
+		opts.forEach(function(opt) {
+			if (opt.value === '') { opt.style.display = ''; opt.disabled = false; return; }
+			var match = !catId || opt.getAttribute('data-category-id') === catId;
+			opt.style.display = match ? '' : 'none';
+			opt.disabled = !match;
+		});
+		filterSubcategory.value = '';
+		filterProducts();
+	}
+	function filterProducts() {
+		var catId = filterCategory ? filterCategory.value : '';
+		var subId = filterSubcategory ? filterSubcategory.value : '';
+		document.querySelectorAll('.order-product-select').forEach(function(sel) {
+			var visible = [];
+			sel.querySelectorAll('option').forEach(function(opt) {
+				if (opt.value === '') { opt.style.display = ''; opt.disabled = false; return; }
+				var catMatch = !catId || opt.getAttribute('data-category-id') === catId;
+				var subMatch = !subId || opt.getAttribute('data-subcategory-id') === subId;
+				var show = catMatch && subMatch;
+				opt.style.display = show ? '' : 'none';
+				opt.disabled = !show;
+				if (show) visible.push(opt);
+			});
+			if (sel.value) {
+				var selectedOpt = sel.querySelector('option[value="' + sel.value + '"]');
+				if (!selectedOpt || selectedOpt.disabled) sel.value = '';
+			}
+			// When subcategory is selected and exactly one product matches, auto-select it
+			if (subId && visible.length === 1) sel.value = visible[0].value;
+		});
+	}
+	if (filterCategory) filterCategory.addEventListener('change', filterSubcategories);
+	if (filterSubcategory) filterSubcategory.addEventListener('change', filterProducts);
 
-	addProductButton.addEventListener('click', function() {
-		const currentFormCount = productFormsetContainer.children.length;
-		const newForm = productFormsetContainer.children[0].cloneNode(true);
-		const formRegex = RegExp(`orderproduct_set-(\\d){1}-`, 'g');
-
-		newForm.innerHTML = newForm.innerHTML.replace(formRegex, `orderproduct_set-${currentFormCount}-`);
-		productFormsetContainer.appendChild(newForm);
-		totalForms.setAttribute('value', currentFormCount + 1);
+	// Delete row: check DELETE and hide row (works for dynamically added rows too)
+	document.getElementById('product-formset-container').addEventListener('click', function(e) {
+		if (e.target.classList.contains('order-row-delete')) {
+			var row = e.target.closest('.product-form-row');
+			if (!row) return;
+			var cb = row.querySelector('input[name$="-DELETE"]');
+			if (cb) cb.checked = true;
+			row.style.display = 'none';
+		}
 	});
+
+	// Admin: reload on organisation/agent change to refresh agent and lead dropdowns
+	var orgSelect = document.getElementById('id_organisation');
+	var agentSelect = document.getElementById('filter_agent');
+	if (orgSelect) {
+		orgSelect.addEventListener('change', function() {
+			var org = this.value;
+			window.location = '{% url "orders:order-create" %}' + (org ? '?organisation=' + encodeURIComponent(org) : '');
+		});
+	}
+	if (agentSelect) {
+		agentSelect.addEventListener('change', function() {
+			var org = orgSelect ? orgSelect.value : '';
+			var agent = this.value;
+			var params = [];
+			if (org) params.push('organisation=' + encodeURIComponent(org));
+			if (agent) params.push('agent=' + encodeURIComponent(agent));
+			window.location = '{% url "orders:order-create" %}' + (params.length ? '?' + params.join('&') : '');
+		});
+	}
+
+	var container = document.getElementById('product-formset-container');
+	var addBtn = document.getElementById('add-product');
+	var totalInput = document.querySelector('input[name="orderproduct_set-TOTAL_FORMS"]');
+	if (!totalInput) totalInput = document.querySelector('#id_orderproduct_set-TOTAL_FORMS');
+
+	function getTotalForms() {
+		return totalInput ? parseInt(totalInput.value, 10) : 0;
+	}
+
+	function setTotalForms(n) {
+		if (totalInput) totalInput.value = n;
+	}
+
+	if (addBtn && container) {
+		addBtn.addEventListener('click', function() {
+			var total = getTotalForms();
+			var rowToClone = container.querySelector('.product-form-row');
+			if (!rowToClone) return;
+			var clone = rowToClone.cloneNode(true);
+			clone.style.display = '';
+			var newPrefix = 'orderproduct_set-' + total + '-';
+			var newIdPrefix = 'id_orderproduct_set-' + total + '-';
+			clone.querySelectorAll('input, select').forEach(function(el) {
+				el.value = '';
+				el.checked = false;
+				var name = el.getAttribute('name');
+				if (name) el.setAttribute('name', name.replace(/orderproduct_set-\d+-/, newPrefix));
+				var id = el.getAttribute('id');
+				if (id) el.setAttribute('id', id.replace(/id_orderproduct_set-\d+-/, newIdPrefix));
+			});
+			clone.querySelectorAll('label').forEach(function(lbl) {
+				var forAttr = lbl.getAttribute('for');
+				if (forAttr) lbl.setAttribute('for', forAttr.replace(/id_orderproduct_set-\d+-/, newIdPrefix));
+			});
+			var delCb = clone.querySelector('input[name$="-DELETE"]');
+			if (delCb) delCb.checked = false;
+			container.appendChild(clone);
+			setTotalForms(total + 1);
+		});
+	}
 });
 </script>
-{% endblock content %}
+{% endblock %}

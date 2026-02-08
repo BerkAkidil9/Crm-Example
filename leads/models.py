@@ -119,7 +119,10 @@ class Lead(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        name = f"{self.first_name} {self.last_name}"
+        if self.email:
+            return f"{name} ({self.email})"
+        return name
 
 class Agent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

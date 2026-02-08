@@ -18,6 +18,17 @@ class orders(models.Model):
     def __str__(self):
         return self.order_name
 
+    @property
+    def total_order_price(self):
+        """Sum of all line items' total_price."""
+        return sum(op.total_price for op in self.orderproduct_set.all())
+
+    @property
+    def items_count(self):
+        """Total number of line items (product rows)."""
+        return self.orderproduct_set.count()
+
+
 class OrderProduct(models.Model):
     order = models.ForeignKey(orders, on_delete=models.CASCADE)
     product = models.ForeignKey(ProductsAndStock, on_delete=models.CASCADE)

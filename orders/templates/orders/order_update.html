@@ -2,37 +2,31 @@
 {% load tailwind_filters %}
 
 {% block content %}
-<section class="text-gray-600 body-font overflow-hidden">
-  <div class="container px-5 py-12 mx-auto">
-	<div class="lg:w-4/5 mx-auto flex flex-wrap justify-center">
-	  <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
-		<h2 class="text-sm title-font text-gray-500 tracking-widest">ORDER</h2>
-		<h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ object.order_name }}</h1>
-		<div class="flex mb-4">
-		  <a href="{% url 'orders:order-detail' object.pk %}" class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1">
-			Overview
-		  </a>
-		  <a href="{% url 'orders:order-update' object.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
-			Update Details
-		  </a>
+<div class="max-w-2xl mx-auto py-8 px-4">
+	<div class="flex justify-between items-center mb-8">
+		<div>
+			<h1 class="text-3xl font-bold text-gray-800">Edit order</h1>
+			<p class="text-gray-500 mt-1">{{ object.order_name }}</p>
 		</div>
-		<form method="post">
-		  {% csrf_token %}
-		  {{ form|crispy }}
-		  <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md mt-4">Update</button>
-		</form>
-		<!-- Delete Button -->
-		<div class="mt-5 py-5 border-t border-gray-200">
-		  <a href="{% url 'orders:order-delete' object.pk %}" class="w-1/2 mt-3 text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-center block">
-			Delete
-		  </a>
-		</div>
-		<!-- Go back to Orders Link -->
-		<div class="mt-6">
-		  <a class="hover:text-blue-500" href="{% url 'orders:order-list' %}">Go back to Orders</a>
-		</div>
-	  </div>
+		<a href="{% url 'orders:order-detail' object.pk %}" class="text-gray-500 hover:text-gray-700 font-medium">← Back to order</a>
 	</div>
-  </div>
-</section>
-{% endblock content %}
+
+	<div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+		<form method="post">
+			{% csrf_token %}
+			{{ form|crispy }}
+			<div class="flex gap-3 mt-6">
+				<button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save changes</button>
+				<a href="{% url 'orders:order-detail' object.pk %}" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300">Cancel</a>
+			</div>
+		</form>
+	</div>
+
+	<div class="border-t border-gray-200 pt-6">
+		<a href="{% url 'orders:order-delete' object.pk %}" class="inline-flex items-center px-4 py-2 text-red-600 hover:text-red-800 font-medium rounded-lg hover:bg-red-50">
+			<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+			Delete or cancel order
+		</a>
+	</div>
+</div>
+{% endblock %}
