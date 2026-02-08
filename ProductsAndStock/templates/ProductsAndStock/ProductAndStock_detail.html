@@ -60,15 +60,31 @@
 			  </span>
 			</div>
 			{% endif %}
-			{% if ProductAndStock.is_discount_active %}
+			{% if ProductAndStock.discount_percentage > 0 or ProductAndStock.discount_amount > 0 %}
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Discounted Price</span>
 			  <span class="ml-auto text-green-600 font-medium">${{ ProductAndStock.discounted_price|floatformat:2 }}</span>
 			</div>
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Discount</span>
-			  <span class="ml-auto text-green-600 font-medium">{{ ProductAndStock.discount_percentage }}% off</span>
+			  <span class="ml-auto text-green-600 font-medium">
+				{% if ProductAndStock.discount_percentage > 0 %}{{ ProductAndStock.discount_percentage }}% off{% endif %}
+				{% if ProductAndStock.discount_percentage > 0 and ProductAndStock.discount_amount > 0 %} + {% endif %}
+				{% if ProductAndStock.discount_amount > 0 %}${{ ProductAndStock.discount_amount|floatformat:2 }}{% endif %}
+			  </span>
 			</div>
+			{% if ProductAndStock.discount_start_date %}
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Discount Start Date</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.discount_start_date|date:"M d, Y H:i" }}</span>
+			</div>
+			{% endif %}
+			{% if ProductAndStock.discount_end_date %}
+			<div class="flex border-t border-gray-200 py-2">
+			  <span class="text-gray-500">Discount End Date</span>
+			  <span class="ml-auto text-gray-900">{{ ProductAndStock.discount_end_date|date:"M d, Y H:i" }}</span>
+			</div>
+			{% endif %}
 			{% endif %}
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Quantity</span>
@@ -80,7 +96,7 @@
 			</div>
 			<div class="flex border-t border-gray-200 py-2">
 			  <span class="text-gray-500">Stock Status</span>
-			  <span class="ml-auto {% if ProductAndStock.is_low_stock %}text-red-600{% else %}text-green-600{% endif %} font-medium">
+			  <span class="ml-auto px-2 py-1 text-xs rounded-full font-medium {% if ProductAndStock.stock_status == 'Out of Stock' %}bg-red-100 text-red-800{% elif ProductAndStock.stock_status == 'Low Stock' %}bg-orange-100 text-orange-800{% elif ProductAndStock.stock_status == 'Overstock' %}bg-amber-100 text-amber-800{% else %}bg-green-100 text-green-800{% endif %}">
 				{{ ProductAndStock.stock_status }}
 			  </span>
 			</div>

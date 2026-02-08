@@ -3,8 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.http import JsonResponse
 from django.contrib import messages
-from django.db import transaction
-from django.db import models
+from django.db import transaction, models
+from django.db.models import F, Case, When, Value, IntegerField
 from .models import ProductsAndStock, Category, SubCategory, PriceHistory, SalesStatistics, StockAlert, StockRecommendation
 from leads.models import UserProfile
 from agents.mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin, ProductsAndStockAccessMixin
@@ -308,8 +308,9 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
                     elif update_type == 'SET_PRICE':
                         new_price = form.cleaned_data['new_price']
                     
-                    # Update product price
+                    # Update product price (signal won't create PriceHistory; we add one with custom reason)
                     product.product_price = new_price
+                    product._skip_price_history_signal = True
                     product.save()
                     
                     # Create price history record
@@ -353,6 +354,68 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
         context['total_products'] = self.get_queryset().count()
         return context
 
+
+class ProductChartsView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
+    template_name = "ProductsAndStock/product_charts.html"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return ProductsAndStock.objects.all()
+        elif user.is_organisor:
+            return ProductsAndStock.objects.filter(organisation=user.userprofile)
+        return ProductsAndStock.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        products = list(self.get_queryset())
+        # Stock status counts (same logic as dashboard)
+        out_of_stock = sum(1 for p in products if p.product_quantity <= 0)
+        low_stock = sum(1 for p in products if p.is_low_stock and p.product_quantity > 0)
+        overstock = sum(1 for p in products if p.minimum_stock_level and p.product_quantity > p.minimum_stock_level * 10)
+        in_stock = sum(1 for p in products if p.product_quantity > p.minimum_stock_level and (not p.minimum_stock_level or p.product_quantity <= p.minimum_stock_level * 10))
+        context['chart_stock_labels'] = ['Out of Stock', 'Low Stock', 'In Stock', 'Overstock']
+        context['chart_stock_data'] = [out_of_stock, low_stock, in_stock, overstock]
+        context['chart_stock_colors'] = ['#ef4444', '#f97316', '#22c55e', '#eab308']
+        import json
+        from collections import defaultdict
+        context['chart_stock_labels_json'] = json.dumps(context['chart_stock_labels'])
+        context['chart_stock_data_json'] = json.dumps(context['chart_stock_data'])
+        context['chart_stock_colors_json'] = json.dumps(context['chart_stock_colors'])
+        # By category
+        by_cat = defaultdict(lambda: {'count': 0, 'value': 0})
+        for p in products:
+            name = p.category.name
+            by_cat[name]['count'] += 1
+            by_cat[name]['value'] += p.total_value
+        context['chart_category_labels'] = list(by_cat.keys())
+        context['chart_category_counts'] = [by_cat[k]['count'] for k in by_cat]
+        context['chart_category_values'] = [round(by_cat[k]['value'], 2) for k in by_cat]
+        context['chart_category_labels_json'] = json.dumps(context['chart_category_labels'])
+        context['chart_category_counts_json'] = json.dumps(context['chart_category_counts'])
+        context['chart_category_values_json'] = json.dumps(context['chart_category_values'])
+        # Top products by total value (max 10)
+        by_value = sorted(products, key=lambda x: x.total_value, reverse=True)[:10]
+        context['chart_top_labels'] = [p.product_name[:18] + ('..' if len(p.product_name) > 18 else '') for p in by_value]
+        context['chart_top_data'] = [round(p.total_value, 2) for p in by_value]
+        context['chart_top_labels_json'] = json.dumps(context['chart_top_labels'])
+        context['chart_top_data_json'] = json.dumps(context['chart_top_data'])
+        # Top selling products (by units sold) - max 10
+        by_sales = sorted(products, key=lambda x: x.total_sales_count, reverse=True)[:10]
+        context['chart_sales_labels'] = [p.product_name[:18] + ('..' if len(p.product_name) > 18 else '') for p in by_sales]
+        context['chart_sales_data'] = [p.total_sales_count for p in by_sales]
+        context['chart_sales_revenue_data'] = [round(p.total_revenue_from_sales, 2) for p in by_sales]
+        context['chart_has_sales'] = any(p.total_sales_count > 0 for p in products)
+        context['chart_sales_labels_json'] = json.dumps(context['chart_sales_labels'])
+        context['chart_sales_data_json'] = json.dumps(context['chart_sales_data'])
+        context['chart_sales_revenue_data_json'] = json.dumps(context['chart_sales_revenue_data'])
+        # Summary
+        context['total_products'] = len(products)
+        context['total_value'] = round(sum(p.total_value for p in products), 2)
+        context['total_profit'] = round(sum(p.total_profit for p in products if p.cost_price > 0), 2)
+        return context
+
+
 class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
     template_name = "ProductsAndStock/sales_dashboard.html"
     
@@ -375,40 +438,90 @@ class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
         context['total_products'] = products.count()
         context['total_value'] = sum(p.total_value for p in products)
         context['total_profit'] = sum(p.total_profit for p in products if p.cost_price > 0)
-        context['low_stock_products'] = products.filter(product_quantity__lte=models.F('minimum_stock_level')).count()
+        context['low_stock_products'] = products.filter(product_quantity__lte=F('minimum_stock_level')).exclude(product_quantity=0).count()
         context['out_of_stock_products'] = products.filter(product_quantity=0).count()
-        context['in_stock_products'] = products.filter(product_quantity__gt=models.F('minimum_stock_level')).count()
+        context['overstock_products'] = products.filter(product_quantity__gt=F('minimum_stock_level') * 10).count()
+        # In Stock = quantity > min and not overstock (min < qty <= min*10)
+        context['in_stock_products'] = products.filter(
+            product_quantity__gt=F('minimum_stock_level'),
+            product_quantity__lte=F('minimum_stock_level') * 10
+        ).count()
         
-        # Top Selling Products (by actual sales count)
+        # Top Selling Products (only products with at least 1 sale, sorted by sales count)
+        products_with_sales = [p for p in products if p.total_sales_count > 0]
         context['top_selling_products'] = sorted(
-            products, 
-            key=lambda x: x.total_sales_count, 
+            products_with_sales,
+            key=lambda x: x.total_sales_count,
             reverse=True
         )[:5]
         
-        # Recent Alerts
+        # Recent Alerts: kritiklik yuksekten dusuge (CRITICAL -> HIGH -> MEDIUM -> LOW), sonra en yeni tarih
+        severity_order = Case(
+            When(severity='CRITICAL', then=Value(0)),
+            When(severity='HIGH', then=Value(1)),
+            When(severity='MEDIUM', then=Value(2)),
+            When(severity='LOW', then=Value(3)),
+            default=Value(4),
+            output_field=IntegerField(),
+        )
         context['recent_alerts'] = StockAlert.objects.filter(
             product__in=products,
             is_resolved=False
-        ).order_by('-created_at')[:10]
+        ).annotate(severity_order=severity_order).order_by('severity_order', '-created_at')[:20]
         
-        # Stock Recommendations
-        context['stock_recommendations'] = StockRecommendation.objects.filter(
+        # Stock Recommendations: sadece sorun hala gecerliyse goster, urun basina tek oneri (en onemli)
+        # Ayni urunde hem DISCOUNT hem REDUCE_STOCK olmasin; confidence_score ile sirali, urun basina ilk gelen
+        recs_qs = StockRecommendation.objects.filter(
             product__in=products,
             is_applied=False
-        ).order_by('-confidence_score')[:10]
+        ).select_related('product').order_by('-confidence_score', '-created_at')
+        seen_product_ids = set()
+        relevant_recs = []
+        for rec in recs_qs:
+            if not (
+                (rec.recommendation_type == 'RESTOCK' and rec.product.is_low_stock and rec.product.product_quantity > 0) or
+                (rec.recommendation_type == 'DISCOUNT' and rec.product.product_quantity > rec.product.minimum_stock_level * 5) or
+                (rec.recommendation_type == 'REDUCE_STOCK' and rec.product.product_quantity > rec.product.minimum_stock_level * 10)
+            ):
+                continue
+            if rec.product_id in seen_product_ids:
+                continue
+            seen_product_ids.add(rec.product_id)
+            relevant_recs.append(rec)
+        context['stock_recommendations'] = relevant_recs
         
-        # Critical Alerts Count
-        context['critical_alerts_count'] = StockAlert.objects.filter(
+        # Critical Alerts: sadece urun hala kritik durumdaysa say ve listele (duzelince dusar)
+        # Ayni urun birden fazla alert kaydi ile tekrar etmesin: urun basina bir tane (en guncel alert)
+        critical_alerts_qs = StockAlert.objects.filter(
             product__in=products,
             is_resolved=False,
             severity='CRITICAL'
-        ).count()
+        ).select_related('product').order_by('-created_at')
+        still_critical = [
+            a for a in critical_alerts_qs
+            if a.product.product_quantity <= 0
+            or (a.product.minimum_stock_level and a.product.product_quantity <= a.product.minimum_stock_level / 2)
+        ]
+        seen_product_ids = set()
+        critical_alerts_list = []
+        for a in still_critical:
+            if a.product_id not in seen_product_ids:
+                seen_product_ids.add(a.product_id)
+                critical_alerts_list.append(a)
+        context['critical_alerts_count'] = len(critical_alerts_list)
+        context['critical_alerts_list'] = critical_alerts_list
         
-        # Products with Active Alerts
-        context['products_with_alerts'] = products.filter(
+        # Products with Active Alerts: limit yok, sadece alert durumu hala gecerli olanlar (sorun devam ediyorsa)
+        products_with_unresolved = products.filter(
             stock_alerts__is_resolved=False
-        ).distinct()[:5]
+        ).distinct()
+        products_with_alerts = [
+            p for p in products_with_unresolved
+            if p.product_quantity <= 0
+            or p.is_low_stock
+            or (p.minimum_stock_level and p.product_quantity > p.minimum_stock_level * 10)
+        ]
+        context['products_with_alerts'] = products_with_alerts
         
         return context
     

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProductAndStockListView,ProductAndStockDetailView,ProductAndStockCreateView,ProductAndStockUpdateView,ProductAndStockDeleteView, get_subcategories, BulkPriceUpdateView, SalesDashboardView
+from .views import ProductAndStockListView, ProductAndStockDetailView, ProductAndStockCreateView, ProductAndStockUpdateView, ProductAndStockDeleteView, get_subcategories, BulkPriceUpdateView, SalesDashboardView, ProductChartsView
 
 app_name = 'ProductsAndStock'  # Define the app name here
 
@@ -12,6 +12,7 @@ urlpatterns = [
     path('<int:pk>/update/', ProductAndStockUpdateView.as_view(), name="ProductAndStock-update"),
     path('<int:pk>/delete/', ProductAndStockDeleteView.as_view(), name="ProductAndStock-delete"),
     path('bulk-price-update/', BulkPriceUpdateView.as_view(), name="bulk-price-update"),
+    path('charts/', ProductChartsView.as_view(), name="product-charts"),
     path('get-subcategories/', get_subcategories, name="get-subcategories"),
 
 ]

@@ -12,6 +12,9 @@
             <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
                 📦 Products
             </a>
+            <a href="{% url 'ProductsAndStock:product-charts' %}" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-md">
+                📉 Charts
+            </a>
             <a href="{% url 'ProductsAndStock:bulk-price-update' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
                 📈 Bulk Update
             </a>
@@ -77,22 +80,45 @@
         </div>
     </div>
 
+    <!-- Critical Alerts list: hangilerinin kritik oldugu -->
+    {% if critical_alerts_list %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold text-red-900 mb-4">⚠️ Critical Alerts ({{ critical_alerts_count }})</h3>
+        <p class="text-sm text-red-800 mb-3">The following products are in critical state:</p>
+        <ul class="space-y-2">
+            {% for alert in critical_alerts_list %}
+            <li class="flex items-center justify-between bg-white rounded-lg px-4 py-3 border border-red-100">
+                <div>
+                    <span class="font-medium text-gray-900">{{ alert.product.product_name }}</span>
+                    <span class="text-sm text-gray-600 ml-2">– {{ alert.message }}</span>
+                </div>
+                <a href="{% url 'ProductsAndStock:ProductAndStock-detail' alert.product.pk %}" class="text-sm font-medium text-red-600 hover:text-red-800 whitespace-nowrap ml-2">Details →</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <!-- Stock Status Overview -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">📦 Stock Status</h3>
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Low Stock Products</span>
-                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">{{ low_stock_products }}</span>
-                </div>
-                <div class="flex justify-between items-center">
                     <span class="text-gray-600">Out of Stock</span>
                     <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">{{ out_of_stock_products }}</span>
                 </div>
                 <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Low Stock</span>
+                    <span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">{{ low_stock_products }}</span>
+                </div>
+                <div class="flex justify-between items-center">
                     <span class="text-gray-600">In Stock</span>
                     <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">{{ in_stock_products }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Overstock</span>
+                    <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">{{ overstock_products }}</span>
                 </div>
             </div>
         </div>
@@ -142,10 +168,7 @@
                         {% if rec.suggested_discount %}
                         <p class="text-xs text-gray-500">Suggested discount: {{ rec.suggested_discount }}%</p>
                         {% endif %}
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-xs text-gray-500">Confidence: {{ rec.confidence_score }}%</span>
-                            <span class="text-xs text-gray-500">{{ rec.created_at|date:"M d" }}</span>
-                        </div>
+                        <p class="text-xs text-gray-500 mt-2">{{ rec.created_at|date:"M d" }}</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -196,7 +219,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${{ product.total_revenue_from_sales|floatformat:2 }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.product_quantity }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if product.is_low_stock %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if product.stock_status == 'Out of Stock' %}bg-red-100 text-red-800{% elif product.stock_status == 'Low Stock' %}bg-orange-100 text-orange-800{% elif product.stock_status == 'Overstock' %}bg-amber-100 text-amber-800{% else %}bg-green-100 text-green-800{% endif %}">
                                     {{ product.stock_status }}
                                 </span>
                             </td>
@@ -219,11 +242,13 @@
             <div class="border border-gray-200 rounded-lg p-4">
                 <div class="flex justify-between items-start mb-2">
                     <h4 class="font-medium text-gray-900">{{ product.product_name }}</h4>
-                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
-                        {{ product.critical_alerts_count }} Critical
-                    </span>
+                    {% with sev=product.worst_active_alert_severity %}
+                        {% if sev == 'CRITICAL' %}<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Critical</span>{% elif sev == 'HIGH' %}<span class="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">High</span>{% elif sev == 'MEDIUM' %}<span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800">Medium</span>{% elif sev == 'LOW' %}<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Low</span>{% endif %}
+                        {% endwith %}
                 </div>
-                <p class="text-sm text-gray-600 mb-2">{{ product.stock_status }}</p>
+                <p class="text-sm mb-2">
+                    <span class="px-2 py-0.5 text-xs rounded-full {% if product.stock_status == 'Out of Stock' %}bg-red-100 text-red-800{% elif product.stock_status == 'Low Stock' %}bg-orange-100 text-orange-800{% elif product.stock_status == 'Overstock' %}bg-amber-100 text-amber-800{% else %}bg-green-100 text-green-800{% endif %}">{{ product.stock_status }}</span>
+                </p>
                 <p class="text-sm text-gray-500">Stock: {{ product.product_quantity }} / Min: {{ product.minimum_stock_level }}</p>
                 <a href="{% url 'ProductsAndStock:ProductAndStock-detail' product.pk %}" class="text-blue-600 text-sm hover:text-blue-800 mt-2 inline-block">
                     View Details →

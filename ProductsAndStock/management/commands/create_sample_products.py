@@ -8,11 +8,11 @@ from leads.models import UserProfile
 from ProductsAndStock.models import Category, SubCategory, ProductsAndStock
 
 
-# Her (category_name, subcategory_name) için: (product_name max 20 char, description, price, cost, quantity, min_stock)
+# (category_name, subcategory_name) -> product_name max 20 char, description in English, price, cost, quantity, min_stock
 PRODUCTS_BY_SUBCATEGORY = {
     ('Products', 'Merchandise'): {
         'product_name': 'Merchandise Pack',
-        'product_description': 'Promosyon ve merchandising ürün paketi.',
+        'product_description': 'Promotional and merchandising product pack.',
         'product_price': 49.99,
         'cost_price': 25.00,
         'product_quantity': 100,
@@ -20,7 +20,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Products', 'Inventory'): {
         'product_name': 'Inventory Item',
-        'product_description': 'Stok takibi yapılan standart envanter kalemi.',
+        'product_description': 'Standard inventory item for stock tracking.',
         'product_price': 29.99,
         'cost_price': 15.00,
         'product_quantity': 200,
@@ -28,7 +28,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Products', 'Other'): {
         'product_name': 'Product Other',
-        'product_description': 'Diğer fiziksel ürün kategorisi.',
+        'product_description': 'Other physical product category.',
         'product_price': 19.99,
         'cost_price': 10.00,
         'product_quantity': 80,
@@ -36,7 +36,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Services', 'Consulting'): {
         'product_name': 'Consulting Hour',
-        'product_description': 'Danışmanlık hizmeti saatlik birim.',
+        'product_description': 'Consulting service per hour.',
         'product_price': 150.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -44,7 +44,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Services', 'Support'): {
         'product_name': 'Support Ticket',
-        'product_description': 'Teknik destek bileti / destek paketi.',
+        'product_description': 'Technical support ticket or support package.',
         'product_price': 75.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -52,7 +52,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Services', 'Training'): {
         'product_name': 'Training Session',
-        'product_description': 'Eğitim oturumu veya workshop.',
+        'product_description': 'Training session or workshop.',
         'product_price': 200.00,
         'cost_price': 0,
         'product_quantity': 50,
@@ -60,7 +60,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Services', 'Other'): {
         'product_name': 'Service Other',
-        'product_description': 'Diğer hizmet türü.',
+        'product_description': 'Other service type.',
         'product_price': 99.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -68,7 +68,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Software', 'Licenses'): {
         'product_name': 'License Key',
-        'product_description': 'Yazılım lisans anahtarı.',
+        'product_description': 'Software license key.',
         'product_price': 299.00,
         'cost_price': 120.00,
         'product_quantity': 50,
@@ -76,7 +76,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Software', 'SaaS'): {
         'product_name': 'SaaS Plan',
-        'product_description': 'Bulut / abonelik tabanlı yazılım planı.',
+        'product_description': 'Cloud or subscription-based software plan.',
         'product_price': 49.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -84,7 +84,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Software', 'Other'): {
         'product_name': 'Software Other',
-        'product_description': 'Diğer yazılım veya dijital ürün.',
+        'product_description': 'Other software or digital product.',
         'product_price': 79.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -92,7 +92,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Subscriptions', 'Monthly'): {
         'product_name': 'Monthly Plan',
-        'product_description': 'Aylık abonelik planı.',
+        'product_description': 'Monthly subscription plan.',
         'product_price': 19.99,
         'cost_price': 0,
         'product_quantity': 999,
@@ -100,7 +100,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Subscriptions', 'Annual'): {
         'product_name': 'Annual Plan',
-        'product_description': 'Yıllık abonelik planı.',
+        'product_description': 'Annual subscription plan.',
         'product_price': 199.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -108,7 +108,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Subscriptions', 'Other'): {
         'product_name': 'Subscr Other',
-        'product_description': 'Diğer abonelik türü.',
+        'product_description': 'Other subscription type.',
         'product_price': 59.00,
         'cost_price': 0,
         'product_quantity': 999,
@@ -116,7 +116,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Other', 'General'): {
         'product_name': 'General Item',
-        'product_description': 'Genel kategorideki kalem.',
+        'product_description': 'General category item.',
         'product_price': 39.99,
         'cost_price': 20.00,
         'product_quantity': 60,
@@ -124,7 +124,7 @@ PRODUCTS_BY_SUBCATEGORY = {
     },
     ('Other', 'Misc'): {
         'product_name': 'Misc Product',
-        'product_description': 'Çeşitli / diğer ürün.',
+        'product_description': 'Miscellaneous or other product.',
         'product_price': 24.99,
         'cost_price': 12.00,
         'product_quantity': 40,

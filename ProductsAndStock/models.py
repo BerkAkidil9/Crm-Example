@@ -79,13 +79,14 @@ class ProductsAndStock(models.Model):
 	
 	@property
 	def stock_status(self):
-		"""Get stock status as string"""
+		"""Get stock status as string: Out of Stock, Low Stock, Overstock, In Stock"""
 		if self.product_quantity <= 0:
 			return "Out of Stock"
-		elif self.is_low_stock:
+		if self.is_low_stock:
 			return "Low Stock"
-		else:
-			return "In Stock"
+		if self.minimum_stock_level and self.product_quantity > self.minimum_stock_level * 10:
+			return "Overstock"
+		return "In Stock"
 	
 	@property
 	def profit_margin_amount(self):
@@ -176,6 +177,17 @@ class ProductsAndStock(models.Model):
 	def critical_alerts_count(self):
 		"""Count of critical unresolved alerts"""
 		return self.stock_alerts.filter(is_resolved=False, severity='CRITICAL').count()
+	
+	@property
+	def worst_active_alert_severity(self):
+		"""Highest severity among unresolved alerts (CRITICAL > HIGH > MEDIUM > LOW), or None."""
+		severity_order = {'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1}
+		severities = list(
+			self.stock_alerts.filter(is_resolved=False).values_list('severity', flat=True)
+		)
+		if not severities:
+			return None
+		return max(severities, key=lambda s: severity_order.get(s, 0))
 	
 	@property
 	def days_since_last_sale(self):
@@ -354,8 +366,13 @@ def create_stock_movement(sender, instance, created, **kwargs):
 			)
 
 def create_price_history(sender, instance, created, **kwargs):
-	"""Create price history record after save"""
+	"""Create price history record after save (skip if bulk update will add its own)"""
 	if not created:  # Only for updates, not new products
+		# Bulk Price Update view creates its own PriceHistory with custom reason; don't duplicate
+		if getattr(instance, '_skip_price_history_signal', False):
+			if instance.pk in _previous_data:
+				del _previous_data[instance.pk]
+			return
 		previous_data = _previous_data.get(instance.pk, {})
 		previous_price = previous_data.get('product_price', 0)
 		

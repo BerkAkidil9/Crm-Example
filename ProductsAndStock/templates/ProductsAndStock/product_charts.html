@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-8 px-4">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📉 Charts</h1>
+            <p class="text-gray-600 mt-1">Products and Stock summary charts</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">Products</a>
+            <a href="{% url 'ProductsAndStock:sales-dashboard' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Dashboard</a>
+            <a href="{% url 'ProductsAndStock:bulk-price-update' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">Bulk Update</a>
+        </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+            <p class="text-sm text-gray-500">Total Products</p>
+            <p class="text-2xl font-bold text-blue-600">{{ total_products }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+            <p class="text-sm text-gray-500">Total Value</p>
+            <p class="text-2xl font-bold text-green-600">${{ total_value|floatformat:2 }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+            <p class="text-sm text-gray-500">Total Profit</p>
+            <p class="text-2xl font-bold text-purple-600">${{ total_profit|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Stock status pie -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Products by Stock Status</h2>
+            <div class="relative" style="height: 280px;">
+                <canvas id="chartStock"></canvas>
+            </div>
+        </div>
+        <!-- Products by category (count) -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Products by Category (Count)</h2>
+            <div class="relative" style="height: 280px;">
+                <canvas id="chartCategory"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Total value by category -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Total Value by Category ($)</h2>
+            <div class="relative" style="height: 280px;">
+                <canvas id="chartCategoryValue"></canvas>
+            </div>
+        </div>
+        <!-- Top products by value -->
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Top Products by Value</h2>
+            <div class="relative" style="height: 280px;">
+                <canvas id="chartTopProducts"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Top Selling Products (Units Sold)</h2>
+            {% if chart_has_sales %}
+            <div class="relative" style="height: 280px;">
+                <canvas id="chartSales"></canvas>
+            </div>
+            {% else %}
+            <p class="text-gray-500 py-8 text-center">No sales data yet. Sales will appear here once orders are placed.</p>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Revenue by Product ($)</h2>
+            {% if chart_has_sales %}
+            <div class="relative" style="height: 280px;">
+                <canvas id="chartSalesRevenue"></canvas>
+            </div>
+            {% else %}
+            <p class="text-gray-500 py-8 text-center">No sales data yet. Revenue will appear here once orders are placed.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const stockLabels = {{ chart_stock_labels_json|safe }};
+    const stockData = {{ chart_stock_data_json|safe }};
+    const stockColors = {{ chart_stock_colors_json|safe }};
+
+    const categoryLabels = {{ chart_category_labels_json|safe }};
+    const categoryCounts = {{ chart_category_counts_json|safe }};
+    const categoryValues = {{ chart_category_values_json|safe }};
+
+    const topLabels = {{ chart_top_labels_json|safe }};
+    const topData = {{ chart_top_data_json|safe }};
+
+    const salesLabels = {{ chart_sales_labels_json|safe }};
+    const salesData = {{ chart_sales_data_json|safe }};
+    const salesRevenueData = {{ chart_sales_revenue_data_json|safe }};
+
+    const defaultColors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+
+    if (document.getElementById('chartStock')) {
+        new Chart(document.getElementById('chartStock'), {
+            type: 'doughnut',
+            data: {
+                labels: stockLabels,
+                datasets: [{ data: stockData, backgroundColor: stockColors, borderWidth: 2 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+    if (document.getElementById('chartCategory') && categoryLabels.length) {
+        new Chart(document.getElementById('chartCategory'), {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{ label: 'Product count', data: categoryCounts, backgroundColor: defaultColors.slice(0, categoryLabels.length) }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+    if (document.getElementById('chartCategoryValue') && categoryLabels.length) {
+        new Chart(document.getElementById('chartCategoryValue'), {
+            type: 'bar',
+            data: {
+                labels: categoryLabels,
+                datasets: [{ label: 'Total value ($)', data: categoryValues, backgroundColor: '#22c55e' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+    if (document.getElementById('chartTopProducts') && topLabels.length) {
+        new Chart(document.getElementById('chartTopProducts'), {
+            type: 'bar',
+            data: {
+                labels: topLabels,
+                datasets: [{ label: 'Total value ($)', data: topData, backgroundColor: '#8b5cf6' }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+    if (document.getElementById('chartSales') && salesLabels.length) {
+        new Chart(document.getElementById('chartSales'), {
+            type: 'bar',
+            data: {
+                labels: salesLabels,
+                datasets: [{ label: 'Units sold', data: salesData, backgroundColor: '#0ea5e9' }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+    if (document.getElementById('chartSalesRevenue') && salesLabels.length) {
+        new Chart(document.getElementById('chartSalesRevenue'), {
+            type: 'bar',
+            data: {
+                labels: salesLabels,
+                datasets: [{ label: 'Revenue ($)', data: salesRevenueData, backgroundColor: '#10b981' }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+        });
+    }
+})();
+</script>
+{% endblock %}
