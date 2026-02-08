@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="text-gray-600 body-font overflow-hidden">
+  <div class="container px-5 py-8 mx-auto">
+    <div class="lg:w-4/5 mx-auto flex flex-wrap">
+      <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
+        <h2 class="text-sm title-font text-gray-500 tracking-widest">TASK</h2>
+        <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{ task.title }}</h1>
+        <div class="flex mb-4">
+          <a href="{% url 'tasks:task-detail' task.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">Overview</a>
+          <a href="{% url 'tasks:task-update' task.pk %}" class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1 hover:border-gray-500">Edit</a>
+        </div>
+
+        <div class="flex border-t border-gray-200 py-2">
+          <span class="text-gray-500">Start Date</span>
+          <span class="ml-auto text-gray-900">{{ task.start_date|date:"m/d/Y" }}</span>
+        </div>
+        <div class="flex border-t border-gray-200 py-2">
+          <span class="text-gray-500">End Date</span>
+          <span class="ml-auto text-gray-900">{{ task.end_date|date:"m/d/Y" }}</span>
+        </div>
+        <div class="flex border-t border-gray-200 py-2">
+          <span class="text-gray-500">Status</span>
+          <span class="ml-auto">
+            {% if task.status == 'pending' %}<span class="text-amber-600 font-medium">Pending</span>{% endif %}
+            {% if task.status == 'in_progress' %}<span class="text-blue-600 font-medium">In Progress</span>{% endif %}
+            {% if task.status == 'completed' %}<span class="text-green-600 font-medium">Completed</span>{% endif %}
+          </span>
+        </div>
+        <div class="flex border-t border-gray-200 py-2">
+          <span class="text-gray-500">Assigned To</span>
+          <span class="ml-auto text-gray-900">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+        </div>
+        <div class="flex border-t border-gray-200 py-2">
+          <span class="text-gray-500">Assigned By</span>
+          <span class="ml-auto text-gray-900">{% if task.assigned_by %}{{ task.assigned_by.get_full_name|default:task.assigned_by.username }}{% else %}Self-assigned{% endif %}</span>
+        </div>
+        <div class="flex border-t border-b border-gray-200 py-2 mb-6">
+          <span class="text-gray-500">Content</span>
+        </div>
+        <p class="leading-relaxed text-gray-700 whitespace-pre-wrap">{{ task.content|default:"—" }}</p>
+
+        <div class="mt-6 flex gap-3">
+          <a href="{% url 'tasks:task-update' task.pk %}" class="text-indigo-500 hover:text-blue-600">Edit task</a>
+          <a href="{% url 'tasks:task-delete' task.pk %}" class="text-red-500 hover:text-red-600">Delete</a>
+          <a href="{% url 'tasks:task-list' %}" class="text-gray-500 hover:text-blue-500">Back to task list</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

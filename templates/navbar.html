@@ -17,12 +17,14 @@
 	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products and Stock</a>
 	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
 	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a>
+	  <a href="{% url 'tasks:task-list' %}" class="mr-5 hover:text-blue-500">Tasks</a>
 	  {% elif request.user.is_organisor %}
 	  <!-- Organisors: Management + Strategy -->
 	  <a href="{% url 'agents:agent-list' %}" class="mr-5 hover:text-blue-500">Agents</a>
 	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products & Stock</a>
 	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
 	  <a href="{% url 'finance:financial_report' %}" class="mr-5 hover:text-blue-500">Finance</a>
+	  <a href="{% url 'tasks:task-list' %}" class="mr-5 hover:text-blue-500">Tasks</a>
 	  {% if request.user.organisor %}
 	  <a href="{% url 'organisors:organisor-detail' request.user.organisor.pk %}" class="mr-5 hover:text-blue-500">My Profile</a>
 	  {% else %}
@@ -37,6 +39,7 @@
 	  {% endif %}
 	  <a href="{% url 'ProductsAndStock:ProductAndStock-list' %}" class="mr-5 hover:text-blue-500">Products & Stock</a>
 	  <a href="{% url 'orders:order-list' %}" class="mr-5 hover:text-blue-500">Orders</a>
+	  <a href="{% url 'tasks:task-list' %}" class="mr-5 hover:text-blue-500">Tasks</a>
 	  {% endif %}
 	  <a href="{% url 'leads:lead-list' %}" class="mr-5 hover:text-blue-500">Leads</a>
 	  {% endif %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-5 py-8">
+  <div class="py-5 border-b border-gray-200">
+    <a class="hover:text-blue-500" href="{% url 'tasks:task-detail' task.pk %}">Back to task</a>
+  </div>
+
+  <h1 class="text-2xl text-gray-800 mb-6">Edit task</h1>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+      <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% if form.non_field_errors %}
+    <div class="text-red-500">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md">Save</button>
+  </form>
+  {% if 'assigned_to_pk' in form.fields %}
+  <script>
+  (function() {
+    var assignSel = document.getElementById('id_assigned_to_pk');
+    var currentUserPk = '{{ request.user.pk|default:"" }}';
+    if (assignSel && currentUserPk) {
+      var opts = assignSel.querySelectorAll('option[value="' + currentUserPk + '"]');
+      opts.forEach(function(o) { o.remove(); });
+    }
+  })();
+  </script>
+  {% endif %}
+</div>
+{% endblock content %}
