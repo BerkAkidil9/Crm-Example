@@ -1,6 +1,6 @@
 """
 Forget Password Test Runner
-Bu dosya forget password testlerini çalıştırmak için kullanılır.
+This file is used to run forget password tests.
 """
 
 import os
@@ -9,72 +9,72 @@ import django
 from django.test.utils import get_runner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 def run_forget_password_tests():
-    """Forget password testlerini çalıştır"""
-    print("Forget Password Testleri Başlatılıyor...")
+    """Run forget password tests"""
+    print("Starting Forget Password Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modülleri
+    # Test modules
     test_modules = [
         'test.forget_password.test_forget_password_views',
         'test.forget_password.test_forget_password_forms',
     ]
     
-    # Testleri çalıştır
+    # Run tests
     failures = test_runner.run_tests(test_modules, verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} tests failed!")
         return False
     else:
-        print("\n✅ Tüm testler başarılı!")
+        print("\n✅ All tests passed!")
         return True
 
 def run_specific_test(test_name):
-    """Belirli bir testi çalıştır"""
-    print(f"Forget Password Testi Çalıştırılıyor: {test_name}")
+    """Run a specific test"""
+    print(f"Running Forget Password Test: {test_name}")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Belirli testi çalıştır
+    # Run specific test
     failures = test_runner.run_tests([test_name], verbosity=2)
     
     if failures:
-        print(f"\n❌ Test başarısız!")
+        print(f"\n❌ Test failed!")
         return False
     else:
-        print("\n✅ Test başarılı!")
+        print("\n✅ Test passed!")
         return True
 
 def run_view_tests():
-    """Sadece view testlerini çalıştır"""
+    """Run view tests only"""
     return run_specific_test('test.forget_password.test_forget_password_views')
 
 def run_form_tests():
-    """Sadece form testlerini çalıştır"""
+    """Run form tests only"""
     return run_specific_test('test.forget_password.test_forget_password_forms')
 
 def run_integration_tests():
-    """Sadece entegrasyon testlerini çalıştır"""
-    print("Forget Password Entegrasyon Testleri Çalıştırılıyor...")
+    """Run integration tests only"""
+    print("Running Forget Password Integration Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Sadece entegrasyon testlerini çalıştır
+    # Run integration tests only
     test_modules = [
         'test.forget_password.test_forget_password_views.TestForgetPasswordIntegration',
         'test.forget_password.test_forget_password_forms.TestForgetPasswordFormIntegration',
@@ -83,33 +83,33 @@ def run_integration_tests():
     failures = test_runner.run_tests(test_modules, verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} entegrasyon testi başarısız!")
+        print(f"\n❌ {failures} integration tests failed!")
         return False
     else:
-        print("\n✅ Tüm entegrasyon testleri başarılı!")
+        print("\n✅ All integration tests passed!")
         return True
 
 def show_test_menu():
-    """Test menüsünü göster"""
+    """Show test menu"""
     print("\n" + "=" * 60)
-    print("FORGET PASSWORD TEST MENÜSÜ")
+    print("FORGET PASSWORD TEST MENU")
     print("=" * 60)
-    print("1. Tüm testleri çalıştır")
-    print("2. Sadece view testlerini çalıştır")
-    print("3. Sadece form testlerini çalıştır")
-    print("4. Sadece entegrasyon testlerini çalıştır")
-    print("5. Belirli bir testi çalıştır")
-    print("6. Test istatistikleri")
-    print("0. Çıkış")
+    print("1. Run all tests")
+    print("2. Run view tests only")
+    print("3. Run form tests only")
+    print("4. Run integration tests only")
+    print("5. Run a specific test")
+    print("6. Test statistics")
+    print("0. Exit")
     print("=" * 60)
 
 def show_test_statistics():
-    """Test istatistiklerini göster"""
+    """Show test statistics"""
     print("\n" + "=" * 60)
-    print("FORGET PASSWORD TEST İSTATİSTİKLERİ")
+    print("FORGET PASSWORD TEST STATISTICS")
     print("=" * 60)
     
-    # Test dosyalarını kontrol et
+    # Check test files
     test_files = [
         'test/forget_password/test_forget_password_views.py',
         'test/forget_password/test_forget_password_forms.py',
@@ -123,44 +123,44 @@ def show_test_statistics():
             with open(test_file, 'r', encoding='utf-8') as f:
                 content = f.read()
                 
-                # Test class sayısı
+                # Test class count
                 class_count = content.count('class Test')
                 test_classes += class_count
                 
-                # Test method sayısı
+                # Test method count
                 method_count = content.count('def test_')
                 total_tests += method_count
                 
                 print(f"📁 {test_file}:")
-                print(f"   - Test Sınıfları: {class_count}")
-                print(f"   - Test Metodları: {method_count}")
+                print(f"   - Test Classes: {class_count}")
+                print(f"   - Test Methods: {method_count}")
     
-    print(f"\n📊 TOPLAM İSTATİSTİKLER:")
-    print(f"   - Toplam Test Sınıfı: {test_classes}")
-    print(f"   - Toplam Test Metodu: {total_tests}")
-    print(f"   - Test Dosyası: {len(test_files)}")
+    print(f"\n📊 TOTAL STATISTICS:")
+    print(f"   - Total Test Classes: {test_classes}")
+    print(f"   - Total Test Methods: {total_tests}")
+    print(f"   - Test Files: {len(test_files)}")
     
-    print(f"\n📋 TEST KAPSAMI:")
-    print(f"   ✅ CustomPasswordResetView testleri")
-    print(f"   ✅ PasswordResetDoneView testleri")
-    print(f"   ✅ CustomPasswordResetConfirmView testleri")
-    print(f"   ✅ PasswordResetCompleteView testleri")
-    print(f"   ✅ CustomPasswordResetForm testleri")
-    print(f"   ✅ CustomSetPasswordForm testleri")
-    print(f"   ✅ Entegrasyon testleri")
-    print(f"   ✅ Güvenlik testleri")
-    print(f"   ✅ Edge case testleri")
+    print(f"\n📋 TEST COVERAGE:")
+    print(f"   ✅ CustomPasswordResetView tests")
+    print(f"   ✅ PasswordResetDoneView tests")
+    print(f"   ✅ CustomPasswordResetConfirmView tests")
+    print(f"   ✅ PasswordResetCompleteView tests")
+    print(f"   ✅ CustomPasswordResetForm tests")
+    print(f"   ✅ CustomSetPasswordForm tests")
+    print(f"   ✅ Integration tests")
+    print(f"   ✅ Security tests")
+    print(f"   ✅ Edge case tests")
 
 def main():
-    """Ana fonksiyon"""
+    """Main function"""
     while True:
         show_test_menu()
         
         try:
-            choice = input("\nSeçiminizi yapın (0-6): ").strip()
+            choice = input("\nEnter your choice (0-6): ").strip()
             
             if choice == '0':
-                print("Çıkılıyor...")
+                print("Exiting...")
                 break
             elif choice == '1':
                 run_forget_password_tests()
@@ -171,24 +171,24 @@ def main():
             elif choice == '4':
                 run_integration_tests()
             elif choice == '5':
-                test_name = input("Test adını girin (örn: test.forget_password.test_forget_password_views.TestCustomPasswordResetView): ").strip()
+                test_name = input("Enter test name (e.g. test.forget_password.test_forget_password_views.TestCustomPasswordResetView): ").strip()
                 if test_name:
                     run_specific_test(test_name)
                 else:
-                    print("❌ Geçersiz test adı!")
+                    print("❌ Invalid test name!")
             elif choice == '6':
                 show_test_statistics()
             else:
-                print("❌ Geçersiz seçim! Lütfen 0-6 arası bir sayı girin.")
+                print("❌ Invalid choice! Please enter a number between 0 and 6.")
             
-            input("\nDevam etmek için Enter'a basın...")
+            input("\nPress Enter to continue...")
             
         except KeyboardInterrupt:
-            print("\n\nÇıkılıyor...")
+            print("\n\nExiting...")
             break
         except Exception as e:
             print(f"\n❌ Error: {e}")
-            input("Devam etmek için Enter'a basın...")
+            input("Press Enter to continue...")
 
 if __name__ == "__main__":
     main()

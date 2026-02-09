@@ -16,12 +16,11 @@ This file lists all Turkish content in the project **excluding migration files**
 
 ---
 
-## 2. Python – Uygulama kodu (yorumlar / mesajlar)
+## 2. Python – Application code (comments / messages)
 
-| File | Line | Turkish | Suggested English |
-|-------|-------|--------|---------------------|
-| `ProductsAndStock/views.py` | 567 | `# Critical Alerts: sadece urun hala kritik durumdaysa say ve listele (duzelince dusar)` | `# Critical Alerts: only count/list product if still in critical state (drop when fixed)` |
-| `ProductsAndStock/views.py` | 568 | `# Ayni urun birden fazla alert kaydi ile tekrar etmesin: urun basina bir tane (en guncel alert)` | `# Same product should not repeat with multiple alert records: one per product (latest alert)` |
+| File | Line | Turkish | Suggested English | Status |
+|-------|-------|--------|---------------------|--------|
+| `ProductsAndStock/views.py` | 567-568 | Turkish comments | Already in English in current codebase | Done |
 
 ---
 
@@ -139,33 +138,32 @@ This file lists all Turkish content in the project **excluding migration files**
 
 ## 4. Python – Test files (Turkish docstrings / comments)
 
-The following files contained **Turkish docstrings** and **Turkish comment lines**. All have been translated to English (e.g. "Test verilerini hazırla" → "Set up test data", "Gerekli alanların varlığını kontrol et" → "Check presence of required fields").
+### Translated in this session (Feb 2025)
+- **test/orders/working_tests/test_views.py** – All docstrings and comments → English
+- **test/orders/working_tests/test_forms.py** – All docstrings and comments → English
+- **test/agents/test_runner.py** – Full file (menu, messages, docstrings) → English
+- **test/logout/test_runner.py** – Full file → English
+- **test/forget_password/test_runner.py** – Full file → English
 
+### Still containing Turkish (optional to translate)
 | Location | Note |
-|-------|-----|
-| `test/leads/test_forms.py` | Çok sayıda Türkçe docstring ve yorum |
-| `test/products_and_stock/working_tests/test_forms.py` | Türkçe docstring ve yorumlar |
-| `test/products_and_stock/working_tests/test_integration.py` | Türkçe docstring ve yorumlar |
-| `test/products_and_stock/working_tests/simple_test.py` | Türkçe yorum |
-| `test/products_and_stock/working_tests/__init__.py` | "Çalışan testler - ProductsAndStock modülü" → "Working tests - ProductsAndStock module" |
-| `test/products_and_stock/test_runner.py` | "Test modülünü import et", "BAŞARISIZ" vb. |
-| `test/products_and_stock/broken_tests/test_forms.py` | Türkçe docstring ve yorumlar |
-| `test/products_and_stock/broken_tests/test_views_simple.py` | Türkçe docstring ve yorumlar |
-| `test/leads/test_integration.py` | "Email entegrasyon testleri" vb. |
+|----------|------|
+| `test/leads/test_forms.py` | Many Turkish docstrings and comments |
+| `test/leads/test_models.py`, `test_views.py` | Some Turkish docstrings |
+| `test/products_and_stock/working_tests/` | test_forms, test_integration, simple_test, __init__.py |
+| `test/products_and_stock/test_runner.py` | Menu and messages |
+| `test/products_and_stock/broken_tests/` | test_forms, test_views, test_views_simple |
+| `test/forget_password/test_forget_password_forms.py` | Docstrings (e.g. "Form şifre uyumsuzluğu testi"), comments |
+| `test/forget_password/test_forget_password_views.py` | Docstrings and comments |
+| `test/login/working/` | test_login_views, test_login_integration, test_login_authentication – comments/docstrings |
+| `test/logout/working/` | test_logout_views, test_logout_integration – docstrings and comments |
 
-Example translations:
+Example translations (for reference):
 - "Test verilerini hazırla" → "Set up test data"
 - "Form başlatma testi" → "Form initialization test"
-- "Geçerli veri ile form testi" → "Form test with valid data"
-- "Gerekli alanların varlığını kontrol et" → "Check that required fields exist"
-- "Kullanıcı izinleri iş akışı testi" → "User permissions workflow test"
-- "Admin kullanıcı ... erişimi" → "Admin user ... access"
-- "ProductsAndStock Formları Test Dosyası" → "ProductsAndStock Forms Test File"
-- "Bu dosya ... tüm formları test eder." → "This file tests all forms in..."
 - "Django ayarlarını yükle" → "Load Django settings"
-- "Test çalıştırma" → "Run tests"
-- "Testleri Başlatılıyor" → "Starting tests"
-- "BAŞARISIZ" → "FAILED"
+- "Giriş yapmış kullanıcı" → "Authenticated user"
+- "Çıkış" → "Exit"
 
 ---
 
@@ -180,10 +178,10 @@ Example translations:
 
 ---
 
-## 6. Migration’lar hakkında
+## 6. About migrations
 
-**Migrations are excluded.**  
-Files such as `activity_log/migrations/0001_initial.py`, `tasks/migrations/0001_initial.py` contain Turkish `verbose_name` and choice texts (e.g. "Organisor oluşturuldu", "Başlık", "İçerik"). Changing these would generate new migrations or risk database incompatibility; use English only for **new** models/fields. Leave existing migration files untouched.
+**Migrations are excluded from translation.**  
+Files such as `activity_log/migrations/0001_initial.py`, `tasks/migrations/0001_initial.py` may contain Turkish `verbose_name` and choice texts. Changing these would generate new migrations or risk database incompatibility; use English only for **new** models/fields. Leave existing migration files untouched.
 
 ---
 
@@ -192,12 +190,12 @@ Files such as `activity_log/migrations/0001_initial.py`, `tasks/migrations/0001_
 The following have been translated to English (migrations left unchanged as per section 6):
 
 - **Application code:** `ProductsAndStock/forms.py` (comments)
-- **Test runners:** `test/finance/test_runner.py`, `test/orders/test_runner.py`, `test/leads/test_runner.py` (all Turkish strings)
-- **Orders tests:** `test/orders/working_tests/test_models.py`, `test_integration.py`, `test_views.py`, `test_forms.py` (docstrings and comments)
+- **Test runners:** `test/finance/test_runner.py`, `test/orders/test_runner.py`, `test/leads/test_runner.py`, **test/agents/test_runner.py**, **test/logout/test_runner.py**, **test/forget_password/test_runner.py** (all Turkish strings)
+- **Orders tests:** `test/orders/working_tests/test_models.py`, `test_integration.py`, **test_views.py**, **test_forms.py** (docstrings and comments – full translation in this session)
 - **Finance tests:** `test/finance/working_tests/test_models.py`, `test_integration.py`, `test_forms.py` (docstrings and comments)
 - **Organisors tests:** `test/organisors/working_tests/test_integration.py` (one comment)
 
-Remaining (optional): test/leads/test_forms.py, test/login, test/forget_password, test/logout, test/products_and_stock, test/agents (runners and some comments), leads/management/commands, agents/mixins.py – may still contain Turkish docstrings/comments.
+**Remaining (optional):** test/leads (test_forms, test_models, test_views), test/login/working, test/forget_password (test_*_forms.py, test_*_views.py), test/logout/working, test/products_and_stock (all), test/signup – may still contain Turkish docstrings/comments. HTML templates and app code (non-migration) are already in English or were not Turkish.
 
 ---
 

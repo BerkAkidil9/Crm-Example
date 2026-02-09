@@ -1,6 +1,6 @@
 """
 Agent Test Runner
-Bu dosya agent testlerini çalıştırmak için kullanılır.
+This file is used to run agent tests.
 """
 
 import os
@@ -9,20 +9,20 @@ import django
 from django.test.utils import get_runner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 def run_agent_tests():
-    """Agent testlerini çalıştır"""
-    print("Agent Testleri Başlatılıyor...")
+    """Run agent tests"""
+    print("Starting Agent Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modüllerini tanımla
+    # Define test modules
     test_modules = [
         'test.agents.working_tests.test_models',
         'test.agents.working_tests.test_forms',
@@ -31,76 +31,76 @@ def run_agent_tests():
         'test.agents.working_tests.test_integration',
     ]
     
-    # Testleri çalıştır
+    # Run tests
     failures = test_runner.run_tests(test_modules, verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} tests failed!")
         return False
     else:
-        print("\n✅ Tüm testler başarılı!")
+        print("\n✅ All tests passed!")
         return True
 
 def run_specific_test(test_module):
-    """Belirli bir test modülünü çalıştır"""
-    print(f"Agent Test Modülü Çalıştırılıyor: {test_module}")
+    """Run a specific test module"""
+    print(f"Running Agent Test Module: {test_module}")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Testi çalıştır
+    # Run test
     failures = test_runner.run_tests([test_module], verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} tests failed!")
         return False
     else:
-        print("\n✅ Test başarılı!")
+        print("\n✅ Test passed!")
         return True
 
 def run_model_tests():
-    """Model testlerini çalıştır"""
+    """Run model tests"""
     return run_specific_test('test.agents.working_tests.test_models')
 
 def run_form_tests():
-    """Form testlerini çalıştır"""
+    """Run form tests"""
     return run_specific_test('test.agents.working_tests.test_forms')
 
 def run_view_tests():
-    """View testlerini çalıştır"""
+    """Run view tests"""
     return run_specific_test('test.agents.working_tests.test_views')
 
 def run_mixin_tests():
-    """Mixin testlerini çalıştır"""
+    """Run mixin tests"""
     return run_specific_test('test.agents.working_tests.test_mixins')
 
 def run_integration_tests():
-    """Entegrasyon testlerini çalıştır"""
+    """Run integration tests"""
     return run_specific_test('test.agents.working_tests.test_integration')
 
 def show_test_menu():
-    """Test menüsünü göster"""
+    """Show test menu"""
     print("\n" + "=" * 60)
-    print("AGENT TEST MENÜSÜ")
+    print("AGENT TEST MENU")
     print("=" * 60)
-    print("1. Tüm testleri çalıştır")
-    print("2. Model testleri")
-    print("3. Form testleri")
-    print("4. View testleri")
-    print("5. Mixin testleri")
-    print("6. Entegrasyon testleri")
-    print("7. Çıkış")
+    print("1. Run all tests")
+    print("2. Model tests")
+    print("3. Form tests")
+    print("4. View tests")
+    print("5. Mixin tests")
+    print("6. Integration tests")
+    print("7. Exit")
     print("=" * 60)
 
 def main():
-    """Ana fonksiyon"""
+    """Main function"""
     while True:
         show_test_menu()
         
         try:
-            choice = input("\nSeçiminizi yapın (1-7): ").strip()
+            choice = input("\nEnter your choice (1-7): ").strip()
             
             if choice == '1':
                 run_agent_tests()
@@ -115,19 +115,19 @@ def main():
             elif choice == '6':
                 run_integration_tests()
             elif choice == '7':
-                print("Çıkılıyor...")
+                print("Exiting...")
                 break
             else:
-                print("❌ Geçersiz seçim! Lütfen 1-7 arası bir sayı girin.")
+                print("❌ Invalid choice! Please enter a number between 1 and 7.")
             
-            input("\nDevam etmek için Enter'a basın...")
+            input("\nPress Enter to continue...")
             
         except KeyboardInterrupt:
-            print("\n\nÇıkılıyor...")
+            print("\n\nExiting...")
             break
         except Exception as e:
             print(f"\n❌ Error occurred: {e}")
-            input("\nDevam etmek için Enter'a basın...")
+            input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 """
-Orders Views Test Dosyası
-Bu dosya Orders modülündeki tüm view'ları test eder.
+Orders Views Test File
+This file tests all views in the Orders module.
 """
 
 import os
@@ -14,7 +14,7 @@ from django.core import mail
 from unittest.mock import patch, MagicMock
 from django.utils import timezone
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -31,7 +31,7 @@ class TestOrderListView(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='orderlist_test_user',
             email='orderlist_test@example.com',
@@ -45,12 +45,12 @@ class TestOrderListView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -59,7 +59,7 @@ class TestOrderListView(TestCase):
             organisation=self.user_profile
         )
         
-        # Order'lar oluştur
+        # Create orders
         self.order1 = orders.objects.create(
             order_day=timezone.now(),
             order_name='Active Order',
@@ -77,47 +77,47 @@ class TestOrderListView(TestCase):
             is_cancelled=True
         )
         
-        # Client oluştur
+        # Create test client
         self.client = Client()
     
     def test_order_list_view_requires_login(self):
-        """Order list view login gerektirme testi"""
+        """Order list view requires login test"""
         response = self.client.get(reverse('orders:order-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
         self.assertTrue('/login' in response.url)
     
     def test_order_list_view_authenticated_user(self):
-        """Giriş yapmış kullanıcı order list view testi"""
+        """Authenticated user order list view test"""
         self.client.login(username='orderlist_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-list'))
         
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Active Order')
-        # Template'de cancelled orders ayrı bölümde gösteriliyor, bu yüzden hem aktif hem iptal edilmiş görünebilir
+        # Template shows cancelled orders in separate section, so both active and cancelled may appear
         self.assertContains(response, 'Cancelled Order')
     
     def test_order_list_view_template(self):
-        """Order list view template testi"""
+        """Order list view template test"""
         self.client.login(username='orderlist_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-list'))
         
         self.assertTemplateUsed(response, 'orders/order_list.html')
     
     def test_order_list_view_context(self):
-        """Order list view context testi"""
+        """Order list view context test"""
         self.client.login(username='orderlist_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-list'))
         
-        # Context'te orders olmalı
+        # Context should contain orders
         self.assertIn('object_list', response.context)
-        # Template'de hem aktif hem iptal edilmiş orders gösteriliyor
-        self.assertEqual(len(response.context['object_list']), 2)  # Aktif ve iptal edilmiş order
+        # Template shows both active and cancelled orders
+        self.assertEqual(len(response.context['object_list']), 2)  # Active and cancelled orders
         self.assertIn(self.order1, response.context['object_list'])
         self.assertIn(self.order2, response.context['object_list'])
     
     def test_order_list_view_filtered_by_organisation(self):
-        """Order list view organisation filtreleme testi"""
-        # Başka bir kullanıcı ve order oluştur
+        """Order list view organisation filtering test"""
+        # Create another user and order
         other_user = User.objects.create_user(
             username='other_user',
             email='other@example.com',
@@ -138,7 +138,7 @@ class TestOrderListView(TestCase):
         response = self.client.get(reverse('orders:order-list'))
         
         # Should only see their own organisation's orders
-        self.assertEqual(len(response.context['object_list']), 2)  # Aktif ve iptal edilmiş
+        self.assertEqual(len(response.context['object_list']), 2)  # Active and cancelled
         self.assertIn(self.order1, response.context['object_list'])
         self.assertIn(self.order2, response.context['object_list'])
         self.assertNotIn(other_order, response.context['object_list'])
@@ -149,7 +149,7 @@ class TestOrderDetailView(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='orderdetail_test_user',
             email='orderdetail_test@example.com',
@@ -163,12 +163,12 @@ class TestOrderDetailView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -177,7 +177,7 @@ class TestOrderDetailView(TestCase):
             organisation=self.user_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -196,7 +196,7 @@ class TestOrderDetailView(TestCase):
             organisation=self.user_profile
         )
         
-        # Order oluştur
+        # Create order
         self.order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Detail Test Order',
@@ -205,7 +205,7 @@ class TestOrderDetailView(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         self.order_product = OrderProduct.objects.create(
             order=self.order,
             product=self.product,
@@ -213,16 +213,16 @@ class TestOrderDetailView(TestCase):
             total_price=1999.98
         )
         
-        # Client oluştur
+        # Create test client
         self.client = Client()
     
     def test_order_detail_view_requires_login(self):
-        """Order detail view login gerektirme testi"""
+        """Order detail view requires login test"""
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': self.order.pk}))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_order_detail_view_authenticated_user(self):
-        """Giriş yapmış kullanıcı order detail view testi"""
+        """Authenticated user order detail view test"""
         self.client.login(username='orderdetail_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': self.order.pk}))
         
@@ -231,18 +231,18 @@ class TestOrderDetailView(TestCase):
         self.assertContains(response, 'iPhone 15')
     
     def test_order_detail_view_template(self):
-        """Order detail view template testi"""
+        """Order detail view template test"""
         self.client.login(username='orderdetail_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': self.order.pk}))
         
         self.assertTemplateUsed(response, 'orders/order_detail.html')
     
     def test_order_detail_view_context(self):
-        """Order detail view context testi"""
+        """Order detail view context test"""
         self.client.login(username='orderdetail_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': self.order.pk}))
         
-        # Context'te order ve order_items olmalı
+        # Context should contain order and order_items
         self.assertIn('order', response.context)
         self.assertIn('order_items', response.context)
         self.assertIn('total_order_price', response.context)
@@ -255,8 +255,8 @@ class TestOrderDetailView(TestCase):
         self.assertEqual(response.context['total_order_price'], 1999.98)
     
     def test_order_detail_view_access_denied_other_organisation(self):
-        """Order detail view başka organisation erişim engelleme testi"""
-        # Başka bir kullanıcı oluştur
+        """Order detail view access denied for other organisation test"""
+        # Create another user
         other_user = User.objects.create_user(
             username='other_detail_user',
             email='other_detail@example.com',
@@ -271,7 +271,7 @@ class TestOrderDetailView(TestCase):
         self.assertEqual(response.status_code, 404)  # Not found (access denied)
     
     def test_order_detail_view_nonexistent_order(self):
-        """Order detail view var olmayan order testi"""
+        """Order detail view nonexistent order test"""
         self.client.login(username='orderdetail_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': 99999}))
         
@@ -283,7 +283,7 @@ class TestOrderCreateView(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='ordercreate_test_user',
             email='ordercreate_test@example.com',
@@ -297,12 +297,12 @@ class TestOrderCreateView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -311,7 +311,7 @@ class TestOrderCreateView(TestCase):
             organisation=self.user_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -330,23 +330,23 @@ class TestOrderCreateView(TestCase):
             organisation=self.user_profile
         )
         
-        # Client oluştur
+        # Create test client
         self.client = Client()
     
     def test_order_create_view_requires_login(self):
-        """Order create view login gerektirme testi"""
+        """Order create view requires login test"""
         response = self.client.get(reverse('orders:order-create'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_order_create_view_get(self):
-        """Order create view GET testi"""
+        """Order create view GET test"""
         self.client.login(username='ordercreate_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-create'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'orders/order_create.html')
         
-        # Context'te form ve formset olmalı
+        # Context should contain form and formset
         self.assertIn('form', response.context)
         self.assertIn('product_formset', response.context)
         self.assertIn('leads', response.context)
@@ -354,10 +354,10 @@ class TestOrderCreateView(TestCase):
     
     @patch('orders.views.send_mail')
     def test_order_create_view_post_success(self, mock_send_mail):
-        """Order create view POST başarılı testi"""
+        """Order create view POST success test"""
         self.client.login(username='ordercreate_test_user', password='testpass123')
         
-        # Form data hazırla
+        # Prepare form data
         form_data = {
             'order_day': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
             'order_name': 'New Order',
@@ -383,31 +383,31 @@ class TestOrderCreateView(TestCase):
             # Form hatalarını kontrol et
             self.assertContains(response, 'form')
         
-        # Order oluşturulmuş olmalı
+        # Order should have been created
         self.assertTrue(orders.objects.filter(order_name='New Order').exists())
         order = orders.objects.get(order_name='New Order')
         
-        # OrderProduct oluşturulmuş olmalı
+        # OrderProduct should have been created
         self.assertTrue(OrderProduct.objects.filter(order=order).exists())
         order_product = OrderProduct.objects.get(order=order)
         self.assertEqual(order_product.product, self.product)
         self.assertEqual(order_product.product_quantity, 2)
         
-        # Email gönderilmiş olmalı
+        # Email should have been sent
         mock_send_mail.assert_called_once()
         
-        # OrderFinanceReport oluşturulmuş olmalı
+        # OrderFinanceReport should have been created
         self.assertTrue(OrderFinanceReport.objects.filter(order=order).exists())
     
     def test_order_create_view_post_insufficient_stock(self):
-        """Order create view POST yetersiz stok testi"""
+        """Order create view POST insufficient stock test"""
         self.client.login(username='ordercreate_test_user', password='testpass123')
         
-        # Stok miktarını azalt
+        # Reduce stock quantity
         self.product.product_quantity = 1
         self.product.save()
         
-        # Form data hazırla (daha fazla quantity)
+        # Prepare form data (higher quantity)
         form_data = {
             'order_day': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
             'order_name': 'Stock Test Order',
@@ -426,14 +426,14 @@ class TestOrderCreateView(TestCase):
         # Form invalid olmalı (redirect olmamalı)
         self.assertEqual(response.status_code, 200)
         
-        # Order oluşturulmamış olmalı
+        # Order should not have been created
         self.assertFalse(orders.objects.filter(order_name='Stock Test Order').exists())
     
     def test_order_create_view_post_invalid_form(self):
-        """Order create view POST geçersiz form testi"""
+        """Order create view POST invalid form test"""
         self.client.login(username='ordercreate_test_user', password='testpass123')
         
-        # Geçersiz form data
+        # Invalid form data
         form_data = {
             'order_day': '',
             'order_name': '',
@@ -446,7 +446,7 @@ class TestOrderCreateView(TestCase):
         # Form invalid olmalı
         self.assertEqual(response.status_code, 200)
         
-        # Order oluşturulmamış olmalı
+        # Order should not have been created
         self.assertFalse(orders.objects.filter(order_name='').exists())
 
 
@@ -455,7 +455,7 @@ class TestOrderUpdateView(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='orderupdate_test_user',
             email='orderupdate_test@example.com',
@@ -469,12 +469,12 @@ class TestOrderUpdateView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -483,7 +483,7 @@ class TestOrderUpdateView(TestCase):
             organisation=self.user_profile
         )
         
-        # Order oluştur
+        # Create order
         self.order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Update Test Order',
@@ -492,16 +492,16 @@ class TestOrderUpdateView(TestCase):
             lead=self.lead
         )
         
-        # Client oluştur
+        # Create test client
         self.client = Client()
     
     def test_order_update_view_requires_login(self):
-        """Order update view login gerektirme testi"""
+        """Order update view requires login test"""
         response = self.client.get(reverse('orders:order-update', kwargs={'pk': self.order.pk}))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_order_update_view_get(self):
-        """Order update view GET testi"""
+        """Order update view GET test"""
         self.client.login(username='orderupdate_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-update', kwargs={'pk': self.order.pk}))
         
@@ -514,10 +514,10 @@ class TestOrderUpdateView(TestCase):
         self.assertIn('products', response.context)
     
     def test_order_update_view_post_success(self):
-        """Order update view POST başarılı testi"""
+        """Order update view POST success test"""
         self.client.login(username='orderupdate_test_user', password='testpass123')
         
-        # Form data hazırla
+        # Prepare form data
         form_data = {
             'order_day': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
             'order_name': 'Updated Order Name',
@@ -530,18 +530,18 @@ class TestOrderUpdateView(TestCase):
             form_data
         )
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('orders:order-list'))
         
-        # Order güncellenmiş olmalı
+        # Order should have been updated
         self.order.refresh_from_db()
         self.assertEqual(self.order.order_name, 'Updated Order Name')
         self.assertEqual(self.order.order_description, 'Updated order description')
     
     def test_order_update_view_access_denied_other_organisation(self):
-        """Order update view başka organisation erişim engelleme testi"""
-        # Başka bir kullanıcı oluştur
+        """Order update view access denied for other organisation test"""
+        # Create another user
         other_user = User.objects.create_user(
             username='other_update_user',
             email='other_update@example.com',
@@ -561,7 +561,7 @@ class TestOrderCancelView(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='ordercancel_test_user',
             email='ordercancel_test@example.com',
@@ -575,12 +575,12 @@ class TestOrderCancelView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -589,7 +589,7 @@ class TestOrderCancelView(TestCase):
             organisation=self.user_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -608,7 +608,7 @@ class TestOrderCancelView(TestCase):
             organisation=self.user_profile
         )
         
-        # Order oluştur
+        # Create order
         self.order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Cancel Test Order',
@@ -617,7 +617,7 @@ class TestOrderCancelView(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         self.order_product = OrderProduct.objects.create(
             order=self.order,
             product=self.product,
@@ -625,47 +625,47 @@ class TestOrderCancelView(TestCase):
             total_price=4999.95
         )
         
-        # Client oluştur
+        # Create test client
         self.client = Client()
     
     def test_order_cancel_view_post_success(self):
-        """Order cancel view POST başarılı testi"""
+        """Order cancel view POST success test"""
         initial_stock = self.product.product_quantity
         
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': self.order.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
-        # Redirect URL'ini kontrol et (tam eşleşme yerine içerik kontrolü)
+        # Check redirect URL (content check instead of exact match)
         self.assertTrue(response.url.endswith('/orders/'))
         
-        # Order iptal edilmiş olmalı
+        # Order should be cancelled
         self.order.refresh_from_db()
         self.assertTrue(self.order.is_cancelled)
         
-        # Stok geri yüklenmiş olmalı
+        # Stock should have been restored
         self.product.refresh_from_db()
         self.assertEqual(self.product.product_quantity, initial_stock + 5)
     
     def test_order_cancel_view_post_already_cancelled(self):
-        """Order cancel view POST zaten iptal edilmiş order testi"""
-        # Order'ı iptal et
+        """Order cancel view POST already cancelled order test"""
+        # Cancel the order
         self.order.is_cancelled = True
         self.order.save()
         
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': self.order.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
-        # Redirect URL'ini kontrol et (tam eşleşme yerine içerik kontrolü)
+        # Check redirect URL (content check instead of exact match)
         self.assertTrue(response.url.endswith('/orders/'))
         
-        # Mesaj kontrolü için session'ı kontrol et
+        # Check session for message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any('already been canceled' in str(message) for message in messages))
     
     def test_order_cancel_view_nonexistent_order(self):
-        """Order cancel view var olmayan order testi"""
+        """Order cancel view nonexistent order test"""
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': 99999}))
         
         self.assertEqual(response.status_code, 404)
@@ -676,7 +676,7 @@ class TestOrderDeleteView(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='orderdelete_test_user',
             email='orderdelete_test@example.com',
@@ -690,12 +690,12 @@ class TestOrderDeleteView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -704,7 +704,7 @@ class TestOrderDeleteView(TestCase):
             organisation=self.user_profile
         )
         
-        # Order oluştur
+        # Create order
         self.order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Delete Test Order',
@@ -713,43 +713,43 @@ class TestOrderDeleteView(TestCase):
             lead=self.lead
         )
         
-        # Client oluştur
+        # Create test client
         self.client = Client()
     
     def test_order_delete_view_requires_login(self):
-        """Order delete view login gerektirme testi"""
+        """Order delete view requires login test"""
         response = self.client.get(reverse('orders:order-delete', kwargs={'pk': self.order.pk}))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_order_delete_view_get(self):
-        """Order delete view GET testi"""
+        """Order delete view GET test"""
         self.client.login(username='orderdelete_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-delete', kwargs={'pk': self.order.pk}))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'orders/order_delete.html')
         
-        # Context'te order olmalı
+        # Context should contain order
         self.assertIn('object', response.context)
         self.assertEqual(response.context['object'], self.order)
     
     def test_order_delete_view_post_success(self):
-        """Order delete view POST başarılı testi"""
+        """Order delete view POST success test"""
         self.client.login(username='orderdelete_test_user', password='testpass123')
         
         order_id = self.order.id
         response = self.client.post(reverse('orders:order-delete', kwargs={'pk': self.order.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('orders:order-list'))
         
-        # Order silinmiş olmalı
+        # Order should have been deleted
         self.assertFalse(orders.objects.filter(id=order_id).exists())
     
     def test_order_delete_view_access_denied_other_organisation(self):
-        """Order delete view başka organisation erişim engelleme testi"""
-        # Başka bir kullanıcı oluştur
+        """Order delete view access denied for other organisation test"""
+        # Create another user
         other_user = User.objects.create_user(
             username='other_delete_user',
             email='other_delete@example.com',
@@ -767,26 +767,26 @@ class TestOrderDeleteView(TestCase):
         """Order delete view cancel order action testi"""
         self.client.login(username='orderdelete_test_user', password='testpass123')
         
-        # Cancel order action ile POST
+        # POST with cancel order action
         response = self.client.post(
             reverse('orders:order-delete', kwargs={'pk': self.order.pk}),
             {'cancel_order': 'Cancel Order'}
         )
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('orders:order-list'))
         
-        # Order iptal edilmiş olmalı (silinmemiş)
+        # Order should be cancelled (not deleted)
         self.order.refresh_from_db()
         self.assertTrue(self.order.is_cancelled)
         self.assertTrue(orders.objects.filter(id=self.order.id).exists())
 
 
 if __name__ == "__main__":
-    print("Orders Views Testleri Başlatılıyor...")
+    print("Starting Orders Views Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

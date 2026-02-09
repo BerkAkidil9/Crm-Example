@@ -1,13 +1,13 @@
 """
 Logout Test Runner
-Bu dosya logout testlerini interaktif olarak çalıştırmayı sağlar.
+This file allows running logout tests interactively.
 """
 
 import os
 import sys
 import django
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -16,21 +16,21 @@ from django.test.runner import DiscoverRunner
 
 
 def print_header(text):
-    """Başlık yazdır"""
+    """Print header"""
     print("\n" + "=" * 70)
     print(text.center(70))
     print("=" * 70 + "\n")
 
 
 def print_section(text):
-    """Bölüm başlığı yazdır"""
+    """Print section header"""
     print("\n" + "-" * 70)
     print(text)
     print("-" * 70)
 
 
 def run_tests(test_label, verbosity=2):
-    """Testleri çalıştır"""
+    """Run tests"""
     try:
         call_command('test', test_label, verbosity=verbosity)
         return True
@@ -41,58 +41,57 @@ def run_tests(test_label, verbosity=2):
 
 
 def main():
-    """Ana test runner fonksiyonu"""
+    """Main test runner function"""
     print_header("🔐 LOGOUT TEST RUNNER 🔐")
     
-    print("Logout Test Seçenekleri:")
-    print("\n1. ✅ Tüm Çalışan Logout Testleri")
-    print("2. 📝 Logout View Testleri")
-    print("3. 🔗 Logout Entegrasyon Testleri")
-    print("4. 🚀 Tüm Logout Testleri (Working)")
-    print("5. ❌ Çıkış")
+    print("Logout Test Options:")
+    print("\n1. ✅ All Working Logout Tests")
+    print("2. 📝 Logout View Tests")
+    print("3. 🔗 Logout Integration Tests")
+    print("4. 🚀 All Logout Tests (Working)")
+    print("5. ❌ Exit")
     
-    choice = input("\nSeçiminizi yapın (1-5): ")
+    choice = input("\nEnter your choice (1-5): ")
     
     if choice == '1':
-        print_section("Tüm Çalışan Logout Testleri Çalıştırılıyor...")
+        print_section("Running All Working Logout Tests...")
         run_tests('test.logout.working', verbosity=2)
     
     elif choice == '2':
-        print_section("Logout View Testleri Çalıştırılıyor...")
+        print_section("Running Logout View Tests...")
         run_tests('test.logout.working.test_logout_views', verbosity=2)
     
     elif choice == '3':
-        print_section("Logout Entegrasyon Testleri Çalıştırılıyor...")
+        print_section("Running Logout Integration Tests...")
         run_tests('test.logout.working.test_logout_integration', verbosity=2)
     
     elif choice == '4':
-        print_section("Tüm Logout Testleri Çalıştırılıyor...")
+        print_section("Running All Logout Tests...")
         run_tests('test.logout.working', verbosity=2)
     
     elif choice == '5':
-        print("\n👋 Test runner kapatılıyor...")
+        print("\n👋 Closing test runner...")
         sys.exit(0)
     
     else:
-        print("\n❌ Geçersiz seçim! Lütfen 1-5 arası bir sayı girin.")
+        print("\n❌ Invalid choice! Please enter a number between 1 and 5.")
         return main()
     
-    # Tekrar çalıştırma seçeneği
+    # Run again option
     print("\n" + "=" * 70)
-    repeat = input("Başka bir test çalıştırmak ister misiniz? (e/h): ")
-    if repeat.lower() == 'e':
+    repeat = input("Would you like to run another test? (y/n): ")
+    if repeat.lower() == 'y':
         return main()
     else:
-        print("\n👋 Test runner kapatılıyor...")
+        print("\n👋 Closing test runner...")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Test runner kullanıcı tarafından durduruldu.")
+        print("\n\n⚠️  Test runner stopped by user.")
         sys.exit(0)
     except Exception as e:
         print(f"\n❌ Error occurred: {e}")
         sys.exit(1)
-
