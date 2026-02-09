@@ -1,6 +1,6 @@
 """
-Organisor adına her subcategory için örnek ürün oluşturur.
-Kullanım: python manage.py create_sample_products [--username ORGANISOR_USERNAME]
+Create sample products for each subcategory on behalf of an organisor.
+Usage: python manage.py create_sample_products [--username ORGANISOR_USERNAME]
 """
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -134,14 +134,14 @@ PRODUCTS_BY_SUBCATEGORY = {
 
 
 class Command(BaseCommand):
-    help = 'Organisor adına her subcategory için örnek ürün oluşturur.'
+    help = 'Create sample products for each subcategory on behalf of an organisor.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--username',
             type=str,
             default=None,
-            help='Organisor kullanıcı adı. Verilmezse ilk organisor kullanılır.',
+            help='Organisor username. If not provided, first organisor is used.',
         )
 
     def handle(self, *args, **options):
@@ -152,16 +152,16 @@ class Command(BaseCommand):
                 profile = UserProfile.objects.get(user__username=username)
                 if not profile.user.is_organisor:
                     self.stdout.write(
-                        self.style.ERROR(f'"{username}" organisor değil. Organisor kullanıcı adı girin.')
+                        self.style.ERROR(f'"{username}" is not an organisor. Enter an organisor username.')
                     )
                     return
             except UserProfile.DoesNotExist:
-                self.stdout.write(self.style.ERROR(f'Kullanıcı bulunamadı: {username}'))
+                self.stdout.write(self.style.ERROR(f'User not found: {username}'))
                 return
         else:
             profile = UserProfile.objects.filter(user__is_organisor=True).first()
             if not profile:
-                self.stdout.write(self.style.ERROR('Hiç organisor (UserProfile) bulunamadı.'))
+                self.stdout.write(self.style.ERROR('No organisor (UserProfile) found.'))
                 return
 
         organisation = profile
@@ -177,14 +177,14 @@ class Command(BaseCommand):
                     subcategory = SubCategory.objects.get(category=category, name=subcat_name)
                 except (Category.DoesNotExist, SubCategory.DoesNotExist):
                     self.stdout.write(
-                        self.style.WARNING(f'Atlandı (kategori/alt kategori yok): {cat_name} / {subcat_name}')
+                        self.style.WARNING(f'Skipped (category/subcategory missing): {cat_name} / {subcat_name}')
                     )
                     skipped += 1
                     continue
 
                 name = data['product_name']
                 if ProductsAndStock.objects.filter(organisation=organisation, product_name=name).exists():
-                    self.stdout.write(self.style.WARNING(f'Zaten var: {name}'))
+                    self.stdout.write(self.style.WARNING(f'Already exists: {name}'))
                     skipped += 1
                     continue
 
@@ -195,8 +195,8 @@ class Command(BaseCommand):
                     **data,
                 )
                 created += 1
-                self.stdout.write(self.style.SUCCESS(f'Oluşturuldu: {name} ({cat_name} / {subcat_name})'))
+                self.stdout.write(self.style.SUCCESS(f'Created: {name} ({cat_name} / {subcat_name})'))
 
         self.stdout.write(
-            self.style.SUCCESS(f'\nToplam: {created} ürün oluşturuldu, {skipped} atlandı.')
+            self.style.SUCCESS(f'\nTotal: {created} products created, {skipped} skipped.')
         )

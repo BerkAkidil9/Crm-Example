@@ -1,6 +1,6 @@
 """
-Leads Views Test Dosyası
-Bu dosya Leads modülündeki tüm view'ları test eder.
+Leads Views Test File
+This file tests all views in the Leads module.
 """
 
 import os
@@ -14,7 +14,7 @@ from django.http import Http404
 from unittest.mock import patch, MagicMock
 from django.utils import timezone
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -33,10 +33,10 @@ User = get_user_model()
 
 
 class TestLandingPageView(TestCase):
-    """LandingPageView testleri"""
+    """LandingPageView tests"""
     
     def test_landing_page_view_get(self):
-        """Landing page GET testi"""
+        """Landing page GET test"""
         client = Client()
         response = client.get('/')
         
@@ -44,7 +44,7 @@ class TestLandingPageView(TestCase):
         self.assertTemplateUsed(response, 'landing.html')
     
     def test_landing_page_function(self):
-        """Landing page function testi"""
+        """Landing page function test"""
         client = Client()
         response = client.get('/')
         
@@ -53,10 +53,10 @@ class TestLandingPageView(TestCase):
 
 
 class TestSignupView(TestCase):
-    """SignupView testleri"""
+    """SignupView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         self.valid_data = {
             'username': 'newuser',
@@ -72,57 +72,57 @@ class TestSignupView(TestCase):
         }
     
     def test_signup_view_get(self):
-        """Signup view GET testi"""
+        """Signup view GET test"""
         response = self.client.get(reverse('signup'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/signup.html')
     
     def test_signup_view_post_valid(self):
-        """Signup view POST geçerli veri testi"""
+        """Signup view POST valid data test"""
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('signup'), data=self.valid_data)
             
-            # Redirect olmalı
+            # Should redirect
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.url, reverse('verify-email-sent'))
             
-            # User oluşturulmuş olmalı
+            # User should be created
             self.assertTrue(User.objects.filter(username='newuser').exists())
             
-            # UserProfile oluşturulmuş olmalı
+            # UserProfile should be created
             user = User.objects.get(username='newuser')
             self.assertTrue(UserProfile.objects.filter(user=user).exists())
             
-            # Organisor oluşturulmuş olmalı
+            # Organisor should be created
             self.assertTrue(Organisor.objects.filter(user=user).exists())
             
-            # Email doğrulama token'ı oluşturulmuş olmalı
+            # Email verification token should be created
             self.assertTrue(EmailVerificationToken.objects.filter(user=user).exists())
             
-            # Email gönderilmiş olmalı
+            # Email should have been sent
             mock_send_mail.assert_called_once()
     
     def test_signup_view_post_invalid(self):
-        """Signup view POST geçersiz veri testi"""
+        """Signup view POST invalid data test"""
         invalid_data = self.valid_data.copy()
         invalid_data['email'] = 'invalid-email'
         
         response = self.client.post(reverse('signup'), data=invalid_data)
         
-        # Form hatalı olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/signup.html')
         self.assertFalse(response.context['form'].is_valid())
     
     def test_signup_view_user_creation(self):
-        """Signup view kullanıcı oluşturma testi"""
+        """Signup view user creation test"""
         with patch('leads.views.send_mail'):
             response = self.client.post(reverse('signup'), data=self.valid_data)
             
             user = User.objects.get(username='newuser')
             
-            # User özellikleri doğru mu
+            # User attributes should be correct
             self.assertEqual(user.email, 'newuser@example.com')
             self.assertEqual(user.first_name, 'New')
             self.assertEqual(user.last_name, 'User')
@@ -135,28 +135,28 @@ class TestSignupView(TestCase):
             self.assertFalse(user.email_verified)
     
     def test_signup_view_email_sending(self):
-        """Signup view email gönderme testi"""
+        """Signup view email sending test"""
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('signup'), data=self.valid_data)
             
-            # Email gönderilmiş olmalı
+            # Email should have been sent
             mock_send_mail.assert_called_once()
             
-            # Email parametreleri doğru mu
+            # Email parameters should be correct
             call_args = mock_send_mail.call_args
-            # call_args[0] = positional args, [1] = kwargs veya message içeriği
+            # call_args[0] = positional args, [1] = kwargs or message content
             self.assertEqual(call_args[0][0], 'Darkenyas CRM - Email Verification')
-            # Email adresi ya ikinci parametre ya da message içinde
+            # Email address is either second param or in message
             if len(call_args[0]) > 2:
                 # call_args[0][1] = message, [2] = from_email, [3] = recipient_list
                 self.assertIn('New', call_args[0][1])
 
 
 class TestEmailVerificationViews(TestCase):
-    """Email verification view'ları testleri"""
+    """Email verification views tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         self.user = User.objects.create_user(
             username='verify_test',
@@ -174,67 +174,67 @@ class TestEmailVerificationViews(TestCase):
         self.token = EmailVerificationToken.objects.create(user=self.user)
     
     def test_email_verification_sent_view(self):
-        """Email verification sent view testi"""
+        """Email verification sent view test"""
         response = self.client.get(reverse('verify-email-sent'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/verify_email_sent.html')
     
     def test_email_verification_view_valid_token(self):
-        """Email verification view geçerli token testi"""
+        """Email verification view valid token test"""
         response = self.client.get(reverse('verify-email', kwargs={'token': self.token.token}))
         
         # Redirect to success page
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('verify-email-success'))
         
-        # User email doğrulanmış olmalı
+        # User email should be verified
         self.user.refresh_from_db()
         self.assertTrue(self.user.email_verified)
         
-        # Token kullanılmış olmalı
+        # Token should be used
         self.token.refresh_from_db()
         self.assertTrue(self.token.is_used)
     
     def test_email_verification_view_invalid_token(self):
-        """Email verification view geçersiz token testi"""
-        # Geçerli UUID formatında ama mevcut olmayan token
+        """Email verification view invalid token test"""
+        # Valid UUID format but non-existent token
         invalid_token = '12345678-1234-1234-1234-123456789012'
         response = self.client.get(reverse('verify-email', kwargs={'token': invalid_token}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('verify-email-failed'))
     
     def test_email_verification_view_used_token(self):
-        """Email verification view kullanılmış token testi"""
-        # Token'ı kullanılmış olarak işaretle
+        """Email verification view used token test"""
+        # Mark token as used
         self.token.is_used = True
         self.token.save()
         
         response = self.client.get(reverse('verify-email', kwargs={'token': self.token.token}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('verify-email-failed'))
     
     def test_email_verification_view_expired_token(self):
-        """Email verification view süresi dolmuş token testi"""
-        # Token'ı 25 saat önce oluştur
+        """Email verification view expired token test"""
+        # Create token 25 hours ago
         from datetime import datetime, timedelta
         past_time = timezone.now() - timedelta(hours=25)
         expired_token = EmailVerificationToken.objects.create(user=self.user)
-        # Token'ın created_at zamanını manuel olarak güncelle
+        # Update token's created_at manually
         EmailVerificationToken.objects.filter(id=expired_token.id).update(created_at=past_time)
         
         response = self.client.get(reverse('verify-email', kwargs={'token': expired_token.token}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('verify-email-failed'))
     
     def test_email_verification_failed_view(self):
-        """Email verification failed view testi"""
+        """Email verification failed view test"""
         response = self.client.get(reverse('verify-email-failed'))
         
         self.assertEqual(response.status_code, 200)
@@ -242,10 +242,10 @@ class TestEmailVerificationViews(TestCase):
 
 
 class TestCustomLoginView(TestCase):
-    """CustomLoginView testleri"""
+    """CustomLoginView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         self.user = User.objects.create_user(
             username='login_test',
@@ -261,46 +261,46 @@ class TestCustomLoginView(TestCase):
         )
     
     def test_login_view_get(self):
-        """Login view GET testi"""
+        """Login view GET test"""
         response = self.client.get(reverse('login'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/login.html')
     
     def test_login_view_post_valid(self):
-        """Login view POST geçerli veri testi"""
+        """Login view POST valid data test"""
         response = self.client.post(reverse('login'), {
             'username': 'login_test',
             'password': 'testpass123'
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_login_view_post_invalid(self):
-        """Login view POST geçersiz veri testi"""
+        """Login view POST invalid data test"""
         response = self.client.post(reverse('login'), {
             'username': 'login_test',
             'password': 'wrongpassword'
         })
         
-        # Form hatalı olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/login.html')
     
     def test_login_view_email_authentication(self):
-        """Login view email ile authentication testi"""
+        """Login view email authentication test"""
         response = self.client.post(reverse('login'), {
             'username': 'login_test@example.com',
             'password': 'testpass123'
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_login_view_unverified_email(self):
-        """Login view doğrulanmamış email testi"""
-        # User'ı doğrulanmamış olarak işaretle
+        """Login view unverified email test"""
+        # Mark user as unverified
         self.user.email_verified = False
         self.user.save()
         
@@ -309,7 +309,7 @@ class TestCustomLoginView(TestCase):
             'password': 'testpass123'
         })
         
-        # Form hatalı olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/login.html')
 
@@ -318,10 +318,10 @@ class TestLeadListView(TestCase):
     """LeadListView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='lead_list_organisor',
             email='lead_list_organisor@example.com',
@@ -339,7 +339,7 @@ class TestLeadListView(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='lead_list_agent',
             email='lead_list_agent@example.com',
@@ -358,7 +358,7 @@ class TestLeadListView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Lead oluştur
+        # Create lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -371,7 +371,7 @@ class TestLeadListView(TestCase):
             address='123 Test Street'
         )
         
-        # Unassigned lead oluştur
+        # Create unassigned lead
         self.unassigned_lead = Lead.objects.create(
             first_name='Unassigned',
             last_name='Lead',
@@ -384,7 +384,7 @@ class TestLeadListView(TestCase):
         )
     
     def test_lead_list_view_organisor(self):
-        """Lead list view organisor testi"""
+        """Lead list view organisor test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:lead-list'))
         
@@ -395,15 +395,15 @@ class TestLeadListView(TestCase):
         self.assertIn('leads', response.context)
         self.assertIn('unassigned_leads', response.context)
         
-        # Assigned lead listede olmalı
+        # Assigned lead should be in list
         self.assertIn(self.lead, response.context['leads'])
         
-        # Unassigned lead unassigned listesinde olmalı
+        # Unassigned lead should be in unassigned list
         self.assertIn(self.unassigned_lead, response.context['unassigned_leads'])
     
     def test_lead_list_view_agent(self):
-        """Lead list view agent testi"""
-        # Lead'i ÖNCE agent'a ata
+        """Lead list view agent test"""
+        # Assign lead to agent FIRST
         self.lead.agent = self.agent
         self.lead.save()
         
@@ -416,19 +416,19 @@ class TestLeadListView(TestCase):
         # Context kontrol et
         self.assertIn('leads', response.context)
         
-        # Lead artık agent'ın listesinde olmalı (eğer view queryset çalışıyorsa)
+        # Lead should now be in agent's list (if view queryset works)
         lead_ids = [lead.id for lead in response.context['leads']]
-        # Agent view queryset'i bazen boş dönebilir - bu kabul edilebilir
+        # Agent view queryset may sometimes return empty - this is acceptable
         # Test'i esnek tut
         if len(lead_ids) > 0:
             self.assertIn(self.lead.id, lead_ids)
             self.assertNotIn(self.unassigned_lead.id, lead_ids)
         else:
-            # Queryset boş - agent view'ında known issue
+            # Queryset empty - known issue in agent view
             self.assertEqual(len(lead_ids), 0)
     
     def test_lead_list_view_superuser(self):
-        """Lead list view superuser testi"""
+        """Lead list view superuser test"""
         superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
@@ -445,21 +445,21 @@ class TestLeadListView(TestCase):
         self.assertIn('leads', response.context)
         self.assertIn('unassigned_leads', response.context)
         
-        # Tüm assigned lead'ler olmalı
+        # All assigned leads should be present
         self.assertIn(self.lead, response.context['leads'])
         
-        # Tüm unassigned lead'ler olmalı
+        # All unassigned leads should be present
         self.assertIn(self.unassigned_lead, response.context['unassigned_leads'])
     
     def test_lead_list_view_unauthenticated(self):
-        """Lead list view giriş yapmamış kullanıcı testi"""
+        """Lead list view unauthenticated user test"""
         response = self.client.get(reverse('leads:lead-list'))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_lead_list_function(self):
-        """Lead list function testi"""
+        """Lead list function test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get('/leads/')
         
@@ -471,10 +471,10 @@ class TestLeadDetailView(TestCase):
     """LeadDetailView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='lead_detail_organisor',
             email='lead_detail_organisor@example.com',
@@ -492,7 +492,7 @@ class TestLeadDetailView(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='lead_detail_agent',
             email='lead_detail_agent@example.com',
@@ -511,7 +511,7 @@ class TestLeadDetailView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Lead oluştur
+        # Create lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -525,7 +525,7 @@ class TestLeadDetailView(TestCase):
         )
     
     def test_lead_detail_view_organisor(self):
-        """Lead detail view organisor testi"""
+        """Lead detail view organisor test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': self.lead.pk}))
         
@@ -537,20 +537,20 @@ class TestLeadDetailView(TestCase):
         self.assertEqual(response.context['lead'], self.lead)
     
     def test_lead_detail_view_agent(self):
-        """Lead detail view agent testi"""
-        # Lead setUp'ta zaten agent'a atanmış
-        # Debug: Lead ve agent ilişkisini kontrol et
+        """Lead detail view agent test"""
+        # Lead is already assigned to agent in setUp
+        # Debug: check lead and agent relationship
         self.assertEqual(self.lead.agent, self.agent)
         self.assertEqual(self.agent.user, self.agent_user)
         
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': self.lead.pk}))
         
-        # Eğer 404 dönüyorsa, agent queryset filtresinde sorun var
-        # Bu durumda test beklentisini ayarlayalım
+        # If 404, there may be an issue with agent queryset filter
+        # In that case adjust test expectation
         if response.status_code == 404:
-            # Agent kendi lead'lerini görebilmeli ama view queryset'i çalışmıyor
-            # Test'i geçerli kıl
+            # Agent should see their leads but view queryset may not be working
+            # Make test pass
             self.assertEqual(response.status_code, 404)
         else:
             self.assertEqual(response.status_code, 200)
@@ -561,7 +561,7 @@ class TestLeadDetailView(TestCase):
             self.assertEqual(response.context['lead'], self.lead)
     
     def test_lead_detail_view_superuser(self):
-        """Lead detail view superuser testi"""
+        """Lead detail view superuser test"""
         superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
@@ -579,22 +579,22 @@ class TestLeadDetailView(TestCase):
         self.assertEqual(response.context['lead'], self.lead)
     
     def test_lead_detail_view_unauthenticated(self):
-        """Lead detail view giriş yapmamış kullanıcı testi"""
+        """Lead detail view unauthenticated user test"""
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': self.lead.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_lead_detail_view_not_found(self):
-        """Lead detail view bulunamayan lead testi"""
+        """Lead detail view non-existent lead test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': 99999}))
         
-        # 404 olmalı
+        # Should be 404
         self.assertEqual(response.status_code, 404)
     
     def test_lead_detail_function(self):
-        """Lead detail function testi"""
+        """Lead detail function test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(f'/leads/{self.lead.pk}/')
         
@@ -606,10 +606,10 @@ class TestLeadCreateView(TestCase):
     """LeadCreateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='lead_create_organisor',
             email='lead_create_organisor@example.com',
@@ -627,7 +627,7 @@ class TestLeadCreateView(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='lead_create_agent',
             email='lead_create_agent@example.com',
@@ -646,7 +646,7 @@ class TestLeadCreateView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -671,7 +671,7 @@ class TestLeadCreateView(TestCase):
         }
     
     def test_lead_create_view_organisor_get(self):
-        """Lead create view organisor GET testi"""
+        """Lead create view organisor GET test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:lead-create'))
         
@@ -679,40 +679,40 @@ class TestLeadCreateView(TestCase):
         self.assertTemplateUsed(response, 'leads/lead_create.html')
     
     def test_lead_create_view_organisor_post(self):
-        """Lead create view organisor POST testi"""
+        """Lead create view organisor POST test"""
         self.client.force_login(self.organisor_user)
         
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('leads:lead-create'), data=self.valid_data)
             
-            # Redirect olmalı
+            # Should redirect
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.url, reverse('leads:lead-list'))
             
-            # Lead oluşturulmuş olmalı
+            # Lead should have been created
             self.assertTrue(Lead.objects.filter(email='new.lead@example.com').exists())
             
-            # Email gönderilmiş olmalı
+            # Email should have been sent
             mock_send_mail.assert_called_once()
     
     def test_lead_create_view_agent_unauthorized(self):
-        """Lead create view agent unauthorized testi"""
+        """Lead create view agent unauthorized test"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('leads:lead-create'))
         
-        # Agent'lar lead oluşturamaz - redirect veya access denied
-        # Bazı sistemlerde 302 (redirect), bazılarında 200 (form göster ama save yasak)
+        # Agents cannot create leads - redirect or access denied
+        # Some systems return 302 (redirect), others 200 (show form but save forbidden)
         self.assertIn(response.status_code, [200, 302])
     
     def test_lead_create_view_unauthenticated(self):
-        """Lead create view giriş yapmamış kullanıcı testi"""
+        """Lead create view unauthenticated user test"""
         response = self.client.get(reverse('leads:lead-create'))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_lead_create_view_superuser(self):
-        """Lead create view superuser testi"""
+        """Lead create view superuser test"""
         superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
@@ -726,7 +726,7 @@ class TestLeadCreateView(TestCase):
         self.assertTemplateUsed(response, 'leads/lead_create.html')
     
     def test_lead_create_function(self):
-        """Lead create function testi"""
+        """Lead create function test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get('/leads/create/')
         
@@ -738,10 +738,10 @@ class TestLeadUpdateView(TestCase):
     """LeadUpdateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='lead_update_organisor',
             email='lead_update_organisor@example.com',
@@ -759,7 +759,7 @@ class TestLeadUpdateView(TestCase):
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -782,7 +782,7 @@ class TestLeadUpdateView(TestCase):
         }
     
     def test_lead_update_view_organisor_get(self):
-        """Lead update view organisor GET testi"""
+        """Lead update view organisor GET test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
         
@@ -790,21 +790,21 @@ class TestLeadUpdateView(TestCase):
         self.assertTemplateUsed(response, 'leads/lead_update.html')
     
     def test_lead_update_view_organisor_post(self):
-        """Lead update view organisor POST testi"""
+        """Lead update view organisor POST test"""
         self.client.force_login(self.organisor_user)
         response = self.client.post(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}), data=self.valid_data)
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('leads:lead-list'))
         
-        # Lead güncellenmiş olmalı
+        # Lead should have been updated
         self.lead.refresh_from_db()
         self.assertEqual(self.lead.first_name, 'Updated')
         self.assertEqual(self.lead.email, 'updated.lead@example.com')
     
     def test_lead_update_view_agent_unauthorized(self):
-        """Lead update view agent unauthorized testi"""
+        """Lead update view agent unauthorized test"""
         agent_user = User.objects.create_user(
             username='lead_update_agent',
             email='lead_update_agent@example.com',
@@ -821,19 +821,19 @@ class TestLeadUpdateView(TestCase):
         self.client.force_login(agent_user)
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
         
-        # Agent başka bir agent'ın lead'ini güncelleyemez
-        # 404 (bulunamadı) veya 302 (redirect)
+        # Agent cannot update another agent's lead
+        # 404 (not found) or 302 (redirect)
         self.assertIn(response.status_code, [302, 404])
     
     def test_lead_update_view_unauthenticated(self):
-        """Lead update view giriş yapmamış kullanıcı testi"""
+        """Lead update view unauthenticated user test"""
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_lead_update_function(self):
-        """Lead update function testi"""
+        """Lead update function test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(f'/leads/{self.lead.pk}/update/')
         
@@ -845,10 +845,10 @@ class TestLeadDeleteView(TestCase):
     """LeadDeleteView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='lead_delete_organisor',
             email='lead_delete_organisor@example.com',
@@ -866,7 +866,7 @@ class TestLeadDeleteView(TestCase):
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -879,7 +879,7 @@ class TestLeadDeleteView(TestCase):
         )
     
     def test_lead_delete_view_organisor_get(self):
-        """Lead delete view organisor GET testi"""
+        """Lead delete view organisor GET test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         
@@ -887,19 +887,19 @@ class TestLeadDeleteView(TestCase):
         self.assertTemplateUsed(response, 'leads/lead_delete.html')
     
     def test_lead_delete_view_organisor_post(self):
-        """Lead delete view organisor POST testi"""
+        """Lead delete view organisor POST test"""
         self.client.force_login(self.organisor_user)
         response = self.client.post(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('leads:lead-list'))
         
-        # Lead silinmiş olmalı
+        # Lead should have been deleted
         self.assertFalse(Lead.objects.filter(pk=self.lead.pk).exists())
     
     def test_lead_delete_view_agent_unauthorized(self):
-        """Lead delete view agent unauthorized testi"""
+        """Lead delete view agent unauthorized test"""
         agent_user = User.objects.create_user(
             username='lead_delete_agent',
             email='lead_delete_agent@example.com',
@@ -916,19 +916,19 @@ class TestLeadDeleteView(TestCase):
         self.client.force_login(agent_user)
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         
-        # Agent başka bir agent'ın lead'ini silemez
-        # 404 (bulunamadı) veya 302 (redirect)
+        # Agent cannot delete another agent's lead
+        # 404 (not found) or 302 (redirect)
         self.assertIn(response.status_code, [302, 404])
     
     def test_lead_delete_view_unauthenticated(self):
-        """Lead delete view giriş yapmamış kullanıcı testi"""
+        """Lead delete view unauthenticated user test"""
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
     
     def test_lead_delete_function(self):
-        """Lead delete function testi"""
+        """Lead delete function test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(f'/leads/{self.lead.pk}/delete/')
         
@@ -940,10 +940,10 @@ class TestAssignAgentView(TestCase):
     """AssignAgentView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='assign_agent_organisor',
             email='assign_agent_organisor@example.com',
@@ -961,7 +961,7 @@ class TestAssignAgentView(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='assign_agent_agent',
             email='assign_agent_agent@example.com',
@@ -980,7 +980,7 @@ class TestAssignAgentView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Lead oluştur
+        # Create lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -993,7 +993,7 @@ class TestAssignAgentView(TestCase):
         )
     
     def test_assign_agent_view_organisor_get(self):
-        """Assign agent view organisor GET testi"""
+        """Assign agent view organisor GET test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         
@@ -1001,34 +1001,34 @@ class TestAssignAgentView(TestCase):
         self.assertTemplateUsed(response, 'leads/assign_agent.html')
     
     def test_assign_agent_view_organisor_post(self):
-        """Assign agent view organisor POST testi"""
+        """Assign agent view organisor POST test"""
         self.client.force_login(self.organisor_user)
         response = self.client.post(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}), {
             'agent': self.agent.id
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('leads:lead-list'))
         
-        # Lead agent atanmış olmalı
+        # Lead should have been assigned to agent
         self.lead.refresh_from_db()
         self.assertEqual(self.lead.agent, self.agent)
     
     def test_assign_agent_view_agent_unauthorized(self):
-        """Assign agent view agent unauthorized testi"""
+        """Assign agent view agent unauthorized test"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         
-        # Agent başka lead'lere agent atayamaz
-        # 200 (form göster), 302 (redirect) veya 404 olabilir
+        # Agent cannot assign agent to other leads
+        # 200 (show form), 302 (redirect) or 404
         self.assertIn(response.status_code, [200, 302, 404])
     
     def test_assign_agent_view_unauthenticated(self):
-        """Assign agent view giriş yapmamış kullanıcı testi"""
+        """Assign agent view unauthenticated user test"""
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
 
 
@@ -1036,10 +1036,10 @@ class TestCategoryListView(TestCase):
     """CategoryListView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='category_list_organisor',
             email='category_list_organisor@example.com',
@@ -1057,7 +1057,7 @@ class TestCategoryListView(TestCase):
             user=self.organisor_user
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -1069,7 +1069,7 @@ class TestCategoryListView(TestCase):
         )
     
     def test_category_list_view_organisor(self):
-        """Category list view organisor testi"""
+        """Category list view organisor test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:category-list'))
         
@@ -1080,12 +1080,12 @@ class TestCategoryListView(TestCase):
         self.assertIn('source_categories', response.context)
         self.assertIn('value_categories', response.context)
         self.assertIn('is_admin_view', response.context)
-        # is_admin_view durumu kullanıcıya bağlı
-        # Superuser veya özel kullanıcılar için True olabilir
+        # is_admin_view depends on user
+        # Can be True for superuser or specific users
         self.assertIsNotNone(response.context['is_admin_view'])
     
     def test_category_list_view_superuser(self):
-        """Category list view superuser testi"""
+        """Category list view superuser test"""
         superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
@@ -1105,10 +1105,10 @@ class TestCategoryListView(TestCase):
         self.assertTrue(response.context['is_admin_view'])
     
     def test_category_list_view_unauthenticated(self):
-        """Category list view giriş yapmamış kullanıcı testi"""
+        """Category list view unauthenticated user test"""
         response = self.client.get(reverse('leads:category-list'))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
 
 
@@ -1116,17 +1116,17 @@ class TestGetAgentsByOrgView(TestCase):
     """get_agents_by_org view testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Superuser oluştur
+        # Create superuser
         self.superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
             password='testpass123'
         )
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='get_agents_organisor',
             email='get_agents_organisor@example.com',
@@ -1144,7 +1144,7 @@ class TestGetAgentsByOrgView(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='get_agents_agent',
             email='get_agents_agent@example.com',
@@ -1163,7 +1163,7 @@ class TestGetAgentsByOrgView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -1175,7 +1175,7 @@ class TestGetAgentsByOrgView(TestCase):
         )
     
     def test_get_agents_by_org_superuser(self):
-        """Get agents by org superuser testi"""
+        """Get agents by org superuser test"""
         self.client.force_login(self.superuser)
         response = self.client.get(reverse('leads:get-agents-by-org', kwargs={'org_id': self.organisor_profile.id}))
         
@@ -1193,26 +1193,26 @@ class TestGetAgentsByOrgView(TestCase):
         self.assertIn('name', data['agents'][0])
     
     def test_get_agents_by_org_non_superuser(self):
-        """Get agents by org non-superuser testi"""
+        """Get agents by org non-superuser test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('leads:get-agents-by-org', kwargs={'org_id': self.organisor_profile.id}))
         
-        # 403 olmalı
+        # Should be 403
         self.assertEqual(response.status_code, 403)
     
     def test_get_agents_by_org_invalid_org(self):
-        """Get agents by org invalid org testi"""
+        """Get agents by org invalid org test"""
         self.client.force_login(self.superuser)
         response = self.client.get(reverse('leads:get-agents-by-org', kwargs={'org_id': 99999}))
         
-        # 404 olmalı
+        # Should be 404
         self.assertEqual(response.status_code, 404)
 
 
 if __name__ == "__main__":
-    print("Leads Views Testleri Başlatılıyor...")
+    print("Starting Leads Views Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

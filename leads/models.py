@@ -22,7 +22,7 @@ class User(AbstractUser):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
     profile_image = models.FileField(upload_to='profile_images/', blank=True, null=True, help_text="Upload a profile picture")
     
-    # Email ve username unique olacak şekilde ayarla
+    # Set email and username to be unique
     email = models.EmailField(unique=True)
     username = models.CharField(
         max_length=150,
@@ -51,7 +51,7 @@ class Category(models.Model):
         return self.name
 
 class SourceCategory(models.Model):
-    """Kaynak bazlı kategoriler - Müşteri adayının nereden geldiği"""
+    """Source-based categories - Where the lead came from"""
     name = models.CharField(max_length=50)
     organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
@@ -62,7 +62,7 @@ class SourceCategory(models.Model):
         verbose_name_plural = "Source Categories"
 
 class ValueCategory(models.Model):
-    """Değer bazlı kategoriler - Müşteri adayının potansiyel değeri"""
+    """Value-based categories - Lead's potential value"""
     name = models.CharField(max_length=50)
     organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
@@ -89,11 +89,11 @@ class Lead(models.Model):
     profile_image = models.FileField(upload_to='lead_photos/', blank=True, null=True, help_text="Lead profile photo")
 
     def save(self, *args, **kwargs):
-        # Sadece yeni lead oluştururken kategorileri ata (pk yoksa)
+        # Only assign categories when creating new lead (no pk)
         is_new = self.pk is None
         
         if is_new:
-            # Eski category sistemi için backward compatibility
+            # Backward compatibility for old category system
             if not self.category:
                 try:
                     unassigned_category = Category.objects.get(name="Unassigned", organisation=self.organisation)
@@ -101,7 +101,7 @@ class Lead(models.Model):
                     unassigned_category = Category.objects.create(name="Unassigned", organisation=self.organisation)
                 self.category = unassigned_category
             
-            # Yeni kategoriler için default değerler
+            # Default values for new categories
             if not self.source_category:
                 try:
                     unassigned_source = SourceCategory.objects.get(name="Unassigned", organisation=self.organisation)
@@ -138,7 +138,7 @@ class EmailVerificationToken(models.Model):
     is_used = models.BooleanField(default=False)
     
     def is_expired(self):
-        # Token 24 saat geçerli
+        # Token valid for 24 hours
         return timezone.now() > self.created_at + timedelta(hours=24)
     
     def __str__(self):

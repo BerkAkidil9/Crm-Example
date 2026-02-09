@@ -1,6 +1,6 @@
 """
 Mevcut ornek urunlerin (product_name ile eslesen) description alanini Ingilizce metinle gunceller.
-Kullanım: python manage.py update_product_descriptions_english
+Usage: python manage.py update_product_descriptions_english
 """
 from django.core.management.base import BaseCommand
 from ProductsAndStock.models import ProductsAndStock

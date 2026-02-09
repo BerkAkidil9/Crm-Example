@@ -172,7 +172,7 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
             # Organisors use their own organisation
             try:
                 product.organisation = user.userprofile
-                # Form'a user_organisation'ı set et (clean metodunda kullanmak için)
+                # Set user_organisation on the form (for use in clean method)
                 form.user_organisation = user.userprofile
             except:
                 from django.contrib import messages
@@ -221,7 +221,7 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
         product = self.get_object()
         old_price = getattr(product, 'product_price', None)
 
-        # Organisors için user_organisation'ı set et (clean metodunda kullanmak için)
+        # Set user_organisation for organisors (for use in clean method)
         if not (user.is_superuser or user.id == 1 or user.username == 'berk'):
             try:
                 form.user_organisation = user.userprofile

@@ -10,10 +10,10 @@
 				<h2 class="text-sm title-font text-gray-500 tracking-widest">LEAD</h2>
 				<h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{lead.first_name}}  {{lead.last_name}} </h1>
 				<div class="flex mb-4">
-				   <a href= "{% url 'leads:lead-detail' lead.pk %}"class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1">
+				   <a href="{% url 'leads:lead-detail' lead.pk %}" class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1">
 					   Overview
 				   </a>
-				   <a href={% url 'leads:lead-category-update' lead.pk %} class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
+				   <a href="{% url 'leads:lead-category-update' lead.pk %}" class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
 					Category
 				   </a>
 				   {% if not request.user.is_agent %}
@@ -21,6 +21,9 @@
 					  Update Details
 				   </a>
 				   {% endif %}
+				   <a href="{% url 'leads:lead-activity' lead.pk %}" class="flex-grow border-b-2 border-gray-300 py-2 text-lg px-1">
+					Lead Activity
+				   </a>
 				 </div>
 				 <form method="post">
 				 {% csrf_token %}  

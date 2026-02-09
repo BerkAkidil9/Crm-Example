@@ -80,8 +80,8 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
         user = form.save(commit=False)
         user.is_agent = True
         user.is_organisor = False
-        user.email_verified = False  # Email doğrulanmamış olarak başlat
-        # Şifre form'da set ediliyor, burada tekrar set etmeye gerek yok
+        user.email_verified = False  # Start with email unverified
+        # Password is set in the form, no need to set it here again
 
         try:
             with transaction.atomic():
@@ -97,7 +97,7 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
 
                 # Create Agent
                 if self.request.user.is_superuser:
-                    # Admin için form'dan seçilen organizasyonu kullan
+                    # For admin: use organisation selected in the form
                     selected_organisation = form.cleaned_data.get('organisation')
                     agent = Agent.objects.create(
                         user=user,
@@ -105,7 +105,7 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
                     )
                     org_for_log = selected_organisation
                 else:
-                    # Organisor için kendi organizasyonunu kullan
+                    # For organisor: use their own organisation
                     agent = Agent.objects.create(
                         user=user,
                         organisation=self.request.user.userprofile
@@ -121,10 +121,10 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
                     organisation=org_for_log,
                 )
 
-                # Email doğrulama token'ı oluştur
+                # Create email verification token
                 verification_token = EmailVerificationToken.objects.create(user=user)
                 
-                # Email gönder
+                # Send email
                 self.send_verification_email(user, verification_token.token)
             return super().form_valid(form)
         except IntegrityError as e:
@@ -184,12 +184,12 @@ class AgentDetailView(AgentAndOrganisorLoginRequiredMixin, generic.DetailView):
         if self.request.user.is_superuser:
             logger.info(f"Admin fetching all agents")
             return Agent.objects.all()
-        # Organisor ise tüm agent'ları görebilir
+        # Organisor can see all agents
         elif self.request.user.is_organisor:
             organisation = self.request.user.userprofile
             logger.info(f"Fetching agents for organisation: {organisation}")
             return Agent.objects.filter(organisation=organisation)
-        # Agent ise sadece kendisini görebilir
+        # Agent can only see themselves
         elif self.request.user.is_agent:
             logger.info(f"Fetching agent profile for user: {self.request.user.username}")
             return Agent.objects.filter(user=self.request.user)
@@ -256,12 +256,12 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
         if self.request.user.is_superuser:
             logger.info(f"Admin fetching all agents for update")
             return Agent.objects.all()
-        # Organisor ise tüm agent'ları güncelleyebilir
+        # Organisor can update all agents
         elif self.request.user.is_organisor:
             organisation = self.request.user.userprofile
             logger.info(f"Fetching agents for organisation: {organisation}")
             return Agent.objects.filter(organisation=organisation)
-        # Agent ise sadece kendisini güncelleyebilir
+        # Agent can only update themselves
         elif self.request.user.is_agent:
             logger.info(f"Fetching agent profile for user: {self.request.user.username}")
             return Agent.objects.filter(user=self.request.user)
@@ -344,7 +344,7 @@ class AgentDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
             return Agent.objects.filter(organisation=organisation)
     
     def form_valid(self, form):
-        # Agent'ı al
+        # Get the agent
         agent = self.get_object()
         user = agent.user
         username = user.username
@@ -360,9 +360,9 @@ class AgentDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
                     object_repr=object_repr,
                     organisation=org,
                 )
-                # Önce Agent'ı sil
+                # Delete the agent first
                 agent.delete()
-                # Sonra ilişkili User'ı da sil
+                # Then delete the related User
                 user.delete()
                 
             logger.info(f"Agent and User {username} deleted successfully")

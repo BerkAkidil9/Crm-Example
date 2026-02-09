@@ -18,56 +18,56 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # Basit set: 5 kategori, her birinde 3-4 alt kategori
+        # Simple set: 5 categories, 3-4 subcategories each
         categories_data = [
             {
                 'name': 'Products',
-                'description': 'Fiziksel ürünler',
+                'description': 'Physical products',
                 'icon': 'fas fa-box',
                 'subcategories': [
-                    {'name': 'Merchandise', 'description': 'Ürün ve promosyon'},
-                    {'name': 'Inventory', 'description': 'Stok kalemleri'},
-                    {'name': 'Other', 'description': 'Diğer'},
+                    {'name': 'Merchandise', 'description': 'Products and promotions'},
+                    {'name': 'Inventory', 'description': 'Stock items'},
+                    {'name': 'Other', 'description': 'Other'},
                 ]
             },
             {
                 'name': 'Services',
-                'description': 'Hizmetler',
+                'description': 'Services',
                 'icon': 'fas fa-handshake',
                 'subcategories': [
-                    {'name': 'Consulting', 'description': 'Danışmanlık'},
-                    {'name': 'Support', 'description': 'Destek'},
-                    {'name': 'Training', 'description': 'Eğitim'},
-                    {'name': 'Other', 'description': 'Diğer'},
+                    {'name': 'Consulting', 'description': 'Consulting'},
+                    {'name': 'Support', 'description': 'Support'},
+                    {'name': 'Training', 'description': 'Training'},
+                    {'name': 'Other', 'description': 'Other'},
                 ]
             },
             {
                 'name': 'Software',
-                'description': 'Yazılım ve dijital',
+                'description': 'Software and digital',
                 'icon': 'fas fa-laptop-code',
                 'subcategories': [
-                    {'name': 'Licenses', 'description': 'Lisanslar'},
-                    {'name': 'SaaS', 'description': 'Bulut / abonelik'},
-                    {'name': 'Other', 'description': 'Diğer'},
+                    {'name': 'Licenses', 'description': 'Licenses'},
+                    {'name': 'SaaS', 'description': 'Cloud / subscription'},
+                    {'name': 'Other', 'description': 'Other'},
                 ]
             },
             {
                 'name': 'Subscriptions',
-                'description': 'Abonelik ve tekrarlayan',
+                'description': 'Subscriptions and recurring',
                 'icon': 'fas fa-sync-alt',
                 'subcategories': [
-                    {'name': 'Monthly', 'description': 'Aylık'},
-                    {'name': 'Annual', 'description': 'Yıllık'},
-                    {'name': 'Other', 'description': 'Diğer'},
+                    {'name': 'Monthly', 'description': 'Monthly'},
+                    {'name': 'Annual', 'description': 'Annual'},
+                    {'name': 'Other', 'description': 'Other'},
                 ]
             },
             {
                 'name': 'Other',
-                'description': 'Diğer kategoriler',
+                'description': 'Other categories',
                 'icon': 'fas fa-folder',
                 'subcategories': [
-                    {'name': 'General', 'description': 'Genel'},
-                    {'name': 'Misc', 'description': 'Çeşitli'},
+                    {'name': 'General', 'description': 'General'},
+                    {'name': 'Misc', 'description': 'Miscellaneous'},
                 ]
             },
         ]

@@ -1,6 +1,6 @@
 """
-Finance Views Test Dosyası
-Bu dosya Finance modülündeki tüm view'ları test eder.
+Finance Views Test File
+This file tests all views in the Finance module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.utils import timezone
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -27,11 +27,11 @@ User = get_user_model()
 
 
 class TestFinancialReportView(TestCase):
-    """FinancialReportView testleri"""
+    """FinancialReportView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor kullanıcısı oluştur
+        """Set up test data"""
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='finance_view_organisor',
             email='finance_view_organisor@example.com',
@@ -45,12 +45,12 @@ class TestFinancialReportView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -59,7 +59,7 @@ class TestFinancialReportView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -78,8 +78,8 @@ class TestFinancialReportView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Order'lar oluştur (farklı tarihlerde)
-        # Tarihleri günün başlangıcına sabitle (00:00:00)
+        # Create orders (on different dates)
+        # Fix times to start of day (00:00:00)
         now = timezone.now()
         self.yesterday = timezone.make_aware(datetime.combine(
             (now - timedelta(days=1)).date(), datetime.min.time()
@@ -97,7 +97,7 @@ class TestFinancialReportView(TestCase):
             order_description='Order from yesterday',
             organisation=self.organisor_profile,
             lead=self.lead,
-            creation_date=self.yesterday  # creation_date'i manuel set et
+            creation_date=self.yesterday  # Set creation_date manually
         )
         
         self.order2 = orders.objects.create(
@@ -106,7 +106,7 @@ class TestFinancialReportView(TestCase):
             order_description='Order from today',
             organisation=self.organisor_profile,
             lead=self.lead,
-            creation_date=self.today  # creation_date'i manuel set et
+            creation_date=self.today  # Set creation_date manually
         )
         
         self.order3 = orders.objects.create(
@@ -115,10 +115,10 @@ class TestFinancialReportView(TestCase):
             order_description='Order from tomorrow',
             organisation=self.organisor_profile,
             lead=self.lead,
-            creation_date=self.tomorrow  # creation_date'i manuel set et
+            creation_date=self.tomorrow  # Set creation_date manually
         )
         
-        # Finance report'lar oluştur
+        # Create finance reports
         self.finance_report1 = OrderFinanceReport.objects.create(
             order=self.order1,
             earned_amount=1000.0
@@ -134,7 +134,7 @@ class TestFinancialReportView(TestCase):
             earned_amount=3000.0
         )
         
-        # Client oluştur ve giriş yap
+        # Create client and log in
         self.client = Client()
         self.client.login(username='finance_view_organisor', password='testpass123')
     
@@ -158,7 +158,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn('total_earned', response.context)
         self.assertIn('reports', response.context)
         
-        # GET request'te varsayılan (bu ay) veriler gösterilir
+        # GET request shows default (this month) data
         self.assertIn('order_count', response.context)
     
     def test_financial_report_view_post_valid_dates(self):
@@ -176,7 +176,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn('total_earned', response.context)
         self.assertIn('reports', response.context)
         
-        # Sadece bugünkü order filtrelenmiş olmalı
+        # Only today's order should be filtered
         self.assertEqual(response.context['total_earned'], 2000.0)  # Sadece order2
         self.assertEqual(len(response.context['reports']), 1)
         self.assertIn(self.finance_report2, response.context['reports'])
@@ -193,7 +193,7 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Dün ve bugünkü order'lar filtrelenmiş olmalı
+        # Yesterday's and today's orders should be filtered
         self.assertEqual(response.context['total_earned'], 3000.0)  # order1 (1000) + order2 (2000)
         self.assertEqual(len(response.context['reports']), 2)
         self.assertIn(self.finance_report1, response.context['reports'])
@@ -211,7 +211,7 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Tüm order'lar (dün, bugün, yarın) filtrelenmiş olmalı
+        # All orders (yesterday, today, tomorrow) should be filtered
         self.assertEqual(response.context['total_earned'], 6000.0)  # order1 (1000) + order2 (2000) + order3 (3000)
         self.assertEqual(len(response.context['reports']), 3)
         self.assertIn(self.finance_report1, response.context['reports'])
@@ -230,7 +230,7 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Sonuç bulunmamalı
+        # No result should be found
         self.assertEqual(response.context['total_earned'], 0)
         self.assertEqual(len(response.context['reports']), 0)
     
@@ -243,7 +243,7 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Form hatalı olduğu için GET response döner
+        # Returns GET response because form is invalid
         self.assertIsNone(response.context['total_earned'])
         self.assertEqual(len(response.context['reports']), 0)
     
@@ -259,7 +259,7 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Form hatalı olduğu için GET response döner
+        # Returns GET response because form is invalid
         self.assertIsNone(response.context['total_earned'])
         self.assertEqual(len(response.context['reports']), 0)
     
@@ -281,7 +281,7 @@ class TestFinancialReportView(TestCase):
         })
         
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Today Order')  # Sadece bugünkü order
+        self.assertContains(response, 'Today Order')  # Only today's order
         self.assertContains(response, '2000')  # Earned amount
         self.assertContains(response, 'reportTable')
     
@@ -301,7 +301,7 @@ class TestFinancialReportView(TestCase):
     
     def test_financial_report_view_date_filtering_logic(self):
         """FinancialReportView date filtering logic testi"""
-        # Özel tarih aralığı oluştur
+        # Create custom date range
         custom_start = self.today.replace(hour=0, minute=0, second=0, microsecond=0)
         custom_end = self.today.replace(hour=23, minute=59, second=59, microsecond=999999)
         
@@ -315,13 +315,13 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Sadece bugünkü order filtrelenmiş olmalı
+        # Only today's order should be filtered
         self.assertEqual(response.context['total_earned'], 2000.0)  # Sadece order2
         self.assertEqual(len(response.context['reports']), 1)
     
     def test_financial_report_view_aggregation(self):
         """FinancialReportView aggregation testi"""
-        # Birden fazla aynı gün order'ı oluştur
+        # Create multiple same-day orders
         same_day_order = orders.objects.create(
             order_day=self.today,
             order_name='Same Day Order',
@@ -346,12 +346,12 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Bugünkü iki order'ın toplamı (order2: 2000 + same_day_order: 1500)
+        # Sum of today's two orders (order2: 2000 + same_day_order: 1500)
         self.assertEqual(response.context['total_earned'], 3500.0)  # 2000 + 1500
         self.assertEqual(len(response.context['reports']), 2)
     
     def test_financial_report_view_select_related_optimization(self):
-        """FinancialReportView select_related optimization testi - N+1 sorgu önlenir"""
+        """FinancialReportView select_related optimization test - prevents N+1 queries"""
         start_date = self.today.date()
         end_date = self.today.date()
         
@@ -361,12 +361,12 @@ class TestFinancialReportView(TestCase):
         })
         
         self.assertEqual(response.status_code, 200)
-        # select_related ile order, lead, organisation yüklü - N+1 yok
+        # select_related loads order, lead, organisation - no N+1
         reports = list(response.context['reports'])
         self.assertTrue(len(reports) >= 0)
     
     def test_financial_report_view_multiple_organisations(self):
-        """FinancialReportView multiple organisations testi - superuser tüm org'ları görür"""
+        """FinancialReportView multiple organisations test - superuser sees all orgs"""
         self.client.logout()
         superuser = User.objects.create_superuser(
             username='finance_superuser',
@@ -375,7 +375,7 @@ class TestFinancialReportView(TestCase):
         )
         self.client.login(username='finance_superuser', password='testpass123')
 
-        # Farklı organizasyon oluştur
+        # Create different organisation
         org2_user = User.objects.create_user(
             username='org2_finance_view',
             email='org2_finance_view@example.com',
@@ -391,7 +391,7 @@ class TestFinancialReportView(TestCase):
         
         org2_profile, created = UserProfile.objects.get_or_create(user=org2_user)
         
-        # Org2 için order ve finance report oluştur
+        # Create order and finance report for Org2
         org2_order = orders.objects.create(
             order_day=self.today,
             order_name='Org2 Order',
@@ -416,7 +416,7 @@ class TestFinancialReportView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # Bugünkü order'lar filtrelenmiş olmalı (her iki organizasyondan)
+        # Today's orders should be filtered (from both organisations)
         self.assertEqual(response.context['total_earned'], 7000.0)  # order2 (2000) + org2_order (5000)
         self.assertEqual(len(response.context['reports']), 2)
 
@@ -425,8 +425,8 @@ class TestFinancialReportViewEdgeCases(TestCase):
     """FinancialReportView edge cases testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor kullanıcısı oluştur
+        """Set up test data"""
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='edge_case_organisor',
             email='edge_case_organisor@example.com',
@@ -440,12 +440,12 @@ class TestFinancialReportViewEdgeCases(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Edge',
             last_name='Lead',
@@ -454,14 +454,14 @@ class TestFinancialReportViewEdgeCases(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Tarih değişkenleri
+        # Date variables
         from datetime import datetime
         now = timezone.now()
         self.today = timezone.make_aware(datetime.combine(
             now.date(), datetime.min.time()
         ))
         
-        # Client oluştur ve giriş yap
+        # Create client and log in
         self.client = Client()
         self.client.login(username='edge_case_organisor', password='testpass123')
     
@@ -481,7 +481,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
     
     def test_financial_report_view_orders_without_finance_reports(self):
         """FinancialReportView orders without finance reports testi"""
-        # Order oluştur ama finance report oluşturma
+        # Create order but do not create finance report
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Order Without Finance Report',
@@ -505,7 +505,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
     
     def test_financial_report_view_zero_earned_amount(self):
         """FinancialReportView zero earned amount testi"""
-        # Order ve finance report oluştur (earned_amount = 0)
+        # Create order and finance report (earned_amount = 0)
         order = orders.objects.create(
             order_day=self.today,
             order_name='Zero Earned Order',
@@ -534,7 +534,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
     
     def test_financial_report_view_negative_earned_amount(self):
         """FinancialReportView negative earned amount testi"""
-        # Order ve finance report oluştur (earned_amount < 0)
+        # Create order and finance report (earned_amount < 0)
         order = orders.objects.create(
             order_day=self.today,
             order_name='Negative Earned Order',
@@ -563,9 +563,9 @@ class TestFinancialReportViewEdgeCases(TestCase):
 
 
 if __name__ == "__main__":
-    print("Finance Views Testleri Başlatılıyor...")
+    print("Starting Finance Views Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

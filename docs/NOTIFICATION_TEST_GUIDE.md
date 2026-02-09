@@ -1,61 +1,61 @@
-# Bildirim Test Rehberi
+# Notification Test Guide
 
-Notification'ların çalışıp çalışmadığını test etmek için hangi adımları izleyeceğiniz burada.
-
----
-
-## 1. Anında tetiklenen bildirimler (uygulama içi aksiyon)
-
-| Bildirim | Nasıl test edilir |
-|----------|-------------------|
-| **Yeni görev atandı** | Tasks → Create Task → Bir kullanıcıya atayın (kendiniz hariç). O kullanıcıyla giriş yapıp `/tasks/notifications/` bakın. |
-| **Görev başka kullanıcıya atandı** | Bir görevi düzenleyip "Assigned To"yu başka kullanıcı yapın. Yeni atanan kullanıcının bildirim listesinde görünmeli. |
-| **Sipariş oluşturuldu** | Orders → Create Order. Organizatör + (sipariş lead'e bağlıysa) agent bildirim alır. |
-| **Stok uyarısı** | ProductsAndStock'ta stok uyarısı tetikleyecek bir durum oluşturun (örn. minimum stok altına düşen ürün). Organizatör bildirim alır. |
-| **Lead'e agent atandı** | Leads → bir lead seç → Assign Agent. Atanan agent bildirim alır. |
+How to test that notifications work correctly.
 
 ---
 
-## 2. Management command ile tetiklenen bildirimler
+## 1. Instantly triggered notifications (in-app actions)
 
-Bu komutlar **otomatik çalışmıyor**; test için terminalde elle çalıştırın.
-
-### Görev bitiş tarihi (1 veya 3 gün kala)
-
-- **Komut:** `python manage.py check_task_deadlines`
-- **Ne yapar:** Bitiş tarihi **yarın** veya **3 gün sonra** olan, henüz tamamlanmamış (pending/in_progress) görevler için atanan kullanıcıya e-posta + bildirim oluşturur.
-- **Test için:**
-  1. Admin'den bir görev oluşturun; **end_date** = yarının tarihi veya 3 gün sonrası, status = pending veya in_progress.
-  2. Terminalde: `python manage.py check_task_deadlines`
-  3. Atanan kullanıcının e-postası ve `/tasks/notifications/` listesi kontrol.
-- **Sadece listele, gönderme:** `python manage.py check_task_deadlines --dry-run`
-- **Farklı günler (örn. 2 ve 5 gün):** `python manage.py check_task_deadlines --days 2 5`
-
-### Sipariş günü bugün (sale completed)
-
-- **Komut:** `python manage.py check_order_day`
-- **Ne yapar:** `order_day` (teslim/tamamlanma tarihi) **bugün** olan, iptal edilmemiş siparişler için organisor + agent'a bildirim.
-- **Test için:**
-  1. Bir siparişin `order_day` alanını bugünün tarihi yapın (admin veya DB).
-  2. `python manage.py check_order_day`
-  3. İlgili organisor ve agent bildirim listesine baksın.
-- **Sadece listele:** `python manage.py check_order_day --dry-run`
-
-### Lead 30 gündür sipariş vermedi
-
-- **Komut:** `python manage.py check_lead_no_order`
-- **Ne yapar:** Agent'ı olan lead'lerden son 30 günde sipariş vermeyenler için agent'a bildirim.
-- **Test için:**
-  1. Bir lead'e agent atayın; o lead'in son siparişi 30 günden eski olsun (veya hiç siparişi olmasın ve lead 30 günden eski eklenmiş olsun).
-  2. `python manage.py check_lead_no_order`
-  3. Agent kullanıcısının bildirim listesine bakın.
-- **Sadece listele:** `python manage.py check_lead_no_order --dry-run`
+| Notification | How to test |
+|--------------|-------------|
+| **New task assigned** | Tasks → Create Task → Assign to a user (other than yourself). Log in as that user and check `/tasks/notifications/`. |
+| **Task reassigned** | Edit a task and set "Assigned To" to another user. It should appear in the new assignee's notification list. |
+| **Order created** | Orders → Create Order. Organisor + (if order is linked to a lead) the agent receive a notification. |
+| **Stock alert** | In ProductsAndStock, create a situation that triggers a stock alert (e.g. product below minimum stock). Organisor receives a notification. |
+| **Agent assigned to lead** | Leads → select a lead → Assign Agent. The assigned agent receives a notification. |
 
 ---
 
-## Hızlı kontrol
+## 2. Notifications triggered by management commands
 
-- Bildirim listesi (giriş yapmış kullanıcı): **`/tasks/notifications/`**
-- Okunmamış sayısı navbar'da gösteriliyor (context_processors ile).
+These commands **do not run automatically**; run them manually in the terminal for testing.
 
-Test ederken farklı kullanıcılarla (organisor, agent, atanan user) giriş yapıp her rolün kendi bildirimlerini kontrol edebilirsiniz.
+### Task deadline (1 or 3 days before)
+
+- **Command:** `python manage.py check_task_deadlines`
+- **What it does:** For tasks whose **end_date** is tomorrow or 3 days from now and not yet completed (pending/in_progress), sends email + notification to the assigned user.
+- **To test:**
+  1. Create a task as admin; **end_date** = tomorrow or 3 days from now, status = pending or in_progress.
+  2. In terminal: `python manage.py check_task_deadlines`
+  3. Check the assigned user's email and `/tasks/notifications/` list.
+- **List only, do not send:** `python manage.py check_task_deadlines --dry-run`
+- **Different days (e.g. 2 and 5 days):** `python manage.py check_task_deadlines --days 2 5`
+
+### Order day is today (sale completed)
+
+- **Command:** `python manage.py check_order_day`
+- **What it does:** For orders whose `order_day` (delivery/completion date) is **today** and not cancelled, sends notification to organisor + agent.
+- **To test:**
+  1. Set a order's `order_day` to today's date (admin or DB).
+  2. Run `python manage.py check_order_day`
+  3. Check the relevant organisor and agent notification list.
+- **List only:** `python manage.py check_order_day --dry-run`
+
+### Lead has not ordered in 30 days
+
+- **Command:** `python manage.py check_lead_no_order`
+- **What it does:** For leads that have an agent and have not placed an order in the last 30 days, sends notification to the agent.
+- **To test:**
+  1. Assign an agent to a lead; that lead's last order should be older than 30 days (or have no orders and lead created more than 30 days ago).
+  2. Run `python manage.py check_lead_no_order`
+  3. Check the agent user's notification list.
+- **List only:** `python manage.py check_lead_no_order --dry-run`
+
+---
+
+## Quick reference
+
+- Notification list (logged-in user): **`/tasks/notifications/`**
+- Unread count is shown in the navbar (via context_processors).
+
+When testing, log in as different users (organisor, agent, assigned user) and verify each role sees their own notifications.

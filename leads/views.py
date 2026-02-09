@@ -12,7 +12,8 @@ from django.db import models
 from django.db.models import Q
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
-from activity_log.models import log_activity, ACTION_LEAD_CREATED, ACTION_LEAD_UPDATED, ACTION_LEAD_DELETED
+from activity_log.models import ActivityLog, log_activity, ACTION_LEAD_CREATED, ACTION_LEAD_UPDATED, ACTION_LEAD_DELETED
+from orders.models import orders as Order
 from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, OrganisorLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
 
 
@@ -316,6 +317,35 @@ class LeadDetailView(LoginRequiredMixin, generic.DetailView):
 			queryset = Lead.objects.filter(organisation=user.agent.organisation)
 			queryset = queryset.filter(agent__user=user)
 		return queryset
+
+
+class LeadActivityView(LoginRequiredMixin, generic.DetailView):
+	"""Lists all activities for this lead: lead create/update/delete and orders for this lead."""
+	template_name = "leads/lead_activity.html"
+	context_object_name = "lead"
+
+	def get_queryset(self):
+		user = self.request.user
+		if user.is_superuser:
+			return Lead.objects.all()
+		if user.is_organisor:
+			return Lead.objects.filter(organisation=user.userprofile)
+		return Lead.objects.filter(organisation=user.agent.organisation, agent__user=user)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		lead = self.object
+		# All activities for this lead: actions on the lead + this lead's orders
+		order_ids = list(Order.objects.filter(lead=lead).values_list('id', flat=True))
+		lead_activities = ActivityLog.objects.filter(
+			Q(object_type='lead', object_id=lead.pk) |
+			Q(object_type='order', object_id__in=order_ids)
+		).select_related(
+			"user", "organisation", "organisation__user", "affected_agent", "affected_agent__user"
+		).order_by("-created_at")[:100]
+		context["lead_activities"] = lead_activities
+		return context
+
 
 def lead_detail(request, pk):
 	lead = Lead.objects.get(id=pk)
@@ -830,7 +860,7 @@ def get_agents_by_org(request, org_id):
 	try:
 		# Organisation dropdown only lists organisors, so this is always an organisor org
 		organisation = UserProfile.objects.get(id=org_id, user__is_organisor=True, user__is_superuser=False)
-		# Seçilen org için varsayılan kategoriler yoksa oluştur (org 2, 3... seçildiğinde de dolu gelsin)
+		# Create default categories for selected org if missing (so org 2, 3... also get pre-filled when selected)
 		_default_source = [
 			"Website", "Social Media", "Email Campaign", "Cold Call", "Referral",
 			"Trade Show", "Advertisement", "Direct Mail", "SEO/Google", "Unassigned"
@@ -843,7 +873,7 @@ def get_agents_by_org(request, org_id):
 			SourceCategory.objects.get_or_create(name=name, organisation=organisation)
 		for name in _default_value:
 			ValueCategory.objects.get_or_create(name=name, organisation=organisation)
-		# Agents - isim soyisim (email) formatında
+		# Agents - display as firstname lastname (email)
 		agents = Agent.objects.filter(organisation=organisation).select_related('user').order_by('user__email')
 		agents_data = [
 			{'id': agent.id, 'name': f"{agent.user.get_full_name() or agent.user.username} ({agent.user.email})"}

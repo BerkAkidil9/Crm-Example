@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Development mode için açıldı
+DEBUG = True  # Enabled for development mode
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 

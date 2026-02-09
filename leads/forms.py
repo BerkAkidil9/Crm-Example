@@ -247,7 +247,7 @@ class OrganisorLeadModelForm(forms.ModelForm):
             'accept': 'image/*',
             'id': 'id_lead_profile_image',
         }),
-        help_text='Profil fotoğrafı (zorunlu). JPG, PNG, GIF, WebP. Max 5 MB.'
+        help_text='Profile photo (required). JPG, PNG, GIF, WebP. Max 5 MB.'
     )
 
     def __init__(self, *args, **kwargs):
@@ -269,18 +269,18 @@ class OrganisorLeadModelForm(forms.ModelForm):
             self.fields["agent"].queryset = Agent.objects.all()
         if self.instance and self.instance.pk and self.instance.profile_image:
             self.fields['profile_image'].required = False
-            self.fields['profile_image'].help_text = 'Yeni fotoğraf yükleyin veya mevcut kalsın. Boş bırakırsanız değişmez. JPG, PNG, GIF, WebP. Max 5 MB.'
+            self.fields['profile_image'].help_text = 'Upload a new photo to change, or leave empty to keep current. JPG, PNG, GIF, WebP. Max 5 MB.'
 
     def clean_profile_image(self):
         upload = self.cleaned_data.get('profile_image')
         if upload and isinstance(upload, UploadedFile):
             allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
             if getattr(upload, 'content_type', None) not in allowed:
-                raise forms.ValidationError('Lütfen geçerli bir resim yükleyin (JPG, PNG, GIF veya WebP).')
+                raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
             if upload.size > 5 * 1024 * 1024:
-                raise forms.ValidationError('Dosya boyutu 5 MB\'dan küçük olmalıdır.')
+                raise forms.ValidationError('File size must be less than 5 MB.')
         elif not upload and (not self.instance or not self.instance.pk or not getattr(self.instance, 'profile_image', None) or not self.instance.profile_image):
-            raise forms.ValidationError('Profil fotoğrafı zorunludur.')
+            raise forms.ValidationError('Profile photo is required.')
         return upload
 
     def clean_email(self):
@@ -288,10 +288,10 @@ class OrganisorLeadModelForm(forms.ModelForm):
         if email:
             if self.instance and self.instance.pk:
                 if Lead.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-                    raise forms.ValidationError("Bu e-posta adresi zaten kullanılıyor.")
+                    raise forms.ValidationError("This email address is already in use.")
             else:
                 if Lead.objects.filter(email=email).exists():
-                    raise forms.ValidationError("Bu e-posta adresi zaten kullanılıyor.")
+                    raise forms.ValidationError("This email address is already in use.")
         return email
 
     def clean_phone_number(self):
@@ -299,10 +299,10 @@ class OrganisorLeadModelForm(forms.ModelForm):
         if phone_number:
             if self.instance and self.instance.pk:
                 if Lead.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
-                    raise forms.ValidationError("Bu telefon numarası zaten kullanılıyor.")
+                    raise forms.ValidationError("This phone number is already in use.")
             else:
                 if Lead.objects.filter(phone_number=phone_number).exists():
-                    raise forms.ValidationError("Bu telefon numarası zaten kullanılıyor.")
+                    raise forms.ValidationError("This phone number is already in use.")
         return phone_number
 
     def save(self, commit=True):
@@ -359,7 +359,7 @@ class AdminLeadModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         request = kwargs.pop("request", None)
         super(AdminLeadModelForm, self).__init__(*args, **kwargs)
-        # Her istekte tüm organisor'ları göster (2. organisor sonradan eklenmiş olsa da)
+        # Show all organisors on every request (even if a second organisor was added later)
         self.fields['organisation'].queryset = UserProfile.objects.filter(
             user__is_organisor=True,
             user__is_superuser=False
@@ -401,7 +401,7 @@ class AdminLeadModelForm(forms.ModelForm):
                     self.fields['organisation'].initial = org.pk
         
         if org:
-            # Varsayılan source ve value kategorilerini yoksa oluştur (sadece Unassigned değil, hepsi)
+            # Create default source and value categories if missing (all of them, not just Unassigned)
             _default_source = [
                 "Website", "Social Media", "Email Campaign", "Cold Call", "Referral",
                 "Trade Show", "Advertisement", "Direct Mail", "SEO/Google", "Unassigned"
