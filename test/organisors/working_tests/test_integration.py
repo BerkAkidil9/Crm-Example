@@ -1,6 +1,6 @@
 """
-Organisors Entegrasyon Test Dosyası
-Bu dosya organisors modülündeki tüm bileşenlerin birlikte çalışmasını test eder.
+Organisors Integration Test File
+This file tests all components of the organisors module working together.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.contrib.messages import get_messages
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -26,13 +26,13 @@ User = get_user_model()
 
 
 class TestOrganisorCompleteIntegration(TestCase):
-    """Organisor tam entegrasyon testleri"""
+    """Organisor complete integration tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_integration_test',
             email='admin_integration_test@example.com',
@@ -46,16 +46,16 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username='normal_integration_test',
             email='normal_integration_test@example.com',
@@ -69,16 +69,16 @@ class TestOrganisorCompleteIntegration(TestCase):
             email_verified=True
         )
         
-        # Normal UserProfile oluştur
+        # Create normal UserProfile
         self.normal_profile, created = UserProfile.objects.get_or_create(user=self.normal_user)
         
-        # Normal Organisor oluştur
+        # Create normal Organisor
         self.normal_organisor = Organisor.objects.create(
             user=self.normal_user,
             organisation=self.admin_profile
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_integration_test',
             email='agent_integration_test@example.com',
@@ -93,7 +93,7 @@ class TestOrganisorCompleteIntegration(TestCase):
         )
     
     def test_complete_organisor_lifecycle(self):
-        """Tam organisor yaşam döngüsü testi"""
+        """Complete organisor lifecycle test"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
         # 1. Go to organisor list page
@@ -102,12 +102,12 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertContains(response, 'Admin')
         self.assertContains(response, 'Normal')
         
-        # 2. Yeni organisor oluşturma sayfasına git
+        # 2. Go to new organisor create page
         response = self.client.get(reverse('organisors:organisor-create'))
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         
-        # 3. Yeni organisor oluştur
+        # 3. Create new organisor
         create_data = {
             'email': 'new_organisor_integration@example.com',
             'username': 'new_organisor_integration',
@@ -126,28 +126,28 @@ class TestOrganisorCompleteIntegration(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertRedirects(response, reverse('organisors:organisor-list'))
             
-            # Email gönderilmiş mi
+            # Was email sent
             mock_send_mail.assert_called_once()
         
-        # 4. Yeni organisor oluşturuldu mu kontrol et
+        # 4. Check if new organisor was created
         self.assertTrue(User.objects.filter(username='new_organisor_integration').exists())
         new_user = User.objects.get(username='new_organisor_integration')
         self.assertTrue(Organisor.objects.filter(user=new_user).exists())
         self.assertTrue(EmailVerificationToken.objects.filter(user=new_user).exists())
         
-        # 5. Yeni organisor detay sayfasına git
+        # 5. Go to new organisor detail page
         new_organisor = Organisor.objects.get(user=new_user)
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': new_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'New')
         self.assertContains(response, 'Organisor')
         
-        # 6. Yeni organisor güncelleme sayfasına git
+        # 6. Go to new organisor update page
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': new_organisor.pk}))
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         
-        # 7. Yeni organisor güncelle
+        # 7. Update new organisor
         update_data = {
             'email': 'updated_organisor_integration@example.com',
             'username': 'updated_organisor_integration',
@@ -165,35 +165,35 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-detail', kwargs={'pk': new_organisor.pk}))
         
-        # 8. Güncelleme kontrol et
+        # 8. Check update
         updated_user = User.objects.get(pk=new_user.pk)
         self.assertEqual(updated_user.email, 'updated_organisor_integration@example.com')
         self.assertEqual(updated_user.first_name, 'Updated')
         
-        # 9. Yeni organisor silme sayfasına git
+        # 9. Go to new organisor delete page
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': new_organisor.pk}))
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         
-        # 10. Yeni organisor sil
+        # 10. Delete new organisor
         response = self.client.post(reverse('organisors:organisor-delete', kwargs={'pk': new_organisor.pk}))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))
         
-        # 11. Silme kontrol et
+        # 11. Check delete
         self.assertFalse(User.objects.filter(username='updated_organisor_integration').exists())
         self.assertFalse(Organisor.objects.filter(pk=new_organisor.pk).exists())
     
     def test_organisor_permission_system(self):
-        """Organisor izin sistemi testi"""
-        # Admin kullanıcısı tüm işlemleri yapabilmeli
+        """Organisor permission system test"""
+        # Admin user should be able to perform all operations
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # List görüntüleme
+        # List view
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Oluşturma
+        # Create
         response = self.client.get(reverse('organisors:organisor-create'))
         self.assertEqual(response.status_code, 200)
         
@@ -246,15 +246,15 @@ class TestOrganisorCompleteIntegration(TestCase):
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         self.assertEqual(response.status_code, 404)
         
-        # Silme (erişemez)
+        # Delete (no access)
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.admin_organisor.pk}))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('leads:lead-list'))
         
-        # Agent kullanıcısı hiçbir işlem yapamamalı
+        # Agent user should not be able to perform any operations
         self.client.login(username='agent_integration_test', password='testpass123')
         
-        # Tüm işlemler redirect edilmeli
+        # All operations should redirect
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('leads:lead-list'))
@@ -274,10 +274,10 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertRedirects(response, reverse('leads:lead-list'))
     
     def test_organisor_form_validation_integration(self):
-        """Organisor form validasyon entegrasyonu testi"""
+        """Organisor form validation integration test"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # Geçersiz email ile organisor oluşturma
+        # Create organisor with invalid email
         invalid_email_data = {
             'email': 'invalid-email',
             'username': 'invalid_email_test',
@@ -296,7 +296,7 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertContains(response, 'form')
         self.assertFalse(User.objects.filter(username='invalid_email_test').exists())
         
-        # Aynı email ile organisor oluşturma
+        # Create organisor with same email
         duplicate_email_data = {
             'email': 'admin_integration_test@example.com',
             'username': 'duplicate_email_test',
@@ -315,7 +315,7 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertContains(response, 'form')
         self.assertFalse(User.objects.filter(username='duplicate_email_test').exists())
         
-        # Farklı şifreler ile organisor oluşturma
+        # Create organisor with different passwords
         password_mismatch_data = {
             'email': 'password_mismatch_test@example.com',
             'username': 'password_mismatch_test',
@@ -335,16 +335,16 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertFalse(User.objects.filter(username='password_mismatch_test').exists())
     
     def test_organisor_model_relationships_integration(self):
-        """Organisor model ilişkileri entegrasyonu testi"""
-        # Organisor-User ilişkisi
+        """Organisor model relationships integration test"""
+        # Organisor-User relationship
         self.assertEqual(self.admin_organisor.user, self.admin_user)
         self.assertEqual(self.admin_user.organisor, self.admin_organisor)
         
-        # Organisor-Organisation ilişkisi
+        # Organisor-Organisation relationship
         self.assertEqual(self.admin_organisor.organisation, self.admin_profile)
         self.assertIn(self.admin_organisor, self.admin_profile.organisor_set.all())
         
-        # Normal organisor admin'in organisation'ına bağlı
+        # Normal organisor linked to admin's organisation
         self.assertEqual(self.normal_organisor.organisation, self.admin_profile)
         self.assertNotEqual(self.normal_organisor.organisation, self.normal_profile)
         
@@ -354,15 +354,15 @@ class TestOrganisorCompleteIntegration(TestCase):
         
         self.normal_user.delete()
         
-        # Organisor da silinmiş olmalı
+        # Organisor should also be deleted
         self.assertFalse(Organisor.objects.filter(id=organisor_id).exists())
         self.assertFalse(User.objects.filter(id=user_id).exists())
     
     def test_organisor_email_verification_integration(self):
-        """Organisor email doğrulama entegrasyonu testi"""
+        """Organisor email verification integration test"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # Yeni organisor oluştur
+        # Create new organisor
         create_data = {
             'email': 'email_verification_test@example.com',
             'username': 'email_verification_test',
@@ -378,29 +378,29 @@ class TestOrganisorCompleteIntegration(TestCase):
         
         with patch('organisors.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('organisors:organisor-create'), create_data)
-            # Form başarılı veya hata durumunu kontrol et
+            # Check form success or error status
             self.assertIn(response.status_code, [200, 302])
             
-            # Eğer başarılıysa email gönderilmiş mi
+            # If successful, was email sent
             if response.status_code == 302:
                 mock_send_mail.assert_called_once()
                 
-                # Email verification token oluşturulmuş mu
+                # Was email verification token created
                 try:
                     user = User.objects.get(username='email_verification_test')
                     self.assertTrue(EmailVerificationToken.objects.filter(user=user).exists())
                     
-                    # Kullanıcı email doğrulanmamış olmalı
+                    # User should be unverified
                     self.assertFalse(user.email_verified)
                 except User.DoesNotExist:
-                    # User oluşturulmamışsa test başarısız
+                    # If user not created, test fails
                     self.fail("User was not created successfully")
     
     def test_organisor_bulk_operations_integration(self):
-        """Organisor toplu işlemler entegrasyonu testi"""
+        """Organisor bulk operations integration test"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # Birden fazla organisor oluştur
+        # Create multiple organisors
         organisors_data = [
             {
                 'email': f'bulk_organisor_{i}@example.com',
@@ -422,10 +422,10 @@ class TestOrganisorCompleteIntegration(TestCase):
                 response = self.client.post(reverse('organisors:organisor-create'), data)
                 self.assertEqual(response.status_code, 302)
             
-            # 3 email gönderilmiş mi
+            # Were 3 emails sent
             self.assertEqual(mock_send_mail.call_count, 3)
             
-            # 3 organisor oluşturulmuş mu
+            # Were 3 organisors created
             self.assertEqual(User.objects.filter(username__startswith='bulk_organisor_').count(), 3)
             self.assertEqual(Organisor.objects.filter(user__username__startswith='bulk_organisor_').count(), 3)
         
@@ -436,33 +436,33 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertContains(response, 'Bulk2')
         self.assertContains(response, 'Bulk3')
         
-        # Toplu silme
+        # Bulk delete
         bulk_organisors = Organisor.objects.filter(user__username__startswith='bulk_organisor_')
         for organisor in bulk_organisors:
             response = self.client.post(reverse('organisors:organisor-delete', kwargs={'pk': organisor.pk}))
             self.assertEqual(response.status_code, 302)
         
-        # Tüm bulk organisorlar silinmiş mi
+        # Were all bulk organisors deleted
         self.assertEqual(User.objects.filter(username__startswith='bulk_organisor_').count(), 0)
         self.assertEqual(Organisor.objects.filter(user__username__startswith='bulk_organisor_').count(), 0)
     
     def test_organisor_error_handling_integration(self):
-        """Organisor hata yönetimi entegrasyonu testi"""
+        """Organisor error handling integration test"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # Var olmayan organisor detay sayfası
+        # Non-existent organisor detail page
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': 99999}))
         self.assertEqual(response.status_code, 404)
         
-        # Var olmayan organisor güncelleme sayfası
+        # Non-existent organisor update page
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': 99999}))
         self.assertEqual(response.status_code, 404)
         
-        # Var olmayan organisor silme sayfası
+        # Non-existent organisor delete page
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': 99999}))
         self.assertEqual(response.status_code, 404)
         
-        # Geçersiz form verisi ile güncelleme
+        # Update with invalid form data
         invalid_update_data = {
             'email': 'invalid-email',
             'username': 'invalid_username',
@@ -480,16 +480,16 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Orijinal veriler değişmemiş olmalı
+        # Original data should be unchanged
         updated_user = User.objects.get(pk=self.admin_user.pk)
         self.assertEqual(updated_user.email, 'admin_integration_test@example.com')
         self.assertEqual(updated_user.username, 'admin_integration_test')
 
 
 if __name__ == "__main__":
-    print("Organisors Entegrasyon Testleri Başlatılıyor...")
+    print("Organisors Integration Tests Starting...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

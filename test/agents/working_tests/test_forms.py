@@ -24,7 +24,7 @@ User = get_user_model()
 
 
 class TestAgentModelForm(TestCase):
-    """AgentModelForm testleri"""
+    """AgentModelForm tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -96,8 +96,8 @@ class TestAgentModelForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
-        # AgentModelForm'da sadece email required
+        """Required fields test"""
+        # Only email is required in AgentModelForm
         required_fields = ['email']
         
         for field in required_fields:
@@ -109,15 +109,15 @@ class TestAgentModelForm(TestCase):
             self.assertIn(field, form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
-        # Başka bir kullanıcı oluştur
+        """Email uniqueness validation test"""
+        # Create another user
         other_user = User.objects.create_user(
             username='other_user',
             email='other@example.com',
             password='testpass123'
         )
         
-        # Aynı email ile form oluştur
+        # Create form with same email
         data = self.valid_data.copy()
         data['email'] = 'other@example.com'
         
@@ -127,15 +127,15 @@ class TestAgentModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['email']))
     
     def test_form_username_validation_unique(self):
-        """Kullanıcı adı benzersizlik validasyonu testi"""
-        # Başka bir kullanıcı oluştur
+        """Username uniqueness validation test"""
+        # Create another user
         other_user = User.objects.create_user(
             username='other_user',
             email='other@example.com',
             password='testpass123'
         )
         
-        # Aynı kullanıcı adı ile form oluştur
+        # Create form with same username
         data = self.valid_data.copy()
         data['username'] = 'other_user'
         
@@ -145,8 +145,8 @@ class TestAgentModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['username']))
     
     def test_form_phone_number_validation_unique(self):
-        """Telefon numarası benzersizlik validasyonu testi"""
-        # Başka bir kullanıcı oluştur
+        """Phone number uniqueness validation test"""
+        # Create another user
         other_user = User.objects.create_user(
             username='other_user',
             email='other@example.com',
@@ -154,7 +154,7 @@ class TestAgentModelForm(TestCase):
             phone_number='+905556666666'
         )
         
-        # Aynı telefon numarası ile form oluştur
+        # Create form with same phone number
         data = self.valid_data.copy()
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5556666666'
@@ -177,8 +177,8 @@ class TestAgentModelForm(TestCase):
         self.assertIn("didn't match", str(form.errors['password2']).replace('&#x27;', "'"))
     
     def test_form_password_optional(self):
-        """Şifre alanları opsiyonel testi"""
-        # Şifre alanları boş bırakılabilir
+        """Password fields optional test"""
+        # Password fields can be left empty
         data = self.valid_data.copy()
         data['password1'] = ''
         data['password2'] = ''
@@ -187,7 +187,7 @@ class TestAgentModelForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_password_validation_short(self):
-        """Kısa şifre validasyonu testi"""
+        """Short password validation test"""
         data = self.valid_data.copy()
         data['password1'] = '123'
         data['password2'] = '123'
@@ -197,7 +197,7 @@ class TestAgentModelForm(TestCase):
         self.assertIn('password1', form.errors)
     
     def test_form_password_validation_common(self):
-        """Yaygın şifre validasyonu testi"""
+        """Common password validation test"""
         data = self.valid_data.copy()
         data['password1'] = 'password'
         data['password2'] = 'password'
@@ -227,17 +227,17 @@ class TestAgentModelForm(TestCase):
         
         user = form.save()
         
-        # Kullanıcı alanları doğru mu
+        # Check if user fields are correct
         self.assertEqual(user.username, 'agent_forms')
         self.assertEqual(user.email, 'agent_forms@example.com')
         self.assertEqual(user.first_name, 'Agent')
         self.assertEqual(user.last_name, 'Forms')
         
-        # Şifre değişti mi
+        # Did password change
         self.assertTrue(user.check_password('newpassword123!'))
     
     def test_form_save_without_password_change(self):
-        """Şifre değiştirmeden form save testi"""
+        """Form save without password change test"""
         data = self.valid_data.copy()
         data['password1'] = ''
         data['password2'] = ''
@@ -247,11 +247,11 @@ class TestAgentModelForm(TestCase):
         
         user = form.save()
         
-        # Eski şifre korunmalı
+        # Old password should be preserved
         self.assertTrue(user.check_password('testpass123'))
     
     def test_form_clean_methods(self):
-        """Form clean metodları testi"""
+        """Form clean methods test"""
         # Email clean
         form = AgentModelForm(data=self.valid_data, instance=self.agent_user)
         if form.is_valid():
@@ -265,21 +265,21 @@ class TestAgentModelForm(TestCase):
             self.assertEqual(cleaned_username, 'agent_forms')
     
     def test_form_validation_edge_cases(self):
-        """Form validasyon sınır durumları testi"""
-        # Geçersiz email formatı
+        """Form validation edge cases test"""
+        # Invalid email format
         data = self.valid_data.copy()
         data['email'] = 'invalid-email'
         form = AgentModelForm(data=data, instance=self.agent_user)
         self.assertFalse(form.is_valid())
         
-        # Geçersiz tarih formatı
+        # Invalid date format
         data = self.valid_data.copy()
         data['date_of_birth'] = 'invalid-date'
         form = AgentModelForm(data=data, instance=self.agent_user)
         self.assertFalse(form.is_valid())
     
     def test_form_field_help_texts(self):
-        """Form alan yardım metinleri testi"""
+        """Form field help texts test"""
         form = AgentModelForm(instance=self.agent_user)
         
         self.assertEqual(form.fields['email'].help_text, "Email address is required")
@@ -287,7 +287,7 @@ class TestAgentModelForm(TestCase):
         self.assertIn("Enter the same password as above", form.fields['password2'].help_text)
     
     def test_form_field_widgets(self):
-        """Form alan widget'ları testi"""
+        """Form field widgets test"""
         form = AgentModelForm(instance=self.agent_user)
         
         # Email widget
@@ -306,7 +306,7 @@ class TestAgentModelForm(TestCase):
 
 
 class TestAgentCreateForm(TestCase):
-    """AgentCreateForm testleri"""
+    """AgentCreateForm tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -344,8 +344,8 @@ class TestAgentCreateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
-        # AgentCreateForm'da sadece email, phone_number, password1, password2 required
+        """Required fields test"""
+        # Only email, phone_number, password1, password2 required in AgentCreateForm
         required_fields = ['email', 'password1', 'password2']
         
         for field in required_fields:
@@ -356,7 +356,7 @@ class TestAgentCreateForm(TestCase):
             self.assertFalse(form.is_valid())
             self.assertIn(field, form.errors)
         
-        # Phone number için özel kontrol
+        # Special check for phone number
         data = self.valid_data.copy()
         del data['phone_number_0']
         del data['phone_number_1']
@@ -365,15 +365,15 @@ class TestAgentCreateForm(TestCase):
         self.assertIn('phone_number', form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Email uniqueness validation test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı email ile form oluştur
+        # Create form with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
@@ -383,15 +383,15 @@ class TestAgentCreateForm(TestCase):
         self.assertIn('already exists', str(form.errors['email']))
     
     def test_form_username_validation_unique(self):
-        """Kullanıcı adı benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Username uniqueness validation test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı kullanıcı adı ile form oluştur
+        # Create form with same username
         data = self.valid_data.copy()
         data['username'] = 'existing_user'
         
@@ -401,8 +401,8 @@ class TestAgentCreateForm(TestCase):
         self.assertIn('already exists', str(form.errors['username']))
     
     def test_form_phone_number_validation_unique(self):
-        """Telefon numarası benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Phone number uniqueness validation test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
@@ -410,7 +410,7 @@ class TestAgentCreateForm(TestCase):
             phone_number='+905556666666'
         )
         
-        # Aynı telefon numarası ile form oluştur
+        # Create form with same phone number
         data = self.valid_data.copy()
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5556666666'
@@ -421,8 +421,8 @@ class TestAgentCreateForm(TestCase):
         self.assertIn('already exists', str(form.errors['phone_number']))
     
     def test_form_password_validation(self):
-        """Şifre validasyonu testi"""
-        # Farklı şifreler
+        """Password validation test"""
+        # Different passwords
         data = self.valid_data.copy()
         data['password1'] = 'testpass123!'
         data['password2'] = 'differentpass123!'
@@ -433,19 +433,19 @@ class TestAgentCreateForm(TestCase):
         self.assertIn("didn't match", str(form.errors['password2']).replace('&#x27;', "'"))
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         form = AgentCreateForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
         
         user = form.save()
         
-        # Kullanıcı alanları doğru mu
+        # Check if user fields are correct
         self.assertEqual(user.username, 'new_agent_forms')
         self.assertEqual(user.email, 'new_agent_forms@example.com')
         self.assertEqual(user.first_name, 'New')
         self.assertEqual(user.last_name, 'Agent')
         
-        # Şifre doğru set edildi mi
+        # Was password set correctly
         self.assertTrue(user.check_password('testpass123!'))
     
     def test_form_widget_attributes(self):
@@ -460,7 +460,7 @@ class TestAgentCreateForm(TestCase):
 
 
 class TestAdminAgentCreateForm(TestCase):
-    """AdminAgentCreateForm testleri"""
+    """AdminAgentCreateForm tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -517,28 +517,28 @@ class TestAdminAgentCreateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_organisation_field(self):
-        """Organisation alanı testi"""
+        """Organisation field test"""
         form = AdminAgentCreateForm()
         
-        # Organisation field'ı doğru queryset'e sahip mi
+        # Does organisation field have correct queryset
         self.assertIn(self.organisor_profile, form.fields['organisation'].queryset)
         
         # Empty label kontrol et
         self.assertEqual(form.fields['organisation'].empty_label, "Select Organisation")
     
     def test_form_organisation_queryset(self):
-        """Organisation queryset testi"""
+        """Organisation queryset test"""
         form = AdminAgentCreateForm()
         
-        # Sadece organisor'ların organisation'ları olmalı
+        # Only organisors' organisations should be included
         queryset = form.fields['organisation'].queryset
         for profile in queryset:
             self.assertTrue(profile.user.is_organisor)
             self.assertFalse(profile.user.is_superuser)
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
-        # AdminAgentCreateForm'da sadece email, phone_number, organisation, password1, password2 required
+        """Required fields test"""
+        # Only email, phone_number, organisation, password1, password2 required in AdminAgentCreateForm
         required_fields = ['email', 'organisation', 'password1', 'password2']
         
         for field in required_fields:
@@ -549,7 +549,7 @@ class TestAdminAgentCreateForm(TestCase):
             self.assertFalse(form.is_valid())
             self.assertIn(field, form.errors)
         
-        # Phone number için özel kontrol
+        # Special check for phone number
         data = self.valid_data.copy()
         del data['phone_number_0']
         del data['phone_number_1']
@@ -558,19 +558,19 @@ class TestAdminAgentCreateForm(TestCase):
         self.assertIn('phone_number', form.errors)
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         form = AdminAgentCreateForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
         
         user = form.save()
         
-        # Kullanıcı alanları doğru mu
+        # Check if user fields are correct
         self.assertEqual(user.username, 'admin_agent_forms')
         self.assertEqual(user.email, 'admin_agent_forms@example.com')
         self.assertEqual(user.first_name, 'Admin')
         self.assertEqual(user.last_name, 'Agent')
         
-        # Şifre doğru set edildi mi
+        # Was password set correctly
         self.assertTrue(user.check_password('testpass123!'))
     
     def test_form_widget_attributes(self):
@@ -588,7 +588,7 @@ class TestAdminAgentCreateForm(TestCase):
 
 
 class TestAgentFormIntegration(TestCase):
-    """Agent form entegrasyon testleri"""
+    """Agent form integration tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -610,8 +610,8 @@ class TestAgentFormIntegration(TestCase):
         Organisor.objects.create(user=self.organisor_user, organisation=self.organisor_profile)
     
     def test_agent_create_form_with_existing_data_conflicts(self):
-        """Mevcut verilerle çakışma testi"""
-        # Önce bir kullanıcı oluştur
+        """Conflict with existing data test"""
+        # Create a user first
         User.objects.create_user(
             username='conflict_user',
             email='conflict@example.com',
@@ -619,7 +619,7 @@ class TestAgentFormIntegration(TestCase):
             phone_number='+905551111111'
         )
         
-        # Çakışan email ile form test et
+        # Test form with conflicting email
         data = {
             'username': 'new_agent',
             'email': 'conflict@example.com',
@@ -637,7 +637,7 @@ class TestAgentFormIntegration(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         
-        # Çakışan telefon numarası ile form test et
+        # Test form with conflicting phone number
         data = {
             'username': 'new_agent2',
             'email': 'new_agent2@example.com',
@@ -655,7 +655,7 @@ class TestAgentFormIntegration(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
         
-        # Çakışan kullanıcı adı ile form test et
+        # Test form with conflicting username
         data = {
             'username': 'conflict_user',
             'email': 'new_agent3@example.com',
@@ -674,7 +674,7 @@ class TestAgentFormIntegration(TestCase):
         self.assertIn('username', form.errors)
     
     def test_admin_agent_create_form_with_organisation(self):
-        """Organisation ile admin agent create form testi"""
+        """Admin agent create form with organisation test"""
         data = {
             'username': 'admin_agent',
             'email': 'admin_agent@example.com',
@@ -694,33 +694,33 @@ class TestAgentFormIntegration(TestCase):
         
         user = form.save()
         
-        # Kullanıcı oluşturuldu mu
+        # Was user created
         self.assertTrue(User.objects.filter(username='admin_agent').exists())
         
         # Create agent
         agent = Agent.objects.create(user=user, organisation=self.organisor_profile)
         
-        # Agent doğru organisation'a atandı mı
+        # Was agent assigned to correct organisation
         self.assertEqual(agent.organisation, self.organisor_profile)
     
     def test_form_validation_with_empty_data(self):
-        """Boş veri ile form validasyon testi"""
+        """Form validation with empty data test"""
         form = AgentCreateForm(data={})
         
         self.assertFalse(form.is_valid())
-        # Sadece gerçekten required olan alanları kontrol et
+        # Check only truly required fields
         required_fields = ['email', 'password1', 'password2']
         for field in required_fields:
             self.assertIn(field, form.errors)
     
     def test_form_validation_with_partial_data(self):
-        """Kısmi veri ile form validasyon testi"""
-        # Sadece username
+        """Form validation with partial data test"""
+        # Only username
         form = AgentCreateForm(data={
             'username': 'partial_agent'
         })
         self.assertFalse(form.is_valid())
-        # Sadece gerçekten required olan alanları kontrol et
+        # Check only truly required fields
         required_fields = ['email', 'password1', 'password2']
         for field in required_fields:
             self.assertIn(field, form.errors)

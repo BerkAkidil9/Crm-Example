@@ -1,192 +1,192 @@
-# Agent Test Sistemi
+# Agent Test System
 
-Bu klasör Agent modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the Agent module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/agents/
 ├── __init__.py
-├── working_tests/          # ✅ Çalışan testler
+├── working_tests/          # ✅ Working tests
 │   ├── __init__.py
-│   ├── test_models.py      # Agent model testleri
-│   ├── test_forms.py       # Agent form testleri
-│   ├── test_views.py       # Agent view testleri
-│   ├── test_mixins.py      # Agent mixin testleri
-│   └── test_integration.py # Agent entegrasyon testleri
-├── test_runner.py          # İnteraktif test çalıştırıcı
+│   ├── test_models.py      # Agent model tests
+│   ├── test_forms.py       # Agent form tests
+│   ├── test_views.py       # Agent view tests
+│   ├── test_mixins.py      # Agent mixin tests
+│   └── test_integration.py # Agent integration tests
+├── test_runner.py          # Interactive test runner
 └── README.md
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Tüm Testleri Çalıştır
+### ✅ Run All Tests
 ```bash
-# Tüm agent testleri
+# All agent tests
 python manage.py test test.agents.working_tests
 
-# Verbose mod
+# Verbose mode
 python manage.py test test.agents.working_tests -v 2
 ```
 
-### ✅ Belirli Test Modüllerini Çalıştır
+### ✅ Run Specific Test Modules
 ```bash
-# Model testleri
+# Model tests
 python manage.py test test.agents.working_tests.test_models
 
-# Form testleri
+# Form tests
 python manage.py test test.agents.working_tests.test_forms
 
-# View testleri
+# View tests
 python manage.py test test.agents.working_tests.test_views
 
-# Mixin testleri
+# Mixin tests
 python manage.py test test.agents.working_tests.test_mixins
 
-# Entegrasyon testleri
+# Integration tests
 python manage.py test test.agents.working_tests.test_integration
 ```
 
-### ✅ İnteraktif Test Çalıştırıcı
+### ✅ Interactive Test Runner
 ```bash
 python test/agents/test_runner.py
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
-### Models (2 model)
-- ✅ Agent (çalışıyor)
-- ✅ EmailVerificationToken (çalışıyor)
+### Models (2 models)
+- ✅ Agent (working)
+- ✅ EmailVerificationToken (working)
 
-### Views (5 view)
-- ✅ AgentListView (çalışıyor)
-- ✅ AgentCreateView (çalışıyor)
-- ✅ AgentDetailView (çalışıyor)
-- ✅ AgentUpdateView (çalışıyor)
-- ✅ AgentDeleteView (çalışıyor)
+### Views (5 views)
+- ✅ AgentListView (working)
+- ✅ AgentCreateView (working)
+- ✅ AgentDetailView (working)
+- ✅ AgentUpdateView (working)
+- ✅ AgentDeleteView (working)
 
-### Forms (3 form)
-- ✅ AgentModelForm (çalışıyor)
-- ✅ AgentCreateForm (çalışıyor)
-- ✅ AdminAgentCreateForm (çalışıyor)
+### Forms (3 forms)
+- ✅ AgentModelForm (working)
+- ✅ AgentCreateForm (working)
+- ✅ AdminAgentCreateForm (working)
 
-### Mixins (3 mixin)
-- ✅ OrganisorAndLoginRequiredMixin (çalışıyor)
-- ✅ AgentAndOrganisorLoginRequiredMixin (çalışıyor)
-- ✅ ProductsAndStockAccessMixin (çalışıyor)
+### Mixins (3 mixins)
+- ✅ OrganisorAndLoginRequiredMixin (working)
+- ✅ AgentAndOrganisorLoginRequiredMixin (working)
+- ✅ ProductsAndStockAccessMixin (working)
 
 ### Integration Tests
-- ✅ Agent Full Workflow (çalışıyor)
-- ✅ Email Verification Workflow (çalışıyor)
-- ✅ Form Integration (çalışıyor)
+- ✅ Agent Full Workflow (working)
+- ✅ Email Verification Workflow (working)
+- ✅ Form Integration (working)
 
 ## 🧪 Test Details
 
-### Model Testleri (test_models.py)
-- **TestAgentModel**: Agent modeli temel işlevleri
-- **TestEmailVerificationTokenModel**: Email doğrulama token modeli
-- **TestAgentModelIntegration**: Model entegrasyon testleri
+### Model Tests (test_models.py)
+- **TestAgentModel**: Agent model basic functionality
+- **TestEmailVerificationTokenModel**: Email verification token model
+- **TestAgentModelIntegration**: Model integration tests
 
-**Test Sayısı**: 25+ test
-**Kapsam**: Model oluşturma, silme, ilişkiler, validasyonlar
+**Test Count**: 25+ tests
+**Coverage**: Model creation, deletion, relationships, validations
 
-### Form Testleri (test_forms.py)
-- **TestAgentModelForm**: Agent güncelleme formu
-- **TestAgentCreateForm**: Agent oluşturma formu
-- **TestAdminAgentCreateForm**: Admin agent oluşturma formu
-- **TestAgentFormIntegration**: Form entegrasyon testleri
+### Form Tests (test_forms.py)
+- **TestAgentModelForm**: Agent update form
+- **TestAgentCreateForm**: Agent create form
+- **TestAdminAgentCreateForm**: Admin agent create form
+- **TestAgentFormIntegration**: Form integration tests
 
-**Test Sayısı**: 40+ test
-**Kapsam**: Form validasyonu, widget özellikleri, save metodları
+**Test Count**: 40+ tests
+**Coverage**: Form validation, widget properties, save methods
 
-### View Testleri (test_views.py)
-- **TestAgentListView**: Agent listesi görüntüleme
-- **TestAgentCreateView**: Agent oluşturma
-- **TestAgentDetailView**: Agent detay görüntüleme
-- **TestAgentUpdateView**: Agent güncelleme
-- **TestAgentDeleteView**: Agent silme
+### View Tests (test_views.py)
+- **TestAgentListView**: Agent list view
+- **TestAgentCreateView**: Agent create
+- **TestAgentDetailView**: Agent detail view
+- **TestAgentUpdateView**: Agent update
+- **TestAgentDeleteView**: Agent delete
 
-**Test Sayısı**: 50+ test
-**Kapsam**: Erişim kontrolleri, form işleme, redirect'ler
+**Test Count**: 50+ tests
+**Coverage**: Access controls, form handling, redirects
 
-### Mixin Testleri (test_mixins.py)
-- **TestOrganisorAndLoginRequiredMixin**: Organisor erişim kontrolü
-- **TestAgentAndOrganisorLoginRequiredMixin**: Agent ve Organisor erişim kontrolü
-- **TestProductsAndStockAccessMixin**: Ürün erişim kontrolü
-- **TestMixinIntegration**: Mixin entegrasyon testleri
+### Mixin Tests (test_mixins.py)
+- **TestOrganisorAndLoginRequiredMixin**: Organisor access control
+- **TestAgentAndOrganisorLoginRequiredMixin**: Agent and Organisor access control
+- **TestProductsAndStockAccessMixin**: Product access control
+- **TestMixinIntegration**: Mixin integration tests
 
-**Test Sayısı**: 30+ test
-**Kapsam**: İzin kontrolleri, erişim kısıtlamaları
+**Test Count**: 30+ tests
+**Coverage**: Permission controls, access restrictions
 
-### Entegrasyon Testleri (test_integration.py)
-- **TestAgentFullWorkflow**: Tam agent iş akışı
-- **TestAgentEmailVerificationWorkflow**: Email doğrulama iş akışı
-- **TestAgentFormIntegration**: Form entegrasyon testleri
+### Integration Tests (test_integration.py)
+- **TestAgentFullWorkflow**: Full agent workflow
+- **TestAgentEmailVerificationWorkflow**: Email verification workflow
+- **TestAgentFormIntegration**: Form integration tests
 
-**Test Sayısı**: 20+ test
-**Kapsam**: End-to-end iş akışları, email gönderimi
+**Test Count**: 20+ tests
+**Coverage**: End-to-end workflows, email sending
 
-## 🔧 Test Özellikleri
+## 🔧 Test Features
 
-### Mock Kullanımı
-- Email gönderimi için `send_mail` mock'u
-- Zaman işlemleri için `timezone.now` mock'u
-- Database işlemleri için transaction testleri
+### Mock Usage
+- `send_mail` mock for email sending
+- `timezone.now` mock for time operations
+- Transaction tests for database operations
 
-### Test Verisi Yönetimi
-- Her test bağımsız çalışır
-- `setUp` metodunda test verileri hazırlanır
-- `tearDown` metodunda temizlik yapılır
+### Test Data Management
+- Each test runs independently
+- Test data is prepared in `setUp` method
+- Cleanup is performed in `tearDown` method
 
-### Assertion'lar
-- Model oluşturma/silme kontrolü
-- Form validasyon kontrolü
-- View response kontrolü
-- Redirect kontrolü
-- Email gönderim kontrolü
+### Assertions
+- Model creation/deletion check
+- Form validation check
+- View response check
+- Redirect check
+- Email sending check
 
-## 📈 Test Metrikleri
+## 📈 Test Metrics
 
-### Toplam Test Sayısı
-- **Model Testleri**: 25+ test
-- **Form Testleri**: 40+ test
-- **View Testleri**: 50+ test
-- **Mixin Testleri**: 30+ test
-- **Entegrasyon Testleri**: 20+ test
-- **TOPLAM**: 165+ test
+### Total Test Count
+- **Model Tests**: 25+ tests
+- **Form Tests**: 40+ tests
+- **View Tests**: 50+ tests
+- **Mixin Tests**: 30+ tests
+- **Integration Tests**: 20+ tests
+- **TOTAL**: 165+ tests
 
-### Test Kategorileri
-- **Unit Tests**: Model, Form, Mixin testleri
-- **Integration Tests**: View, Workflow testleri
-- **Functional Tests**: End-to-end iş akışları
+### Test Categories
+- **Unit Tests**: Model, Form, Mixin tests
+- **Integration Tests**: View, Workflow tests
+- **Functional Tests**: End-to-end workflows
 
 ### Coverage
-- **Model Coverage**: %100
-- **Form Coverage**: %100
-- **View Coverage**: %100
-- **Mixin Coverage**: %100
+- **Model Coverage**: 100%
+- **Form Coverage**: 100%
+- **View Coverage**: 100%
+- **Mixin Coverage**: 100%
 
-## 🎯 Gelecek Planları
+## 🎯 Future Plans
 
-1. **Performance testleri ekle**
-2. **Load testleri ekle**
-3. **Security testleri ekle**
-4. **API testleri ekle**
-5. **Test coverage raporu ekle**
+1. **Add performance tests**
+2. **Add load tests**
+3. **Add security tests**
+4. **Add API tests**
+5. **Add test coverage report**
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
-- Transaction testleri veritabanı tutarlılığı için
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is created and destroyed automatically
+- Mock used for email sending
+- Factory pattern used for test data creation
+- Transaction tests for database consistency
 
-## 🚨 Önemli Notlar
+## 🚨 Important Notes
 
-- Testler çalıştırılmadan önce Django ayarlarının yüklenmesi gerekir
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock'lar test sonrası otomatik temizlenir
-- Test dosyaları `working_tests` klasöründe tutulur
-- Test runner ile interaktif test çalıştırma mümkündür
+- Django settings must be loaded before running tests
+- Test database is created and destroyed automatically
+- Mocks are cleaned up automatically after tests
+- Test files are kept in the `working_tests` folder
+- Interactive test running is available via test runner

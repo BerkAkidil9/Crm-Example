@@ -1,8 +1,8 @@
 """
-Organisors Mixins Test Dosyası
-Bu dosya organisors modülündeki tüm mixin'leri test eder.
-Mixin'ler view'larla birlikte çalışacak şekilde tasarlandığı için
-bu testler sadece mixin'lerin temel özelliklerini kontrol eder.
+Organisors Mixins Test File
+This file tests all mixins in the organisors module.
+Mixins are designed to work with views, so
+these tests only check basic mixin features.
 """
 
 from django.test import TestCase
@@ -14,11 +14,11 @@ User = get_user_model()
 
 
 class TestAdminOnlyMixin(TestCase):
-    """AdminOnlyMixin testleri"""
+    """AdminOnlyMixin tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Admin kullanıcısı oluştur
+        # Create admin user
         self.admin_user = User.objects.create_user(
             username='admin_mixin_test',
             email='admin_mixin_test@example.com',
@@ -32,7 +32,7 @@ class TestAdminOnlyMixin(TestCase):
             email_verified=True
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username='normal_mixin_test',
             email='normal_mixin_test@example.com',
@@ -47,35 +47,35 @@ class TestAdminOnlyMixin(TestCase):
     
     def test_is_admin_user_method(self):
         """is_admin_user metodu testi"""
-        # Admin kullanıcısı organisor olmalı (admin kriteri)
+        # Admin user should be organisor (admin criteria)
         self.assertTrue(self.admin_user.is_organisor)
         
-        # Normal kullanıcı için organisor durumunu kontrol et
-        # (User model'inde default değer True olabilir)
-        self.assertTrue(self.normal_user.is_organisor)  # Default değer True
+        # Check organisor status for normal user
+        # (User model may have default value True)
+        self.assertTrue(self.normal_user.is_organisor)  # Default value True
     
     def test_admin_user_characteristics(self):
-        """Admin kullanıcısı özellikleri testi"""
-        # Admin kullanıcısı organisor olmalı
+        """Admin user characteristics test"""
+        # Admin user should be organisor
         self.assertTrue(self.admin_user.is_organisor)
         
-        # Email doğrulanmış olmalı
+        # Email should be verified
         self.assertTrue(self.admin_user.email_verified)
     
     def test_normal_user_characteristics(self):
-        """Normal kullanıcı özellikleri testi"""
-        # Normal kullanıcı organisor olmamalı (varsayılan olarak False)
-        # Not: User model'inde is_organisor default değeri True olabilir
-        # Bu yüzden sadece email doğrulanmış olup olmadığını kontrol edelim
+        """Normal user characteristics test"""
+        # Normal user should not be organisor (default False)
+        # Note: User model may have is_organisor default True
+        # So only check if email is verified
         self.assertTrue(self.normal_user.email_verified)
 
 
 class TestOrganisorAndAdminMixin(TestCase):
-    """OrganisorAndAdminMixin testleri"""
+    """OrganisorAndAdminMixin tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='organisor_mixin_test',
             email='organisor_mixin_test@example.com',
@@ -89,7 +89,7 @@ class TestOrganisorAndAdminMixin(TestCase):
             email_verified=True
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_mixin_test',
             email='agent_mixin_test@example.com',
@@ -105,36 +105,36 @@ class TestOrganisorAndAdminMixin(TestCase):
     
     def test_is_admin_user_method(self):
         """is_admin_user metodu testi"""
-        # Organisor kullanıcısı organisor olmalı (admin kriteri)
+        # Organisor user should be organisor (admin criteria)
         self.assertTrue(self.organisor_user.is_organisor)
         
-        # Agent kullanıcısı için organisor durumunu kontrol et
-        # (User model'inde default değer True olabilir)
-        self.assertTrue(self.agent_user.is_organisor)  # Default değer True
+        # Check organisor status for agent user
+        # (User model may have default value True)
+        self.assertTrue(self.agent_user.is_organisor)  # Default value True
     
     def test_organisor_user_characteristics(self):
-        """Organisor kullanıcısı özellikleri testi"""
-        # Organisor kullanıcısı organisor olmalı
+        """Organisor user characteristics test"""
+        # Organisor user should be organisor
         self.assertTrue(self.organisor_user.is_organisor)
         
-        # Email doğrulanmış olmalı
+        # Email should be verified
         self.assertTrue(self.organisor_user.email_verified)
     
     def test_agent_user_characteristics(self):
-        """Agent kullanıcısı özellikleri testi"""
-        # Agent kullanıcısı agent olmalı
+        """Agent user characteristics test"""
+        # Agent user should be agent
         self.assertTrue(self.agent_user.is_agent)
         
-        # Not: User model'inde is_organisor default değeri True olabilir
-        # Bu yüzden sadece agent olup olmadığını kontrol edelim
+        # Note: User model may have is_organisor default True
+        # So only check if agent
 
 
 class TestSelfProfileOnlyMixin(TestCase):
-    """SelfProfileOnlyMixin testleri"""
+    """SelfProfileOnlyMixin tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Admin kullanıcısı oluştur
+        # Create admin user
         self.admin_user = User.objects.create_user(
             username='admin_self_profile_test',
             email='admin_self_profile_test@example.com',
@@ -148,16 +148,16 @@ class TestSelfProfileOnlyMixin(TestCase):
             email_verified=True
         )
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Başka bir kullanıcı oluştur
+        # Create another user
         self.other_user = User.objects.create_user(
             username='other_self_profile_test',
             email='other_self_profile_test@example.com',
@@ -170,10 +170,10 @@ class TestSelfProfileOnlyMixin(TestCase):
             email_verified=True
         )
         
-        # Başka kullanıcının UserProfile'ını oluştur
+        # Create other user's UserProfile
         self.other_profile, created = UserProfile.objects.get_or_create(user=self.other_user)
         
-        # Başka kullanıcının Organisor'ını oluştur
+        # Create other user's Organisor
         self.other_organisor = Organisor.objects.create(
             user=self.other_user,
             organisation=self.other_profile
@@ -181,39 +181,39 @@ class TestSelfProfileOnlyMixin(TestCase):
     
     def test_is_admin_user_method(self):
         """is_admin_user metodu testi"""
-        # Admin kullanıcısı organisor olmalı (admin kriteri)
+        # Admin user should be organisor (admin criteria)
         self.assertTrue(self.admin_user.is_organisor)
         
-        # Başka kullanıcı için organisor durumunu kontrol et
-        # (User model'inde default değer True olabilir)
-        self.assertTrue(self.other_user.is_organisor)  # Default değer True
+        # Check organisor status for other user
+        # (User model may have default value True)
+        self.assertTrue(self.other_user.is_organisor)  # Default value True
     
     def test_organisor_relationships(self):
-        """Organisor ilişkileri testi"""
-        # Admin organisor'ı doğru user'a bağlı olmalı
+        """Organisor relationships test"""
+        # Admin organisor should be linked to correct user
         self.assertEqual(self.admin_organisor.user, self.admin_user)
         self.assertEqual(self.admin_organisor.organisation, self.admin_profile)
         
-        # Başka organisor doğru user'a bağlı olmalı
+        # Other organisor should be linked to correct user
         self.assertEqual(self.other_organisor.user, self.other_user)
         self.assertEqual(self.other_organisor.organisation, self.other_profile)
     
     def test_organisor_creation(self):
-        """Organisor oluşturma testi"""
-        # Organisor'lar başarıyla oluşturulmuş olmalı
+        """Organisor creation test"""
+        # Organisors should be created successfully
         self.assertIsNotNone(self.admin_organisor)
         self.assertIsNotNone(self.other_organisor)
         
-        # Organisor'lar farklı user'lara ait olmalı
+        # Organisors should belong to different users
         self.assertNotEqual(self.admin_organisor.user, self.other_organisor.user)
 
 
 class TestMixinIntegration(TestCase):
-    """Mixin entegrasyon testleri"""
+    """Mixin integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Farklı rollerde kullanıcılar oluştur
+        # Create users with different roles
         self.admin_user = User.objects.create_user(
             username='admin_integration_test',
             email='admin_integration_test@example.com',
@@ -254,31 +254,31 @@ class TestMixinIntegration(TestCase):
         )
     
     def test_user_role_hierarchy(self):
-        """Kullanıcı rol hiyerarşisi testi"""
-        # Admin kullanıcısı en yüksek yetkiye sahip olmalı
+        """User role hierarchy test"""
+        # Admin user should have highest authority
         self.assertTrue(self.admin_user.is_organisor)
         
-        # Organisor kullanıcısı admin yetkisine sahip olmalı
+        # Organisor user should have admin authority
         self.assertTrue(self.organisor_user.is_organisor)
         
-        # Agent kullanıcısı agent olmalı
+        # Agent user should be agent
         self.assertTrue(self.agent_user.is_agent)
     
     def test_mixin_imports(self):
-        """Mixin import'ları testi"""
-        # Mixin'ler başarıyla import edilebilmeli
+        """Mixin imports test"""
+        # Mixins should be importable successfully
         from organisors.mixins import AdminOnlyMixin, OrganisorAndAdminMixin, SelfProfileOnlyMixin
         
-        # Mixin'ler tanımlanmış olmalı
+        # Mixins should be defined
         self.assertIsNotNone(AdminOnlyMixin)
         self.assertIsNotNone(OrganisorAndAdminMixin)
         self.assertIsNotNone(SelfProfileOnlyMixin)
     
     def test_mixin_methods_exist(self):
-        """Mixin metodları varlık testi"""
+        """Mixin methods existence test"""
         from organisors.mixins import AdminOnlyMixin, OrganisorAndAdminMixin, SelfProfileOnlyMixin
         
-        # Mixin'lerde dispatch metodu olmalı
+        # Mixins should have dispatch method
         self.assertTrue(hasattr(AdminOnlyMixin, 'dispatch'))
         self.assertTrue(hasattr(OrganisorAndAdminMixin, 'dispatch'))
         self.assertTrue(hasattr(SelfProfileOnlyMixin, 'dispatch'))

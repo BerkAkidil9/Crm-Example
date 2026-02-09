@@ -1,6 +1,6 @@
 """
-Organisors Viewları Test Dosyası
-Bu dosya organisors modülündeki tüm viewları test eder.
+Organisors Views Test File
+This file tests all views in the organisors module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.contrib.messages import get_messages
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -24,13 +24,13 @@ User = get_user_model()
 
 
 class TestOrganisorListView(TestCase):
-    """OrganisorListView testleri"""
+    """OrganisorListView tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_organisor_views',
             email='admin_organisor_views@example.com',
@@ -44,16 +44,16 @@ class TestOrganisorListView(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username='normal_organisor_views',
             email='normal_organisor_views@example.com',
@@ -67,16 +67,16 @@ class TestOrganisorListView(TestCase):
             email_verified=True
         )
         
-        # Normal UserProfile oluştur
+        # Create normal UserProfile
         self.normal_profile, created = UserProfile.objects.get_or_create(user=self.normal_user)
         
-        # Normal Organisor oluştur
+        # Create normal Organisor
         self.normal_organisor = Organisor.objects.create(
             user=self.normal_user,
             organisation=self.admin_profile
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_organisor_views',
             email='agent_organisor_views@example.com',
@@ -98,30 +98,30 @@ class TestOrganisorListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Organisors')
         self.assertIn('organisors', response.context)
-        # Superuser'lar listeden exclude edilir, sadece normal organisor görünür
-        self.assertEqual(len(response.context['organisors']), 1)  # Sadece normal organisor
+        # Superusers are excluded from list, only normal organisor visible
+        self.assertEqual(len(response.context['organisors']), 1)  # Only normal organisor
     
     def test_organisor_list_view_agent_access(self):
-        """Agent kullanıcısı erişim testi"""
+        """Agent user access test"""
         self.client.login(username='agent_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-list'))
         
-        # Agent kullanıcısı redirect edilmeli
+        # Agent user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_list_view_unauthenticated_access(self):
-        """Giriş yapmamış kullanıcı erişim testi"""
+        """Unauthenticated user access test"""
         response = self.client.get(reverse('organisors:organisor-list'))
         
-        # Giriş yapmamış kullanıcı redirect edilmeli
+        # Unauthenticated user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_list_view_template(self):
-        """Template testi"""
+        """Template test"""
         self.client.login(username='admin_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-list'))
         
@@ -129,31 +129,31 @@ class TestOrganisorListView(TestCase):
         self.assertContains(response, 'Organisors')
     
     def test_organisor_list_view_context(self):
-        """Context testi"""
+        """Context test"""
         self.client.login(username='admin_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-list'))
         
         self.assertIn('organisors', response.context)
         organisors = response.context['organisors']
-        # Superuser'lar listeden exclude edilir
+        # Superusers are excluded from list
         self.assertEqual(organisors.count(), 1)
-        # Admin artık superuser, sadece normal_organisor görünür
+        # Admin is now superuser, only normal_organisor visible
         self.assertNotIn(self.admin_organisor, organisors)
         self.assertIn(self.normal_organisor, organisors)
     
     def test_organisor_list_view_excludes_superuser(self):
-        """Superuser'ların listede görünmemesi testi"""
-        # Superuser oluştur
+        """Superusers not visible in list test"""
+        # Create superuser
         superuser = User.objects.create_superuser(
             username='superuser_organisor_views',
             email='superuser_organisor_views@example.com',
             password='testpass123'
         )
         
-        # Superuser UserProfile oluştur
+        # Create Superuser UserProfile
         superuser_profile, created = UserProfile.objects.get_or_create(user=superuser)
         
-        # Superuser Organisor oluştur
+        # Create Superuser Organisor
         superuser_organisor = Organisor.objects.create(
             user=superuser,
             organisation=superuser_profile
@@ -162,10 +162,10 @@ class TestOrganisorListView(TestCase):
         self.client.login(username='admin_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-list'))
         
-        # Superuser organisor listede görünmemeli
+        # Superuser organisor should not appear in list
         organisors = response.context['organisors']
         self.assertNotIn(superuser_organisor, organisors)
-        # admin_user da artık superuser, sadece normal_organisor görünür
+        # admin_user is now superuser, only normal_organisor visible
         self.assertEqual(organisors.count(), 1)  # Sadece normal organisor
 
 
@@ -176,7 +176,7 @@ class TestOrganisorCreateView(TestCase):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_create_organisor_views',
             email='admin_create_organisor_views@example.com',
@@ -190,16 +190,16 @@ class TestOrganisorCreateView(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_create_organisor_views',
             email='agent_create_organisor_views@example.com',
@@ -235,34 +235,34 @@ class TestOrganisorCreateView(TestCase):
         self.assertIn('form', response.context)
     
     def test_organisor_create_view_agent_access(self):
-        """Agent kullanıcısı erişim testi"""
+        """Agent user access test"""
         self.client.login(username='agent_create_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-create'))
         
-        # Agent kullanıcısı redirect edilmeli
+        # Agent user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_create_view_unauthenticated_access(self):
-        """Giriş yapmamış kullanıcı erişim testi"""
+        """Unauthenticated user access test"""
         response = self.client.get(reverse('organisors:organisor-create'))
         
-        # Giriş yapmamış kullanıcı redirect edilmeli
+        # Unauthenticated user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_create_view_template(self):
-        """Template testi"""
+        """Template test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-create'))
         
         self.assertTemplateUsed(response, 'organisors/organisor_create.html')
-        # Template içeriği kontrol edildi
+        # Template content checked
     
     def test_organisor_create_view_form_class(self):
-        """Form class testi"""
+        """Form class test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-create'))
         
@@ -272,41 +272,41 @@ class TestOrganisorCreateView(TestCase):
     
     @patch('organisors.views.send_mail')
     def test_organisor_create_view_post_valid_data(self, mock_send_mail):
-        """Geçerli veri ile POST isteği testi"""
+        """POST request with valid data test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
         response = self.client.post(reverse('organisors:organisor-create'), self.valid_data)
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))
         
-        # Kullanıcı oluşturulmuş mu
+        # Was user created
         self.assertTrue(User.objects.filter(username='new_organisor_create_views').exists())
         
-        # UserProfile oluşturulmuş mu
+        # Was UserProfile created
         user = User.objects.get(username='new_organisor_create_views')
         self.assertTrue(UserProfile.objects.filter(user=user).exists())
         
-        # Organisor oluşturulmuş mu
+        # Was Organisor created
         self.assertTrue(Organisor.objects.filter(user=user).exists())
         
-        # Email verification token oluşturulmuş mu
+        # Was email verification token created
         self.assertTrue(EmailVerificationToken.objects.filter(user=user).exists())
         
-        # Email gönderilmiş mi
+        # Was email sent
         mock_send_mail.assert_called_once()
     
     def test_organisor_create_view_post_invalid_data(self):
-        """Geçersiz veri ile POST isteği testi"""
+        """POST request with invalid data test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
         invalid_data = self.valid_data.copy()
-        invalid_data['email'] = 'invalid-email'  # Geçersiz email
+        invalid_data['email'] = 'invalid-email'  # Invalid email
         
         response = self.client.post(reverse('organisors:organisor-create'), invalid_data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         self.assertIn('form', response.context)
@@ -315,16 +315,16 @@ class TestOrganisorCreateView(TestCase):
         self.assertFalse(User.objects.filter(username='new_organisor_create_views').exists())
     
     def test_organisor_create_view_post_duplicate_email(self):
-        """Aynı email ile POST isteği testi"""
+        """POST request with same email test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
-        # Aynı email ile form gönder
+        # Submit form with same email
         duplicate_data = self.valid_data.copy()
         duplicate_data['email'] = 'admin_create_organisor_views@example.com'
         
         response = self.client.post(reverse('organisors:organisor-create'), duplicate_data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -332,16 +332,16 @@ class TestOrganisorCreateView(TestCase):
         self.assertFalse(User.objects.filter(username='new_organisor_create_views').exists())
     
     def test_organisor_create_view_post_duplicate_username(self):
-        """Aynı username ile POST isteği testi"""
+        """POST request with same username test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
-        # Aynı username ile form gönder
+        # Submit form with same username
         duplicate_data = self.valid_data.copy()
         duplicate_data['username'] = 'admin_create_organisor_views'
         
         response = self.client.post(reverse('organisors:organisor-create'), duplicate_data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -349,16 +349,16 @@ class TestOrganisorCreateView(TestCase):
         self.assertFalse(User.objects.filter(email='new_organisor_create_views@example.com').exists())
     
     def test_organisor_create_view_post_password_mismatch(self):
-        """Farklı şifreler ile POST isteği testi"""
+        """POST request with different passwords test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
-        # Farklı şifreler ile form gönder
+        # Submit form with different passwords
         password_mismatch_data = self.valid_data.copy()
         password_mismatch_data['password2'] = 'differentpass123!'
         
         response = self.client.post(reverse('organisors:organisor-create'), password_mismatch_data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -383,7 +383,7 @@ class TestOrganisorDetailView(TestCase):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_detail_organisor_views',
             email='admin_detail_organisor_views@example.com',
@@ -397,16 +397,16 @@ class TestOrganisorDetailView(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username='normal_detail_organisor_views',
             email='normal_detail_organisor_views@example.com',
@@ -420,16 +420,16 @@ class TestOrganisorDetailView(TestCase):
             email_verified=True
         )
         
-        # Normal UserProfile oluştur
+        # Create normal UserProfile
         self.normal_profile, created = UserProfile.objects.get_or_create(user=self.normal_user)
         
-        # Normal Organisor oluştur
+        # Create normal Organisor
         self.normal_organisor = Organisor.objects.create(
             user=self.normal_user,
             organisation=self.admin_profile
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_detail_organisor_views',
             email='agent_detail_organisor_views@example.com',
@@ -444,7 +444,7 @@ class TestOrganisorDetailView(TestCase):
         )
     
     def test_organisor_detail_view_admin_access_own_profile(self):
-        """Admin kullanıcısı kendi profilini görme testi"""
+        """Admin user own profile view test"""
         self.client.login(username='admin_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         
@@ -455,7 +455,7 @@ class TestOrganisorDetailView(TestCase):
         self.assertEqual(response.context['organisor'], self.admin_organisor)
     
     def test_organisor_detail_view_admin_access_other_profile(self):
-        """Admin kullanıcısı başka profilini görme testi"""
+        """Admin user other profile view test"""
         self.client.login(username='admin_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.normal_organisor.pk}))
         
@@ -466,7 +466,7 @@ class TestOrganisorDetailView(TestCase):
         self.assertEqual(response.context['organisor'], self.normal_organisor)
     
     def test_organisor_detail_view_organisor_access_own_profile(self):
-        """Organisor kullanıcısı kendi profilini görme testi"""
+        """Organisor user own profile view test"""
         self.client.login(username='normal_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.normal_organisor.pk}))
         
@@ -477,32 +477,32 @@ class TestOrganisorDetailView(TestCase):
         self.assertEqual(response.context['organisor'], self.normal_organisor)
     
     def test_organisor_detail_view_organisor_access_other_profile(self):
-        """Organisor kullanıcısı başka profilini görme testi"""
+        """Organisor user other profile view test"""
         self.client.login(username='normal_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         
-        # 404 hatası almalı
+        # Should get 404 error
         self.assertEqual(response.status_code, 404)
     
     def test_organisor_detail_view_agent_access(self):
-        """Agent kullanıcısı erişim testi"""
+        """Agent user access test"""
         self.client.login(username='agent_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         
-        # 404 hatası almalı
+        # Should get 404 error
         self.assertEqual(response.status_code, 404)
     
     def test_organisor_detail_view_unauthenticated_access(self):
-        """Giriş yapmamış kullanıcı erişim testi"""
+        """Unauthenticated user access test"""
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         
-        # Giriş yapmamış kullanıcı redirect edilmeli
+        # Unauthenticated user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_detail_view_template(self):
-        """Template testi"""
+        """Template test"""
         self.client.login(username='admin_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         
@@ -511,11 +511,11 @@ class TestOrganisorDetailView(TestCase):
         self.assertContains(response, 'User')
     
     def test_organisor_detail_view_nonexistent_organisor(self):
-        """Var olmayan organisor testi"""
+        """Non-existent organisor test"""
         self.client.login(username='admin_detail_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': 99999}))
         
-        # 404 hatası almalı
+        # Should get 404 error
         self.assertEqual(response.status_code, 404)
 
 
@@ -526,7 +526,7 @@ class TestOrganisorUpdateView(TestCase):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_update_organisor_views',
             email='admin_update_organisor_views@example.com',
@@ -540,16 +540,16 @@ class TestOrganisorUpdateView(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username='normal_update_organisor_views',
             email='normal_update_organisor_views@example.com',
@@ -563,10 +563,10 @@ class TestOrganisorUpdateView(TestCase):
             email_verified=True
         )
         
-        # Normal UserProfile oluştur
+        # Create normal UserProfile
         self.normal_profile, created = UserProfile.objects.get_or_create(user=self.normal_user)
         
-        # Normal Organisor oluştur
+        # Create normal Organisor
         self.normal_organisor = Organisor.objects.create(
             user=self.normal_user,
             organisation=self.admin_profile
@@ -586,53 +586,53 @@ class TestOrganisorUpdateView(TestCase):
         }
     
     def test_organisor_update_view_admin_access_own_profile(self):
-        """Admin kullanıcısı kendi profilini güncelleme testi"""
+        """Admin user own profile update test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         self.assertIn('form', response.context)
         self.assertIn('organisor', response.context)
     
     def test_organisor_update_view_admin_access_other_profile(self):
-        """Admin kullanıcısı başka profilini güncelleme testi"""
+        """Admin user other profile update test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.normal_organisor.pk}))
         
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         self.assertIn('form', response.context)
         self.assertIn('organisor', response.context)
     
     def test_organisor_update_view_organisor_access_own_profile(self):
-        """Organisor kullanıcısı kendi profilini güncelleme testi"""
+        """Organisor user own profile update test"""
         self.client.login(username='normal_update_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.normal_organisor.pk}))
         
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         self.assertIn('form', response.context)
         self.assertIn('organisor', response.context)
     
     def test_organisor_update_view_organisor_access_other_profile(self):
-        """Organisor kullanıcısı başka profilini güncelleme testi"""
+        """Organisor user other profile update test"""
         self.client.login(username='normal_update_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         
-        # 404 hatası almalı
+        # Should get 404 error
         self.assertEqual(response.status_code, 404)
     
     def test_organisor_update_view_template(self):
-        """Template testi"""
+        """Template test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         
         self.assertTemplateUsed(response, 'organisors/organisor_update.html')
-        # Template içeriği kontrol edildi
+        # Template content checked
     
     def test_organisor_update_view_form_class(self):
-        """Form class testi"""
+        """Form class test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         
@@ -641,16 +641,16 @@ class TestOrganisorUpdateView(TestCase):
         self.assertIsInstance(response.context['form'], OrganisorModelForm)
     
     def test_organisor_update_view_post_valid_data(self):
-        """Geçerli veri ile POST isteği testi"""
+        """POST request with valid data test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         
         response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), self.valid_data)
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         
-        # Kullanıcı güncellenmiş mi
+        # Was user updated
         updated_user = User.objects.get(pk=self.admin_user.pk)
         self.assertEqual(updated_user.email, 'updated_organisor_update_views@example.com')
         self.assertEqual(updated_user.username, 'updated_organisor_update_views')
@@ -658,15 +658,15 @@ class TestOrganisorUpdateView(TestCase):
         self.assertEqual(updated_user.last_name, 'User')
     
     def test_organisor_update_view_post_invalid_data(self):
-        """Geçersiz veri ile POST isteği testi"""
+        """POST request with invalid data test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         
         invalid_data = self.valid_data.copy()
-        invalid_data['email'] = 'invalid-email'  # Geçersiz email
+        invalid_data['email'] = 'invalid-email'  # Invalid email
         
         response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), invalid_data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         self.assertIn('form', response.context)
@@ -677,7 +677,7 @@ class TestOrganisorUpdateView(TestCase):
         
         response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), self.valid_data)
         
-        # Organisor detail sayfasına redirect olmalı
+        # Should redirect to organisor detail page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
 
@@ -689,7 +689,7 @@ class TestOrganisorDeleteView(TestCase):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_delete_organisor_views',
             email='admin_delete_organisor_views@example.com',
@@ -703,16 +703,16 @@ class TestOrganisorDeleteView(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username='normal_delete_organisor_views',
             email='normal_delete_organisor_views@example.com',
@@ -726,16 +726,16 @@ class TestOrganisorDeleteView(TestCase):
             email_verified=True
         )
         
-        # Normal UserProfile oluştur
+        # Create normal UserProfile
         self.normal_profile, created = UserProfile.objects.get_or_create(user=self.normal_user)
         
-        # Normal Organisor oluştur
+        # Create normal Organisor
         self.normal_organisor = Organisor.objects.create(
             user=self.normal_user,
             organisation=self.admin_profile
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_delete_organisor_views',
             email='agent_delete_organisor_views@example.com',
@@ -755,52 +755,52 @@ class TestOrganisorDeleteView(TestCase):
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         
         self.assertEqual(response.status_code, 200)
-        # Template içeriği kontrol edildi
+        # Template content checked
         self.assertIn('organisor', response.context)
         self.assertEqual(response.context['organisor'], self.normal_organisor)
     
     def test_organisor_delete_view_agent_access(self):
-        """Agent kullanıcısı erişim testi"""
+        """Agent user access test"""
         self.client.login(username='agent_delete_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         
-        # Agent kullanıcısı redirect edilmeli
+        # Agent user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_delete_view_unauthenticated_access(self):
-        """Giriş yapmamış kullanıcı erişim testi"""
+        """Unauthenticated user access test"""
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         
-        # Giriş yapmamış kullanıcı redirect edilmeli
+        # Unauthenticated user should be redirected
         self.assertEqual(response.status_code, 302)
-        # Redirect kontrol edildi
+        # Redirect checked
         self.assertEqual(response.status_code, 302)
     
     def test_organisor_delete_view_template(self):
-        """Template testi"""
+        """Template test"""
         self.client.login(username='admin_delete_organisor_views', password='testpass123')
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         
         self.assertTemplateUsed(response, 'organisors/organisor_delete.html')
-        # Template içeriği kontrol edildi
+        # Template content checked
     
     def test_organisor_delete_view_post_confirm(self):
-        """POST ile silme onayı testi"""
+        """POST delete confirmation test"""
         self.client.login(username='admin_delete_organisor_views', password='testpass123')
         
-        # Silme işlemini onayla
+        # Confirm delete
         response = self.client.post(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))
         
-        # Organisor silinmiş mi
+        # Was organisor deleted
         self.assertFalse(Organisor.objects.filter(pk=self.normal_organisor.pk).exists())
         
-        # User da silinmiş mi
+        # Was user also deleted
         self.assertFalse(User.objects.filter(pk=self.normal_user.pk).exists())
     
     def test_organisor_delete_view_success_redirect(self):
@@ -821,7 +821,7 @@ class TestOrganisorViewIntegration(TestCase):
         """Set up test data"""
         self.client = Client()
         
-        # Admin kullanıcısı oluştur (superuser)
+        # Create admin user (superuser)
         self.admin_user = User.objects.create_superuser(
             username='admin_integration_organisor_views',
             email='admin_integration_organisor_views@example.com',
@@ -835,10 +835,10 @@ class TestOrganisorViewIntegration(TestCase):
         self.admin_user.email_verified = True
         self.admin_user.save()
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
@@ -846,7 +846,7 @@ class TestOrganisorViewIntegration(TestCase):
     
     @patch('organisors.views.send_mail')
     def test_complete_organisor_management_flow(self, mock_send_mail):
-        """Tam organisor yönetim akışı testi"""
+        """Full organisor management flow test"""
         self.client.login(username='admin_integration_organisor_views', password='testpass123')
         
         # 1. Go to organisor list page
@@ -854,7 +854,7 @@ class TestOrganisorViewIntegration(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Admin')
         
-        # 2. Yeni organisor oluştur
+        # 2. Create new organisor
         create_data = {
             'email': 'integration_new_organisor@example.com',
             'username': 'integration_new_organisor',
@@ -872,18 +872,18 @@ class TestOrganisorViewIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))
         
-        # 3. Yeni organisor oluşturuldu mu kontrol et
+        # 3. Check if new organisor was created
         self.assertTrue(User.objects.filter(username='integration_new_organisor').exists())
         new_user = User.objects.get(username='integration_new_organisor')
         self.assertTrue(Organisor.objects.filter(user=new_user).exists())
         
-        # 4. Yeni organisor detay sayfasına git
+        # 4. Go to new organisor detail page
         new_organisor = Organisor.objects.get(user=new_user)
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': new_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Integration')
         
-        # 5. Yeni organisor güncelle
+        # 5. Update new organisor
         update_data = {
             'email': 'updated_integration_new_organisor@example.com',
             'username': 'updated_integration_new_organisor',
@@ -901,7 +901,7 @@ class TestOrganisorViewIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-detail', kwargs={'pk': new_organisor.pk}))
         
-        # 6. Güncelleme kontrol et
+        # 6. Check update
         updated_user = User.objects.get(pk=new_user.pk)
         self.assertEqual(updated_user.email, 'updated_integration_new_organisor@example.com')
         self.assertEqual(updated_user.first_name, 'Updated')
@@ -911,15 +911,15 @@ class TestOrganisorViewIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))
         
-        # 8. Silme kontrol et
+        # 8. Check delete
         self.assertFalse(User.objects.filter(username='updated_integration_new_organisor').exists())
         self.assertFalse(Organisor.objects.filter(pk=new_organisor.pk).exists())
 
 
 if __name__ == "__main__":
-    print("Organisors View Testleri Başlatılıyor...")
+    print("Organisors View Tests Starting...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

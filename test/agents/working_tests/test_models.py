@@ -1,6 +1,6 @@
 """
-Agent Models Test Dosyası
-Bu dosya Agent modeli ile ilgili tüm testleri içerir.
+Agent Models Test File
+This file contains all tests related to the Agent model.
 """
 
 import os
@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -23,11 +23,11 @@ User = get_user_model()
 
 
 class TestAgentModel(TestCase):
-    """Agent model testleri"""
+    """Agent model tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='organisor_test',
             email='organisor_test@example.com',
@@ -41,13 +41,13 @@ class TestAgentModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.organisor_user, organisation=self.organisor_profile)
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_test',
             email='agent_test@example.com',
@@ -61,11 +61,11 @@ class TestAgentModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.agent_profile, created = UserProfile.objects.get_or_create(user=self.agent_user)
     
     def test_agent_creation(self):
-        """Agent oluşturma testi"""
+        """Agent creation test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -76,7 +76,7 @@ class TestAgentModel(TestCase):
         self.assertTrue(Agent.objects.filter(user=self.agent_user).exists())
     
     def test_agent_str_representation(self):
-        """Agent __str__ metodu testi"""
+        """Agent __str__ method test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -86,38 +86,38 @@ class TestAgentModel(TestCase):
         self.assertEqual(str(agent), expected_str)
     
     def test_agent_user_relationship(self):
-        """Agent-User ilişkisi testi"""
+        """Agent-User relationship test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # OneToOneField testi
+        # OneToOneField test
         self.assertEqual(agent.user, self.agent_user)
         self.assertEqual(agent.user.is_agent, True)
-        # User model'inde is_organisor=True default değeri var
+        # User model has is_organisor=True as default
         self.assertEqual(agent.user.is_organisor, True)
     
     def test_agent_organisation_relationship(self):
-        """Agent-Organisation ilişkisi testi"""
+        """Agent-Organisation relationship test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # ForeignKey testi
+        # ForeignKey test
         self.assertEqual(agent.organisation, self.organisor_profile)
         self.assertEqual(agent.organisation.user, self.organisor_user)
     
     def test_agent_unique_user_constraint(self):
-        """Agent unique user constraint testi"""
-        # İlk agent oluştur
+        """Agent unique user constraint test"""
+        # Create first agent
         Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # Aynı user ile ikinci agent oluşturmaya çalış
+        # Try to create second agent with same user
         with self.assertRaises(IntegrityError):
             Agent.objects.create(
                 user=self.agent_user,
@@ -125,7 +125,7 @@ class TestAgentModel(TestCase):
             )
     
     def test_agent_cascade_delete_user(self):
-        """Agent cascade delete user testi"""
+        """Agent cascade delete user test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -134,15 +134,15 @@ class TestAgentModel(TestCase):
         agent_id = agent.id
         user_id = self.agent_user.id
         
-        # User'ı sil
+        # Delete user
         self.agent_user.delete()
         
-        # Agent da silinmeli
+        # Agent should also be deleted
         self.assertFalse(Agent.objects.filter(id=agent_id).exists())
         self.assertFalse(User.objects.filter(id=user_id).exists())
     
     def test_agent_cascade_delete_organisation(self):
-        """Agent cascade delete organisation testi"""
+        """Agent cascade delete organisation test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -150,15 +150,15 @@ class TestAgentModel(TestCase):
         
         agent_id = agent.id
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # Agent da silinmeli
+        # Agent should also be deleted
         self.assertFalse(Agent.objects.filter(id=agent_id).exists())
     
     def test_agent_creation_with_different_organisations(self):
-        """Farklı organizasyonlarla agent oluşturma testi"""
-        # İkinci organisor oluştur
+        """Agent creation with different organisations test"""
+        # Create second organisor
         second_organisor_user = User.objects.create_user(
             username='organisor2_test',
             email='organisor2_test@example.com',
@@ -175,7 +175,7 @@ class TestAgentModel(TestCase):
         second_organisor_profile, created = UserProfile.objects.get_or_create(user=second_organisor_user)
         Organisor.objects.create(user=second_organisor_user, organisation=second_organisor_profile)
         
-        # İkinci agent oluştur
+        # Create second agent
         second_agent_user = User.objects.create_user(
             username='agent2_test',
             email='agent2_test@example.com',
@@ -189,41 +189,41 @@ class TestAgentModel(TestCase):
             email_verified=True
         )
         
-        # İkinci agent oluştur
+        # Create second agent
         second_agent = Agent.objects.create(
             user=second_agent_user,
             organisation=second_organisor_profile
         )
         
-        # Her iki agent farklı organizasyonlarda olmalı
+        # Both agents should be in different organisations
         self.assertNotEqual(second_agent.organisation, self.organisor_profile)
         self.assertEqual(second_agent.organisation, second_organisor_profile)
         
-        # Agent oluşturuldu mu kontrol et
+        # Check if agent was created
         self.assertTrue(Agent.objects.filter(user=second_agent_user).exists())
         self.assertTrue(Agent.objects.filter(organisation=second_organisor_profile).exists())
     
     def test_agent_user_profile_creation(self):
-        """Agent oluşturulduğunda UserProfile oluşturma testi"""
-        # UserProfile'ı sil
+        """UserProfile creation when agent is created test"""
+        # Delete UserProfile
         self.agent_profile.delete()
         
-        # Agent oluştur
+        # Create agent
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # UserProfile otomatik oluşturulmalı (signal ile)
-        # Eğer signal çalışmıyorsa manuel oluştur
+        # UserProfile should be created automatically (via signal)
+        # Create manually if signal does not work
         if not UserProfile.objects.filter(user=self.agent_user).exists():
             UserProfile.objects.create(user=self.agent_user)
         
         self.assertTrue(UserProfile.objects.filter(user=self.agent_user).exists())
     
     def test_agent_creation_without_user_profile(self):
-        """UserProfile olmadan agent oluşturma testi"""
-        # Yeni user oluştur (UserProfile olmadan)
+        """Agent creation without UserProfile test"""
+        # Create new user (without UserProfile)
         new_user = User.objects.create_user(
             username='new_agent_test',
             email='new_agent_test@example.com',
@@ -237,18 +237,18 @@ class TestAgentModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile'ı sil
+        # Delete UserProfile
         if UserProfile.objects.filter(user=new_user).exists():
             UserProfile.objects.filter(user=new_user).delete()
         
-        # Agent oluştur
+        # Create agent
         agent = Agent.objects.create(
             user=new_user,
             organisation=self.organisor_profile
         )
         
-        # UserProfile otomatik oluşturulmalı
-        # Eğer signal çalışmıyorsa manuel oluştur
+        # UserProfile should be created automatically
+        # Create manually if signal does not work
         if not UserProfile.objects.filter(user=new_user).exists():
             UserProfile.objects.create(user=new_user)
         
@@ -256,7 +256,7 @@ class TestAgentModel(TestCase):
 
 
 class TestEmailVerificationTokenModel(TestCase):
-    """EmailVerificationToken model testleri"""
+    """EmailVerificationToken model tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -274,7 +274,7 @@ class TestEmailVerificationTokenModel(TestCase):
         )
     
     def test_token_creation(self):
-        """Token oluşturma testi"""
+        """Token creation test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         self.assertEqual(token.user, self.user)
@@ -283,95 +283,95 @@ class TestEmailVerificationTokenModel(TestCase):
         self.assertIsNotNone(token.created_at)
     
     def test_token_str_representation(self):
-        """Token __str__ metodu testi"""
+        """Token __str__ method test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         expected_str = f"Verification token for {self.user.email}"
         self.assertEqual(str(token), expected_str)
     
     def test_token_uniqueness(self):
-        """Token benzersizlik testi"""
+        """Token uniqueness test"""
         token1 = EmailVerificationToken.objects.create(user=self.user)
         token2 = EmailVerificationToken.objects.create(user=self.user)
         
-        # Her iki token farklı olmalı
+        # Both tokens should be different
         self.assertNotEqual(token1.token, token2.token)
         
-        # Aynı user için birden fazla token olabilir
+        # Multiple tokens can exist for same user
         self.assertEqual(EmailVerificationToken.objects.filter(user=self.user).count(), 2)
     
     def test_token_expiration(self):
-        """Token süresi dolma testi"""
+        """Token expiration test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Yeni oluşturulan token süresi dolmamış olmalı
+        # Newly created token should not be expired
         self.assertFalse(token.is_expired())
         
-        # Mock ile 25 saat sonrasını simüle et
+        # Simulate 25 hours later with mock
         with patch('django.utils.timezone.now') as mock_now:
             from datetime import timedelta
             mock_now.return_value = token.created_at + timedelta(hours=25)
             
-            # Token süresi dolmuş olmalı
+            # Token should be expired
             self.assertTrue(token.is_expired())
     
     def test_token_is_used_default(self):
-        """Token is_used default değeri testi"""
+        """Token is_used default value test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         self.assertFalse(token.is_used)
     
     def test_token_cascade_delete_user(self):
-        """Token cascade delete user testi"""
+        """Token cascade delete user test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         token_id = token.id
         user_id = self.user.id
         
-        # User'ı sil
+        # Delete user
         self.user.delete()
         
-        # Token da silinmeli
+        # Token should also be deleted
         self.assertFalse(EmailVerificationToken.objects.filter(id=token_id).exists())
         self.assertFalse(User.objects.filter(id=user_id).exists())
     
     def test_multiple_tokens_for_same_user(self):
-        """Aynı kullanıcı için birden fazla token testi"""
+        """Multiple tokens for same user test"""
         token1 = EmailVerificationToken.objects.create(user=self.user)
         token2 = EmailVerificationToken.objects.create(user=self.user)
         
-        # Her iki token farklı olmalı
+        # Both tokens should be different
         self.assertNotEqual(token1.token, token2.token)
         
-        # Aynı user'a ait olmalı
+        # Should belong to same user
         self.assertEqual(token1.user, self.user)
         self.assertEqual(token2.user, self.user)
         
-        # Toplam 2 token olmalı
+        # Should have 2 tokens total
         self.assertEqual(EmailVerificationToken.objects.filter(user=self.user).count(), 2)
     
     def test_token_used_status_update(self):
-        """Token kullanıldı durumu güncelleme testi"""
+        """Token used status update test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Başlangıçta kullanılmamış
+        # Initially not used
         self.assertFalse(token.is_used)
         
-        # Kullanıldı olarak işaretle
+        # Mark as used
         token.is_used = True
         token.save()
         
-        # Güncellenmiş token'ı al
+        # Get updated token
         updated_token = EmailVerificationToken.objects.get(id=token.id)
         self.assertTrue(updated_token.is_used)
 
 
 class TestAgentModelIntegration(TestCase):
-    """Agent model entegrasyon testleri"""
+    """Agent model integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='integration_organisor',
             email='integration_organisor@example.com',
@@ -389,8 +389,8 @@ class TestAgentModelIntegration(TestCase):
         Organisor.objects.create(user=self.organisor_user, organisation=self.organisor_profile)
     
     def test_agent_creation_with_verification_token(self):
-        """Agent oluşturma ile verification token oluşturma testi"""
-        # Agent user oluştur
+        """Agent creation with verification token creation test"""
+        # Create agent user
         agent_user = User.objects.create_user(
             username='integration_agent',
             email='integration_agent@example.com',
@@ -404,24 +404,24 @@ class TestAgentModelIntegration(TestCase):
             email_verified=False
         )
         
-        # Agent oluştur
+        # Create agent
         agent = Agent.objects.create(
             user=agent_user,
             organisation=self.organisor_profile
         )
         
-        # Verification token oluştur
+        # Create verification token
         token = EmailVerificationToken.objects.create(user=agent_user)
         
-        # Agent ve token ilişkisi
+        # Agent and token relationship
         self.assertEqual(agent.user, agent_user)
         self.assertEqual(token.user, agent_user)
         self.assertFalse(agent_user.email_verified)
         self.assertFalse(token.is_used)
     
     def test_agent_organisation_relationship_integrity(self):
-        """Agent-organisation ilişki bütünlüğü testi"""
-        # Birden fazla agent aynı organisation'da olabilir
+        """Agent-organisation relationship integrity test"""
+        # Multiple agents can be in same organisation
         agent1_user = User.objects.create_user(
             username='agent1_integration',
             email='agent1_integration@example.com',
@@ -448,22 +448,22 @@ class TestAgentModelIntegration(TestCase):
             email_verified=True
         )
         
-        # Her iki agent aynı organisation'da
+        # Both agents in same organisation
         agent1 = Agent.objects.create(user=agent1_user, organisation=self.organisor_profile)
         agent2 = Agent.objects.create(user=agent2_user, organisation=self.organisor_profile)
         
-        # Aynı organisation'a ait olmalılar
+        # Should belong to same organisation
         self.assertEqual(agent1.organisation, self.organisor_profile)
         self.assertEqual(agent2.organisation, self.organisor_profile)
         
-        # Organisation'dan agent'ları sorgula
+        # Query agents from organisation
         agents_in_org = Agent.objects.filter(organisation=self.organisor_profile)
         self.assertEqual(agents_in_org.count(), 2)
         self.assertIn(agent1, agents_in_org)
         self.assertIn(agent2, agents_in_org)
     
     def test_agent_user_profile_consistency(self):
-        """Agent ve UserProfile tutarlılığı testi"""
+        """Agent and UserProfile consistency test"""
         agent_user = User.objects.create_user(
             username='consistency_agent',
             email='consistency_agent@example.com',
@@ -477,30 +477,30 @@ class TestAgentModelIntegration(TestCase):
             email_verified=True
         )
         
-        # Agent oluştur
+        # Create agent
         agent = Agent.objects.create(
             user=agent_user,
             organisation=self.organisor_profile
         )
         
-        # UserProfile otomatik oluşturulmalı
+        # UserProfile should be created automatically
         user_profile = UserProfile.objects.get(user=agent_user)
         
-        # Tutarlılık kontrolü
+        # Consistency check
         self.assertEqual(agent.user, agent_user)
         self.assertEqual(user_profile.user, agent_user)
         self.assertEqual(agent.organisation, self.organisor_profile)
         
-        # User'ın agent olduğunu kontrol et
+        # Check if user is agent
         self.assertTrue(agent_user.is_agent)
-        # User model'inde is_organisor=True default değeri var
+        # User model has is_organisor=True as default
         self.assertTrue(agent_user.is_organisor)
 
 
 if __name__ == "__main__":
-    print("Agent Models Testleri Başlatılıyor...")
+    print("Agent Models Tests Starting...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

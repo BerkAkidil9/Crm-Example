@@ -1,6 +1,6 @@
 """
-Organisors Modelleri Test Dosyası
-Bu dosya organisors modülündeki tüm modelleri test eder.
+Organisors Models Test File
+This file tests all models in the organisors module.
 """
 
 import os
@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -20,11 +20,11 @@ from leads.models import User, UserProfile
 
 
 class TestOrganisorModel(TestCase):
-    """Organisor modeli testleri"""
+    """Organisor model tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username="testuser_organisor_models",
             email="test_organisor_models@example.com",
@@ -38,44 +38,44 @@ class TestOrganisorModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         self.organisor = Organisor.objects.create(
             user=self.user,
             organisation=self.user_profile
         )
     
     def test_organisor_creation(self):
-        """Organisor oluşturma testi"""
+        """Organisor creation test"""
         self.assertEqual(self.organisor.user, self.user)
         self.assertEqual(self.organisor.organisation, self.user_profile)
         self.assertIsNotNone(self.organisor)
     
     def test_organisor_str_representation(self):
-        """Organisor __str__ metodu testi"""
+        """Organisor __str__ method test"""
         self.assertEqual(str(self.organisor), self.user.email)
     
     def test_organisor_verbose_names(self):
-        """Organisor verbose name testleri"""
+        """Organisor verbose name tests"""
         self.assertEqual(Organisor._meta.verbose_name, "Organisor")
         self.assertEqual(Organisor._meta.verbose_name_plural, "Organisors")
     
     def test_organisor_user_relationship(self):
-        """Organisor-User ilişkisi testi"""
+        """Organisor-User relationship test"""
         self.assertEqual(self.organisor.user, self.user)
         self.assertTrue(hasattr(self.user, 'organisor'))
         self.assertEqual(self.user.organisor, self.organisor)
     
     def test_organisor_organisation_relationship(self):
-        """Organisor-Organisation ilişkisi testi"""
+        """Organisor-Organisation relationship test"""
         self.assertEqual(self.organisor.organisation, self.user_profile)
         self.assertIn(self.organisor, self.user_profile.organisor_set.all())
     
     def test_organisor_user_one_to_one(self):
-        """Organisor-User OneToOneField testi"""
-        # Aynı kullanıcı için ikinci bir organisor oluşturulamaz
+        """Organisor-User OneToOneField test"""
+        # Cannot create second organisor for same user
         with self.assertRaises(IntegrityError):
             Organisor.objects.create(
                 user=self.user,
@@ -83,20 +83,20 @@ class TestOrganisorModel(TestCase):
             )
     
     def test_organisor_cascade_delete_user(self):
-        """User silinince Organisor da silinir testi"""
+        """When user is deleted Organisor is also deleted test"""
         user_id = self.user.id
         organisor_id = self.organisor.id
         
-        # User'ı sil
+        # Delete user
         self.user.delete()
         
-        # Organisor da silinmiş olmalı
+        # Organisor should also be deleted
         self.assertFalse(Organisor.objects.filter(id=organisor_id).exists())
         self.assertFalse(User.objects.filter(id=user_id).exists())
     
     def test_organisor_cascade_delete_organisation(self):
-        """Organisation silinince Organisor da silinir testi"""
-        # Yeni bir organisor oluştur
+        """When organisation is deleted Organisor is also deleted test"""
+        # Create new organisor
         user2 = User.objects.create_user(
             username="testuser2_organisor_models",
             email="test2_organisor_models@example.com",
@@ -112,16 +112,16 @@ class TestOrganisorModel(TestCase):
         organisor_id = organisor2.id
         user_profile_id = user_profile2.id
         
-        # UserProfile'ı sil
+        # Delete UserProfile
         user_profile2.delete()
         
-        # Organisor da silinmiş olmalı
+        # Organisor should also be deleted
         self.assertFalse(Organisor.objects.filter(id=organisor_id).exists())
         self.assertFalse(UserProfile.objects.filter(id=user_profile_id).exists())
     
     def test_organisor_multiple_organisations(self):
-        """Bir kullanıcının birden fazla organisor kaydı olamaz testi"""
-        # Aynı kullanıcı için farklı organisation ile organisor oluşturulamaz
+        """User cannot have multiple organisor records test"""
+        # Cannot create organisor with different organisation for same user
         user2 = User.objects.create_user(
             username="testuser3_organisor_models",
             email="test3_organisor_models@example.com",
@@ -130,41 +130,41 @@ class TestOrganisorModel(TestCase):
         )
         user_profile2, created = UserProfile.objects.get_or_create(user=user2)
         
-        # Aynı user ile ikinci organisor oluşturulamaz
+        # Cannot create second organisor with same user
         with self.assertRaises(IntegrityError):
             Organisor.objects.create(
-                user=self.user,  # Aynı user
-                organisation=user_profile2  # Farklı organisation
+                user=self.user,  # Same user
+                organisation=user_profile2  # Different organisation
             )
     
     def test_organisor_model_fields(self):
-        """Organisor model alanları testi"""
-        # Model alanlarının varlığını kontrol et
+        """Organisor model fields test"""
+        # Check presence of model fields
         self.assertTrue(hasattr(self.organisor, 'user'))
         self.assertTrue(hasattr(self.organisor, 'organisation'))
         self.assertTrue(hasattr(self.organisor, 'id'))
     
     def test_organisor_foreign_key_constraints(self):
-        """Organisor foreign key kısıtlamaları testi"""
-        # Bu test Django'nun built-in constraint'lerini test eder
-        # Foreign key alanları required olduğu için None değerler kabul edilmez
-        # Bu durum Django ORM seviyesinde değil, veritabanı seviyesinde kontrol edilir
+        """Organisor foreign key constraints test"""
+        # This test checks Django's built-in constraints
+        # Foreign key fields are required so None values are not accepted
+        # This is checked at database level, not Django ORM level
         
-        # Organisor modeli doğru foreign key alanlarına sahip mi?
+        # Does Organisor model have correct foreign key fields?
         self.assertTrue(hasattr(Organisor._meta.get_field('user'), 'null'))
         self.assertTrue(hasattr(Organisor._meta.get_field('organisation'), 'null'))
         
-        # Foreign key alanları null=False olmalı
+        # Foreign key fields should be null=False
         self.assertFalse(Organisor._meta.get_field('user').null)
         self.assertFalse(Organisor._meta.get_field('organisation').null)
 
 
 class TestOrganisorModelRelationships(TestCase):
-    """Organisor model ilişkileri testleri"""
+    """Organisor model relationships tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Admin kullanıcısı oluştur
+        # Create admin user
         self.admin_user = User.objects.create_user(
             username="admin_organisor_relationships",
             email="admin_organisor_relationships@example.com",
@@ -178,16 +178,16 @@ class TestOrganisorModelRelationships(TestCase):
             email_verified=True
         )
         
-        # Admin UserProfile oluştur
+        # Create Admin UserProfile
         self.admin_profile, created = UserProfile.objects.get_or_create(user=self.admin_user)
         
-        # Admin Organisor oluştur
+        # Create Admin Organisor
         self.admin_organisor = Organisor.objects.create(
             user=self.admin_user,
             organisation=self.admin_profile
         )
         
-        # Normal kullanıcı oluştur
+        # Create normal user
         self.normal_user = User.objects.create_user(
             username="normal_organisor_relationships",
             email="normal_organisor_relationships@example.com",
@@ -201,68 +201,68 @@ class TestOrganisorModelRelationships(TestCase):
             email_verified=True
         )
         
-        # Normal UserProfile oluştur
+        # Create normal UserProfile
         self.normal_profile, created = UserProfile.objects.get_or_create(user=self.normal_user)
         
-        # Normal Organisor oluştur
+        # Create normal Organisor
         self.normal_organisor = Organisor.objects.create(
             user=self.normal_user,
-            organisation=self.admin_profile  # Admin'in organisation'ına bağlı
+            organisation=self.admin_profile  # Linked to admin's organisation
         )
     
     def test_organisor_organisation_hierarchy(self):
-        """Organisor organisation hiyerarşisi testi"""
-        # Normal organisor, admin'in organisation'ına bağlı
+        """Organisor organisation hierarchy test"""
+        # Normal organisor linked to admin's organisation
         self.assertEqual(self.normal_organisor.organisation, self.admin_profile)
         self.assertNotEqual(self.normal_organisor.organisation, self.normal_profile)
     
     def test_organisor_user_profile_consistency(self):
-        """Organisor user profile tutarlılığı testi"""
-        # Her organisor'ın kendi user'ı var
+        """Organisor user profile consistency test"""
+        # Each organisor has its own user
         self.assertEqual(self.admin_organisor.user, self.admin_user)
         self.assertEqual(self.normal_organisor.user, self.normal_user)
         
-        # User'ların organisor kayıtları var
+        # Users have organisor records
         self.assertEqual(self.admin_user.organisor, self.admin_organisor)
         self.assertEqual(self.normal_user.organisor, self.normal_organisor)
     
     def test_organisor_organisation_access(self):
-        """Organisor organisation erişimi testi"""
-        # Admin'in organisation'ına bağlı organisorlar
+        """Organisor organisation access test"""
+        # Organisors linked to admin's organisation
         admin_organisors = Organisor.objects.filter(organisation=self.admin_profile)
         self.assertIn(self.admin_organisor, admin_organisors)
         self.assertIn(self.normal_organisor, admin_organisors)
         self.assertEqual(admin_organisors.count(), 2)
     
     def test_organisor_user_queries(self):
-        """Organisor user sorguları testi"""
-        # Organisor'dan user'a erişim
+        """Organisor user queries test"""
+        # Access user from organisor
         self.assertEqual(self.admin_organisor.user.username, "admin_organisor_relationships")
         self.assertEqual(self.normal_organisor.user.email, "normal_organisor_relationships@example.com")
         
-        # User'dan organisor'a erişim
+        # Access organisor from user
         self.assertEqual(self.admin_user.organisor.organisation, self.admin_profile)
         self.assertEqual(self.normal_user.organisor.organisation, self.admin_profile)
     
     def test_organisor_organisation_queries(self):
-        """Organisor organisation sorguları testi"""
-        # Organisation'dan organisor'lara erişim
+        """Organisor organisation queries test"""
+        # Access organisors from organisation
         organisors = self.admin_profile.organisor_set.all()
         self.assertEqual(organisors.count(), 2)
         self.assertIn(self.admin_organisor, organisors)
         self.assertIn(self.normal_organisor, organisors)
         
-        # Organisor'dan organisation'a erişim
+        # Access organisation from organisor
         self.assertEqual(self.admin_organisor.organisation.user, self.admin_user)
         self.assertEqual(self.normal_organisor.organisation.user, self.admin_user)
 
 
 class TestOrganisorModelEdgeCases(TestCase):
-    """Organisor model sınır durumları testleri"""
+    """Organisor model edge cases tests"""
     
     def test_organisor_with_deleted_user(self):
-        """Silinmiş user ile organisor testi"""
-        # User oluştur
+        """Organisor with deleted user test"""
+        # Create user
         user = User.objects.create_user(
             username="deleted_user_organisor",
             email="deleted_user_organisor@example.com",
@@ -270,24 +270,24 @@ class TestOrganisorModelEdgeCases(TestCase):
             is_organisor=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         user_profile, created = UserProfile.objects.get_or_create(user=user)
         
-        # Organisor oluştur
+        # Create Organisor
         organisor = Organisor.objects.create(
             user=user,
             organisation=user_profile
         )
         
-        # User'ı sil
+        # Delete user
         user.delete()
         
-        # Organisor da silinmiş olmalı
+        # Organisor should also be deleted
         self.assertFalse(Organisor.objects.filter(id=organisor.id).exists())
     
     def test_organisor_with_deleted_organisation(self):
-        """Silinmiş organisation ile organisor testi"""
-        # User oluştur
+        """Organisor with deleted organisation test"""
+        # Create user
         user = User.objects.create_user(
             username="deleted_org_organisor",
             email="deleted_org_organisor@example.com",
@@ -295,37 +295,37 @@ class TestOrganisorModelEdgeCases(TestCase):
             is_organisor=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         user_profile, created = UserProfile.objects.get_or_create(user=user)
         
-        # Organisor oluştur
+        # Create Organisor
         organisor = Organisor.objects.create(
             user=user,
             organisation=user_profile
         )
         
-        # UserProfile'ı sil
+        # Delete UserProfile
         user_profile.delete()
         
-        # Organisor da silinmiş olmalı
+        # Organisor should also be deleted
         self.assertFalse(Organisor.objects.filter(id=organisor.id).exists())
     
     def test_organisor_model_meta_options(self):
-        """Organisor model Meta seçenekleri testi"""
-        # Model Meta seçeneklerini kontrol et
+        """Organisor model Meta options test"""
+        # Check model Meta options
         meta = Organisor._meta
         self.assertEqual(meta.verbose_name, "Organisor")
         self.assertEqual(meta.verbose_name_plural, "Organisors")
         
-        # Model alanlarını kontrol et
+        # Check model fields
         field_names = [field.name for field in meta.fields]
         self.assertIn('id', field_names)
         self.assertIn('user', field_names)
         self.assertIn('organisation', field_names)
     
     def test_organisor_model_constraints(self):
-        """Organisor model kısıtlamaları testi"""
-        # OneToOneField kısıtlaması
+        """Organisor model constraints test"""
+        # OneToOneField constraint
         user = User.objects.create_user(
             username="constraint_test_user",
             email="constraint_test_user@example.com",
@@ -334,13 +334,13 @@ class TestOrganisorModelEdgeCases(TestCase):
         )
         user_profile, created = UserProfile.objects.get_or_create(user=user)
         
-        # İlk organisor oluştur
+        # Create first organisor
         Organisor.objects.create(
             user=user,
             organisation=user_profile
         )
         
-        # Aynı user ile ikinci organisor oluşturulamaz
+        # Cannot create second organisor with same user
         with self.assertRaises(IntegrityError):
             Organisor.objects.create(
                 user=user,
@@ -349,9 +349,9 @@ class TestOrganisorModelEdgeCases(TestCase):
 
 
 if __name__ == "__main__":
-    print("Organisors Modelleri Testleri Başlatılıyor...")
+    print("Organisors Models Tests Starting...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()
