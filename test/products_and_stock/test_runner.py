@@ -1,6 +1,6 @@
 """
-ProductsAndStock Test Çalıştırıcı
-Bu dosya tüm ProductsAndStock testlerini çalıştırır ve sonuçları raporlar.
+ProductsAndStock Test Runner
+This file runs all ProductsAndStock tests and reports results.
 """
 
 import os
@@ -10,13 +10,13 @@ import unittest
 from django.test.runner import DiscoverRunner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 
 class ProductsAndStockTestRunner:
-    """ProductsAndStock test çalıştırıcı sınıfı"""
+    """ProductsAndStock test runner class"""
     
     def __init__(self):
         self.test_results = {}
@@ -26,37 +26,37 @@ class ProductsAndStockTestRunner:
         self.errors = 0
     
     def run_all_tests(self):
-        """Tüm testleri çalıştır"""
+        """Run all tests"""
         print("=" * 80)
-        print("🚀 PRODUCTSANDSTOCK KAPSAMLI TEST SİSTEMİ")
+        print("🚀 PRODUCTSANDSTOCK COMPREHENSIVE TEST SYSTEM")
         print("=" * 80)
         print()
         
-        # Test dosyalarını tanımla
+        # Define test files
         test_files = [
-            ('Modeller Testleri', 'test_products_stock_models'),
-            ('Viewlar Testleri', 'test_products_stock_views'),
-            ('Formlar Testleri', 'test_products_stock_forms'),
-            ('Entegrasyon Testleri', 'test_products_stock_integration'),
+            ('Model Tests', 'test_products_stock_models'),
+            ('View Tests', 'test_products_stock_views'),
+            ('Form Tests', 'test_products_stock_forms'),
+            ('Integration Tests', 'test_products_stock_integration'),
         ]
         
         for test_name, test_module in test_files:
-            print(f"🔍 {test_name} çalıştırılıyor...")
+            print(f"🔍 Running {test_name}...")
             print("-" * 60)
             
             try:
                 # Test modülünü import et
                 module = __import__(f'test.{test_module}', fromlist=[test_module])
                 
-                # Test suite oluştur
+                # Create test suite
                 loader = unittest.TestLoader()
                 suite = loader.loadTestsFromModule(module)
                 
-                # Test çalıştır
+                # Run tests
                 runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout)
                 result = runner.run(suite)
                 
-                # Sonuçları kaydet
+                # Save results
                 self.test_results[test_name] = {
                     'tests_run': result.testsRun,
                     'failures': len(result.failures),
@@ -69,16 +69,16 @@ class ProductsAndStockTestRunner:
                 self.failed_tests += len(result.failures)
                 self.errors += len(result.errors)
                 
-                # Durum göster
+                # Show status
                 if result.wasSuccessful():
-                    print(f"✅ {test_name} BAŞARILI")
+                    print(f"✅ {test_name} SUCCESSFUL")
                 else:
-                    print(f"❌ {test_name} BAŞARISIZ")
+                    print(f"❌ {test_name} FAILED")
                 
                 print()
                 
             except Exception as e:
-                print(f"❌ {test_name} HATASI: {str(e)}")
+                print(f"❌ {test_name} ERROR: {str(e)}")
                 self.test_results[test_name] = {
                     'tests_run': 0,
                     'failures': 0,
@@ -91,20 +91,20 @@ class ProductsAndStockTestRunner:
         self.print_summary()
     
     def run_specific_test(self, test_name):
-        """Belirli bir test dosyasını çalıştır"""
-        print(f"🔍 {test_name} çalıştırılıyor...")
+        """Run a specific test file"""
+        print(f"🔍 Running {test_name}...")
         print("-" * 60)
         
         test_modules = {
-            'modeller': 'test_products_stock_models',
-            'viewlar': 'test_products_stock_views',
-            'formlar': 'test_products_stock_forms',
-            'entegrasyon': 'test_products_stock_integration',
+            'models': 'test_products_stock_models',
+            'views': 'test_products_stock_views',
+            'forms': 'test_products_stock_forms',
+            'integration': 'test_products_stock_integration',
         }
         
         if test_name.lower() not in test_modules:
-            print(f"❌ Bilinmeyen test: {test_name}")
-            print("Mevcut testler: modeller, viewlar, formlar, entegrasyon")
+            print(f"❌ Unknown test: {test_name}")
+            print("Available tests: models, views, forms, integration")
             return False
         
         try:
@@ -118,107 +118,107 @@ class ProductsAndStockTestRunner:
             result = runner.run(suite)
             
             if result.wasSuccessful():
-                print(f"✅ {test_name} BAŞARILI")
+                print(f"✅ {test_name} SUCCESSFUL")
                 return True
             else:
                 print(f"❌ {test_name} BAŞARISIZ")
                 return False
                 
         except Exception as e:
-            print(f"❌ {test_name} HATASI: {str(e)}")
+            print(f"❌ {test_name} ERROR: {str(e)}")
             return False
     
     def run_model_tests(self):
-        """Sadece model testlerini çalıştır"""
-        return self.run_specific_test('modeller')
+        """Run model tests only"""
+        return self.run_specific_test('models')
     
     def run_view_tests(self):
-        """Sadece view testlerini çalıştır"""
-        return self.run_specific_test('viewlar')
+        """Run view tests only"""
+        return self.run_specific_test('views')
     
     def run_form_tests(self):
-        """Sadece form testlerini çalıştır"""
-        return self.run_specific_test('formlar')
+        """Run form tests only"""
+        return self.run_specific_test('forms')
     
     def run_integration_tests(self):
-        """Sadece entegrasyon testlerini çalıştır"""
-        return self.run_specific_test('entegrasyon')
+        """Run integration tests only"""
+        return self.run_specific_test('integration')
     
     def print_summary(self):
-        """Test sonuçlarını özetle"""
+        """Summarize test results"""
         print("=" * 80)
-        print("📊 TEST SONUÇLARI ÖZETİ")
+        print("📊 TEST RESULTS SUMMARY")
         print("=" * 80)
         print()
         
-        # Her test dosyası için sonuç
+        # Result for each test file
         for test_name, result in self.test_results.items():
-            status = "✅ BAŞARILI" if result['success'] else "❌ BAŞARISIZ"
+            status = "✅ SUCCESSFUL" if result['success'] else "❌ FAILED"
             print(f"{test_name:<25} {status}")
-            print(f"  Test Sayısı: {result['tests_run']}")
-            print(f"  Hatalar: {result['errors']}")
-            print(f"  Başarısız: {result['failures']}")
+            print(f"  Test Count: {result['tests_run']}")
+            print(f"  Errors: {result['errors']}")
+            print(f"  Failed: {result['failures']}")
             print()
         
-        # Genel istatistikler
+        # General statistics
         print("-" * 80)
-        print("📈 GENEL İSTATİSTİKLER")
+        print("📈 GENERAL STATISTICS")
         print("-" * 80)
-        print(f"Toplam Test: {self.total_tests}")
-        print(f"Başarılı: {self.passed_tests}")
-        print(f"Başarısız: {self.failed_tests}")
-        print(f"Hatalar: {self.errors}")
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed: {self.passed_tests}")
+        print(f"Failed: {self.failed_tests}")
+        print(f"Errors: {self.errors}")
         
         if self.total_tests > 0:
             success_rate = (self.passed_tests / self.total_tests) * 100
-            print(f"Başarı Oranı: %{success_rate:.1f}")
+            print(f"Success Rate: %{success_rate:.1f}")
         
         print()
         
-        # Genel durum
+        # Overall status
         if self.failed_tests == 0 and self.errors == 0:
-            print("🎉 TÜM TESTLER BAŞARILI!")
+            print("🎉 ALL TESTS SUCCESSFUL!")
         elif self.failed_tests > 0 or self.errors > 0:
-            print("⚠️  BAZI TESTLER BAŞARISIZ!")
+            print("⚠️  SOME TESTS FAILED!")
         
         print("=" * 80)
     
     def run_quick_tests(self):
-        """Hızlı testler (sadece temel testler)"""
-        print("🚀 HIZLI TESTLER ÇALIŞTIRILIYOR...")
+        """Quick tests (basic tests only)"""
+        print("🚀 RUNNING QUICK TESTS...")
         print("=" * 50)
         
-        # Sadece model testlerini çalıştır
+        # Run model tests only
         return self.run_model_tests()
     
     def run_performance_tests(self):
-        """Performans testleri"""
-        print("⚡ PERFORMANS TESTLERİ ÇALIŞTIRILIYOR...")
+        """Performance tests"""
+        print("⚡ RUNNING PERFORMANCE TESTS...")
         print("=" * 50)
         
-        # Sadece entegrasyon testlerini çalıştır (performans testleri içerir)
+        # Run integration tests only (includes performance tests)
         return self.run_integration_tests()
 
 
 def main():
-    """Ana fonksiyon"""
+    """Main function"""
     runner = ProductsAndStockTestRunner()
     
-    print("ProductsAndStock Test Sistemi")
+    print("ProductsAndStock Test System")
     print("=" * 40)
-    print("1. Tüm testleri çalıştır")
-    print("2. Model testleri")
-    print("3. View testleri")
-    print("4. Form testleri")
-    print("5. Entegrasyon testleri")
-    print("6. Hızlı testler")
-    print("7. Performans testleri")
-    print("8. Çıkış")
+    print("1. Run all tests")
+    print("2. Model tests")
+    print("3. View tests")
+    print("4. Form tests")
+    print("5. Integration tests")
+    print("6. Quick tests")
+    print("7. Performance tests")
+    print("8. Exit")
     print()
     
     while True:
         try:
-            choice = input("Seçiminizi yapın (1-8): ").strip()
+            choice = input("Enter your choice (1-8): ").strip()
             
             if choice == "1":
                 runner.run_all_tests()
@@ -235,18 +235,18 @@ def main():
             elif choice == "7":
                 runner.run_performance_tests()
             elif choice == "8":
-                print("Çıkılıyor...")
+                print("Exiting...")
                 break
             else:
-                print("Geçersiz seçim! Lütfen 1-8 arası bir sayı girin.")
+                print("Invalid choice! Please enter a number between 1 and 8.")
             
             print("\n" + "=" * 50)
             
         except KeyboardInterrupt:
-            print("\n\nÇıkılıyor...")
+            print("\n\nExiting...")
             break
         except Exception as e:
-            print(f"\nHata: {str(e)}")
+            print(f"\nError: {str(e)}")
 
 
 if __name__ == "__main__":

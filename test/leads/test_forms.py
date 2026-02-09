@@ -37,34 +37,34 @@ class TestPhoneNumberWidget(TestCase):
         # Widget'ın iki alt widget'ı olmalı
         self.assertEqual(len(widget.widgets), 2)
         
-        # İlk widget Select (ülke kodu)
+        # First widget is Select (country code)
         self.assertIsInstance(widget.widgets[0], django.forms.Select)
         
-        # İkinci widget TextInput (telefon numarası)
+        # Second widget is TextInput (phone number)
         self.assertIsInstance(widget.widgets[1], django.forms.TextInput)
     
     def test_widget_decompress_with_value(self):
-        """Widget decompress değer ile testi"""
+        """Widget decompress with value test"""
         widget = PhoneNumberWidget()
         
-        # Türkiye numarası
+        # Turkey number
         result = widget.decompress('+905551234567')
         self.assertEqual(result, ['+90', '5551234567'])
         
-        # ABD numarası
+        # US number
         result = widget.decompress('+15551234567')
         self.assertEqual(result, ['+1', '5551234567'])
         
-        # Boş değer
+        # Empty value
         result = widget.decompress('')
         self.assertEqual(result, ['+90', ''])
         
-        # None değer
+        # None value
         result = widget.decompress(None)
         self.assertEqual(result, ['+90', ''])
     
     def test_widget_value_from_datadict(self):
-        """Widget value_from_datadict testi"""
+        """Widget value_from_datadict test"""
         widget = PhoneNumberWidget()
         
         # Mock data

@@ -1,8 +1,8 @@
-# Logout Test Sistemi
+# Logout Test System
 
-Bu klasör logout ile ilgili tüm test dosyalarını içerir.
+This folder contains all test files related to logout.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/logout/
@@ -15,94 +15,94 @@ test/logout/
     └── test_logout_integration.py
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Çalışan Testler
+### ✅ Working Tests
 
 ```bash
-# Logout view testleri
+# Logout view tests
 python manage.py test test.logout.working.test_logout_views
 
-# Logout entegrasyon testleri
+# Logout integration tests
 python manage.py test test.logout.working.test_logout_integration
 
-# Tüm logout testleri
+# All logout tests
 python manage.py test test.logout.working
 
-# Verbose mod ile
+# With verbose mode
 python manage.py test test.logout.working -v 2
 
-# İnteraktif test runner ile
+# With interactive test runner
 python test/logout/test_runner.py
 ```
 
-### 🎯 Hızlı Test Komutları
+### 🎯 Quick Test Commands
 
 ```bash
-# Sadece logout view testlerini çalıştır
+# Run only logout view tests
 python manage.py test test.logout.working.test_logout_views.TestLogoutView
 
-# Sadece logout güvenlik testlerini çalıştır
+# Run only logout security tests
 python manage.py test test.logout.working.test_logout_views.TestLogoutViewSecurity
 
-# Sadece logout entegrasyon testlerini çalıştır
+# Run only logout integration tests
 python manage.py test test.logout.working.test_logout_integration.TestLogoutIntegration
 
-# Sadece logout güvenlik entegrasyon testlerini çalıştır
+# Run only logout security integration tests
 python manage.py test test.logout.working.test_logout_integration.TestLogoutSecurityIntegration
 
-# Belirli bir test metodunu çalıştır
+# Run a specific test method
 python manage.py test test.logout.working.test_logout_views.TestLogoutView.test_logout_view_post_authenticated_user
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
-### Logout View Testleri (test_logout_views.py)
+### Logout View Tests (test_logout_views.py)
 
-#### TestLogoutView Sınıfı
-- ✅ `test_logout_view_post_authenticated_user` - Giriş yapmış kullanıcı ile logout POST testi
-- ✅ `test_logout_view_get_authenticated_user` - Giriş yapmış kullanıcı ile logout GET testi
-- ✅ `test_logout_view_unauthenticated_user` - Giriş yapmamış kullanıcı ile logout testi
-- ✅ `test_logout_view_redirect_url` - Logout sonrası redirect URL testi
-- ✅ `test_logout_view_session_cleanup` - Logout sonrası session temizliği testi
-- ✅ `test_logout_view_protected_page_access_after_logout` - Logout sonrası korumalı sayfa erişim testi
-- ✅ `test_logout_view_multiple_logout_calls` - Birden fazla logout çağrısı testi
-- ✅ `test_logout_view_csrf_protection` - CSRF koruması testi
-- ✅ `test_logout_view_next_parameter` - Next parametresi ile redirect testi
-- ✅ `test_logout_view_with_different_user_types` - Farklı kullanıcı tipleri ile logout testi
-- ✅ `test_logout_view_with_superuser` - Superuser ile logout testi
-- ✅ `test_logout_view_session_data_cleanup` - Özel session verilerinin temizliği testi
-- ✅ `test_logout_view_concurrent_sessions` - Eşzamanlı session'lar ile logout testi
-- ✅ `test_logout_view_url_pattern` - Logout URL pattern testi
-- ✅ `test_logout_view_with_ajax_request` - AJAX isteği ile logout testi
+#### TestLogoutView Class
+- ✅ `test_logout_view_post_authenticated_user` - Logout POST test with authenticated user
+- ✅ `test_logout_view_get_authenticated_user` - Logout GET test with authenticated user
+- ✅ `test_logout_view_unauthenticated_user` - Logout test with unauthenticated user
+- ✅ `test_logout_view_redirect_url` - Redirect URL test after logout
+- ✅ `test_logout_view_session_cleanup` - Session cleanup test after logout
+- ✅ `test_logout_view_protected_page_access_after_logout` - Protected page access test after logout
+- ✅ `test_logout_view_multiple_logout_calls` - Multiple logout calls test
+- ✅ `test_logout_view_csrf_protection` - CSRF protection test
+- ✅ `test_logout_view_next_parameter` - Redirect test with next parameter
+- ✅ `test_logout_view_with_different_user_types` - Logout test with different user types
+- ✅ `test_logout_view_with_superuser` - Logout test with superuser
+- ✅ `test_logout_view_session_data_cleanup` - Custom session data cleanup test
+- ✅ `test_logout_view_concurrent_sessions` - Logout test with concurrent sessions
+- ✅ `test_logout_view_url_pattern` - Logout URL pattern test
+- ✅ `test_logout_view_with_ajax_request` - Logout test with AJAX request
 
-#### TestLogoutViewSecurity Sınıfı
-- ✅ `test_logout_view_session_fixation_protection` - Session fixation koruması testi
-- ✅ `test_logout_view_no_session_hijacking` - Session hijacking koruması testi
-- ✅ `test_logout_view_token_invalidation` - Token invalidation testi
-- ✅ `test_logout_view_no_caching` - Cache kontrol testi
+#### TestLogoutViewSecurity Class
+- ✅ `test_logout_view_session_fixation_protection` - Session fixation protection test
+- ✅ `test_logout_view_no_session_hijacking` - Session hijacking protection test
+- ✅ `test_logout_view_token_invalidation` - Token invalidation test
+- ✅ `test_logout_view_no_caching` - Cache control test
 
-### Logout Entegrasyon Testleri (test_logout_integration.py)
+### Logout Integration Tests (test_logout_integration.py)
 
-#### TestLogoutIntegration Sınıfı
-- ✅ `test_complete_logout_flow` - Tam logout akışı testi
-- ✅ `test_login_logout_login_cycle` - Login-logout-login döngüsü testi
-- ✅ `test_logout_from_different_pages` - Farklı sayfalardan logout testi
-- ✅ `test_logout_with_active_session_data` - Aktif session verisi ile logout testi
-- ✅ `test_logout_with_multiple_browser_sessions` - Çoklu tarayıcı session'ları ile logout testi
-- ✅ `test_logout_redirect_behavior` - Logout redirect davranışı testi
-- ✅ `test_logout_after_password_change` - Şifre değişikliği sonrası logout testi
-- ✅ `test_logout_with_remember_me` - Remember me özelliği ile logout testi
-- ✅ `test_logout_performance` - Logout performans testi
-- ✅ `test_logout_with_different_user_types` - Farklı kullanıcı tipleri ile logout entegrasyon testi
+#### TestLogoutIntegration Class
+- ✅ `test_complete_logout_flow` - Full logout flow test
+- ✅ `test_login_logout_login_cycle` - Login-logout-login cycle test
+- ✅ `test_logout_from_different_pages` - Logout from different pages test
+- ✅ `test_logout_with_active_session_data` - Logout with active session data test
+- ✅ `test_logout_with_multiple_browser_sessions` - Logout with multiple browser sessions test
+- ✅ `test_logout_redirect_behavior` - Logout redirect behavior test
+- ✅ `test_logout_after_password_change` - Logout after password change test
+- ✅ `test_logout_with_remember_me` - Logout with remember me feature test
+- ✅ `test_logout_performance` - Logout performance test
+- ✅ `test_logout_with_different_user_types` - Logout integration test with different user types
 
-#### TestLogoutSecurityIntegration Sınıfı
-- ✅ `test_logout_session_hijacking_protection` - Session hijacking koruması entegrasyon testi
-- ✅ `test_logout_csrf_protection_integration` - CSRF koruması entegrasyon testi
-- ✅ `test_logout_no_information_leakage` - Bilgi sızıntısı testi
-- ✅ `test_logout_session_fixation_protection_integration` - Session fixation koruması entegrasyon testi
+#### TestLogoutSecurityIntegration Class
+- ✅ `test_logout_session_hijacking_protection` - Session hijacking protection integration test
+- ✅ `test_logout_csrf_protection_integration` - CSRF protection integration test
+- ✅ `test_logout_no_information_leakage` - Information leakage test
+- ✅ `test_logout_session_fixation_protection_integration` - Session fixation protection integration test
 
-## 🔧 Logout İmplementasyonu
+## 🔧 Logout Implementation
 
 ### URL Pattern
 ```python
@@ -119,137 +119,137 @@ LOGOUT_REDIRECT_URL = '/'
 ```
 
 ### View
-Django'nun standart `LogoutView` kullanılıyor:
-- POST ve GET isteklerini destekler
-- Session'ı temizler (flush)
-- `LOGOUT_REDIRECT_URL`'ye yönlendirir
-- CSRF koruması vardır
+Django's standard `LogoutView` is used:
+- Supports POST and GET requests
+- Clears (flushes) session
+- Redirects to `LOGOUT_REDIRECT_URL`
+- Has CSRF protection
 
-## 📈 Test İstatistikleri
+## 📈 Test Statistics
 
-### Toplam Test Sayısı
-- **Logout View Testleri:** 19 test
-- **Logout Entegrasyon Testleri:** 14 test
-- **TOPLAM:** 33 test
+### Total Test Count
+- **Logout View Tests:** 19 tests
+- **Logout Integration Tests:** 14 tests
+- **TOTAL:** 33 tests
 
-### Test Kategorileri
-- **Temel Fonksiyonellik:** 10 test
-- **Güvenlik:** 8 test
-- **Entegrasyon:** 10 test
-- **Performans:** 2 test
-- **Edge Cases:** 3 test
+### Test Categories
+- **Core Functionality:** 10 tests
+- **Security:** 8 tests
+- **Integration:** 10 tests
+- **Performance:** 2 tests
+- **Edge Cases:** 3 tests
 
-## 🎯 Test Özellikleri
+## 🎯 Test Features
 
-### Logout View Testleri
-1. **POST İsteği Testleri**
-   - Giriş yapmış kullanıcı ile logout
-   - Giriş yapmamış kullanıcı ile logout
-   - Session temizliği kontrolü
+### Logout View Tests
+1. **POST Request Tests**
+   - Logout with authenticated user
+   - Logout with unauthenticated user
+   - Session cleanup verification
 
-2. **GET İsteği Testleri**
-   - GET ile logout (Django LogoutView GET'i destekler)
-   - Redirect davranışı
+2. **GET Request Tests**
+   - Logout with GET (Django LogoutView supports GET)
+   - Redirect behavior
 
-3. **Session Yönetimi**
-   - Session temizliği
-   - Özel session verilerinin temizliği
-   - Eşzamanlı session'lar
+3. **Session Management**
+   - Session cleanup
+   - Custom session data cleanup
+   - Concurrent sessions
 
-4. **Güvenlik Testleri**
-   - CSRF koruması
-   - Session hijacking koruması
-   - Session fixation koruması
+4. **Security Tests**
+   - CSRF protection
+   - Session hijacking protection
+   - Session fixation protection
    - Token invalidation
 
 5. **Edge Cases**
-   - Birden fazla logout çağrısı
-   - Farklı kullanıcı tipleri
-   - AJAX istekleri
-   - Next parametresi
+   - Multiple logout calls
+   - Different user types
+   - AJAX requests
+   - Next parameter
 
-### Logout Entegrasyon Testleri
-1. **Tam Akış Testleri**
-   - Login → Logout → Login döngüsü
-   - Farklı sayfalardan logout
-   - Korumalı sayfa erişim kontrolleri
+### Logout Integration Tests
+1. **Full Flow Tests**
+   - Login → Logout → Login cycle
+   - Logout from different pages
+   - Protected page access controls
 
-2. **Session Yönetimi**
-   - Aktif session verisi ile logout
-   - Çoklu tarayıcı session'ları
+2. **Session Management**
+   - Logout with active session data
+   - Multiple browser sessions
    - Session data cleanup
 
-3. **Güvenlik Entegrasyonu**
-   - Session hijacking koruması
-   - CSRF koruması
-   - Bilgi sızıntısı önleme
+3. **Security Integration**
+   - Session hijacking protection
+   - CSRF protection
+   - Information leakage prevention
 
-4. **Performans**
-   - Logout performans testleri
-   - Çoklu logout işlemleri
+4. **Performance**
+   - Logout performance tests
+   - Multiple logout operations
 
-## 📝 Test Yazma Kuralları
+## 📝 Test Writing Rules
 
-1. **Test İsimlendirme**
-   - `test_` prefix ile başla
-   - Açıklayıcı isim kullan
-   - Ne test ettiğini belirt
+1. **Test Naming**
+   - Start with `test_` prefix
+   - Use descriptive names
+   - Indicate what is being tested
 
-2. **Test Yapısı**
-   - `setUp()`: Test verilerini hazırla
-   - Test metodu: Tek bir özelliği test et
-   - Assertions: Sonuçları doğrula
+2. **Test Structure**
+   - `setUp()`: Prepare test data
+   - Test method: Test one feature
+   - Assertions: Verify results
 
-3. **Test Bağımsızlığı**
-   - Her test bağımsız çalışmalı
-   - Testler birbirini etkilememeli
-   - Test sırası önemli olmamalı
+3. **Test Independence**
+   - Each test should run independently
+   - Tests should not affect each other
+   - Test order should not matter
 
-4. **Test Kapsamı**
-   - Pozitif senaryolar
-   - Negatif senaryolar
+4. **Test Coverage**
+   - Positive scenarios
+   - Negative scenarios
    - Edge cases
-   - Güvenlik senaryoları
+   - Security scenarios
 
 ## 🔍 Test Coverage
 
-### Kapsanan Özellikler
-- ✅ Logout view fonksiyonelliği
-- ✅ Session yönetimi
-- ✅ Redirect davranışı
-- ✅ CSRF koruması
-- ✅ Session hijacking koruması
-- ✅ Session fixation koruması
+### Covered Features
+- ✅ Logout view functionality
+- ✅ Session management
+- ✅ Redirect behavior
+- ✅ CSRF protection
+- ✅ Session hijacking protection
+- ✅ Session fixation protection
 - ✅ Token invalidation
-- ✅ Çoklu session yönetimi
-- ✅ Farklı kullanıcı tipleri
+- ✅ Multi-session management
+- ✅ Different user types
 - ✅ Edge cases
 
-### Kapsanmayan Özellikler
-- ⚠️ Remember me özelliği (henüz implement edilmemiş)
-- ⚠️ İki faktörlü authentication ile logout
-- ⚠️ API endpoint logout testleri
+### Uncovered Features
+- ⚠️ Remember me feature (not yet implemented)
+- ⚠️ Logout with two-factor authentication
+- ⚠️ API endpoint logout tests
 - ⚠️ WebSocket connection cleanup
 
-## 🚨 Bilinen Sorunlar
+## 🚨 Known Issues
 
-Şu anda bilinen bir sorun yoktur.
+There are no known issues at this time.
 
-## 📚 Dokümantasyon
+## 📚 Documentation
 
 ### Django LogoutView
-- Döküman: https://docs.djangoproject.com/en/5.0/topics/auth/default/#django.contrib.auth.views.LogoutView
-- POST ve GET isteklerini destekler
-- `next_page` parametresi ile redirect yapılabilir
-- Session'ı flush eder
+- Document: https://docs.djangoproject.com/en/5.0/topics/auth/default/#django.contrib.auth.views.LogoutView
+- Supports POST and GET requests
+- Redirect can be configured with `next_page` parameter
+- Flushes session
 
 ### Test Best Practices
-- Her test tek bir özelliği test etmeli
-- Test isimleri açıklayıcı olmalı
-- Setup ve teardown düzgün yapılmalı
-- Mock kullanımı gerektiğinde yapılmalı
+- Each test should test one feature
+- Test names should be descriptive
+- Setup and teardown should be proper
+- Mock usage when necessary
 
-## 🎓 Öğrenme Kaynakları
+## 🎓 Learning Resources
 
 1. **Django Testing**
    - https://docs.djangoproject.com/en/5.0/topics/testing/
@@ -262,58 +262,57 @@ Django'nun standart `LogoutView` kullanılıyor:
 3. **Session Management**
    - https://docs.djangoproject.com/en/5.0/topics/http/sessions/
 
-## 💡 İpuçları
+## 💡 Tips
 
-1. **Test Çalıştırma**
+1. **Running Tests**
    ```bash
-   # Hızlı test için
+   # Quick test
    python manage.py test test.logout.working --parallel
    
-   # Detaylı output için
+   # Detailed output
    python manage.py test test.logout.working -v 2
    
-   # Belirli bir test için
+   # Specific test
    python manage.py test test.logout.working.test_logout_views.TestLogoutView.test_logout_view_post_authenticated_user
    ```
 
-2. **Debug Modu**
+2. **Debug Mode**
    ```bash
-   # PDB ile debug
+   # Debug with PDB
    python manage.py test test.logout.working --pdb
    
-   # İlk hatada dur
+   # Stop on first failure
    python manage.py test test.logout.working --failfast
    ```
 
 3. **Test Coverage**
    ```bash
-   # Coverage raporu
+   # Coverage report
    coverage run --source='.' manage.py test test.logout.working
    coverage report
    coverage html
    ```
 
-## 🔄 Gelecek Planları
+## 🔄 Future Plans
 
-1. **Yeni Testler**
-   - Remember me özelliği için testler
-   - API endpoint logout testleri
-   - WebSocket cleanup testleri
+1. **New Tests**
+   - Tests for remember me feature
+   - API endpoint logout tests
+   - WebSocket cleanup tests
 
-2. **Test İyileştirmeleri**
-   - Daha fazla edge case testi
-   - Performance benchmark testleri
+2. **Test Improvements**
+   - More edge case tests
+   - Performance benchmark tests
    - Load testing
 
-3. **Dokümantasyon**
+3. **Documentation**
    - Video tutorial
-   - Detaylı örnekler
+   - Detailed examples
    - Best practices guide
 
-## 📞 Destek
+## 📞 Support
 
-Test ile ilgili sorularınız için:
-- Issue açın
-- Pull request gönderin
-- Dokümantasyonu inceleyin
-
+For questions about tests:
+- Open an issue
+- Submit a pull request
+- Review the documentation

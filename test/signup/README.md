@@ -1,229 +1,229 @@
-# Signup Test Sistemi
+# Signup Test System
 
-Bu klasör signup (kayıt olma) modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the signup (registration) module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/signup/
 ├── __init__.py
-├── working_tests/              # ✅ Çalışan testler
+├── working_tests/              # ✅ Working tests
 │   ├── __init__.py
-│   ├── test_signup_forms.py    # Form testleri
-│   ├── test_signup_views.py    # View testleri
-│   ├── test_signup_models.py   # Model testleri
-│   └── test_signup_integration.py  # Entegrasyon testleri
-├── test_runner.py              # İnteraktif test çalıştırıcı
-└── README.md                   # Bu dosya
+│   ├── test_signup_forms.py    # Form tests
+│   ├── test_signup_views.py    # View tests
+│   ├── test_signup_models.py   # Model tests
+│   └── test_signup_integration.py  # Integration tests
+├── test_runner.py              # Interactive test runner
+└── README.md                   # This file
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Çalışan Testler
+### ✅ Working Tests
 
-#### Tüm Testleri Çalıştır
+#### Run All Tests
 ```bash
-# Tüm signup testlerini çalıştır
+# Run all signup tests
 python test/signup/test_runner.py all
 
-# Veya Django manage.py ile
+# Or with Django manage.py
 python manage.py test test.signup.working_tests
 ```
 
-#### Belirli Test Kategorilerini Çalıştır
+#### Run Specific Test Categories
 ```bash
-# Sadece form testleri
+# Form tests only
 python test/signup/test_runner.py forms
 
-# Sadece view testleri  
+# View tests only
 python test/signup/test_runner.py views
 
-# Sadece model testleri
+# Model tests only
 python manage.py test test.signup.working_tests.test_signup_models
 
-# Sadece entegrasyon testleri
+# Integration tests only
 python test/signup/test_runner.py integration
 ```
 
-#### İnteraktif Test Çalıştırıcı
+#### Interactive Test Runner
 ```bash
 python test/signup/test_runner.py interactive
 ```
 
-#### Django Test Komutları
+#### Django Test Commands
 ```bash
-# Verbose mod ile
+# With verbose mode
 python manage.py test test.signup.working_tests -v 2
 
-# Belirli bir test sınıfını çalıştır
+# Run a specific test class
 python manage.py test test.signup.working_tests.test_signup_forms.TestCustomUserCreationForm
 
-# Belirli bir test metodunu çalıştır
+# Run a specific test method
 python manage.py test test.signup.working_tests.test_signup_forms.TestCustomUserCreationForm.test_form_valid_data
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
-### 🧪 Form Testleri (test_signup_forms.py)
-- **Dosya:** `working_tests/test_signup_forms.py`
-- **Test Sınıfları:** 3 sınıf
-- **Toplam Test:** ~25 test
-- **Kapsam:** CustomUserCreationForm, form validasyonları, widget özellikleri
+### 🧪 Form Tests (test_signup_forms.py)
+- **File:** `working_tests/test_signup_forms.py`
+- **Test Classes:** 3 classes
+- **Total Tests:** ~25 tests
+- **Coverage:** CustomUserCreationForm, form validations, widget features
 
-#### Test Edilen Özellikler:
-- ✅ Form başlatma ve alan varlığı
-- ✅ Geçerli veri ile form testi
-- ✅ Zorunlu alanlar validasyonu
-- ✅ Email benzersizlik kontrolü
-- ✅ Telefon numarası benzersizlik kontrolü
-- ✅ Kullanıcı adı benzersizlik kontrolü
-- ✅ Şifre validasyonu
-- ✅ Widget özellikleri (placeholder, CSS sınıfları)
-- ✅ Form save metodu
-- ✅ Clean metodları
-- ✅ Form entegrasyon testleri
+#### Tested Features:
+- ✅ Form initialization and field presence
+- ✅ Form test with valid data
+- ✅ Required fields validation
+- ✅ Email uniqueness check
+- ✅ Phone number uniqueness check
+- ✅ Username uniqueness check
+- ✅ Password validation
+- ✅ Widget features (placeholder, CSS classes)
+- ✅ Form save method
+- ✅ Clean methods
+- ✅ Form integration tests
 
-### 🌐 View Testleri (test_signup_views.py)
-- **Dosya:** `working_tests/test_signup_views.py`
-- **Test Sınıfları:** 6 sınıf
-- **Toplam Test:** ~35 test
-- **Kapsam:** SignupView, EmailVerificationView, view entegrasyonları
+### 🌐 View Tests (test_signup_views.py)
+- **File:** `working_tests/test_signup_views.py`
+- **Test Classes:** 6 classes
+- **Total Tests:** ~35 tests
+- **Coverage:** SignupView, EmailVerificationView, view integrations
 
-#### Test Edilen Özellikler:
-- ✅ SignupView GET/POST istekleri
-- ✅ Geçerli veri ile signup
-- ✅ Geçersiz veri ile signup
-- ✅ Çakışan verilerle signup
-- ✅ Email gönderimi (mock)
-- ✅ Template kullanımı
+#### Tested Features:
+- ✅ SignupView GET/POST requests
+- ✅ Signup with valid data
+- ✅ Signup with invalid data
+- ✅ Signup with conflicting data
+- ✅ Email sending (mock)
+- ✅ Template usage
 - ✅ EmailVerificationSentView
-- ✅ EmailVerificationView (başarılı/başarısız)
+- ✅ EmailVerificationView (success/failure)
 - ✅ EmailVerificationFailedView
-- ✅ Token validasyonu (geçerli/geçersiz/süresi dolmuş/kullanılmış)
-- ✅ Tam signup akışı entegrasyonu
+- ✅ Token validation (valid/invalid/expired/used)
+- ✅ Full signup flow integration
 
-### 🗄️ Model Testleri (test_signup_models.py)
-- **Dosya:** `working_tests/test_signup_models.py`
-- **Test Sınıfları:** 5 sınıf
-- **Toplam Test:** ~30 test
-- **Kapsam:** User, UserProfile, EmailVerificationToken, Organisor modelleri
+### 🗄️ Model Tests (test_signup_models.py)
+- **File:** `working_tests/test_signup_models.py`
+- **Test Classes:** 5 classes
+- **Total Tests:** ~30 tests
+- **Coverage:** User, UserProfile, EmailVerificationToken, Organisor models
 
-#### Test Edilen Özellikler:
-- ✅ User modeli oluşturma ve özellikler
-- ✅ User benzersizlik kısıtlamaları
-- ✅ UserProfile modeli ve ilişkileri
-- ✅ EmailVerificationToken modeli
-- ✅ Token süre kontrolü (24 saat)
-- ✅ Organisor modeli ve ilişkileri
-- ✅ Model cascade delete işlemleri
-- ✅ Model veri bütünlüğü
-- ✅ Model validasyonları
+#### Tested Features:
+- ✅ User model creation and properties
+- ✅ User uniqueness constraints
+- ✅ UserProfile model and relations
+- ✅ EmailVerificationToken model
+- ✅ Token expiry check (24 hours)
+- ✅ Organisor model and relations
+- ✅ Model cascade delete operations
+- ✅ Model data integrity
+- ✅ Model validations
 
-### 🔗 Entegrasyon Testleri (test_signup_integration.py)
-- **Dosya:** `working_tests/test_signup_integration.py`
-- **Test Sınıfları:** 6 sınıf
-- **Toplam Test:** ~20 test
-- **Kapsam:** Tam signup akışı, model ilişkileri, form-view entegrasyonu
+### 🔗 Integration Tests (test_signup_integration.py)
+- **File:** `working_tests/test_signup_integration.py`
+- **Test Classes:** 6 classes
+- **Total Tests:** ~20 tests
+- **Coverage:** Full signup flow, model relations, form-view integration
 
-#### Test Edilen Özellikler:
-- ✅ Tam signup ve doğrulama akışı
-- ✅ Geçersiz verilerle signup akışı
-- ✅ Çakışan verilerle signup akışı
-- ✅ Email doğrulama akışları (başarılı/başarısız)
-- ✅ Model ilişkileri ve cascade işlemler
-- ✅ Form ve view entegrasyonu
-- ✅ Veri tutarlılığı kontrolü
+#### Tested Features:
+- ✅ Full signup and verification flow
+- ✅ Signup flow with invalid data
+- ✅ Signup flow with conflicting data
+- ✅ Email verification flows (success/failure)
+- ✅ Model relations and cascade operations
+- ✅ Form and view integration
+- ✅ Data consistency check
 
-## 📈 Test İstatistikleri
+## 📈 Test Statistics
 
-### ✅ Toplam Test Sayısı: ~110 test
-- **Form Testleri:** ~25 test
-- **View Testleri:** ~35 test  
-- **Model Testleri:** ~30 test
-- **Entegrasyon Testleri:** ~20 test
+### ✅ Total Test Count: ~110 tests
+- **Form Tests:** ~25 tests
+- **View Tests:** ~35 tests
+- **Model Tests:** ~30 tests
+- **Integration Tests:** ~20 tests
 
-### 🎯 Test Kapsamı
-- **Modeller:** User, UserProfile, EmailVerificationToken, Organisor
-- **Viewlar:** SignupView, EmailVerificationView, EmailVerificationSentView, EmailVerificationFailedView
-- **Formlar:** CustomUserCreationForm
-- **URL'ler:** signup, verify-email, verify-email-sent, verify-email-failed
-- **Template'ler:** signup.html, verify_email_sent.html, verify_email_failed.html
+### 🎯 Test Coverage
+- **Models:** User, UserProfile, EmailVerificationToken, Organisor
+- **Views:** SignupView, EmailVerificationView, EmailVerificationSentView, EmailVerificationFailedView
+- **Forms:** CustomUserCreationForm
+- **URLs:** signup, verify-email, verify-email-sent, verify-email-failed
+- **Templates:** signup.html, verify_email_sent.html, verify_email_failed.html
 
-## 🔧 Test Özellikleri
+## 🔧 Test Features
 
-### Mock Kullanımı
-- Email gönderimi için `unittest.mock.patch` kullanılır
-- Gerçek email gönderimi yapılmaz, sadece mock kontrol edilir
+### Mock Usage
+- Uses `unittest.mock.patch` for email sending
+- No actual email sending, only mock verification
 
-### Test Verisi
-- Her test benzersiz kullanıcı adları kullanır
-- Test verileri gerçekçi ve geçerli formatta
-- Test sonrası temizlik otomatik yapılır
+### Test Data
+- Each test uses unique usernames
+- Test data is realistic and in valid format
+- Cleanup is automatic after tests
 
-### Hata Senaryoları
-- Geçersiz email formatları
-- Çakışan kullanıcı adları/emailler
-- Şifre uyumsuzlukları
-- Eksik zorunlu alanlar
-- Süresi dolmuş/kullanılmış tokenlar
+### Error Scenarios
+- Invalid email formats
+- Conflicting usernames/emails
+- Password mismatches
+- Missing required fields
+- Expired/used tokens
 
-## 🎯 Test Edilen Signup Akışı
+## 🎯 Signup Flow Under Test
 
-1. **Signup Sayfası** → Form gösterimi
-2. **Form Gönderimi** → Veri validasyonu
-3. **Kullanıcı Oluşturma** → User, UserProfile, Organisor oluşturma
-4. **Email Token** → EmailVerificationToken oluşturma
-5. **Email Gönderimi** → Doğrulama linki gönderimi
-6. **Email Doğrulama** → Token ile email doğrulama
-7. **Login Yönlendirme** → Başarılı doğrulama sonrası
+1. **Signup Page** → Form display
+2. **Form Submission** → Data validation
+3. **User Creation** → User, UserProfile, Organisor creation
+4. **Email Token** → EmailVerificationToken creation
+5. **Email Sending** → Verification link sending
+6. **Email Verification** → Email verification with token
+7. **Login Redirect** → After successful verification
 
-## 🚨 Dikkat Edilecek Noktalar
+## 🚨 Important Notes
 
-### Test Çalıştırma
-- Django ayarları doğru yüklenmeli
-- Test veritabanı kullanılır (gerçek veri etkilenmez)
-- Mock kullanımı email testlerinde önemli
+### Running Tests
+- Django settings must load correctly
+- Test database is used (real data is not affected)
+- Mock usage is important for email tests
 
-### Test Verileri
-- Her test benzersiz kullanıcı adları kullanır
-- Telefon numaraları ve email adresleri de benzersiz olmalı
-- Test sonrası temizlik Django tarafından otomatik yapılır
+### Test Data
+- Each test uses unique usernames
+- Phone numbers and email addresses must also be unique
+- Django automatically cleans up after tests
 
-### Mock Kullanımı
-- Email gönderimi testlerinde `@patch('leads.views.send_mail')` kullanılır
-- Mock'un çağrıldığı ve doğru parametrelerle çağrıldığı kontrol edilir
+### Mock Usage
+- `@patch('leads.views.send_mail')` is used for email sending tests
+- Verifies that mock is called with correct parameters
 
-## 📝 Test Geliştirme
+## 📝 Test Development
 
-### Yeni Test Ekleme
-1. Uygun test dosyasını seç (forms/views/models/integration)
-2. Mevcut test sınıfına yeni metod ekle veya yeni sınıf oluştur
-3. Test metodunu `test_` ile başlat
-4. Assertion'ları ekle
-5. Test'i çalıştır ve doğrula
+### Adding New Tests
+1. Select the appropriate test file (forms/views/models/integration)
+2. Add new method to existing test class or create new class
+3. Start test method with `test_`
+4. Add assertions
+5. Run and verify the test
 
 ### Test Best Practices
-- Her test bağımsız olmalı
-- Test verileri gerçekçi olmalı
-- Mock kullanımı gerekli yerlerde yapılmalı
-- Hata senaryoları da test edilmeli
-- Test isimleri açıklayıcı olmalı
+- Each test should be independent
+- Test data should be realistic
+- Mock usage where necessary
+- Error scenarios should also be tested
+- Test names should be descriptive
 
-## 🔍 Sorun Giderme
+## 🔍 Troubleshooting
 
-### Yaygın Hatalar
-1. **UserProfile unique constraint hatası:** Benzersiz kullanıcı adları kullanın
-2. **Email gönderimi hatası:** Mock kullanımını kontrol edin
-3. **Token süresi hatası:** Test verilerini güncelleyin
-4. **Form validasyon hatası:** Test verilerini kontrol edin
+### Common Errors
+1. **UserProfile unique constraint error:** Use unique usernames
+2. **Email sending error:** Check mock usage
+3. **Token expiry error:** Update test data
+4. **Form validation error:** Check test data
 
-### Debug İpuçları
-- `-v 2` parametresi ile verbose çıktı alın
-- Belirli testleri tek tek çalıştırın
-- Test verilerini kontrol edin
-- Mock kullanımını doğrulayın
+### Debug Tips
+- Use `-v 2` parameter for verbose output
+- Run specific tests one by one
+- Check test data
+- Verify mock usage
 
-## 📚 Kaynaklar
+## 📚 Resources
 
 - [Django Testing Documentation](https://docs.djangoproject.com/en/stable/topics/testing/)
 - [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)

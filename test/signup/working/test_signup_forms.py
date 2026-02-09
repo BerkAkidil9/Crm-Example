@@ -1,6 +1,6 @@
 """
-Signup Formları Test Dosyası
-Bu dosya signup ile ilgili tüm formları test eder.
+Signup Forms Test File
+This file tests all forms related to signup.
 """
 
 import os
@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -21,10 +21,10 @@ from organisors.models import Organisor
 
 
 class TestCustomUserCreationForm(TestCase):
-    """CustomUserCreationForm testleri"""
+    """CustomUserCreationForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.valid_data = {
             'username': 'testuser_signup',
             'email': 'test_signup@example.com',
@@ -39,10 +39,10 @@ class TestCustomUserCreationForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = CustomUserCreationForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('email', form.fields)
         self.assertIn('first_name', form.fields)
@@ -54,12 +54,12 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('password2', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
+        """Required fields test"""
         required_fields = [
             'username', 'email', 'first_name', 'last_name', 
             'date_of_birth', 'gender', 'password1', 'password2'
@@ -73,7 +73,7 @@ class TestCustomUserCreationForm(TestCase):
             self.assertFalse(form.is_valid())
             self.assertIn(field, form.errors)
         
-        # Phone number alanları için özel test (MultiWidget)
+        # Special test for phone number fields (MultiWidget)
         data = self.valid_data.copy()
         del data['phone_number_0']
         del data['phone_number_1']
@@ -83,15 +83,15 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('phone_number', form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Email uniqueness validation test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı email ile form oluştur
+        # Create form with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
@@ -101,8 +101,8 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('already exists', str(form.errors['email']))
     
     def test_form_phone_number_validation_unique(self):
-        """Telefon numarası benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Phone number uniqueness validation test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
@@ -110,7 +110,7 @@ class TestCustomUserCreationForm(TestCase):
             phone_number='+905551234567'
         )
         
-        # Aynı telefon numarası ile form oluştur
+        # Create form with same phone number
         data = self.valid_data.copy()
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5551234567'
@@ -119,19 +119,19 @@ class TestCustomUserCreationForm(TestCase):
         
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid())
-        # Phone number validation hatası olabilir, ama benzersizlik kontrolü de olabilir
+        # May be phone number validation error or uniqueness check
         self.assertIn('phone_number', form.errors)
     
     def test_form_username_validation_unique(self):
-        """Kullanıcı adı benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Username uniqueness validation test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı kullanıcı adı ile form oluştur
+        # Create form with same username
         data = self.valid_data.copy()
         data['username'] = 'existing_user'
         
@@ -141,8 +141,8 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('already exists', str(form.errors['username']))
     
     def test_form_password_validation(self):
-        """Şifre validasyonu testi"""
-        # Farklı şifreler
+        """Password validation test"""
+        # Different passwords
         data = self.valid_data.copy()
         data['password1'] = 'testpass123!'
         data['password2'] = 'differentpass123!'
@@ -152,10 +152,10 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('password2', form.errors)
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget attributes test"""
         form = CustomUserCreationForm()
         
-        # CSS sınıfları ve placeholder kontrol et
+        # Check CSS classes and placeholder
         self.assertIn('placeholder="Username"', str(form['username'].as_widget()))
         self.assertIn('placeholder="Email"', str(form['email'].as_widget()))
         self.assertIn('placeholder="First Name"', str(form['first_name'].as_widget()))
@@ -165,15 +165,15 @@ class TestCustomUserCreationForm(TestCase):
         # self.assertIn('placeholder="Confirm Password"', str(form['password2'].as_widget()))
     
     def test_form_date_field_type(self):
-        """Tarih alanı tipi testi"""
+        """Date field type test"""
         form = CustomUserCreationForm()
         
-        # Date input tipi kontrol et
+        # Check date input type
         self.assertIn('type="date"', str(form['date_of_birth'].as_widget()))
         self.assertIn('class="form-control"', str(form['date_of_birth'].as_widget()))
     
     def test_form_gender_choices(self):
-        """Cinsiyet seçenekleri testi"""
+        """Gender choices test"""
         form = CustomUserCreationForm()
         
         expected_choices = [
@@ -185,13 +185,13 @@ class TestCustomUserCreationForm(TestCase):
         self.assertEqual(form.fields['gender'].choices, expected_choices)
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
         
         user = form.save(commit=False)
         
-        # Kullanıcı alanları doğru mu
+        # User fields correct?
         self.assertEqual(user.username, 'testuser_signup')
         self.assertEqual(user.email, 'test_signup@example.com')
         self.assertEqual(user.first_name, 'Test')
@@ -201,7 +201,7 @@ class TestCustomUserCreationForm(TestCase):
         self.assertEqual(user.date_of_birth.strftime('%Y-%m-%d'), '1990-01-01')
     
     def test_form_clean_methods(self):
-        """Form clean metodları testi"""
+        """Form clean methods test"""
         # Email clean
         form = CustomUserCreationForm(data=self.valid_data)
         if form.is_valid():
@@ -221,34 +221,34 @@ class TestCustomUserCreationForm(TestCase):
             self.assertEqual(cleaned_username, 'testuser_signup')
     
     def test_form_validation_edge_cases(self):
-        """Form validasyon sınır durumları testi"""
-        # Boş email
+        """Form validation edge cases test"""
+        # Empty email
         data = self.valid_data.copy()
         data['email'] = ''
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid())
         
-        # Geçersiz email formatı
+        # Invalid email format
         data = self.valid_data.copy()
         data['email'] = 'invalid-email'
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid())
         
-        # Çok kısa şifre
+        # Too short password
         data = self.valid_data.copy()
         data['password1'] = '123'
         data['password2'] = '123'
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid())
         
-        # Geçersiz tarih formatı
+        # Invalid date format
         data = self.valid_data.copy()
         data['date_of_birth'] = 'invalid-date'
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid())
     
     def test_form_field_help_texts(self):
-        """Form alan yardım metinleri testi"""
+        """Form field help texts test"""
         form = CustomUserCreationForm()
         
         self.assertEqual(form.fields['email'].help_text, "Email address is required")
@@ -259,14 +259,14 @@ class TestCustomUserCreationForm(TestCase):
         self.assertEqual(form.fields['gender'].help_text, "Gender is required")
     
     def test_form_field_max_lengths(self):
-        """Form alan maksimum uzunlukları testi"""
+        """Form field max lengths test"""
         form = CustomUserCreationForm()
         
         self.assertEqual(form.fields['first_name'].max_length, 30)
         self.assertEqual(form.fields['last_name'].max_length, 30)
     
     def test_form_field_widgets(self):
-        """Form alan widget'ları testi"""
+        """Form field widgets test"""
         form = CustomUserCreationForm()
         
         # Email widget
@@ -284,7 +284,7 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIsInstance(form.fields['password2'].widget, django.forms.PasswordInput)
     
     def test_form_meta_class(self):
-        """Form Meta sınıfı testi"""
+        """Form Meta class test"""
         form = CustomUserCreationForm()
         
         self.assertEqual(form.Meta.model, User)
@@ -293,10 +293,10 @@ class TestCustomUserCreationForm(TestCase):
 
 
 class TestSignupFormIntegration(TestCase):
-    """Signup form entegrasyon testleri"""
+    """Signup form integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.valid_data = {
             'username': 'integration_test_user',
             'email': 'integration_test@example.com',
@@ -311,13 +311,13 @@ class TestSignupFormIntegration(TestCase):
         }
     
     def test_form_save_and_user_creation(self):
-        """Form ile kullanıcı oluşturma testi"""
+        """Form user creation test"""
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
         
         user = form.save()
         
-        # Kullanıcı veritabanında oluşturuldu mu
+        # User created in database?
         self.assertTrue(User.objects.filter(username='integration_test_user').exists())
         
         saved_user = User.objects.get(username='integration_test_user')
@@ -328,12 +328,12 @@ class TestSignupFormIntegration(TestCase):
         self.assertEqual(saved_user.gender, 'F')
         self.assertEqual(saved_user.date_of_birth.strftime('%Y-%m-%d'), '1985-05-15')
         
-        # Şifre doğru set edildi mi
+        # Password set correctly?
         self.assertTrue(saved_user.check_password('testpass123!'))
     
     def test_form_with_existing_data_conflicts(self):
-        """Mevcut verilerle çakışma testi"""
-        # Önce bir kullanıcı oluştur
+        """Conflict with existing data test"""
+        # Create a user first
         User.objects.create_user(
             username='conflict_user',
             email='conflict@example.com',
@@ -341,7 +341,7 @@ class TestSignupFormIntegration(TestCase):
             phone_number='+905551111111'
         )
         
-        # Çakışan email ile form test et
+        # Test form with conflicting email
         data = self.valid_data.copy()
         data['email'] = 'conflict@example.com'
         data['username'] = 'different_username'
@@ -350,7 +350,7 @@ class TestSignupFormIntegration(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         
-        # Çakışan telefon numarası ile form test et
+        # Test form with conflicting phone number
         data = self.valid_data.copy()
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5551111111'
@@ -360,7 +360,7 @@ class TestSignupFormIntegration(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
         
-        # Çakışan kullanıcı adı ile form test et
+        # Test form with conflicting username
         data = self.valid_data.copy()
         data['username'] = 'conflict_user'
         
@@ -370,9 +370,9 @@ class TestSignupFormIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Signup Form Testleri Başlatılıyor...")
+    print("Starting Signup Form Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

@@ -1,5 +1,5 @@
 """
-Mevcut ornek urunlerin (product_name ile eslesen) description alanini Ingilizce metinle gunceller.
+Updates the description field of existing sample products (matching product_name) with English text.
 Usage: python manage.py update_product_descriptions_english
 """
 from django.core.management.base import BaseCommand
@@ -14,7 +14,7 @@ NAME_TO_EN_DESCRIPTION = {
 
 
 class Command(BaseCommand):
-    help = "Sample urunlerin aciklamalarini Ingilizce'ye gunceller."
+    help = "Updates sample product descriptions to English."
 
     def handle(self, *args, **options):
         updated = 0
@@ -23,4 +23,4 @@ class Command(BaseCommand):
             if count:
                 updated += count
                 self.stdout.write(self.style.SUCCESS(f'Updated: {name} ({count} product(s))'))
-        self.stdout.write(self.style.SUCCESS(f'\nToplam {updated} urun aciklamasi Ingilizce yapildi.'))
+        self.stdout.write(self.style.SUCCESS(f'\nTotal: {updated} product description(s) updated to English.'))

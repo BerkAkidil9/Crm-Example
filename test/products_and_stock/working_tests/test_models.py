@@ -1,6 +1,6 @@
 """
-ProductsAndStock Modelleri Test Dosyası
-Bu dosya ProductsAndStock modülündeki tüm modelleri test eder.
+ProductsAndStock Models Test File
+This file tests all models in the ProductsAndStock module.
 """
 
 import os
@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.db import IntegrityError
 from decimal import Decimal
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -24,10 +24,10 @@ from leads.models import User, UserProfile
 
 
 class TestCategoryModel(TestCase):
-    """Category modeli testleri"""
+    """Category model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.category = Category.objects.create(
             name="Electronics",
             description="Electronic devices and gadgets",
@@ -35,34 +35,34 @@ class TestCategoryModel(TestCase):
         )
     
     def test_category_creation(self):
-        """Kategori oluşturma testi"""
+        """Category creation test"""
         self.assertEqual(self.category.name, "Electronics")
         self.assertEqual(self.category.description, "Electronic devices and gadgets")
         self.assertEqual(self.category.icon, "fas fa-mobile-alt")
         self.assertIsNotNone(self.category.created_at)
     
     def test_category_str_representation(self):
-        """Category __str__ metodu testi"""
+        """Category __str__ method test"""
         self.assertEqual(str(self.category), "Electronics")
     
     def test_category_ordering(self):
-        """Category sıralama testi"""
+        """Category ordering test"""
         category2 = Category.objects.create(name="Books")
         categories = Category.objects.all()
         self.assertEqual(categories[0].name, "Books")  # Alphabetical order
         self.assertEqual(categories[1].name, "Electronics")
     
     def test_category_unique_name(self):
-        """Kategori ismi benzersizlik testi"""
+        """Category name uniqueness test"""
         with self.assertRaises(IntegrityError):
             Category.objects.create(name="Electronics")
 
 
 class TestSubCategoryModel(TestCase):
-    """SubCategory modeli testleri"""
+    """SubCategory model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -71,19 +71,19 @@ class TestSubCategoryModel(TestCase):
         )
     
     def test_subcategory_creation(self):
-        """Alt kategori oluşturma testi"""
+        """Subcategory creation test"""
         self.assertEqual(self.subcategory.name, "Smartphones")
         self.assertEqual(self.subcategory.category, self.category)
         self.assertEqual(self.subcategory.description, "Mobile phones and accessories")
         self.assertIsNotNone(self.subcategory.created_at)
     
     def test_subcategory_str_representation(self):
-        """SubCategory __str__ metodu testi"""
+        """SubCategory __str__ method test"""
         expected = f"{self.category.name} - {self.subcategory.name}"
         self.assertEqual(str(self.subcategory), expected)
     
     def test_subcategory_unique_together(self):
-        """Alt kategori benzersizlik testi (name + category)"""
+        """Subcategory uniqueness test (name + category)"""
         with self.assertRaises(IntegrityError):
             SubCategory.objects.create(
                 name="Smartphones",
@@ -91,7 +91,7 @@ class TestSubCategoryModel(TestCase):
             )
     
     def test_subcategory_ordering(self):
-        """SubCategory sıralama testi"""
+        """SubCategory ordering test"""
         subcategory2 = SubCategory.objects.create(
             name="Laptops",
             category=self.category
@@ -102,11 +102,11 @@ class TestSubCategoryModel(TestCase):
 
 
 class TestProductsAndStockModel(TestCase):
-    """ProductsAndStock modeli testleri"""
+    """ProductsAndStock model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Kullanıcı ve organizasyon oluştur
+        """Set up test data"""
+        # Create user and organisation
         self.user = User.objects.create_user(
             username="testuser_products_main",
             email="test_products_main@example.com",
@@ -116,14 +116,14 @@ class TestProductsAndStockModel(TestCase):
             user=self.user
         )
         
-        # Kategori ve alt kategori oluştur
+        # Create category and subcategory
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
             category=self.category
         )
         
-        # Ürün oluştur
+        # Create product
         self.product = ProductsAndStock.objects.create(
             product_name="iPhone 15",
             product_description="Latest iPhone model",
@@ -137,7 +137,7 @@ class TestProductsAndStockModel(TestCase):
         )
     
     def test_product_creation(self):
-        """Ürün oluşturma testi"""
+        """Product creation test"""
         self.assertEqual(self.product.product_name, "iPhone 15")
         self.assertEqual(self.product.product_price, 999.99)
         self.assertEqual(self.product.cost_price, 800.00)
@@ -148,11 +148,11 @@ class TestProductsAndStockModel(TestCase):
         self.assertEqual(self.product.organisation, self.user_profile)
     
     def test_product_str_representation(self):
-        """ProductsAndStock __str__ metodu testi"""
+        """ProductsAndStock __str__ method test"""
         self.assertEqual(str(self.product), "iPhone 15")
     
     def test_product_unique_together(self):
-        """Ürün benzersizlik testi (product_name + organisation)"""
+        """Product uniqueness test (product_name + organisation)"""
         with self.assertRaises(IntegrityError):
             ProductsAndStock.objects.create(
                 product_name="iPhone 15",
@@ -167,99 +167,99 @@ class TestProductsAndStockModel(TestCase):
             )
     
     def test_total_value_property(self):
-        """Total value property testi"""
+        """Total value property test"""
         expected_value = self.product.product_price * self.product.product_quantity
         self.assertEqual(self.product.total_value, expected_value)
         self.assertEqual(self.product.total_value, 49999.5)
     
     def test_is_low_stock_property(self):
-        """Low stock property testi"""
-        # Normal stok seviyesi
+        """Low stock property test"""
+        # Normal stock level
         self.assertFalse(self.product.is_low_stock)
         
-        # Düşük stok seviyesi
+        # Low stock level
         self.product.product_quantity = 5
         self.assertTrue(self.product.is_low_stock)
         
-        # Minimum stok seviyesi
+        # Minimum stock level
         self.product.product_quantity = 10
         self.assertTrue(self.product.is_low_stock)
     
     def test_stock_status_property(self):
-        """Stock status property testi"""
-        # Normal stok
+        """Stock status property test"""
+        # Normal stock
         self.assertEqual(self.product.stock_status, "In Stock")
         
-        # Düşük stok
+        # Low stock
         self.product.product_quantity = 5
         self.assertEqual(self.product.stock_status, "Low Stock")
         
-        # Stok tükendi
+        # Out of stock
         self.product.product_quantity = 0
         self.assertEqual(self.product.stock_status, "Out of Stock")
     
     def test_profit_margin_amount_property(self):
-        """Profit margin amount property testi"""
+        """Profit margin amount property test"""
         expected_margin = self.product.product_price - self.product.cost_price
         self.assertEqual(self.product.profit_margin_amount, expected_margin)
         self.assertEqual(self.product.profit_margin_amount, 199.99)
     
     def test_profit_margin_percentage_property(self):
-        """Profit margin percentage property testi"""
+        """Profit margin percentage property test"""
         expected_percentage = (self.product.profit_margin_amount / self.product.cost_price) * 100
         self.assertEqual(self.product.profit_margin_percentage, expected_percentage)
         self.assertAlmostEqual(self.product.profit_margin_percentage, 24.99875, places=4)
     
     def test_discounted_price_property(self):
-        """Discounted price property testi"""
-        # İndirim yok
+        """Discounted price property test"""
+        # No discount
         self.assertEqual(self.product.discounted_price, self.product.product_price)
         
-        # Yüzde indirimi
+        # Percentage discount
         self.product.discount_percentage = 10.0
         expected_price = self.product.product_price * (1 - 10.0 / 100)
         self.assertEqual(self.product.discounted_price, expected_price)
         
-        # Sabit indirim miktarı
+        # Fixed discount amount
         self.product.discount_percentage = 0.0
         self.product.discount_amount = 50.0
         expected_price = self.product.product_price - 50.0
         self.assertEqual(self.product.discounted_price, expected_price)
     
     def test_is_discount_active_property(self):
-        """Discount active property testi"""
-        # İndirim yok
+        """Discount active property test"""
+        # No discount
         self.assertFalse(self.product.is_discount_active)
         
-        # Aktif indirim
+        # Active discount
         self.product.discount_percentage = 10.0
         self.assertTrue(self.product.is_discount_active)
         
-        # Tarihli indirim - geçmiş
+        # Dated discount - past
         now = timezone.now()
         self.product.discount_start_date = now - timezone.timedelta(days=2)
         self.product.discount_end_date = now - timezone.timedelta(days=1)
         self.assertFalse(self.product.is_discount_active)
         
-        # Tarihli indirim - gelecek
+        # Scheduled discount - future
         self.product.discount_start_date = now + timezone.timedelta(days=1)
         self.product.discount_end_date = now + timezone.timedelta(days=2)
         self.assertFalse(self.product.is_discount_active)
         
-        # Tarihli indirim - aktif
+        # Scheduled discount - active
         self.product.discount_start_date = now - timezone.timedelta(hours=1)
         self.product.discount_end_date = now + timezone.timedelta(hours=1)
         self.assertTrue(self.product.is_discount_active)
     
     def test_total_profit_property(self):
-        """Total profit property testi"""
+        """Total profit property test"""
         expected_profit = self.product.profit_margin_amount * self.product.product_quantity
         self.assertEqual(self.product.total_profit, expected_profit)
         self.assertEqual(self.product.total_profit, 9999.5)
     
     def test_clean_method(self):
-        """Clean metodu testi"""
-        # Geçersiz alt kategori
+        """Clean method test"""
+        # Invalid subcategory
         wrong_subcategory = SubCategory.objects.create(
             name="Books",
             category=Category.objects.create(name="Books")
@@ -270,24 +270,24 @@ class TestProductsAndStockModel(TestCase):
             self.product.clean()
     
     def test_send_low_stock_alert(self):
-        """Low stock alert gönderme testi"""
-        # Düşük stok seviyesine ayarla
+        """Low stock alert sending test"""
+        # Set to low stock level
         self.product.product_quantity = 5
         
-        # Email gönderme testi (mock kullanılabilir)
+        # Email sending test (mock can be used)
         try:
             self.product.send_low_stock_alert()
-            # Eğer email ayarları yoksa exception fırlatır
+            # May raise exception if email settings not configured
         except Exception as e:
-            # Bu normal, email ayarları olmayabilir
+            # Normal, email settings may not be present
             pass
 
 
 class TestStockMovementModel(TestCase):
-    """StockMovement modeli testleri"""
+    """StockMovement model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_movement_main",
             email="test_movement_main@example.com",
@@ -326,7 +326,7 @@ class TestStockMovementModel(TestCase):
         )
     
     def test_stock_movement_creation(self):
-        """Stok hareketi oluşturma testi"""
+        """Stock movement creation test"""
         self.assertEqual(self.stock_movement.product, self.product)
         self.assertEqual(self.stock_movement.movement_type, 'IN')
         self.assertEqual(self.stock_movement.quantity_before, 40)
@@ -337,29 +337,29 @@ class TestStockMovementModel(TestCase):
         self.assertIsNotNone(self.stock_movement.created_at)
     
     def test_stock_movement_str_representation(self):
-        """StockMovement __str__ metodu testi"""
+        """StockMovement __str__ method test"""
         expected = f"{self.product.product_name} - Stock In (+10)"
         self.assertEqual(str(self.stock_movement), expected)
     
     def test_movement_direction_property(self):
-        """Movement direction property testi"""
-        # Pozitif değişim
+        """Movement direction property test"""
+        # Positive change
         self.assertEqual(self.stock_movement.movement_direction, "IN")
         
-        # Negatif değişim
+        # Negative change
         self.stock_movement.quantity_change = -5
         self.assertEqual(self.stock_movement.movement_direction, "OUT")
         
-        # Sıfır değişim
+        # Zero change
         self.stock_movement.quantity_change = 0
         self.assertEqual(self.stock_movement.movement_direction, "NO CHANGE")
 
 
 class TestPriceHistoryModel(TestCase):
-    """PriceHistory modeli testleri"""
+    """PriceHistory model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_price_main",
             email="test_price_main@example.com",
@@ -398,7 +398,7 @@ class TestPriceHistoryModel(TestCase):
         )
     
     def test_price_history_creation(self):
-        """Fiyat geçmişi oluşturma testi"""
+        """Price history creation test"""
         self.assertEqual(self.price_history.product, self.product)
         self.assertEqual(self.price_history.old_price, 899.99)
         self.assertEqual(self.price_history.new_price, 999.99)
@@ -409,25 +409,25 @@ class TestPriceHistoryModel(TestCase):
         self.assertIsNotNone(self.price_history.created_at)
     
     def test_price_history_str_representation(self):
-        """PriceHistory __str__ metodu testi"""
+        """PriceHistory __str__ method test"""
         expected = f"{self.product.product_name} - Price Increase (+100.00)"
         self.assertEqual(str(self.price_history), expected)
     
     def test_change_percentage_property(self):
-        """Change percentage property testi"""
+        """Change percentage property test"""
         expected_percentage = (100.0 / 899.99) * 100
         self.assertAlmostEqual(self.price_history.change_percentage, expected_percentage, places=4)
         
-        # Sıfır eski fiyat testi
+        # Zero old price test
         self.price_history.old_price = 0
         self.assertEqual(self.price_history.change_percentage, 0)
 
 
 class TestSalesStatisticsModel(TestCase):
-    """SalesStatistics modeli testleri"""
+    """SalesStatistics model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_sales_main",
             email="test_sales_main@example.com",
@@ -464,7 +464,7 @@ class TestSalesStatisticsModel(TestCase):
         )
     
     def test_sales_statistics_creation(self):
-        """Satış istatistikleri oluşturma testi"""
+        """Sales statistics creation test"""
         self.assertEqual(self.sales_stats.product, self.product)
         self.assertEqual(self.sales_stats.total_sales, 10)
         self.assertEqual(self.sales_stats.total_revenue, 9999.90)
@@ -473,16 +473,16 @@ class TestSalesStatisticsModel(TestCase):
         self.assertIsNotNone(self.sales_stats.date)
     
     def test_sales_statistics_str_representation(self):
-        """SalesStatistics __str__ metodu testi"""
+        """SalesStatistics __str__ method test"""
         expected = f"{self.product.product_name} - {self.sales_stats.date} (10 sales)"
         self.assertEqual(str(self.sales_stats), expected)
 
 
 class TestStockAlertModel(TestCase):
-    """StockAlert modeli testleri"""
+    """StockAlert model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_alert_main",
             email="test_alert_main@example.com",
@@ -520,7 +520,7 @@ class TestStockAlertModel(TestCase):
         )
     
     def test_stock_alert_creation(self):
-        """Stok uyarısı oluşturma testi"""
+        """Stock alert creation test"""
         self.assertEqual(self.stock_alert.product, self.product)
         self.assertEqual(self.stock_alert.alert_type, 'LOW_STOCK')
         self.assertEqual(self.stock_alert.severity, 'HIGH')
@@ -531,16 +531,16 @@ class TestStockAlertModel(TestCase):
         self.assertIsNone(self.stock_alert.resolved_at)
     
     def test_stock_alert_str_representation(self):
-        """StockAlert __str__ metodu testi"""
+        """StockAlert __str__ method test"""
         expected = f"{self.product.product_name} - Low Stock Alert (HIGH)"
         self.assertEqual(str(self.stock_alert), expected)
 
 
 class TestStockRecommendationModel(TestCase):
-    """StockRecommendation modeli testleri"""
+    """StockRecommendation model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_recommendation_main",
             email="test_recommendation_main@example.com",
@@ -578,7 +578,7 @@ class TestStockRecommendationModel(TestCase):
         )
     
     def test_stock_recommendation_creation(self):
-        """Stok önerisi oluşturma testi"""
+        """Stock recommendation creation test"""
         self.assertEqual(self.stock_recommendation.product, self.product)
         self.assertEqual(self.stock_recommendation.recommendation_type, 'RESTOCK')
         self.assertEqual(self.stock_recommendation.suggested_quantity, 30)
@@ -589,16 +589,16 @@ class TestStockRecommendationModel(TestCase):
         self.assertIsNone(self.stock_recommendation.applied_at)
     
     def test_stock_recommendation_str_representation(self):
-        """StockRecommendation __str__ metodu testi"""
+        """StockRecommendation __str__ method test"""
         expected = f"{self.product.product_name} - Restock Recommendation"
         self.assertEqual(str(self.stock_recommendation), expected)
 
 
 class TestModelRelationships(TestCase):
-    """Model ilişkileri testleri"""
+    """Model relationships tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_relationships_main",
             email="test_relationships_main@example.com",
@@ -627,27 +627,27 @@ class TestModelRelationships(TestCase):
         )
     
     def test_category_subcategory_relationship(self):
-        """Kategori-alt kategori ilişkisi testi"""
+        """Category-subcategory relationship test"""
         self.assertEqual(self.subcategory.category, self.category)
         self.assertIn(self.subcategory, self.category.subcategories.all())
     
     def test_product_category_relationship(self):
-        """Ürün-kategori ilişkisi testi"""
+        """Product-category relationship test"""
         self.assertEqual(self.product.category, self.category)
         self.assertEqual(self.product.subcategory, self.subcategory)
     
     def test_product_organisation_relationship(self):
-        """Ürün-organizasyon ilişkisi testi"""
+        """Product-organisation relationship test"""
         self.assertEqual(self.product.organisation, self.user_profile)
     
     def test_cascade_deletion(self):
-        """Cascade silme testleri"""
-        # Kategori silinince alt kategoriler de silinmeli
+        """Cascade deletion tests"""
+        # When category is deleted, subcategories should also be deleted
         category_id = self.category.id
         self.category.delete()
         self.assertFalse(SubCategory.objects.filter(category_id=category_id).exists())
         
-        # Ürün silinince ilgili kayıtlar da silinmeli
+        # When product is deleted, related records should also be deleted
         product_id = self.product.id
         self.product.delete()
         self.assertFalse(StockMovement.objects.filter(product_id=product_id).exists())
@@ -655,9 +655,9 @@ class TestModelRelationships(TestCase):
 
 
 if __name__ == "__main__":
-    print("ProductsAndStock Modelleri Testleri Başlatılıyor...")
+    print("Starting ProductsAndStock Models Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

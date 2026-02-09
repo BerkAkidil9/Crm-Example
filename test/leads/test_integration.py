@@ -1,6 +1,6 @@
 """
-Leads Integration Test Dosyası
-Bu dosya Leads modülündeki entegrasyon testlerini içerir.
+Leads Integration Test File
+This file contains integration tests for the Leads module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.core import mail
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -25,13 +25,13 @@ User = get_user_model()
 
 
 class TestLeadWorkflowIntegration(TestCase):
-    """Lead workflow entegrasyon testleri"""
+    """Lead workflow integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='workflow_organisor',
             email='workflow_organisor@example.com',
@@ -49,7 +49,7 @@ class TestLeadWorkflowIntegration(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='workflow_agent',
             email='workflow_agent@example.com',
@@ -68,7 +68,7 @@ class TestLeadWorkflowIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -80,8 +80,8 @@ class TestLeadWorkflowIntegration(TestCase):
         )
     
     def test_complete_lead_workflow(self):
-        """Tam lead workflow testi"""
-        # 1. Lead oluştur
+        """Complete lead workflow test"""
+        # 1. Create lead
         lead_data = {
             'first_name': 'John',
             'last_name': 'Doe',
@@ -100,21 +100,21 @@ class TestLeadWorkflowIntegration(TestCase):
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('leads:lead-create'), data=lead_data)
             
-            # Lead oluşturulmuş olmalı
+            # Lead should have been created
             self.assertEqual(response.status_code, 302)
             self.assertTrue(Lead.objects.filter(email='john.doe@example.com').exists())
             
-            # Email gönderilmiş olmalı
+            # Email should have been sent
             mock_send_mail.assert_called_once()
         
-        # 2. Lead'i görüntüle
+        # 2. View lead
         lead = Lead.objects.get(email='john.doe@example.com')
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': lead.pk}))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_detail.html')
         
-        # 3. Lead'i güncelle
+        # 3. Update lead
         update_data = {
             'first_name': 'John',
             'last_name': 'Doe',
@@ -130,22 +130,22 @@ class TestLeadWorkflowIntegration(TestCase):
         
         response = self.client.post(reverse('leads:lead-update', kwargs={'pk': lead.pk}), data=update_data)
         
-        # Lead güncellenmiş olmalı
+        # Lead should have been updated
         self.assertEqual(response.status_code, 302)
         lead.refresh_from_db()
         self.assertEqual(lead.age, 31)
         self.assertEqual(lead.address, '456 Updated Street')
         
-        # 4. Lead'i sil
+        # 4. Delete lead
         response = self.client.post(reverse('leads:lead-delete', kwargs={'pk': lead.pk}))
         
-        # Lead silinmiş olmalı
+        # Lead should have been deleted
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Lead.objects.filter(pk=lead.pk).exists())
     
     def test_lead_assignment_workflow(self):
-        """Lead atama workflow testi"""
-        # Lead oluştur (agent olmadan)
+        """Lead assignment workflow test"""
+        # Create lead (without agent)
         lead = Lead.objects.create(
             first_name='Jane',
             last_name='Smith',
@@ -157,20 +157,20 @@ class TestLeadWorkflowIntegration(TestCase):
             address='789 Unassigned Street'
         )
         
-        # Lead'i agent'a ata
+        # Assign lead to agent
         self.client.force_login(self.organisor_user)
         response = self.client.post(reverse('leads:assign-agent', kwargs={'pk': lead.pk}), {
             'agent': self.agent.id
         })
         
-        # Lead agent'a atanmış olmalı
+        # Lead should have been assigned to agent
         self.assertEqual(response.status_code, 302)
         lead.refresh_from_db()
         self.assertEqual(lead.agent, self.agent)
     
     def test_lead_category_update_workflow(self):
-        """Lead kategori güncelleme workflow testi"""
-        # Lead oluştur
+        """Lead category update workflow test"""
+        # Create lead
         lead = Lead.objects.create(
             first_name='Bob',
             last_name='Johnson',
@@ -183,7 +183,7 @@ class TestLeadWorkflowIntegration(TestCase):
             address='321 Category Street'
         )
         
-        # Yeni kategoriler oluştur
+        # Create new categories
         new_source_category = SourceCategory.objects.create(
             name="Social Media",
             organisation=self.organisor_profile
@@ -194,14 +194,14 @@ class TestLeadWorkflowIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Lead kategorilerini güncelle
+        # Update lead categories
         self.client.force_login(self.organisor_user)
         response = self.client.post(reverse('leads:lead-category-update', kwargs={'pk': lead.pk}), {
             'source_category': new_source_category.id,
             'value_category': new_value_category.id
         })
         
-        # Lead kategorileri güncellenmiş olmalı
+        # Lead categories should have been updated
         self.assertEqual(response.status_code, 302)
         lead.refresh_from_db()
         self.assertEqual(lead.source_category, new_source_category)
@@ -209,10 +209,10 @@ class TestLeadWorkflowIntegration(TestCase):
 
 
 class TestUserRegistrationWorkflow(TestCase):
-    """Kullanıcı kayıt workflow testleri"""
+    """User registration workflow tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.valid_data = {
@@ -229,41 +229,41 @@ class TestUserRegistrationWorkflow(TestCase):
         }
     
     def test_complete_registration_workflow(self):
-        """Tam kayıt workflow testi"""
-        # 1. Kayıt ol
+        """Complete registration workflow test"""
+        # 1. Sign up
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('signup'), data=self.valid_data)
             
-            # Kayıt başarılı olmalı
+            # Registration should succeed
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.url, reverse('verify-email-sent'))
             
-            # User oluşturulmuş olmalı
+            # User should have been created
             self.assertTrue(User.objects.filter(username='newuser').exists())
             
-            # UserProfile oluşturulmuş olmalı
+            # UserProfile should have been created
             user = User.objects.get(username='newuser')
             self.assertTrue(UserProfile.objects.filter(user=user).exists())
             
-            # Organisor oluşturulmuş olmalı
+            # Organisor should have been created
             self.assertTrue(Organisor.objects.filter(user=user).exists())
             
-            # Email doğrulama token'ı oluşturulmuş olmalı
+            # Email verification token should have been created
             self.assertTrue(EmailVerificationToken.objects.filter(user=user).exists())
             
-            # Email gönderilmiş olmalı
+            # Email should have been sent
             mock_send_mail.assert_called_once()
         
-        # 2. Email doğrulama sayfasını görüntüle
+        # 2. View email verification page
         response = self.client.get(reverse('verify-email-sent'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/verify_email_sent.html')
         
-        # 3. Email doğrula
+        # 3. Verify email
         token = EmailVerificationToken.objects.get(user=user)
         response = self.client.get(reverse('verify-email', kwargs={'token': token.token}))
         
-        # Email doğrulanmış olmalı
+        # Email should be verified
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('verify-email-success'))
         
@@ -273,52 +273,52 @@ class TestUserRegistrationWorkflow(TestCase):
         token.refresh_from_db()
         self.assertTrue(token.is_used)
         
-        # 4. Giriş yap
+        # 4. Log in
         response = self.client.post(reverse('login'), {
             'username': 'newuser',
             'password': 'testpass123!'
         })
         
-        # Giriş başarılı olmalı
+        # Login should succeed
         self.assertEqual(response.status_code, 302)
     
     def test_registration_with_existing_email(self):
-        """Mevcut email ile kayıt testi"""
-        # Önce bir kullanıcı oluştur
+        """Registration with existing email test"""
+        # Create a user first
         User.objects.create_user(
             username='existinguser',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı email ile kayıt olmaya çalış
+        # Try to register with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
         response = self.client.post(reverse('signup'), data=data)
         
-        # Form hatalı olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/signup.html')
         self.assertFalse(response.context['form'].is_valid())
         self.assertIn('email', response.context['form'].errors)
     
     def test_registration_with_existing_username(self):
-        """Mevcut kullanıcı adı ile kayıt testi"""
-        # Önce bir kullanıcı oluştur
+        """Registration with existing username test"""
+        # Create a user first
         User.objects.create_user(
             username='existinguser',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı kullanıcı adı ile kayıt olmaya çalış
+        # Try to register with same username
         data = self.valid_data.copy()
         data['username'] = 'existinguser'
         
         response = self.client.post(reverse('signup'), data=data)
         
-        # Form hatalı olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/signup.html')
         self.assertFalse(response.context['form'].is_valid())
@@ -326,13 +326,13 @@ class TestUserRegistrationWorkflow(TestCase):
 
 
 class TestLeadPermissionIntegration(TestCase):
-    """Lead izin entegrasyon testleri"""
+    """Lead permission integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='permission_organisor',
             email='permission_organisor@example.com',
@@ -350,7 +350,7 @@ class TestLeadPermissionIntegration(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='permission_agent',
             email='permission_agent@example.com',
@@ -369,7 +369,7 @@ class TestLeadPermissionIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Lead oluştur
+        # Create lead
         self.lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -383,66 +383,66 @@ class TestLeadPermissionIntegration(TestCase):
         )
     
     def test_organisor_permissions(self):
-        """Organisor izinleri testi"""
+        """Organisor permissions test"""
         self.client.force_login(self.organisor_user)
         
-        # Lead listesi görüntüleme
+        # View lead list
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Lead detayı görüntüleme
+        # View lead detail
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': self.lead.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Lead oluşturma
+        # Create leadma
         response = self.client.get(reverse('leads:lead-create'))
         self.assertEqual(response.status_code, 200)
         
-        # Lead güncelleme
+        # Update lead
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Lead silme
+        # Delete lead
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Agent atama
+        # Assign agent
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_agent_permissions(self):
-        """Agent izinleri testi"""
+        """Agent permissions test"""
         self.client.force_login(self.agent_user)
         
-        # Lead listesi görüntüleme (sadece kendi lead'leri)
+        # View lead list (only own leads)
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Lead detayı görüntüleme (sadece kendi lead'leri)
-        # Lead setUp'ta zaten agent'a atanmış
+        # View lead detail (only own leads)
+        # Lead is already assigned to agent in setUp
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': self.lead.pk}))
-        # Agent view queryset'i bazen 404 dönebilir - kabul edilebilir
+        # Agent view queryset may sometimes return 404 - acceptable
         self.assertIn(response.status_code, [200, 404])
         
-        # Lead oluşturma (yasak - redirect veya form)
+        # Create lead (forbidden - redirect or form)
         response = self.client.get(reverse('leads:lead-create'))
         self.assertIn(response.status_code, [200, 302])
         
-        # Lead güncelleme (yasak - redirect veya 404)
+        # Update lead (forbidden - redirect or 404)
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
         self.assertIn(response.status_code, [200, 302, 404])
         
-        # Lead silme (yasak - redirect veya 404)
+        # Delete lead (forbidden - redirect or 404)
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         self.assertIn(response.status_code, [200, 302, 404])
         
-        # Agent atama (yasak - redirect veya form)
+        # Assign agent (yasak - redirect veya form)
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         self.assertIn(response.status_code, [200, 302, 404])
     
     def test_unauthenticated_permissions(self):
-        """Giriş yapmamış kullanıcı izinleri testi"""
-        # Tüm lead işlemleri yasak
+        """Unauthenticated user permissions test"""
+        # All lead operations forbidden
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 302)
         
@@ -463,13 +463,13 @@ class TestLeadPermissionIntegration(TestCase):
 
 
 class TestLeadFormIntegration(TestCase):
-    """Lead form entegrasyon testleri"""
+    """Lead form integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='form_integration_organisor',
             email='form_integration_organisor@example.com',
@@ -487,7 +487,7 @@ class TestLeadFormIntegration(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='form_integration_agent',
             email='form_integration_agent@example.com',
@@ -506,7 +506,7 @@ class TestLeadFormIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -518,7 +518,7 @@ class TestLeadFormIntegration(TestCase):
         )
     
     def test_lead_form_with_valid_data(self):
-        """Geçerli veri ile lead form testi"""
+        """Lead form with valid data test"""
         self.client.force_login(self.organisor_user)
         
         valid_data = {
@@ -537,34 +537,34 @@ class TestLeadFormIntegration(TestCase):
         with patch('leads.views.send_mail'):
             response = self.client.post(reverse('leads:lead-create'), data=valid_data)
             
-            # Form geçerli olmalı ve lead oluşturulmalı
+            # Form should be valid and lead should be created
             self.assertEqual(response.status_code, 302)
             self.assertTrue(Lead.objects.filter(email='john.doe@example.com').exists())
     
     def test_lead_form_with_invalid_data(self):
-        """Geçersiz veri ile lead form testi"""
+        """Lead form with invalid data test"""
         self.client.force_login(self.organisor_user)
         
         invalid_data = {
-            'first_name': '',  # Boş alan
+            'first_name': '',  # Empty field
             'last_name': 'Doe',
             'age': 30,
             'description': 'Invalid lead description',
             'phone_number': '+905551111111',
-            'email': 'invalid-email',  # Geçersiz email
+            'email': 'invalid-email',  # Invalid email
             'address': '123 Invalid Street'
         }
         
         response = self.client.post(reverse('leads:lead-create'), data=invalid_data)
         
-        # Form geçersiz olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_create.html')
         self.assertFalse(response.context['form'].is_valid())
     
     def test_lead_form_with_duplicate_email(self):
-        """Mükerrer email ile lead form testi"""
-        # Önce bir lead oluştur
+        """Lead form with duplicate email test"""
+        # Create a lead first
         Lead.objects.create(
             first_name='Existing',
             last_name='Lead',
@@ -584,28 +584,28 @@ class TestLeadFormIntegration(TestCase):
             'age': 30,
             'description': 'New lead description',
             'phone_number': '+905553333333',
-            'email': 'existing@example.com',  # Mükerrer email
+            'email': 'existing@example.com',  # Duplicate email
             'address': '789 New Street'
         }
         
         response = self.client.post(reverse('leads:lead-create'), data=duplicate_data)
         
-        # Form geçersiz olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_create.html')
         self.assertFalse(response.context['form'].is_valid())
         self.assertIn('email', response.context['form'].errors)
     
     def test_lead_form_queryset_filtering(self):
-        """Lead form queryset filtreleme testi"""
+        """Lead form queryset filtering test"""
         self.client.force_login(self.organisor_user)
         
         response = self.client.get(reverse('leads:lead-create'))
         
-        # Form context'inde queryset'ler doğru filtrelenmiş olmalı
+        # Querysets in form context should be filtered correctly
         form = response.context['form']
         
-        # Sadece kendi organizasyonunun agentları ve kategorileri olmalı
+        # Only own organisation's agents and categories
         self.assertEqual(
             set(form.fields['agent'].queryset),
             set(Agent.objects.filter(organisation=self.organisor_profile))
@@ -624,10 +624,10 @@ class TestEmailIntegration(TestCase):
     """Email entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Organisor oluştur
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='email_integration_organisor',
             email='email_integration_organisor@example.com',
@@ -646,7 +646,7 @@ class TestEmailIntegration(TestCase):
         )
     
     def test_lead_creation_email_sending(self):
-        """Lead oluşturma email gönderme testi"""
+        """Lead creation email sending test"""
         self.client.force_login(self.organisor_user)
         
         lead_data = {
@@ -662,17 +662,17 @@ class TestEmailIntegration(TestCase):
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('leads:lead-create'), data=lead_data)
             
-            # Email gönderilmiş olmalı
+            # Email should have been sent
             mock_send_mail.assert_called_once()
             
-            # Email parametreleri doğru mu
+            # Are email parameters correct
             call_args = mock_send_mail.call_args
             self.assertEqual(call_args[1]['subject'], 'A lead has been created')
             self.assertIn('test@test.com', call_args[1]['from_email'])
             self.assertIn('test2@test.com', call_args[1]['recipient_list'])
     
     def test_user_registration_email_sending(self):
-        """Kullanıcı kayıt email gönderme testi"""
+        """User registration email sending test"""
         registration_data = {
             'username': 'emailuser',
             'email': 'emailuser@example.com',
@@ -689,22 +689,22 @@ class TestEmailIntegration(TestCase):
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('signup'), data=registration_data)
             
-            # Email gönderimi test edilebilir ama mock bazen çalışmayabilir
-            # Django test ortamında email backend'i farklı olabilir
-            # Response başarılı olmalı (302 redirect veya 200 success)
+            # Email sending can be tested but mock may not always work
+            # In Django test environment email backend may differ
+            # Response should succeed (302 redirect or 200 success)
             self.assertIn(response.status_code, [200, 302])
             
-            # User oluşturulmuş olmalı (eğer form valid ise)
+            # User should have been created (if form valid)
             if response.status_code == 302:
                 self.assertTrue(User.objects.filter(username='emailuser').exists())
 
 
 class TestDatabaseIntegration(TestCase):
-    """Veritabanı entegrasyon testleri"""
+    """Database integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='db_integration_organisor',
             email='db_integration_organisor@example.com',
@@ -723,8 +723,8 @@ class TestDatabaseIntegration(TestCase):
         )
     
     def test_lead_cascade_deletes(self):
-        """Lead cascade delete testleri"""
-        # Agent oluştur
+        """Lead cascade delete tests"""
+        # Create agent
         agent_user = User.objects.create_user(
             username='db_agent',
             email='db_agent@example.com',
@@ -743,7 +743,7 @@ class TestDatabaseIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Lead oluştur
+        # Create lead
         lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -756,19 +756,19 @@ class TestDatabaseIntegration(TestCase):
             address='123 Test Street'
         )
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # Lead da silinmeli
+        # Lead should also be deleted
         self.assertFalse(Lead.objects.filter(pk=lead.pk).exists())
         self.assertFalse(Agent.objects.filter(pk=agent.pk).exists())
         self.assertFalse(UserProfile.objects.filter(pk=self.organisor_profile.pk).exists())
-        # User silme işlemi cascade delete yapmıyor, manuel kontrol et
+        # User delete does not cascade, check manually
         # self.assertFalse(User.objects.filter(pk=self.organisor_user.pk).exists())
     
     def test_lead_default_categories_creation(self):
-        """Lead default kategoriler oluşturma testi"""
-        # Lead oluştur (kategoriler olmadan)
+        """Lead default categories creation test"""
+        # Create lead (without categories)
         lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -780,19 +780,19 @@ class TestDatabaseIntegration(TestCase):
             address='123 Test Street'
         )
         
-        # Default kategoriler oluşturulmuş olmalı
+        # Default categories should have been created
         self.assertIsNotNone(lead.category)
         self.assertIsNotNone(lead.source_category)
         self.assertIsNotNone(lead.value_category)
         
-        # "Unassigned" kategorileri oluşturulmuş olmalı
+        # "Unassigned" categories should have been created
         self.assertEqual(lead.category.name, "Unassigned")
         self.assertEqual(lead.source_category.name, "Unassigned")
         self.assertEqual(lead.value_category.name, "Unassigned")
     
     def test_user_profile_auto_creation(self):
-        """UserProfile otomatik oluşturma testi"""
-        # Yeni user oluştur
+        """UserProfile auto creation test"""
+        # Create new user
         new_user = User.objects.create_user(
             username='new_user',
             email='new_user@example.com',
@@ -806,18 +806,18 @@ class TestDatabaseIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile otomatik oluşturulmuş olmalı
+        # UserProfile should have been created automatically
         self.assertTrue(UserProfile.objects.filter(user=new_user).exists())
         
-        # UserProfile doğru user'a ait olmalı
+        # UserProfile should belong to correct user
         user_profile = UserProfile.objects.get(user=new_user)
         self.assertEqual(user_profile.user, new_user)
 
 
 if __name__ == "__main__":
-    print("Leads Integration Testleri Başlatılıyor...")
+    print("Starting Leads Integration Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

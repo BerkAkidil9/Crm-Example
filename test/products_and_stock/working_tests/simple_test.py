@@ -1,5 +1,5 @@
 """
-Basit test dosyası - ProductsAndStock modülü için temel testler
+Simple test file - Basic tests for ProductsAndStock module
 """
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -9,43 +9,43 @@ from ProductsAndStock.models import Category, SubCategory, ProductsAndStock
 User = get_user_model()
 
 class SimpleProductsAndStockTest(TestCase):
-    """Basit ProductsAndStock testleri"""
+    """Simple ProductsAndStock tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Kullanıcı oluştur
+        """Set up test data"""
+        # Create user
         self.user = User.objects.create_user(
             username="testuser_simple",
             email="test_simple@example.com",
             password="testpass123"
         )
         
-        # UserProfile oluştur (get_or_create kullan)
+        # Create UserProfile (using get_or_create)
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Kategori oluştur
+        # Create category
         self.category = Category.objects.create(
             name="Test Category"
         )
         
-        # Alt kategori oluştur
+        # Create subcategory
         self.subcategory = SubCategory.objects.create(
             name="Test SubCategory",
             category=self.category
         )
     
     def test_category_creation(self):
-        """Kategori oluşturma testi"""
+        """Category creation test"""
         self.assertEqual(self.category.name, "Test Category")
         # Category modelinde organisation alanı yok
     
     def test_subcategory_creation(self):
-        """Alt kategori oluşturma testi"""
+        """Subcategory creation test"""
         self.assertEqual(self.subcategory.name, "Test SubCategory")
         self.assertEqual(self.subcategory.category, self.category)
     
     def test_product_creation(self):
-        """Ürün oluşturma testi"""
+        """Product creation test"""
         product = ProductsAndStock.objects.create(
             product_name="Test Product",
             product_description="Test Description",
@@ -66,7 +66,7 @@ class SimpleProductsAndStockTest(TestCase):
         self.assertEqual(product.organisation, self.user_profile)
     
     def test_product_properties(self):
-        """Ürün property'leri testi"""
+        """Product properties test"""
         product = ProductsAndStock.objects.create(
             product_name="Test Product 2",
             product_description="Test Description 2",
@@ -79,19 +79,19 @@ class SimpleProductsAndStockTest(TestCase):
             organisation=self.user_profile
         )
         
-        # Total value testi
+        # Total value test
         expected_total_value = product.product_price * product.product_quantity
         self.assertEqual(product.total_value, expected_total_value)
         
-        # Profit margin testi
+        # Profit margin test
         expected_profit_margin = product.product_price - product.cost_price
         self.assertEqual(product.profit_margin_amount, expected_profit_margin)
         
-        # Stock status testi
+        # Stock status test
         self.assertFalse(product.is_low_stock)  # 10 > 5 (minimum_stock_level)
     
     def test_product_str_representation(self):
-        """Ürün __str__ metodu testi"""
+        """Product __str__ method test"""
         product = ProductsAndStock.objects.create(
             product_name="Test Product 3",
             product_description="Test Description 3",
@@ -104,5 +104,5 @@ class SimpleProductsAndStockTest(TestCase):
             organisation=self.user_profile
         )
         
-        expected_str = product.product_name  # ProductsAndStock __str__ sadece product_name döndürüyor
+        expected_str = product.product_name  # ProductsAndStock __str__ returns only product_name
         self.assertEqual(str(product), expected_str)

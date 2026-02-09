@@ -21,7 +21,7 @@ from leads.models import User, UserProfile
 
 
 class TestProductAndStockModelForm(TestCase):
-    """ProductAndStockModelForm testleri"""
+    """ProductAndStockModelForm tests"""
     
     def setUp(self):
         """Test verilerini hazırla"""
@@ -55,10 +55,10 @@ class TestProductAndStockModelForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = ProductAndStockModelForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('product_name', form.fields)
         self.assertIn('product_description', form.fields)
         self.assertIn('product_price', form.fields)
@@ -73,12 +73,12 @@ class TestProductAndStockModelForm(TestCase):
         self.assertIn('discount_end_date', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = ProductAndStockModelForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
+        """Required fields test"""
         required_fields = [
             'product_name', 'product_description', 'product_price',
             'cost_price', 'product_quantity', 'minimum_stock_level',
@@ -94,8 +94,8 @@ class TestProductAndStockModelForm(TestCase):
             self.assertIn(field, form.errors)
     
     def test_form_product_name_validation(self):
-        """Ürün adı validasyonu testi"""
-        # Aynı organizasyon altında aynı isimde ürün oluştur
+        """Product name validation test"""
+        # Create product with same name under same organisation
         ProductsAndStock.objects.create(
             product_name='iPhone 15',
             product_description='Existing product',
@@ -108,7 +108,7 @@ class TestProductAndStockModelForm(TestCase):
             organisation=self.user_profile
         )
         
-        # Aynı isimde ürün oluşturmaya çalış
+        # Try to create product with same name
         form = ProductAndStockModelForm(data=self.valid_data)
         form.user_organisation = self.user_profile
         self.assertFalse(form.is_valid())
@@ -116,8 +116,8 @@ class TestProductAndStockModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['product_name']))
     
     def test_form_subcategory_validation(self):
-        """Alt kategori validasyonu testi"""
-        # Farklı kategoride alt kategori oluştur
+        """Subcategory validation test"""
+        # Create subcategory under different category
         other_category = Category.objects.create(name="Books")
         other_subcategory = SubCategory.objects.create(
             name="Fiction",
@@ -129,27 +129,27 @@ class TestProductAndStockModelForm(TestCase):
         
         form = ProductAndStockModelForm(data=data)
         self.assertFalse(form.is_valid())
-        # Form validasyonu subcategory seviyesinde hata veriyor
+        # Form validation gives error at subcategory level
         self.assertIn('subcategory', form.errors)
         self.assertIn('valid choice', str(form.errors['subcategory']))
     
     def test_form_dynamic_subcategory_queryset(self):
-        """Dinamik alt kategori queryset testi"""
-        # Form verisi ile kategori seçildiğinde
+        """Dynamic subcategory queryset test"""
+        # When category is selected with form data
         form_data = {
             'category': self.category.id,
             'subcategory': self.subcategory.id,
         }
         form = ProductAndStockModelForm(data=form_data)
         
-        # Alt kategoriler doğru filtrelenmiş mi
+        # Are subcategories filtered correctly
         self.assertEqual(
             list(form.fields['subcategory'].queryset),
             list(SubCategory.objects.filter(category=self.category))
         )
     
     def test_form_instance_with_category(self):
-        """Mevcut instance ile kategori testi"""
+        """Category test with existing instance"""
         product = ProductsAndStock.objects.create(
             product_name='Test Product',
             product_description='Test Description',
@@ -164,17 +164,17 @@ class TestProductAndStockModelForm(TestCase):
         
         form = ProductAndStockModelForm(instance=product)
         
-        # Alt kategoriler doğru filtrelenmiş mi
+        # Are subcategories filtered correctly
         self.assertEqual(
             list(form.fields['subcategory'].queryset),
             list(SubCategory.objects.filter(category=self.category))
         )
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget features test"""
         form = ProductAndStockModelForm()
         
-        # CSS sınıfları kontrol et
+        # Check CSS classes
         self.assertIn('form-control', str(form['product_name'].as_widget()))
         self.assertIn('form-control', str(form['product_description'].as_widget()))
         self.assertIn('form-control', str(form['product_price'].as_widget()))
@@ -187,10 +187,10 @@ class TestProductAndStockModelForm(TestCase):
         self.assertIn('form-control', str(form['discount_amount'].as_widget()))
     
     def test_form_placeholder_attributes(self):
-        """Placeholder özellikleri testi"""
+        """Placeholder features test"""
         form = ProductAndStockModelForm()
         
-        # Placeholder kontrol et
+        # Check placeholder
         self.assertIn('placeholder="Product Name"', str(form['product_name'].as_widget()))
         self.assertIn('placeholder="Product Description"', str(form['product_description'].as_widget()))
         self.assertIn('placeholder="0.00"', str(form['product_price'].as_widget()))
@@ -199,25 +199,25 @@ class TestProductAndStockModelForm(TestCase):
         self.assertIn('placeholder="0"', str(form['minimum_stock_level'].as_widget()))
     
     def test_form_step_attributes(self):
-        """Step özellikleri testi"""
+        """Step features test"""
         form = ProductAndStockModelForm()
         
-        # Step kontrol et
+        # Check step
         self.assertIn('step="0.01"', str(form['product_price'].as_widget()))
         self.assertIn('step="0.01"', str(form['cost_price'].as_widget()))
         self.assertIn('step="0.01"', str(form['discount_percentage'].as_widget()))
         self.assertIn('step="0.01"', str(form['discount_amount'].as_widget()))
     
     def test_form_max_attributes(self):
-        """Max özellikleri testi"""
+        """Max features test"""
         form = ProductAndStockModelForm()
         
-        # Max kontrol et
+        # Check max
         self.assertIn('max="100"', str(form['discount_percentage'].as_widget()))
 
 
 class TestAdminProductAndStockModelForm(TestCase):
-    """AdminProductAndStockModelForm testleri"""
+    """AdminProductAndStockModelForm tests"""
     
     def setUp(self):
         """Test verilerini hazırla"""
@@ -252,7 +252,7 @@ class TestAdminProductAndStockModelForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = AdminProductAndStockModelForm()
         
         # Admin formunda organisation alanı olmalı
@@ -262,12 +262,12 @@ class TestAdminProductAndStockModelForm(TestCase):
         self.assertIn('subcategory', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = AdminProductAndStockModelForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
     def test_form_organisation_queryset(self):
-        """Organisation queryset testi"""
+        """Organisation queryset test"""
         form = AdminProductAndStockModelForm()
         
         # Sadece organisor kullanıcıların profilleri olmalı
@@ -281,8 +281,8 @@ class TestAdminProductAndStockModelForm(TestCase):
         )
     
     def test_form_product_name_validation(self):
-        """Ürün adı validasyonu testi"""
-        # Aynı organizasyon altında aynı isimde ürün oluştur
+        """Product name validation test"""
+        # Create product with same name under same organisation
         ProductsAndStock.objects.create(
             product_name='iPhone 15',
             product_description='Existing product',
@@ -295,15 +295,15 @@ class TestAdminProductAndStockModelForm(TestCase):
             organisation=self.user_profile
         )
         
-        # Aynı isimde ürün oluşturmaya çalış
+        # Try to create product with same name
         form = AdminProductAndStockModelForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
         self.assertIn('__all__', form.errors)
         self.assertIn('already exists', str(form.errors['__all__']))
     
     def test_form_subcategory_validation(self):
-        """Alt kategori validasyonu testi"""
-        # Farklı kategoride alt kategori oluştur
+        """Subcategory validation test"""
+        # Create subcategory under different category
         other_category = Category.objects.create(name="Books")
         other_subcategory = SubCategory.objects.create(
             name="Fiction",
@@ -315,27 +315,27 @@ class TestAdminProductAndStockModelForm(TestCase):
         
         form = AdminProductAndStockModelForm(data=data)
         self.assertFalse(form.is_valid())
-        # Form validasyonu subcategory seviyesinde hata veriyor
+        # Form validation gives error at subcategory level
         self.assertIn('subcategory', form.errors)
         self.assertIn('valid choice', str(form.errors['subcategory']))
     
     def test_form_dynamic_subcategory_queryset(self):
-        """Dinamik alt kategori queryset testi"""
-        # Form verisi ile kategori seçildiğinde
+        """Dynamic subcategory queryset test"""
+        # When category is selected with form data
         form_data = {
             'category': self.category.id,
             'subcategory': self.subcategory.id,
         }
         form = AdminProductAndStockModelForm(data=form_data)
         
-        # Alt kategoriler doğru filtrelenmiş mi
+        # Are subcategories filtered correctly
         self.assertEqual(
             list(form.fields['subcategory'].queryset),
             list(SubCategory.objects.filter(category=self.category))
         )
     
     def test_form_instance_with_category(self):
-        """Mevcut instance ile kategori testi"""
+        """Category test with existing instance"""
         product = ProductsAndStock.objects.create(
             product_name='Test Product',
             product_description='Test Description',
@@ -350,7 +350,7 @@ class TestAdminProductAndStockModelForm(TestCase):
         
         form = AdminProductAndStockModelForm(instance=product)
         
-        # Alt kategoriler doğru filtrelenmiş mi
+        # Are subcategories filtered correctly
         self.assertEqual(
             list(form.fields['subcategory'].queryset),
             list(SubCategory.objects.filter(category=self.category))
@@ -358,7 +358,7 @@ class TestAdminProductAndStockModelForm(TestCase):
 
 
 class TestBulkPriceUpdateForm(TestCase):
-    """BulkPriceUpdateForm testleri"""
+    """BulkPriceUpdateForm tests"""
     
     def setUp(self):
         """Test verilerini hazırla"""
@@ -376,10 +376,10 @@ class TestBulkPriceUpdateForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = BulkPriceUpdateForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('update_type', form.fields)
         self.assertIn('category_filter', form.fields)
         self.assertIn('category', form.fields)
@@ -392,12 +392,12 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('reason', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = BulkPriceUpdateForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
     def test_form_update_type_choices(self):
-        """Update type seçenekleri testi"""
+        """Update type options test"""
         form = BulkPriceUpdateForm()
         
         expected_choices = [
@@ -411,7 +411,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertEqual(form.fields['update_type'].choices, expected_choices)
     
     def test_form_category_filter_choices(self):
-        """Category filter seçenekleri testi"""
+        """Category filter options test"""
         form = BulkPriceUpdateForm()
         
         expected_choices = [
@@ -423,7 +423,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertEqual(form.fields['category_filter'].choices, expected_choices)
     
     def test_form_percentage_increase_validation(self):
-        """Yüzde artış validasyonu testi"""
+        """Percentage increase validation test"""
         data = {
             'update_type': 'PERCENTAGE_INCREASE',
             'category_filter': 'ALL',
@@ -436,7 +436,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('required', str(form.errors['__all__']))
     
     def test_form_percentage_decrease_validation(self):
-        """Yüzde azalış validasyonu testi"""
+        """Percentage decrease validation test"""
         data = {
             'update_type': 'PERCENTAGE_DECREASE',
             'category_filter': 'ALL',
@@ -449,7 +449,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('required', str(form.errors['__all__']))
     
     def test_form_fixed_amount_increase_validation(self):
-        """Sabit miktar artış validasyonu testi"""
+        """Fixed amount increase validation test"""
         data = {
             'update_type': 'FIXED_AMOUNT_INCREASE',
             'category_filter': 'ALL',
@@ -462,7 +462,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('required', str(form.errors['__all__']))
     
     def test_form_fixed_amount_decrease_validation(self):
-        """Sabit miktar azalış validasyonu testi"""
+        """Fixed amount decrease validation test"""
         data = {
             'update_type': 'FIXED_AMOUNT_DECREASE',
             'category_filter': 'ALL',
@@ -475,7 +475,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('required', str(form.errors['__all__']))
     
     def test_form_set_price_validation(self):
-        """Yeni fiyat belirleme validasyonu testi"""
+        """New price setting validation test"""
         data = {
             'update_type': 'SET_PRICE',
             'category_filter': 'ALL',
@@ -488,7 +488,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('required', str(form.errors['__all__']))
     
     def test_form_percentage_increase_valid(self):
-        """Yüzde artış geçerli veri testi"""
+        """Percentage increase valid data test"""
         data = {
             'update_type': 'PERCENTAGE_INCREASE',
             'category_filter': 'ALL',
@@ -500,7 +500,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_percentage_decrease_valid(self):
-        """Yüzde azalış geçerli veri testi"""
+        """Percentage decrease valid data test"""
         data = {
             'update_type': 'PERCENTAGE_DECREASE',
             'category_filter': 'ALL',
@@ -512,7 +512,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_fixed_amount_increase_valid(self):
-        """Sabit miktar artış geçerli veri testi"""
+        """Fixed amount increase valid data test"""
         data = {
             'update_type': 'FIXED_AMOUNT_INCREASE',
             'category_filter': 'ALL',
@@ -524,7 +524,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_fixed_amount_decrease_valid(self):
-        """Sabit miktar azalış geçerli veri testi"""
+        """Fixed amount decrease valid data test"""
         data = {
             'update_type': 'FIXED_AMOUNT_DECREASE',
             'category_filter': 'ALL',
@@ -536,7 +536,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_set_price_valid(self):
-        """Yeni fiyat belirleme geçerli veri testi"""
+        """New price setting valid data test"""
         data = {
             'update_type': 'SET_PRICE',
             'category_filter': 'ALL',
@@ -548,7 +548,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_category_filter_category(self):
-        """Kategori filtresi ile form testi"""
+        """Form test with category filter"""
         data = {
             'update_type': 'PERCENTAGE_INCREASE',
             'category_filter': 'CATEGORY',
@@ -561,7 +561,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_category_filter_subcategory(self):
-        """Alt kategori filtresi ile form testi"""
+        """Form test with subcategory filter"""
         data = {
             'update_type': 'PERCENTAGE_INCREASE',
             'category_filter': 'SUBCATEGORY',
@@ -580,10 +580,10 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget features test"""
         form = BulkPriceUpdateForm()
         
-        # CSS sınıfları kontrol et
+        # Check CSS classes
         self.assertIn('form-control', str(form['update_type'].as_widget()))
         self.assertIn('form-control', str(form['category_filter'].as_widget()))
         self.assertIn('form-control', str(form['category'].as_widget()))
@@ -596,10 +596,10 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('form-control', str(form['reason'].as_widget()))
     
     def test_form_placeholder_attributes(self):
-        """Placeholder özellikleri testi"""
+        """Placeholder features test"""
         form = BulkPriceUpdateForm()
         
-        # Placeholder kontrol et
+        # Check placeholder
         self.assertIn('placeholder="0"', str(form['percentage_increase'].as_widget()))
         self.assertIn('placeholder="0"', str(form['percentage_decrease'].as_widget()))
         self.assertIn('placeholder="0.00"', str(form['fixed_amount_increase'].as_widget()))
@@ -608,10 +608,10 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('placeholder="Reason for price update"', str(form['reason'].as_widget()))
     
     def test_form_step_attributes(self):
-        """Step özellikleri testi"""
+        """Step features test"""
         form = BulkPriceUpdateForm()
         
-        # Step kontrol et
+        # Check step
         self.assertIn('step="0.01"', str(form['percentage_increase'].as_widget()))
         self.assertIn('step="0.01"', str(form['percentage_decrease'].as_widget()))
         self.assertIn('step="0.01"', str(form['fixed_amount_increase'].as_widget()))
@@ -619,23 +619,23 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('step="0.01"', str(form['new_price'].as_widget()))
     
     def test_form_min_max_attributes(self):
-        """Min/Max özellikleri testi"""
+        """Min/Max features test"""
         form = BulkPriceUpdateForm()
         
-        # Min kontrol et
+        # Check min
         self.assertIn('min="0"', str(form['percentage_increase'].as_widget()))
         self.assertIn('min="0"', str(form['percentage_decrease'].as_widget()))
         self.assertIn('min="0"', str(form['fixed_amount_increase'].as_widget()))
         self.assertIn('min="0"', str(form['fixed_amount_decrease'].as_widget()))
         self.assertIn('min="0"', str(form['new_price'].as_widget()))
         
-        # Max kontrol et
+        # Check max
         self.assertIn('max="1000"', str(form['percentage_increase'].as_widget()))
         self.assertIn('max="100"', str(form['percentage_decrease'].as_widget()))
 
 
 class TestFormIntegration(TestCase):
-    """Form entegrasyon testleri"""
+    """Form integration tests"""
     
     def setUp(self):
         """Test verilerini hazırla"""
@@ -656,7 +656,7 @@ class TestFormIntegration(TestCase):
         )
     
     def test_form_save_product(self):
-        """Form ile ürün kaydetme testi"""
+        """Form product save test"""
         data = {
             'product_name': 'Test Product',
             'product_description': 'Test Description',
@@ -679,7 +679,7 @@ class TestFormIntegration(TestCase):
         product.organisation = self.user_profile
         product.save()
         
-        # Ürün kaydedildi mi kontrol et
+        # Check if product was saved
         self.assertTrue(ProductsAndStock.objects.filter(product_name='Test Product').exists())
         
         saved_product = ProductsAndStock.objects.get(product_name='Test Product')
@@ -691,8 +691,8 @@ class TestFormIntegration(TestCase):
         self.assertEqual(saved_product.organisation, self.user_profile)
     
     def test_form_update_product(self):
-        """Form ile ürün güncelleme testi"""
-        # Önce ürün oluştur
+        """Form product update test"""
+        # First create product
         product = ProductsAndStock.objects.create(
             product_name='Original Product',
             product_description='Original Description',
@@ -726,7 +726,7 @@ class TestFormIntegration(TestCase):
         
         updated_product = form.save()
         
-        # Ürün güncellendi mi kontrol et
+        # Check if product was updated
         self.assertEqual(updated_product.product_name, 'Updated Product')
         self.assertEqual(updated_product.product_description, 'Updated Description')
         self.assertEqual(updated_product.product_price, 149.99)
@@ -735,7 +735,7 @@ class TestFormIntegration(TestCase):
         self.assertEqual(updated_product.minimum_stock_level, 5)
     
     def test_form_validation_edge_cases(self):
-        """Form validasyon sınır durumları testi"""
+        """Form validation edge cases test"""
         # Boş ürün adı (geçersiz)
         data = {
             'product_name': '',  # Boş ürün adı
@@ -755,8 +755,8 @@ class TestFormIntegration(TestCase):
         self.assertFalse(form.is_valid())
     
     def test_form_discount_validation(self):
-        """İndirim validasyonu testi"""
-        # Geçersiz indirim yüzdesi
+        """Discount validation test"""
+        # Invalid discount percentage
         data = {
             'product_name': 'Test Product',
             'product_description': 'Test Description',
@@ -772,7 +772,7 @@ class TestFormIntegration(TestCase):
         
         form = ProductAndStockModelForm(data=data)
         form.user_organisation = self.user_profile
-        # Form validasyonu yapmıyor, model seviyesinde kontrol edilmeli
+        # Form does not validate, should be checked at model level
         # Bu test form seviyesinde geçerli olacak
         self.assertTrue(form.is_valid())
 

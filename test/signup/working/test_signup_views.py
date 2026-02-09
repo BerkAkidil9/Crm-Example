@@ -1,6 +1,6 @@
 """
-Signup Viewları Test Dosyası
-Bu dosya signup ile ilgili tüm viewları test eder.
+Signup Views Test File
+This file tests all signup-related views.
 """
 
 import os
@@ -14,7 +14,7 @@ from django.utils import timezone
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -25,10 +25,10 @@ User = get_user_model()
 
 
 class TestSignupView(TestCase):
-    """SignupView testleri"""
+    """SignupView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.valid_data = {
@@ -45,30 +45,30 @@ class TestSignupView(TestCase):
         }
     
     def test_signup_view_get(self):
-        """Signup sayfası GET isteği testi"""
+        """Signup page GET request test"""
         response = self.client.get(reverse('signup'))
         
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Sign Up')
         self.assertContains(response, 'form')
-        # CSRF token form içinde olmalı
+        # CSRF token should be in form
         self.assertContains(response, 'csrfmiddlewaretoken')
     
     @patch('leads.views.send_mail')
     def test_signup_view_post_valid_data(self, mock_send_mail):
-        """Signup POST isteği geçerli veri testi"""
+        """Signup POST request valid data test"""
         response = self.client.post(reverse('signup'), self.valid_data)
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-sent'))
         
-        # Kullanıcı oluşturuldu mu
+        # Was user created
         self.assertTrue(User.objects.filter(username='testuser_signup_views').exists())
         
         user = User.objects.get(username='testuser_signup_views')
         
-        # Kullanıcı özellikleri doğru mu
+        # Are user attributes correct
         self.assertEqual(user.email, 'test_signup_views@example.com')
         self.assertEqual(user.first_name, 'Test')
         self.assertEqual(user.last_name, 'User')
@@ -79,102 +79,102 @@ class TestSignupView(TestCase):
         self.assertFalse(user.is_agent)
         self.assertFalse(user.email_verified)
         
-        # UserProfile oluşturuldu mu
+        # Was UserProfile created
         self.assertTrue(UserProfile.objects.filter(user=user).exists())
         
-        # Organisor oluşturuldu mu
+        # Was Organisor created
         self.assertTrue(Organisor.objects.filter(user=user).exists())
         
-        # Email verification token oluşturuldu mu
+        # Was email verification token created
         self.assertTrue(EmailVerificationToken.objects.filter(user=user).exists())
         
-        # Email gönderildi mi
+        # Was email sent
         mock_send_mail.assert_called_once()
     
     def test_signup_view_post_invalid_data(self):
-        """Signup POST isteği geçersiz veri testi"""
+        """Signup POST request invalid data test"""
         invalid_data = self.valid_data.copy()
-        invalid_data['email'] = 'invalid-email'  # Geçersiz email
+        invalid_data['email'] = 'invalid-email'  # Invalid email
         
         response = self.client.post(reverse('signup'), invalid_data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Kullanıcı oluşturulmadı mı
+        # User was not created
         self.assertFalse(User.objects.filter(username='testuser_signup_views').exists())
     
     def test_signup_view_duplicate_email(self):
-        """Aynı email ile kayıt testi"""
-        # Önce bir kullanıcı oluştur
+        """Duplicate email registration test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı email ile kayıt olmaya çalış
+        # Try to register with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         data['username'] = 'different_username'
         
         response = self.client.post(reverse('signup'), data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Yeni kullanıcı oluşturulmadı mı
+        # New user was not created
         self.assertFalse(User.objects.filter(username='different_username').exists())
     
     def test_signup_view_duplicate_username(self):
-        """Aynı kullanıcı adı ile kayıt testi"""
-        # Önce bir kullanıcı oluştur
+        """Duplicate username registration test"""
+        # Create a user first
         User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı kullanıcı adı ile kayıt olmaya çalış
+        # Try to register with same username
         data = self.valid_data.copy()
         data['username'] = 'existing_user'
         data['email'] = 'different@example.com'
         
         response = self.client.post(reverse('signup'), data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Yeni kullanıcı oluşturulmadı mı
+        # New user was not created
         self.assertFalse(User.objects.filter(email='different@example.com').exists())
     
     def test_signup_view_password_mismatch(self):
-        """Şifre uyumsuzluğu testi"""
+        """Password mismatch test"""
         data = self.valid_data.copy()
         data['password1'] = 'password123!'
         data['password2'] = 'differentpassword123!'
         
         response = self.client.post(reverse('signup'), data)
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Kullanıcı oluşturulmadı mı
+        # User was not created
         self.assertFalse(User.objects.filter(username='testuser_signup_views').exists())
     
     @patch('leads.views.send_mail')
     def test_signup_view_email_sending(self, mock_send_mail):
-        """Email gönderimi testi"""
+        """Email sending test"""
         response = self.client.post(reverse('signup'), self.valid_data)
         
-        # Email gönderildi mi
+        # Was email sent
         mock_send_mail.assert_called_once()
         
-        # Email içeriği doğru mu
+        # Is email content correct
         call_args = mock_send_mail.call_args
         # send_mail positional args: subject, message, from_email, recipient_list
         self.assertEqual(call_args[0][0], 'Darkenyas CRM - Email Verification')  # subject
@@ -183,7 +183,7 @@ class TestSignupView(TestCase):
         self.assertIn('verify-email', call_args[0][1])  # message - Verification link
     
     def test_signup_view_template(self):
-        """Template testi"""
+        """Template test"""
         response = self.client.get(reverse('signup'))
         
         self.assertTemplateUsed(response, 'registration/signup.html')
@@ -192,7 +192,7 @@ class TestSignupView(TestCase):
         self.assertContains(response, 'Already have an account?')
     
     def test_signup_view_form_class(self):
-        """Form class testi"""
+        """Form class test"""
         response = self.client.get(reverse('signup'))
         
         self.assertIn('form', response.context)
@@ -200,28 +200,28 @@ class TestSignupView(TestCase):
         self.assertIsInstance(response.context['form'], CustomUserCreationForm)
     
     def test_signup_view_success_url(self):
-        """Success URL testi"""
+        """Success URL test"""
         with patch('leads.views.send_mail'):
             response = self.client.post(reverse('signup'), self.valid_data)
             self.assertRedirects(response, reverse('verify-email-sent'))
 
 
 class TestEmailVerificationSentView(TestCase):
-    """EmailVerificationSentView testleri"""
+    """EmailVerificationSentView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
     
     def test_email_verification_sent_view_get(self):
-        """Email verification sent sayfası GET isteği testi"""
+        """Email verification sent page GET request test"""
         response = self.client.get(reverse('verify-email-sent'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/verify_email_sent.html')
     
     def test_email_verification_sent_view_content(self):
-        """Email verification sent sayfası içeriği testi"""
+        """Email verification sent page content test"""
         response = self.client.get(reverse('verify-email-sent'))
         
         self.assertContains(response, 'verification')
@@ -229,13 +229,13 @@ class TestEmailVerificationSentView(TestCase):
 
 
 class TestEmailVerificationView(TestCase):
-    """EmailVerificationView testleri"""
+    """EmailVerificationView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username='verification_test_user',
             email='verification_test@example.com',
@@ -246,48 +246,48 @@ class TestEmailVerificationView(TestCase):
             email_verified=False
         )
         
-        # Email verification token oluştur
+        # Create email verification token
         self.verification_token = EmailVerificationToken.objects.create(
             user=self.user
         )
     
     def test_email_verification_valid_token(self):
-        """Geçerli token ile email doğrulama testi"""
+        """Email verification with valid token test"""
         response = self.client.get(
             reverse('verify-email', kwargs={'token': self.verification_token.token})
         )
         
-        # Verification success sayfasına yönlendirilmeli
+        # Should redirect to verification success page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-success'))
         
-        # Kullanıcı email'i doğrulandı mı
+        # Was user email verified
         updated_user = User.objects.get(pk=self.user.pk)
         self.assertTrue(updated_user.email_verified)
         
-        # Token kullanıldı olarak işaretlendi mi
+        # Was token marked as used
         updated_token = EmailVerificationToken.objects.get(pk=self.verification_token.pk)
         self.assertTrue(updated_token.is_used)
     
     def test_email_verification_invalid_token(self):
-        """Geçersiz token ile email doğrulama testi"""
+        """Email verification with invalid token test"""
         fake_token = '00000000-0000-0000-0000-000000000000'
         
         response = self.client.get(
             reverse('verify-email', kwargs={'token': fake_token})
         )
         
-        # Verification failed sayfasına yönlendirilmeli
+        # Should redirect to verification failed page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-failed'))
         
-        # Kullanıcı email'i doğrulanmadı mı
+        # User email was not verified
         updated_user = User.objects.get(pk=self.user.pk)
         self.assertFalse(updated_user.email_verified)
     
     def test_email_verification_used_token(self):
-        """Kullanılmış token ile email doğrulama testi"""
-        # Token'ı kullanılmış olarak işaretle
+        """Email verification with used token test"""
+        # Mark token as used
         self.verification_token.is_used = True
         self.verification_token.save()
         
@@ -295,17 +295,17 @@ class TestEmailVerificationView(TestCase):
             reverse('verify-email', kwargs={'token': self.verification_token.token})
         )
         
-        # Verification failed sayfasına yönlendirilmeli
+        # Should redirect to verification failed page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-failed'))
         
-        # Kullanıcı email'i doğrulanmadı mı
+        # User email was not verified
         updated_user = User.objects.get(pk=self.user.pk)
         self.assertFalse(updated_user.email_verified)
     
     def test_email_verification_expired_token(self):
-        """Süresi dolmuş token ile email doğrulama testi"""
-        # Token'ı 25 saat önce oluştur (24 saatlik süre dolmuş)
+        """Email verification with expired token test"""
+        # Create token 25 hours ago (24-hour window expired)
         expired_time = timezone.now() - timedelta(hours=25)
         self.verification_token.created_at = expired_time
         self.verification_token.save()
@@ -314,17 +314,17 @@ class TestEmailVerificationView(TestCase):
             reverse('verify-email', kwargs={'token': self.verification_token.token})
         )
         
-        # Verification failed sayfasına yönlendirilmeli
+        # Should redirect to verification failed page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-failed'))
         
-        # Kullanıcı email'i doğrulanmadı mı
+        # User email was not verified
         updated_user = User.objects.get(pk=self.user.pk)
         self.assertFalse(updated_user.email_verified)
     
     def test_email_verification_already_verified(self):
-        """Zaten doğrulanmış email testi"""
-        # Kullanıcıyı zaten doğrulanmış olarak işaretle
+        """Already verified email test"""
+        # Mark user as already verified
         self.user.email_verified = True
         self.user.save()
         
@@ -332,43 +332,43 @@ class TestEmailVerificationView(TestCase):
             reverse('verify-email', kwargs={'token': self.verification_token.token})
         )
         
-        # Yine de doğrulama işlemi gerçekleşmeli (token kullanılmış olarak işaretlenir)
+        # Verification should still complete (token marked as used)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-success'))
         
-        # Token kullanıldı olarak işaretlendi mi
+        # Was token marked as used
         updated_token = EmailVerificationToken.objects.get(pk=self.verification_token.pk)
         self.assertTrue(updated_token.is_used)
 
 
 class TestEmailVerificationFailedView(TestCase):
-    """EmailVerificationFailedView testleri"""
+    """EmailVerificationFailedView tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
     
     def test_email_verification_failed_view_get(self):
-        """Email verification failed sayfası GET isteği testi"""
+        """Email verification failed page GET request test"""
         response = self.client.get(reverse('verify-email-failed'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/verify_email_failed.html')
     
     def test_email_verification_failed_view_content(self):
-        """Email verification failed sayfası içeriği testi"""
+        """Email verification failed page content test"""
         response = self.client.get(reverse('verify-email-failed'))
         
         self.assertContains(response, 'verification')
-        # Template içeriği kontrol et
+        # Check template content
         self.assertContains(response, 'verification')
 
 
 class TestSignupIntegration(TestCase):
-    """Signup entegrasyon testleri"""
+    """Signup integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.valid_data = {
@@ -386,49 +386,49 @@ class TestSignupIntegration(TestCase):
     
     @patch('leads.views.send_mail')
     def test_complete_signup_flow(self, mock_send_mail):
-        """Tam signup akışı testi"""
-        # 1. Signup sayfasına git
+        """Complete signup flow test"""
+        # 1. Go to signup page
         response = self.client.get(reverse('signup'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Form gönder
+        # 2. Submit form
         response = self.client.post(reverse('signup'), self.valid_data)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-sent'))
         
-        # 3. Email verification sent sayfasına git
+        # 3. Go to email verification sent page
         response = self.client.get(reverse('verify-email-sent'))
         self.assertEqual(response.status_code, 200)
         
-        # 4. Kullanıcı oluşturuldu mu kontrol et
+        # 4. Check if user was created
         user = User.objects.get(username='integration_test_user')
         self.assertFalse(user.email_verified)
         
-        # 5. Email verification token oluşturuldu mu
+        # 5. Was email verification token created
         verification_token = EmailVerificationToken.objects.get(user=user)
         self.assertFalse(verification_token.is_used)
         
-        # 6. Email doğrulama linkine tıkla
+        # 6. Click email verification link
         response = self.client.get(
             reverse('verify-email', kwargs={'token': verification_token.token})
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-success'))
         
-        # 7. Kullanıcı email'i doğrulandı mı
+        # 7. Was user email verified
         updated_user = User.objects.get(pk=user.pk)
         self.assertTrue(updated_user.email_verified)
         
-        # 8. Token kullanıldı olarak işaretlendi mi
+        # 8. Was token marked as used
         updated_token = EmailVerificationToken.objects.get(pk=verification_token.pk)
         self.assertTrue(updated_token.is_used)
         
-        # 9. Email gönderildi mi
+        # 9. Was email sent
         mock_send_mail.assert_called_once()
     
     def test_signup_with_duplicate_data(self):
-        """Çakışan verilerle signup testi"""
-        # Önce bir kullanıcı oluştur
+        """Signup with conflicting data test"""
+        # Create a user first
         User.objects.create_user(
             username='duplicate_user',
             email='duplicate@example.com',
@@ -436,58 +436,58 @@ class TestSignupIntegration(TestCase):
             phone_number='+905551111111'
         )
         
-        # Aynı email ile signup olmaya çalış
+        # Try to sign up with same email
         data = self.valid_data.copy()
         data['email'] = 'duplicate@example.com'
         
         response = self.client.post(reverse('signup'), data)
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
         
-        # Aynı telefon numarası ile signup olmaya çalış
+        # Try to sign up with same phone number
         data = self.valid_data.copy()
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5551111111'
         
         response = self.client.post(reverse('signup'), data)
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
     
     def test_signup_form_validation(self):
-        """Signup form validasyon testi"""
-        # Eksik alanlar
+        """Signup form validation test"""
+        # Missing fields
         incomplete_data = {
             'username': 'test_user',
             'email': 'test@example.com',
-            # Diğer alanlar eksik
+            # Other fields missing
         }
         
         response = self.client.post(reverse('signup'), incomplete_data)
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='test_user').exists())
         
-        # Geçersiz email formatı
+        # Invalid email format
         invalid_email_data = self.valid_data.copy()
         invalid_email_data['email'] = 'invalid-email-format'
         
         response = self.client.post(reverse('signup'), invalid_email_data)
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
         
-        # Şifre uyumsuzluğu
+        # Password mismatch
         password_mismatch_data = self.valid_data.copy()
         password_mismatch_data['password1'] = 'password123!'
         password_mismatch_data['password2'] = 'differentpassword123!'
         
         response = self.client.post(reverse('signup'), password_mismatch_data)
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
 
 
 if __name__ == "__main__":
-    print("Signup View Testleri Başlatılıyor...")
+    print("Starting Signup View Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

@@ -1,6 +1,6 @@
 """
-ProductsAndStock Entegrasyon Testleri
-Bu dosya ProductsAndStock modülünün tüm bileşenlerinin birlikte çalışmasını test eder.
+ProductsAndStock Integration Tests
+This file tests all components of the ProductsAndStock module working together.
 """
 
 import os
@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -25,19 +25,19 @@ from ProductsAndStock.models import (
 from ProductsAndStock.forms import ProductAndStockModelForm, AdminProductAndStockModelForm
 from ProductsAndStock.bulk_price_form import BulkPriceUpdateForm
 from leads.models import UserProfile
-# from agents.models import Agent  # Agent modeli yok
+# from agents.models import Agent  # Agent model not available
 
 User = get_user_model()
 
 
 class TestProductsAndStockWorkflow(TestCase):
-    """ProductsAndStock tam iş akışı testleri"""
+    """ProductsAndStock full workflow tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
-        # Kullanıcılar oluştur
+        # Create users
         self.admin_user = User.objects.create_user(
             username="admin_integration_main",
             email="admin_integration_main@example.com",
@@ -64,13 +64,13 @@ class TestProductsAndStockWorkflow(TestCase):
         self.agent_profile, created = UserProfile.objects.get_or_create(
             user=self.agent_user
         )
-        # Agent modeli yok, sadece user kullan
+        # Agent model not available, use user only
         # self.agent = Agent.objects.create(
         #     user=self.agent_user,
         #     organisation=self.organisor_profile
         # )
         
-        # Kategori ve alt kategori oluştur
+        # Create category and subcategory
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -78,8 +78,8 @@ class TestProductsAndStockWorkflow(TestCase):
         )
     
     def test_complete_product_lifecycle(self):
-        """Tam ürün yaşam döngüsü testi"""
-        # 1. Ürün oluşturma
+        """Full product lifecycle test"""
+        # 1. Create product
         product_data = {
             'product_name': 'iPhone 15 Pro',
             'product_description': 'Latest iPhone with advanced features',
@@ -95,36 +95,36 @@ class TestProductsAndStockWorkflow(TestCase):
         
         self.client.force_login(self.organisor_user)
         
-        # Ürün oluştur
+        # Create product
         response = self.client.post(reverse('ProductsAndStock:ProductAndStock-create'), product_data)
         self.assertEqual(response.status_code, 302)
         
-        # Ürün oluşturuldu mu kontrol et
+        # Check if product was created
         product = ProductsAndStock.objects.get(product_name='iPhone 15 Pro')
         self.assertEqual(product.product_price, 1199.99)
         self.assertEqual(product.product_quantity, 100)
         self.assertEqual(product.organisation, self.organisor_profile)
         
-        # 2. Stok hareketi oluşturuldu mu kontrol et
+        # 2. Check if stock movement was created
         stock_movements = StockMovement.objects.filter(product=product)
         self.assertEqual(stock_movements.count(), 1)
         self.assertEqual(stock_movements.first().movement_type, 'IN')
         self.assertEqual(stock_movements.first().quantity_change, 100)
         
-        # 3. Ürün detay sayfasını görüntüle
+        # 3. View product detail page
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': product.pk})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'iPhone 15 Pro')
         
-        # 4. Ürün güncelleme
+        # 4. Update product
         update_data = {
             'product_name': 'iPhone 15 Pro Max',
             'product_description': 'Updated iPhone with advanced features',
-            'product_price': 1299.99,  # Fiyat artışı
+            'product_price': 1299.99,  # Price increase
             'cost_price': 1100.00,
-            'product_quantity': 80,  # Stok azalışı
+            'product_quantity': 80,  # Stock decrease
             'minimum_stock_level': 25,
             'category': self.category.id,
             'subcategory': self.subcategory.id,
@@ -138,13 +138,13 @@ class TestProductsAndStockWorkflow(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         
-        # Ürün güncellendi mi kontrol et
+        # Check if product was updated
         updated_product = ProductsAndStock.objects.get(pk=product.pk)
         self.assertEqual(updated_product.product_name, 'iPhone 15 Pro Max')
         self.assertEqual(updated_product.product_price, 1299.99)
         self.assertEqual(updated_product.product_quantity, 80)
         
-        # 5. Fiyat geçmişi oluşturuldu mu kontrol et
+        # 5. Check if price history was created
         price_history = PriceHistory.objects.filter(product=updated_product)
         self.assertTrue(price_history.exists())
         latest_price_change = price_history.first()
@@ -152,49 +152,49 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertEqual(latest_price_change.new_price, 1299.99)
         self.assertEqual(latest_price_change.price_change, 100.0)
         
-        # 6. Stok hareketi oluşturuldu mu kontrol et
+        # 6. Check if stock movement was created
         stock_movements = StockMovement.objects.filter(product=updated_product)
-        self.assertEqual(stock_movements.count(), 2)  # İlk oluşturma + güncelleme
+        self.assertEqual(stock_movements.count(), 2)  # Initial create + update
         latest_movement = stock_movements.first()
         self.assertEqual(latest_movement.movement_type, 'OUT')
         self.assertEqual(latest_movement.quantity_change, -20)
         
-        # 7. Düşük stok uyarısı oluştur
-        updated_product.product_quantity = 5  # Minimum stok seviyesinin altına düşür
+        # 7. Create low stock alert
+        updated_product.product_quantity = 5  # Below minimum stock level
         updated_product.save()
         
-        # Stok uyarısı oluşturuldu mu kontrol et
+        # Check if stock alert was created
         stock_alerts = StockAlert.objects.filter(product=updated_product)
         self.assertTrue(stock_alerts.exists())
         self.assertEqual(stock_alerts.first().alert_type, 'LOW_STOCK')
         
-        # 8. Stok önerisi oluşturuldu mu kontrol et
+        # 8. Check if stock recommendation was created
         stock_recommendations = StockRecommendation.objects.filter(product=updated_product)
         self.assertTrue(stock_recommendations.exists())
         self.assertEqual(stock_recommendations.first().recommendation_type, 'RESTOCK')
         
-        # 9. Ürün listesi görüntüleme
+        # 9. View product list
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'iPhone 15 Pro Max')
         
-        # 10. Dashboard görüntüleme
+        # 10. View dashboard
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Dashboard')
         
-        # 11. Ürün silme
+        # 11. Delete product
         response = self.client.post(
             reverse('ProductsAndStock:ProductAndStock-delete', kwargs={'pk': updated_product.pk})
         )
         self.assertEqual(response.status_code, 302)
         
-        # Ürün silindi mi kontrol et
+        # Check if product was deleted
         self.assertFalse(ProductsAndStock.objects.filter(pk=updated_product.pk).exists())
     
     def test_bulk_price_update_workflow(self):
-        """Toplu fiyat güncelleme iş akışı testi"""
-        # Test ürünleri oluştur
+        """Bulk price update workflow test"""
+        # Create test products
         products = []
         for i in range(3):
             product = ProductsAndStock.objects.create(
@@ -212,7 +212,7 @@ class TestProductsAndStockWorkflow(TestCase):
         
         self.client.force_login(self.organisor_user)
         
-        # Toplu fiyat güncelleme formu
+        # Bulk price update form
         bulk_data = {
             'update_type': 'PERCENTAGE_INCREASE',
             'category_filter': 'ALL',
@@ -223,39 +223,39 @@ class TestProductsAndStockWorkflow(TestCase):
         response = self.client.post(reverse('ProductsAndStock:bulk-price-update'), bulk_data)
         self.assertEqual(response.status_code, 302)
         
-        # Tüm ürünlerin fiyatları güncellendi mi kontrol et
+        # Check if all product prices were updated
         for i, product in enumerate(products):
             updated_product = ProductsAndStock.objects.get(pk=product.pk)
             expected_price = (100.0 + (i * 50)) * 1.15
             self.assertAlmostEqual(updated_product.product_price, expected_price, places=2)
             
-            # Fiyat geçmişi oluşturuldu mu kontrol et
+            # Check if price history was created
             price_history = PriceHistory.objects.filter(product=updated_product)
             self.assertTrue(price_history.exists())
             self.assertEqual(price_history.first().change_type, 'INCREASE')
     
     def test_stock_alert_system(self):
-        """Stok uyarı sistemi testi"""
-        # Düşük stok seviyesinde ürün oluştur
+        """Stock alert system test"""
+        # Create product with low stock level
         product = ProductsAndStock.objects.create(
             product_name='Low Stock Product',
             product_description='Product with low stock',
             product_price=99.99,
             cost_price=80.00,
-            product_quantity=5,  # Düşük stok
+            product_quantity=5,  # Low stock
             minimum_stock_level=10,
             category=self.category,
             subcategory=self.subcategory,
             organisation=self.organisor_profile
         )
         
-        # Stok uyarısı oluşturuldu mu kontrol et
+        # Check if stock alert was created
         stock_alerts = StockAlert.objects.filter(product=product)
         self.assertTrue(stock_alerts.exists())
         self.assertEqual(stock_alerts.first().alert_type, 'LOW_STOCK')
         self.assertEqual(stock_alerts.first().severity, 'CRITICAL')
         
-        # Stok önerisi oluşturuldu mu kontrol et
+        # Check if stock recommendation was created
         stock_recommendations = StockRecommendation.objects.filter(product=product)
         self.assertTrue(stock_recommendations.exists())
         self.assertEqual(stock_recommendations.first().recommendation_type, 'RESTOCK')
@@ -264,7 +264,7 @@ class TestProductsAndStockWorkflow(TestCase):
         product.product_quantity = 0
         product.save()
         
-        # Out of stock uyarısı oluşturuldu mu kontrol et
+        # Check if out of stock alert was created
         out_of_stock_alerts = StockAlert.objects.filter(
             product=product,
             alert_type='OUT_OF_STOCK'
@@ -274,7 +274,7 @@ class TestProductsAndStockWorkflow(TestCase):
     
     def test_discount_system(self):
         """İndirim sistemi testi"""
-        # İndirimli ürün oluştur
+        # Create product with discount
         product = ProductsAndStock.objects.create(
             product_name='Discounted Product',
             product_description='Product with discount',
@@ -289,28 +289,28 @@ class TestProductsAndStockWorkflow(TestCase):
             discount_amount=10.0
         )
         
-        # İndirimli fiyat hesaplama testi
-        expected_discounted_price = (100.0 * 0.8) - 10.0  # %20 indirim + 10 TL indirim
+        # Discounted price calculation test
+        expected_discounted_price = (100.0 * 0.8) - 10.0  # 20% discount + 10 fixed discount
         self.assertEqual(product.discounted_price, expected_discounted_price)
         
-        # İndirim aktif mi kontrol et
+        # Check if discount is active
         self.assertTrue(product.is_discount_active)
         
-        # Tarihli indirim testi
+        # Scheduled discount test
         now = timezone.now()
         product.discount_start_date = now + timezone.timedelta(days=1)
         product.discount_end_date = now + timezone.timedelta(days=2)
         product.save()
         
-        # Gelecekteki indirim aktif değil
+        # Future discount is not active
         self.assertFalse(product.is_discount_active)
         
-        # Aktif tarihli indirim
+        # Active scheduled discount
         product.discount_start_date = now - timezone.timedelta(hours=1)
         product.discount_end_date = now + timezone.timedelta(hours=1)
         product.save()
         
-        # Aktif tarihli indirim
+        # Active scheduled discount
         self.assertTrue(product.is_discount_active)
     
     def test_profit_calculation_system(self):
@@ -344,15 +344,15 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertEqual(product.total_value, expected_total_value)
     
     def test_category_subcategory_workflow(self):
-        """Kategori-alt kategori iş akışı testi"""
-        # Yeni kategori oluştur
+        """Category-subcategory workflow test"""
+        # Create new category
         new_category = Category.objects.create(name="Books")
         new_subcategory = SubCategory.objects.create(
             name="Fiction",
             category=new_category
         )
         
-        # Ürün oluştur
+        # Create product
         product = ProductsAndStock.objects.create(
             product_name='Book Product',
             product_description='A fiction book',
@@ -365,13 +365,13 @@ class TestProductsAndStockWorkflow(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ilişkileri doğru mu kontrol et
+        # Check if category relations are correct
         self.assertEqual(product.category, new_category)
         self.assertEqual(product.subcategory, new_subcategory)
         self.assertIn(product, new_category.productsandstock_set.all())
         self.assertIn(product, new_subcategory.productsandstock_set.all())
         
-        # Alt kategori kategorisine ait mi kontrol et
+        # Check if subcategory belongs to category
         self.assertEqual(new_subcategory.category, new_category)
         self.assertIn(new_subcategory, new_category.subcategories.all())
     
@@ -384,14 +384,14 @@ class TestProductsAndStockWorkflow(TestCase):
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Agent ürün oluşturabilir mi (hayır)
+        # Can agent create product (no)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)  # Agent can create products
         
         # Organisor kullanıcı ile test
         self.client.force_login(self.organisor_user)
         
-        # Organisor ürün oluşturabilir mi
+        # Can organisor create product
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
         
@@ -412,8 +412,8 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_ajax_subcategory_loading(self):
-        """AJAX alt kategori yükleme testi"""
-        # Kategori seçimi ile alt kategorileri yükle
+        """AJAX subcategory loading test"""
+        # Load subcategories with category selection
         response = self.client.get(
             reverse('ProductsAndStock:get-subcategories'),
             {'category_id': self.category.id}
@@ -431,7 +431,7 @@ class TestProductsAndStockWorkflow(TestCase):
         invalid_data = {
             'product_name': '',  # Boş isim
             'product_description': 'Test Description',
-            'product_price': -10,  # Negatif fiyat
+            'product_price': -10,  # Negative price
             'cost_price': 80.00,
             'product_quantity': 10,
             'minimum_stock_level': 2,
@@ -447,7 +447,7 @@ class TestProductsAndStockWorkflow(TestCase):
     
     def test_database_transactions(self):
         """Veritabanı işlemleri testi"""
-        # Transaction ile ürün oluşturma
+        # Create product with transaction
         with transaction.atomic():
             product = ProductsAndStock.objects.create(
                 product_name='Transaction Test Product',
@@ -461,13 +461,13 @@ class TestProductsAndStockWorkflow(TestCase):
                 organisation=self.organisor_profile
             )
             
-            # Stok hareketi oluşturuldu mu kontrol et
+            # Check if stock movement was created
             stock_movements = StockMovement.objects.filter(product=product)
             self.assertEqual(stock_movements.count(), 1)
     
     def test_performance_with_multiple_products(self):
         """Çoklu ürün performans testi"""
-        # Çok sayıda ürün oluştur
+        # Create many products
         products = []
         for i in range(50):
             product = ProductsAndStock.objects.create(
@@ -504,10 +504,10 @@ class TestProductsAndStockWorkflow(TestCase):
 
 
 class TestProductsAndStockSignals(TransactionTestCase):
-    """ProductsAndStock sinyalleri testleri"""
+    """ProductsAndStock signals tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser",
             email="test@example.com",
@@ -525,8 +525,8 @@ class TestProductsAndStockSignals(TransactionTestCase):
         )
     
     def test_product_creation_signals(self):
-        """Ürün oluşturma sinyalleri testi"""
-        # Ürün oluştur
+        """Product creation signals test"""
+        # Create product
         product = ProductsAndStock.objects.create(
             product_name='Signal Test Product',
             product_description='Product for signal testing',
@@ -539,15 +539,15 @@ class TestProductsAndStockSignals(TransactionTestCase):
             organisation=self.user_profile
         )
         
-        # Stok hareketi oluşturuldu mu kontrol et
+        # Check if stock movement was created
         stock_movements = StockMovement.objects.filter(product=product)
         self.assertEqual(stock_movements.count(), 1)
         self.assertEqual(stock_movements.first().movement_type, 'IN')
         self.assertEqual(stock_movements.first().quantity_change, 50)
     
     def test_product_update_signals(self):
-        """Ürün güncelleme sinyalleri testi"""
-        # Ürün oluştur
+        """Product update signals test"""
+        # Create product
         product = ProductsAndStock.objects.create(
             product_name='Signal Update Test Product',
             product_description='Product for signal update testing',
@@ -560,58 +560,58 @@ class TestProductsAndStockSignals(TransactionTestCase):
             organisation=self.user_profile
         )
         
-        # Fiyat güncelle
+        # Update price
         product.product_price = 149.99
         product.save()
         
-        # Fiyat geçmişi oluşturuldu mu kontrol et
+        # Check if price history was created
         price_history = PriceHistory.objects.filter(product=product)
         self.assertEqual(price_history.count(), 1)
         self.assertEqual(price_history.first().old_price, 99.99)
         self.assertEqual(price_history.first().new_price, 149.99)
         self.assertAlmostEqual(price_history.first().price_change, 50.0, places=2)
         
-        # Stok güncelle
+        # Update stock
         product.product_quantity = 30
         product.save()
         
-        # Stok hareketi oluşturuldu mu kontrol et
+        # Check if stock movement was created
         stock_movements = StockMovement.objects.filter(product=product)
-        self.assertEqual(stock_movements.count(), 2)  # İlk oluşturma + güncelleme
+        self.assertEqual(stock_movements.count(), 2)  # Initial create + update
         latest_movement = stock_movements.first()
         self.assertEqual(latest_movement.movement_type, 'OUT')
         self.assertEqual(latest_movement.quantity_change, -20)
     
     def test_low_stock_alert_signals(self):
-        """Düşük stok uyarı sinyalleri testi"""
-        # Düşük stok seviyesinde ürün oluştur
+        """Low stock alert signals test"""
+        # Create product with low stock level
         product = ProductsAndStock.objects.create(
             product_name='Low Stock Signal Test Product',
             product_description='Product for low stock signal testing',
             product_price=99.99,
             cost_price=80.00,
-            product_quantity=5,  # Düşük stok
+            product_quantity=5,  # Low stock
             minimum_stock_level=10,
             category=self.category,
             subcategory=self.subcategory,
             organisation=self.user_profile
         )
         
-        # Stok uyarısı oluşturuldu mu kontrol et
+        # Check if stock alert was created
         stock_alerts = StockAlert.objects.filter(product=product)
         self.assertTrue(stock_alerts.exists())
         self.assertEqual(stock_alerts.first().alert_type, 'LOW_STOCK')
         
-        # Stok önerisi oluşturuldu mu kontrol et
+        # Check if stock recommendation was created
         stock_recommendations = StockRecommendation.objects.filter(product=product)
         self.assertTrue(stock_recommendations.exists())
         self.assertEqual(stock_recommendations.first().recommendation_type, 'RESTOCK')
 
 
 if __name__ == "__main__":
-    print("ProductsAndStock Entegrasyon Testleri Başlatılıyor...")
+    print("ProductsAndStock Integration Tests Starting...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

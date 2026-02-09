@@ -1,186 +1,186 @@
-# Organisors Test Sistemi
+# Organisors Test System
 
-Bu klasör organisors modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the organisors module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/organisors/
 ├── __init__.py
-├── working_tests/          # ✅ Çalışan testler
+├── working_tests/          # ✅ Working tests
 │   ├── __init__.py
-│   ├── test_models.py      # Model testleri
-│   ├── test_forms.py       # Form testleri
-│   ├── test_views.py       # View testleri
-│   ├── test_mixins.py      # Mixin testleri
-│   └── test_integration.py # Entegrasyon testleri
-├── test_runner.py          # İnteraktif test çalıştırıcı
+│   ├── test_models.py      # Model tests
+│   ├── test_forms.py       # Form tests
+│   ├── test_views.py       # View tests
+│   ├── test_mixins.py      # Mixin tests
+│   └── test_integration.py # Integration tests
+├── test_runner.py          # Interactive test runner
 └── README.md
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Tüm Testleri Çalıştır
+### ✅ Run All Tests
 ```bash
-# İnteraktif menü ile
+# With interactive menu
 python test/organisors/test_runner.py
 
-# Doğrudan tüm testleri çalıştır
+# Run all tests directly
 python test/organisors/test_runner.py all
 
-# Django test komutu ile
+# With Django test command
 python manage.py test test.organisors.working_tests
 ```
 
-### 📋 Belirli Test Kategorilerini Çalıştır
+### 📋 Run Specific Test Categories
 ```bash
-# Model testleri
+# Model tests
 python test/organisors/test_runner.py models
 python manage.py test test.organisors.working_tests.test_models
 
-# Form testleri
+# Form tests
 python test/organisors/test_runner.py forms
 python manage.py test test.organisors.working_tests.test_forms
 
-# View testleri
+# View tests
 python test/organisors/test_runner.py views
 python manage.py test test.organisors.working_tests.test_views
 
-# Mixin testleri
+# Mixin tests
 python test/organisors/test_runner.py mixins
 python manage.py test test.organisors.working_tests.test_mixins
 
-# Entegrasyon testleri
+# Integration tests
 python test/organisors/test_runner.py integration
 python manage.py test test.organisors.working_tests.test_integration
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
 ### Models (1 model)
-- ✅ Organisor (çalışıyor)
-  - Model oluşturma
+- ✅ Organisor (working)
+  - Model creation
   - String representation
-  - İlişkiler (User, UserProfile)
-  - Cascade silme
+  - Relations (User, UserProfile)
+  - Cascade delete
   - Unique constraints
-  - Meta seçenekleri
+  - Meta options
 
-### Views (5 view)
-- ✅ OrganisorListView (çalışıyor)
-- ✅ OrganisorCreateView (çalışıyor)
-- ✅ OrganisorDetailView (çalışıyor)
-- ✅ OrganisorUpdateView (çalışıyor)
-- ✅ OrganisorDeleteView (çalışıyor)
+### Views (5 views)
+- ✅ OrganisorListView (working)
+- ✅ OrganisorCreateView (working)
+- ✅ OrganisorDetailView (working)
+- ✅ OrganisorUpdateView (working)
+- ✅ OrganisorDeleteView (working)
 
-### Forms (2 form)
-- ✅ OrganisorModelForm (çalışıyor)
-- ✅ OrganisorCreateForm (çalışıyor)
+### Forms (2 forms)
+- ✅ OrganisorModelForm (working)
+- ✅ OrganisorCreateForm (working)
 
-### Mixins (3 mixin)
-- ✅ AdminOnlyMixin (çalışıyor)
-- ✅ OrganisorAndAdminMixin (çalışıyor)
-- ✅ SelfProfileOnlyMixin (çalışıyor)
+### Mixins (3 mixins)
+- ✅ AdminOnlyMixin (working)
+- ✅ OrganisorAndAdminMixin (working)
+- ✅ SelfProfileOnlyMixin (working)
 
 ### Integration Tests
-- ✅ Tam organisor yaşam döngüsü
-- ✅ İzin sistemi
-- ✅ Form validasyonu
-- ✅ Model ilişkileri
-- ✅ Email doğrulama
-- ✅ Toplu işlemler
-- ✅ Hata yönetimi
+- ✅ Full organisor lifecycle
+- ✅ Permission system
+- ✅ Form validation
+- ✅ Model relations
+- ✅ Email verification
+- ✅ Bulk operations
+- ✅ Error handling
 
-## 🎯 Test Özellikleri
+## 🎯 Test Features
 
-### Model Testleri
-- **Organisor Model**: Temel CRUD işlemleri, ilişkiler, kısıtlamalar
-- **İlişki Testleri**: User-Organisor, Organisation-Organisor
-- **Cascade Silme**: User/Organisation silinince Organisor da silinir
-- **Unique Constraints**: OneToOneField kısıtlamaları
-- **Edge Cases**: Sınır durumları ve hata senaryoları
+### Model Tests
+- **Organisor Model**: Basic CRUD operations, relations, constraints
+- **Relation Tests**: User-Organisor, Organisation-Organisor
+- **Cascade Delete**: Organisor is deleted when User/Organisation is deleted
+- **Unique Constraints**: OneToOneField constraints
+- **Edge Cases**: Boundary conditions and error scenarios
 
-### Form Testleri
-- **OrganisorModelForm**: Güncelleme formu validasyonları
-- **OrganisorCreateForm**: Oluşturma formu validasyonları
-- **Field Validation**: Email, username, phone number benzersizlik
-- **Password Validation**: Şifre eşleşme ve güvenlik kuralları
-- **Widget Attributes**: CSS sınıfları ve placeholder'lar
-- **Clean Methods**: Özel validasyon metodları
+### Form Tests
+- **OrganisorModelForm**: Update form validations
+- **OrganisorCreateForm**: Create form validations
+- **Field Validation**: Email, username, phone number uniqueness
+- **Password Validation**: Password match and security rules
+- **Widget Attributes**: CSS classes and placeholders
+- **Clean Methods**: Custom validation methods
 
-### View Testleri
-- **Permission System**: Admin, Organisor, Agent erişim kontrolleri
-- **CRUD Operations**: Create, Read, Update, Delete işlemleri
-- **Template Rendering**: Doğru template'lerin kullanılması
-- **Form Handling**: GET/POST istekleri ve validasyon
-- **Redirect Logic**: Başarılı işlemler sonrası yönlendirmeler
-- **Error Handling**: 404, 403 hataları ve form hataları
+### View Tests
+- **Permission System**: Admin, Organisor, Agent access controls
+- **CRUD Operations**: Create, Read, Update, Delete operations
+- **Template Rendering**: Correct templates are used
+- **Form Handling**: GET/POST requests and validation
+- **Redirect Logic**: Redirects after successful operations
+- **Error Handling**: 404, 403 errors and form errors
 
-### Mixin Testleri
-- **AdminOnlyMixin**: Sadece admin kullanıcıları erişebilir
-- **OrganisorAndAdminMixin**: Admin ve organisor kullanıcıları erişebilir
-- **SelfProfileOnlyMixin**: Kullanıcılar sadece kendi profillerini erişebilir
+### Mixin Tests
+- **AdminOnlyMixin**: Only admin users can access
+- **OrganisorAndAdminMixin**: Admin and organisor users can access
+- **SelfProfileOnlyMixin**: Users can only access their own profiles
 - **Permission Hierarchy**: Admin > Organisor > Agent > Anonymous
-- **Edge Cases**: Var olmayan kayıtlar, yetkisiz erişim
+- **Edge Cases**: Non-existent records, unauthorized access
 
-### Entegrasyon Testleri
-- **Complete Lifecycle**: Tam organisor yaşam döngüsü
-- **Permission Integration**: Tüm view'ların izin sistemi
-- **Form Integration**: Form validasyonu ve hata yönetimi
-- **Model Integration**: Model ilişkileri ve cascade işlemler
-- **Email Integration**: Email doğrulama ve gönderimi
-- **Bulk Operations**: Toplu oluşturma ve silme işlemleri
+### Integration Tests
+- **Complete Lifecycle**: Full organisor lifecycle
+- **Permission Integration**: Permission system across all views
+- **Form Integration**: Form validation and error handling
+- **Model Integration**: Model relations and cascade operations
+- **Email Integration**: Email verification and sending
+- **Bulk Operations**: Bulk create and delete operations
 
-## 🔧 Test Verileri
+## 🔧 Test Data
 
-### Kullanıcı Tipleri
-- **Admin User**: ID=1 veya username='berk' (tüm işlemler)
-- **Organisor User**: is_organisor=True (sınırlı işlemler)
-- **Agent User**: is_agent=True (hiçbir işlem)
-- **Anonymous User**: Giriş yapmamış (redirect)
+### User Types
+- **Admin User**: ID=1 or username='berk' (all operations)
+- **Organisor User**: is_organisor=True (limited operations)
+- **Agent User**: is_agent=True (no operations)
+- **Anonymous User**: Not logged in (redirect)
 
-### Test Verileri
-- **Benzersiz Kullanıcılar**: Her test için unique username/email
-- **Gerçekçi Veriler**: Türk telefon numaraları, tarihler
-- **Edge Cases**: Geçersiz veriler, sınır durumları
-- **Mock Objects**: Email gönderimi için mock kullanımı
+### Test Data
+- **Unique Users**: Unique username/email for each test
+- **Realistic Data**: Phone numbers, dates
+- **Edge Cases**: Invalid data, boundary conditions
+- **Mock Objects**: Mock usage for email sending
 
-## 📈 Test Metrikleri
+## 📈 Test Metrics
 
-### Test Sayıları
-- **Model Tests**: ~20 test
-- **Form Tests**: ~30 test
-- **View Tests**: ~50 test
-- **Mixin Tests**: ~25 test
-- **Integration Tests**: ~15 test
-- **Toplam**: ~140 test
+### Test Counts
+- **Model Tests**: ~20 tests
+- **Form Tests**: ~30 tests
+- **View Tests**: ~50 tests
+- **Mixin Tests**: ~25 tests
+- **Integration Tests**: ~15 tests
+- **Total**: ~140 tests
 
-### Test Kategorileri
-- **Unit Tests**: Bireysel bileşen testleri
-- **Integration Tests**: Bileşenler arası etkileşim
-- **Permission Tests**: Yetki ve erişim kontrolleri
-- **Validation Tests**: Form ve model validasyonları
-- **Error Handling Tests**: Hata senaryoları
+### Test Categories
+- **Unit Tests**: Individual component tests
+- **Integration Tests**: Inter-component interaction
+- **Permission Tests**: Authorization and access controls
+- **Validation Tests**: Form and model validations
+- **Error Handling Tests**: Error scenarios
 
-## 🎨 Test Stili
+## 🎨 Test Style
 
 ### Naming Convention
 - **Test Classes**: `Test[ComponentName][TestType]`
 - **Test Methods**: `test_[specific_functionality]`
-- **Setup Methods**: `setUp()` - test verilerini hazırlar
+- **Setup Methods**: `setUp()` - prepares test data
 - **Helper Methods**: `_helper_method_name()`
 
 ### Test Structure
 ```python
 class TestComponentName(TestCase):
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Test verileri oluştur
+        """Set up test data"""
+        # Create test data
     
     def test_specific_functionality(self):
-        """Spesifik işlevsellik testi"""
-        # Test adımları
-        # Assertion'lar
+        """Test specific functionality"""
+        # Test steps
+        # Assertions
 ```
 
 ### Assertion Patterns
@@ -190,40 +190,40 @@ class TestComponentName(TestCase):
 - **Content**: `self.assertContains(response, 'expected_text')`
 - **Database**: `self.assertTrue(Model.objects.filter(...).exists())`
 
-## 🚨 Hata Yönetimi
+## 🚨 Error Handling
 
-### Test Hataları
-- **Import Errors**: Django setup ve model import'ları
-- **Database Errors**: Test veritabanı oluşturma
-- **Permission Errors**: Yetki kontrolleri
-- **Validation Errors**: Form ve model validasyonları
+### Test Errors
+- **Import Errors**: Django setup and model imports
+- **Database Errors**: Test database creation
+- **Permission Errors**: Permission checks
+- **Validation Errors**: Form and model validations
 
-### Debug Bilgileri
-- **Verbose Output**: `-v 2` ile detaylı çıktı
-- **Error Messages**: Hata mesajları ve stack trace
-- **Test Names**: Hangi testin başarısız olduğu
-- **Assertion Details**: Beklenen vs gerçek değerler
+### Debug Information
+- **Verbose Output**: Detailed output with `-v 2`
+- **Error Messages**: Error messages and stack trace
+- **Test Names**: Which test failed
+- **Assertion Details**: Expected vs actual values
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
-- CSRF token'lar test ortamında otomatik işlenir
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is automatically created and destroyed
+- Mock usage for email sending
+- Factory pattern for test data creation
+- CSRF tokens are automatically handled in test environment
 
-## 🔄 Güncelleme Notları
+## 🔄 Update Notes
 
-### v1.0.0 (İlk Sürüm)
-- Temel model, form, view testleri
-- Mixin testleri
-- Entegrasyon testleri
-- Test runner ve dokümantasyon
+### v1.0.0 (Initial Release)
+- Basic model, form, view tests
+- Mixin tests
+- Integration tests
+- Test runner and documentation
 
-### Gelecek Planları
-- Performance testleri
-- Load testleri
-- API testleri (eğer API eklenirse)
-- Test coverage raporu
+### Future Plans
+- Performance tests
+- Load tests
+- API tests (if API is added)
+- Test coverage report
 - Automated testing pipeline

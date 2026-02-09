@@ -1,6 +1,6 @@
 """
 Signup Test Runner
-Bu dosya signup testlerini çalıştırmak için kullanılır.
+This file is used to run signup tests.
 """
 
 import os
@@ -9,20 +9,20 @@ import django
 from django.test.utils import get_runner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 def run_signup_tests():
-    """Signup testlerini çalıştır"""
-    print("🚀 Signup Testleri Başlatılıyor...")
+    """Run signup tests"""
+    print("🚀 Starting Signup Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modüllerini tanımla
+    # Define test modules
     test_modules = [
         'test.signup.working_tests.test_signup_forms',
         'test.signup.working_tests.test_signup_views', 
@@ -30,76 +30,76 @@ def run_signup_tests():
         'test.signup.working_tests.test_signup_integration',
     ]
     
-    print("📋 Çalıştırılacak Test Modülleri:")
+    print("📋 Test modules to run:")
     for module in test_modules:
         print(f"  - {module}")
     print()
     
-    # Testleri çalıştır
+    # Run tests
     failures = test_runner.run_tests(test_modules, verbosity=2)
     
     print("\n" + "=" * 60)
     if failures == 0:
-        print("✅ Tüm signup testleri başarıyla geçti!")
+        print("✅ All signup tests passed!")
     else:
-        print(f"❌ {failures} test başarısız oldu!")
+        print(f"❌ {failures} test(s) failed!")
     
     return failures
 
 def run_specific_test(test_name):
-    """Belirli bir testi çalıştır"""
-    print(f"🎯 {test_name} testi çalıştırılıyor...")
+    """Run a specific test"""
+    print(f"🎯 Running {test_name}...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Belirli testi çalıştır
+    # Run specific test
     failures = test_runner.run_tests([test_name], verbosity=2)
     
     print("\n" + "=" * 60)
     if failures == 0:
-        print(f"✅ {test_name} testi başarıyla geçti!")
+        print(f"✅ {test_name} passed!")
     else:
-        print(f"❌ {test_name} testi başarısız oldu!")
+        print(f"❌ {test_name} failed!")
     
     return failures
 
 def run_form_tests():
-    """Sadece form testlerini çalıştır"""
+    """Run form tests only"""
     return run_specific_test('test.signup.working_tests.test_signup_forms')
 
 def run_view_tests():
-    """Sadece view testlerini çalıştır"""
+    """Run view tests only"""
     return run_specific_test('test.signup.working_tests.test_signup_views')
 
 def run_model_tests():
-    """Sadece model testlerini çalıştır"""
+    """Run model tests only"""
     return run_specific_test('test.signup.working_tests.test_signup_models')
 
 def run_integration_tests():
-    """Sadece entegrasyon testlerini çalıştır"""
+    """Run integration tests only"""
     return run_specific_test('test.signup.working_tests.test_signup_integration')
 
 def interactive_test_runner():
-    """İnteraktif test çalıştırıcı"""
+    """Interactive test runner"""
     while True:
-        print("\n🔧 Signup Test Çalıştırıcı")
+        print("\n🔧 Signup Test Runner")
         print("=" * 40)
-        print("1. Tüm testleri çalıştır")
-        print("2. Form testlerini çalıştır")
-        print("3. View testlerini çalıştır")
-        print("4. Model testlerini çalıştır")
-        print("5. Entegrasyon testlerini çalıştır")
-        print("6. Belirli bir test çalıştır")
-        print("0. Çıkış")
+        print("1. Run all tests")
+        print("2. Run form tests")
+        print("3. Run view tests")
+        print("4. Run model tests")
+        print("5. Run integration tests")
+        print("6. Run a specific test")
+        print("0. Exit")
         print("-" * 40)
         
-        choice = input("Seçiminizi yapın (0-6): ").strip()
+        choice = input("Enter your choice (0-6): ").strip()
         
         if choice == '0':
-            print("👋 Test çalıştırıcısından çıkılıyor...")
+            print("👋 Exiting test runner...")
             break
         elif choice == '1':
             run_signup_tests()
@@ -112,13 +112,13 @@ def interactive_test_runner():
         elif choice == '5':
             run_integration_tests()
         elif choice == '6':
-            test_name = input("Test adını girin: ").strip()
+            test_name = input("Enter test name: ").strip()
             if test_name:
                 run_specific_test(test_name)
             else:
-                print("❌ Geçersiz test adı!")
+                print("❌ Invalid test name!")
         else:
-            print("❌ Geçersiz seçim!")
+            print("❌ Invalid choice!")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -137,8 +137,8 @@ if __name__ == "__main__":
         elif command == 'interactive':
             interactive_test_runner()
         else:
-            print("❌ Geçersiz komut!")
-            print("Kullanım: python test_runner.py [all|forms|views|models|integration|interactive]")
+            print("❌ Invalid command!")
+            print("Usage: python test_runner.py [all|forms|views|models|integration|interactive]")
     else:
-        # Varsayılan olarak tüm testleri çalıştır
+        # By default run all tests
         run_signup_tests()

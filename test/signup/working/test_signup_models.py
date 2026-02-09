@@ -1,6 +1,6 @@
 """
-Signup Modelleri Test Dosyası
-Bu dosya signup ile ilgili tüm modelleri test eder.
+Signup Models Test File
+This file tests all signup-related models.
 """
 
 import os
@@ -12,7 +12,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 import uuid
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -21,10 +21,10 @@ from organisors.models import Organisor
 
 
 class TestUserModel(TestCase):
-    """User modeli testleri"""
+    """User model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user_data = {
             'username': 'testuser_model',
             'email': 'test_model@example.com',
@@ -37,7 +37,7 @@ class TestUserModel(TestCase):
         }
     
     def test_user_creation(self):
-        """Kullanıcı oluşturma testi"""
+        """User creation test"""
         user = User.objects.create_user(**self.user_data)
         
         self.assertEqual(user.username, 'testuser_model')
@@ -52,7 +52,7 @@ class TestUserModel(TestCase):
         self.assertTrue(user.is_active)
     
     def test_user_creation_with_organisor_flag(self):
-        """Organisor bayrağı ile kullanıcı oluşturma testi"""
+        """User creation with organisor flag test"""
         user_data = self.user_data.copy()
         user_data['is_organisor'] = True
         
@@ -62,7 +62,7 @@ class TestUserModel(TestCase):
         self.assertFalse(user.is_agent)
     
     def test_user_creation_with_agent_flag(self):
-        """Agent bayrağı ile kullanıcı oluşturma testi"""
+        """User creation with agent flag test"""
         user_data = self.user_data.copy()
         user_data['username'] = 'testuser_agent_flag'
         user_data['email'] = 'test_agent_flag@example.com'
@@ -75,13 +75,13 @@ class TestUserModel(TestCase):
         self.assertFalse(user.is_organisor)
     
     def test_user_email_verification_default(self):
-        """Email doğrulama varsayılan değeri testi"""
+        """Email verification default value test"""
         user = User.objects.create_user(**self.user_data)
         
         self.assertFalse(user.email_verified)
     
     def test_user_email_verification_set(self):
-        """Email doğrulama set etme testi"""
+        """Email verification set test"""
         user = User.objects.create_user(**self.user_data)
         user.email_verified = True
         user.save()
@@ -90,7 +90,7 @@ class TestUserModel(TestCase):
         self.assertTrue(updated_user.email_verified)
     
     def test_user_gender_choices(self):
-        """Cinsiyet seçenekleri testi"""
+        """Gender choices test"""
         expected_choices = [
             ('M', 'Male'),
             ('F', 'Female'),
@@ -118,20 +118,20 @@ class TestUserModel(TestCase):
         self.assertEqual(user.get_short_name(), 'Test')
     
     def test_user_unique_constraints(self):
-        """User benzersizlik kısıtlamaları testi"""
-        # İlk kullanıcıyı oluştur
+        """User uniqueness constraints test"""
+        # Create first user
         User.objects.create_user(**self.user_data)
         
-        # Aynı email ile ikinci kullanıcı oluşturmaya çalış
-        with self.assertRaises(Exception):  # IntegrityError veya ValidationError
+        # Try to create second user with same email
+        with self.assertRaises(Exception):  # IntegrityError or ValidationError
             User.objects.create_user(
                 username='different_username',
                 email='test_model@example.com',
                 password='testpass123!'
             )
         
-        # Aynı telefon numarası ile ikinci kullanıcı oluşturmaya çalış
-        with self.assertRaises(Exception):  # IntegrityError veya ValidationError
+        # Try to create second user with same phone number
+        with self.assertRaises(Exception):  # IntegrityError or ValidationError
             User.objects.create_user(
                 username='different_username2',
                 email='different@example.com',
@@ -141,10 +141,10 @@ class TestUserModel(TestCase):
 
 
 class TestUserProfileModel(TestCase):
-    """UserProfile modeli testleri"""
+    """UserProfile model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username='testuser_profile',
             email='test_profile@example.com',
@@ -152,75 +152,75 @@ class TestUserProfileModel(TestCase):
         )
     
     def test_userprofile_creation(self):
-        """UserProfile oluşturma testi"""
-        # Test için yeni bir user oluştur
+        """UserProfile creation test"""
+        # Create a new user for test
         test_user = User.objects.create_user(
             username='testuser_profile_creation',
             email='test_profile_creation@example.com',
             password='testpass123!'
         )
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         profile = UserProfile.objects.get(user=test_user)
         
         self.assertEqual(profile.user, test_user)
         self.assertEqual(str(profile), 'testuser_profile_creation')
     
     def test_userprofile_get_or_create(self):
-        """UserProfile get_or_create testi"""
-        # Test için yeni bir user oluştur
+        """UserProfile get_or_create test"""
+        # Create new user for test
         test_user = User.objects.create_user(
             username='testuser_profile_get_or_create',
             email='test_profile_get_or_create@example.com',
             password='testpass123!'
         )
         
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         profile, created = UserProfile.objects.get_or_create(user=test_user)
         
-        self.assertFalse(created)  # Signal nedeniyle zaten oluşturulmuş
+        self.assertFalse(created)  # Already created by signal
         self.assertEqual(profile.user, test_user)
         
-        # İkinci çağrı - oluşturulmamalı
+        # Second call - should not create
         profile2, created2 = UserProfile.objects.get_or_create(user=test_user)
         
         self.assertFalse(created2)
         self.assertEqual(profile, profile2)
     
     def test_userprofile_unique_constraint(self):
-        """UserProfile benzersizlik kısıtlaması testi"""
-        # Test için yeni bir user oluştur
+        """UserProfile uniqueness constraint test"""
+        # Create a new user for test
         test_user = User.objects.create_user(
             username='testuser_profile_unique',
             email='test_profile_unique@example.com',
             password='testpass123!'
         )
         
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         self.assertTrue(UserProfile.objects.filter(user=test_user).exists())
         
-        # Aynı kullanıcı için ikinci profile oluşturmaya çalış
+        # Try to create second profile for same user
         with self.assertRaises(Exception):  # IntegrityError
             UserProfile.objects.create(user=test_user)
     
     def test_userprofile_str_method(self):
-        """UserProfile __str__ metodu testi"""
-        # Test için yeni bir user oluştur
+        """UserProfile __str__ method test"""
+        # Create new user for test
         test_user = User.objects.create_user(
             username='testuser_profile_str',
             email='test_profile_str@example.com',
             password='testpass123!'
         )
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         profile = UserProfile.objects.get(user=test_user)
         
         self.assertEqual(str(profile), 'testuser_profile_str')
 
 
 class TestEmailVerificationTokenModel(TestCase):
-    """EmailVerificationToken modeli testleri"""
+    """EmailVerificationToken model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username='testuser_token',
             email='test_token@example.com',
@@ -228,7 +228,7 @@ class TestEmailVerificationTokenModel(TestCase):
         )
     
     def test_email_verification_token_creation(self):
-        """EmailVerificationToken oluşturma testi"""
+        """EmailVerificationToken creation test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         self.assertEqual(token.user, self.user)
@@ -237,24 +237,24 @@ class TestEmailVerificationTokenModel(TestCase):
         self.assertIsNotNone(token.created_at)
     
     def test_email_verification_token_str_method(self):
-        """EmailVerificationToken __str__ metodu testi"""
+        """EmailVerificationToken __str__ method test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         expected_str = f"Verification token for {self.user.email}"
         self.assertEqual(str(token), expected_str)
     
     def test_email_verification_token_is_expired_false(self):
-        """EmailVerificationToken süresi dolmamış testi"""
+        """EmailVerificationToken not expired test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Token yeni oluşturuldu, süresi dolmamış olmalı
+        # Token newly created, should not be expired
         self.assertFalse(token.is_expired())
     
     def test_email_verification_token_is_expired_true(self):
-        """EmailVerificationToken süresi dolmuş testi"""
+        """EmailVerificationToken expired test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Token'ı 25 saat önce oluşturulmuş gibi yap (24 saatlik süre dolmuş)
+        # Make token as if created 25 hours ago (24-hour window expired)
         expired_time = timezone.now() - timedelta(hours=25)
         token.created_at = expired_time
         token.save()
@@ -262,36 +262,36 @@ class TestEmailVerificationTokenModel(TestCase):
         self.assertTrue(token.is_expired())
     
     def test_email_verification_token_is_expired_boundary(self):
-        """EmailVerificationToken süre sınırı testi"""
+        """EmailVerificationToken time limit test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Token'ı 24 saat + 1 dakika önce oluşturulmuş gibi yap
+        # Make token as if created 24 hours + 1 minute ago
         boundary_time = timezone.now() - timedelta(hours=24, minutes=1)
         token.created_at = boundary_time
         token.save()
         
-        # 24 saatten sonra süre dolmuş sayılmalı
+        # Should be considered expired after 24 hours
         self.assertTrue(token.is_expired())
     
     def test_email_verification_token_multiple_tokens_per_user(self):
-        """Kullanıcı başına birden fazla token testi"""
-        # Aynı kullanıcı için birden fazla token oluştur
+        """Multiple tokens per user test"""
+        # Create multiple tokens for same user
         token1 = EmailVerificationToken.objects.create(user=self.user)
         token2 = EmailVerificationToken.objects.create(user=self.user)
         
-        # Her iki token da oluşturulmuş olmalı
+        # Both tokens should be created
         self.assertEqual(EmailVerificationToken.objects.filter(user=self.user).count(), 2)
         
-        # Token'lar farklı olmalı
+        # Tokens should be different
         self.assertNotEqual(token1.token, token2.token)
     
     def test_email_verification_token_mark_as_used(self):
-        """EmailVerificationToken kullanıldı olarak işaretleme testi"""
+        """EmailVerificationToken mark as used test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         self.assertFalse(token.is_used)
         
-        # Token'ı kullanıldı olarak işaretle
+        # Mark token as used
         token.is_used = True
         token.save()
         
@@ -299,35 +299,35 @@ class TestEmailVerificationTokenModel(TestCase):
         self.assertTrue(updated_token.is_used)
     
     def test_email_verification_token_cascade_delete(self):
-        """EmailVerificationToken cascade delete testi"""
+        """EmailVerificationToken cascade delete test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Kullanıcıyı sil
+        # Delete user
         self.user.delete()
         
-        # Token da silinmiş olmalı
+        # Token should also be deleted
         self.assertFalse(EmailVerificationToken.objects.filter(pk=token.pk).exists())
 
 
 class TestOrganisorModel(TestCase):
-    """Organisor modeli testleri"""
+    """Organisor model tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Bu test class'ında setUp'da user oluşturmayalım
-        # Her test kendi user'ını oluşturacak
+        """Set up test data"""
+        # In this test class do not create user in setUp
+        # Each test will create its own user
         pass
     
     def test_organisor_creation(self):
-        """Organisor oluşturma testi"""
-        # Test için yeni bir user oluştur
+        """Organisor creation test"""
+        # Create new user for test
         test_user = User.objects.create_user(
             username='testuser_organisor_creation',
             email='test_organisor_creation@example.com',
             password='testpass123!',
             is_organisor=True
         )
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         test_user_profile = UserProfile.objects.get(user=test_user)
         
         organisor = Organisor.objects.create(
@@ -340,15 +340,15 @@ class TestOrganisorModel(TestCase):
         self.assertEqual(str(organisor), 'test_organisor_creation@example.com')
     
     def test_organisor_str_method(self):
-        """Organisor __str__ metodu testi"""
-        # Test için yeni bir user oluştur
+        """Organisor __str__ method test"""
+        # Create new user for test
         test_user = User.objects.create_user(
             username='testuser_organisor_str',
             email='test_organisor_str@example.com',
             password='testpass123!',
             is_organisor=True
         )
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         test_user_profile = UserProfile.objects.get(user=test_user)
         
         organisor = Organisor.objects.create(
@@ -359,15 +359,15 @@ class TestOrganisorModel(TestCase):
         self.assertEqual(str(organisor), 'test_organisor_str@example.com')
     
     def test_organisor_cascade_delete(self):
-        """Organisor cascade delete testi"""
-        # Test için yeni bir user oluştur
+        """Organisor cascade delete test"""
+        # Create new user for test
         test_user = User.objects.create_user(
             username='testuser_organisor_cascade',
             email='test_organisor_cascade@example.com',
             password='testpass123!',
             is_organisor=True
         )
-        # Signal nedeniyle UserProfile zaten oluşturulmuş olmalı
+        # UserProfile should already be created by signal
         test_user_profile = UserProfile.objects.get(user=test_user)
         
         organisor = Organisor.objects.create(
@@ -375,18 +375,18 @@ class TestOrganisorModel(TestCase):
             organisation=test_user_profile
         )
         
-        # Kullanıcıyı sil
+        # Delete user
         test_user.delete()
         
-        # Organisor da silinmiş olmalı
+        # Organisor should also be deleted
         self.assertFalse(Organisor.objects.filter(pk=organisor.pk).exists())
 
 
 class TestSignupModelIntegration(TestCase):
-    """Signup model entegrasyon testleri"""
+    """Signup model integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user_data = {
             'username': 'integration_test_user',
             'email': 'integration_test@example.com',
@@ -401,74 +401,74 @@ class TestSignupModelIntegration(TestCase):
         }
     
     def test_complete_signup_model_creation(self):
-        """Tam signup model oluşturma testi"""
-        # Test için benzersiz user data oluştur
+        """Complete signup model creation test"""
+        # Create unique user data for test
         user_data = self.user_data.copy()
         user_data['username'] = 'integration_test_user_complete'
         user_data['email'] = 'integration_test_complete@example.com'
         
-        # 1. User oluştur
+        # 1. Create user
         user = User.objects.create_user(**user_data)
         
-        # 2. UserProfile zaten signal ile oluşturulmuş olmalı
+        # 2. UserProfile should already be created by signal
         user_profile = UserProfile.objects.get(user=user)
         
-        # 3. Organisor oluştur
+        # 3. Create organisor
         organisor = Organisor.objects.create(
             user=user,
             organisation=user_profile
         )
         
-        # 4. EmailVerificationToken oluştur
+        # 4. Create EmailVerificationToken
         verification_token = EmailVerificationToken.objects.create(user=user)
         
-        # Tüm modeller doğru oluşturuldu mu
+        # All models created correctly?
         self.assertEqual(User.objects.filter(username='integration_test_user_complete').count(), 1)
         self.assertEqual(UserProfile.objects.filter(user=user).count(), 1)
         self.assertEqual(Organisor.objects.filter(user=user).count(), 1)
         self.assertEqual(EmailVerificationToken.objects.filter(user=user).count(), 1)
         
-        # İlişkiler doğru mu
+        # Relationships correct?
         self.assertEqual(organisor.user, user)
         self.assertEqual(organisor.organisation, user_profile)
         self.assertEqual(verification_token.user, user)
     
     def test_signup_model_relationships(self):
-        """Signup model ilişkileri testi"""
-        # Test için benzersiz user data oluştur
+        """Signup model relationships test"""
+        # Create unique user data for test
         user_data = self.user_data.copy()
         user_data['username'] = 'integration_test_user_relationships'
         user_data['email'] = 'integration_test_relationships@example.com'
         
-        # Tam signup süreci
+        # Full signup flow
         user = User.objects.create_user(**user_data)
         user_profile = UserProfile.objects.get(user=user)
         organisor = Organisor.objects.create(user=user, organisation=user_profile)
         verification_token = EmailVerificationToken.objects.create(user=user)
         
-        # User'dan diğer modellere erişim
+        # Access other models from User
         self.assertEqual(user.userprofile, user_profile)
         self.assertEqual(user.organisor, organisor)
         self.assertTrue(EmailVerificationToken.objects.filter(user=user).exists())
         
-        # UserProfile'dan User'a erişim
+        # Access User from UserProfile
         self.assertEqual(user_profile.user, user)
         
-        # Organisor'dan User ve UserProfile'a erişim
+        # Access User and UserProfile from Organisor
         self.assertEqual(organisor.user, user)
         self.assertEqual(organisor.organisation, user_profile)
         
-        # EmailVerificationToken'dan User'a erişim
+        # Access User from EmailVerificationToken
         self.assertEqual(verification_token.user, user)
     
     def test_signup_model_cascade_operations(self):
-        """Signup model cascade işlemleri testi"""
-        # Test için benzersiz user data oluştur
+        """Signup model cascade operations test"""
+        # Create unique user data for test
         user_data = self.user_data.copy()
         user_data['username'] = 'integration_test_user_cascade'
         user_data['email'] = 'integration_test_cascade@example.com'
         
-        # Tam signup süreci
+        # Full signup flow
         user = User.objects.create_user(**user_data)
         user_profile = UserProfile.objects.get(user=user)
         organisor = Organisor.objects.create(user=user, organisation=user_profile)
@@ -479,29 +479,29 @@ class TestSignupModelIntegration(TestCase):
         organisor_pk = organisor.pk
         verification_token_pk = verification_token.pk
         
-        # User'ı sil
+        # Delete user
         user.delete()
         
-        # Tüm ilişkili modeller silinmiş olmalı
+        # All related models should be deleted
         self.assertFalse(User.objects.filter(pk=user_pk).exists())
         self.assertFalse(UserProfile.objects.filter(pk=user_profile_pk).exists())
         self.assertFalse(Organisor.objects.filter(pk=organisor_pk).exists())
         self.assertFalse(EmailVerificationToken.objects.filter(pk=verification_token_pk).exists())
     
     def test_signup_model_data_integrity(self):
-        """Signup model veri bütünlüğü testi"""
-        # Test için benzersiz user data oluştur
+        """Signup model data integrity test"""
+        # Create unique user data for test
         user_data = self.user_data.copy()
         user_data['username'] = 'integration_test_user_data_consistency'
         user_data['email'] = 'integration_test_data_consistency@example.com'
         
-        # Tam signup süreci
+        # Full signup flow
         user = User.objects.create_user(**user_data)
         user_profile = UserProfile.objects.get(user=user)
         organisor = Organisor.objects.create(user=user, organisation=user_profile)
         verification_token = EmailVerificationToken.objects.create(user=user)
         
-        # Veri tutarlılığı kontrolü
+        # Data consistency check
         self.assertEqual(user.is_organisor, True)
         self.assertEqual(user.email_verified, False)
         self.assertEqual(user.userprofile, user_profile)
@@ -512,10 +512,10 @@ class TestSignupModelIntegration(TestCase):
         self.assertFalse(verification_token.is_expired())
     
     def test_signup_model_validation(self):
-        """Signup model validasyon testi"""
-        # Model validation testleri
+        """Signup model validation test"""
+        # Model validation tests
         
-        # Boş username - Django bunu kabul etmiyor
+        # Empty username - Django does not accept this
         with self.assertRaises(ValueError):
             User.objects.create_user(
                 username='',
@@ -523,18 +523,18 @@ class TestSignupModelIntegration(TestCase):
                 password='testpass123!'
             )
         
-        # Model validation'ın çalıştığını test et
+        # Test that model validation works
         user = User.objects.create_user(
             username='validation_test_user',
             email='validation@example.com',
             password='testpass123!'
         )
         
-        # User başarıyla oluşturuldu
+        # User created successfully
         self.assertIsNotNone(user)
         self.assertEqual(user.username, 'validation_test_user')
         
-        # Boş kullanıcı adı
+        # Empty username
         with self.assertRaises(Exception):
             User.objects.create_user(
                 username='',
@@ -544,9 +544,9 @@ class TestSignupModelIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Signup Model Testleri Başlatılıyor...")
+    print("Starting Signup Model Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()
