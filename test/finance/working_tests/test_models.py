@@ -27,7 +27,7 @@ class TestOrderFinanceReportModel(TestCase):
     """OrderFinanceReport model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='finance_organisor_test',
@@ -229,7 +229,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
     """OrderFinanceReport model entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='integration_finance_organisor',

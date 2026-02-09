@@ -93,6 +93,6 @@ if __name__ == "__main__":
         print("\n\n⚠️  Test runner kullanıcı tarafından durduruldu.")
         sys.exit(0)
     except Exception as e:
-        print(f"\n❌ Hata oluştu: {e}")
+        print(f"\n❌ Error occurred: {e}")
         sys.exit(1)
 

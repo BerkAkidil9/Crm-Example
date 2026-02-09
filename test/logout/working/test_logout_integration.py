@@ -27,7 +27,7 @@ class TestLogoutIntegration(TestCase):
     """Logout entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur (email doğrulanmış)
@@ -336,7 +336,7 @@ class TestLogoutSecurityIntegration(TestCase):
     """Logout güvenlik entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur

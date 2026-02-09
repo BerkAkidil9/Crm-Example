@@ -49,7 +49,7 @@ def run_tests():
         '6': {
             'name': 'Verbose Mod - Tüm Testler',
             'command': 'test.leads',
-            'description': 'Detaylı çıktı ile tüm testleri çalıştırır',
+            'description': 'Run all tests with verbose output',
             'verbose': True
         }
     }

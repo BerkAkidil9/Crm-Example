@@ -27,7 +27,7 @@ class TestCustomLoginView(TestCase):
     """CustomLoginView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur (email doğrulanmış)
@@ -197,7 +197,7 @@ class TestCustomLoginView(TestCase):
         self.assertIn(response.status_code, [200, 302])
     
     def test_login_view_success_redirect(self):
-        """Başarılı giriş sonrası redirect testi"""
+        """Successful login redirect test"""
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'testpass123'
@@ -289,7 +289,7 @@ class TestLoginViewIntegration(TestCase):
     """Login view entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur

@@ -28,7 +28,7 @@ class TestUserModel(TestCase):
     """User model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user_data = {
             'username': 'testuser',
             'email': 'test@example.com',
@@ -134,7 +134,7 @@ class TestUserProfileModel(TestCase):
     """UserProfile model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username='profileuser',
             email='profile@example.com',
@@ -198,7 +198,7 @@ class TestLeadModel(TestCase):
     """Lead model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='lead_organisor_test',
@@ -491,7 +491,7 @@ class TestAgentModel(TestCase):
     """Agent model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='agent_organisor_test',
@@ -625,7 +625,7 @@ class TestEmailVerificationTokenModel(TestCase):
     """EmailVerificationToken model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username='token_test',
             email='token_test@example.com',
@@ -735,7 +735,7 @@ class TestCategoryModels(TestCase):
     """Category, SourceCategory, ValueCategory model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='category_organisor_test',
@@ -848,7 +848,7 @@ class TestLeadModelSignals(TransactionTestCase):
     """Lead model signal testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='signal_organisor_test',
@@ -896,7 +896,7 @@ class TestLeadModelIntegration(TestCase):
     """Lead model entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='integration_organisor_test',

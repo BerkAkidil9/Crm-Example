@@ -27,7 +27,7 @@ class TestLoginIntegration(TestCase):
     """Login entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur (email doğrulanmış)

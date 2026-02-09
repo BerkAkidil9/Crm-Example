@@ -26,7 +26,7 @@ class TestAgentModel(TestCase):
     """Agent model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='organisor_test',
@@ -259,7 +259,7 @@ class TestEmailVerificationTokenModel(TestCase):
     """EmailVerificationToken model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username='token_test',
             email='token_test@example.com',
@@ -370,7 +370,7 @@ class TestAgentModelIntegration(TestCase):
     """Agent model entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor oluştur
         self.organisor_user = User.objects.create_user(
             username='integration_organisor',

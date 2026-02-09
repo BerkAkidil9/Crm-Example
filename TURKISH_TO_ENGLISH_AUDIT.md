@@ -1,12 +1,12 @@
-# Türkçe → İngilizce Çeviri Özeti (Migrations Hariç)
+# Turkish → English Translation Summary (Excluding Migrations)
 
-Bu dosya projede **migration dosyaları hariç** tüm Türkçe içeriği listeler. İngilizceye çeviri yaparken referans olarak kullanın.
+This file lists all Turkish content in the project **excluding migration files**. Use it as a reference when translating to English.
 
 ---
 
-## 1. HTML Şablonları (UI metinleri)
+## 1. HTML Templates (UI text)
 
-| Dosya | Türkçe metin | Önerilen İngilizce |
+| File | Turkish text | Suggested English |
 |-------|--------------|---------------------|
 | `organisors/templates/organisors/organisor_list.html` | `Ara` (label) | `Search` |
 | `agents/templates/agents/agent_list.html` | `Ara` (label) | `Search` |
@@ -16,16 +16,16 @@ Bu dosya projede **migration dosyaları hariç** tüm Türkçe içeriği listele
 
 ## 2. Python – Uygulama kodu (yorumlar / mesajlar)
 
-| Dosya | Satır | Türkçe | Önerilen İngilizce |
+| File | Line | Turkish | Suggested English |
 |-------|-------|--------|---------------------|
 | `ProductsAndStock/views.py` | 567 | `# Critical Alerts: sadece urun hala kritik durumdaysa say ve listele (duzelince dusar)` | `# Critical Alerts: only count/list product if still in critical state (drop when fixed)` |
 | `ProductsAndStock/views.py` | 568 | `# Ayni urun birden fazla alert kaydi ile tekrar etmesin: urun basina bir tane (en guncel alert)` | `# Same product should not repeat with multiple alert records: one per product (latest alert)` |
 
 ---
 
-## 3. Dokümantasyon (MD dosyaları)
+## 3. Documentation (MD files)
 
-### 3.1 `START_PROJECT.md` (tamamı Türkçe)
+### 3.1 `START_PROJECT.md` (was fully Turkish, now translated)
 - **Başlık:** "Django CRM Projesi Başlatma Rehberi" → "Django CRM Project Startup Guide"
 - "Projeyi Sıfırdan Başlatmak İçin Gerekli Komutlar" → "Required Commands to Start the Project from Scratch"
 - "Terminal/PowerShell'i açın ve proje klasörüne gidin" → "Open Terminal/PowerShell and go to the project folder"
@@ -135,11 +135,11 @@ Bu dosya projede **migration dosyaları hariç** tüm Türkçe içeriği listele
 
 ---
 
-## 4. Python – Test dosyaları (Türkçe docstring / yorumlar)
+## 4. Python – Test files (Turkish docstrings / comments)
 
-Aşağıdaki dosyalarda **Türkçe docstring** ve **Türkçe yorum satırları** var. Hepsi İngilizceye çevrilebilir (örn. "Test verilerini hazırla" → "Set up test data", "Gerekli alanların varlığını kontrol et" → "Check presence of required fields").
+The following files contained **Turkish docstrings** and **Turkish comment lines**. All have been translated to English (e.g. "Test verilerini hazırla" → "Set up test data", "Gerekli alanların varlığını kontrol et" → "Check presence of required fields").
 
-| Konum | Not |
+| Location | Note |
 |-------|-----|
 | `test/leads/test_forms.py` | Çok sayıda Türkçe docstring ve yorum |
 | `test/products_and_stock/working_tests/test_forms.py` | Türkçe docstring ve yorumlar |
@@ -151,7 +151,7 @@ Aşağıdaki dosyalarda **Türkçe docstring** ve **Türkçe yorum satırları**
 | `test/products_and_stock/broken_tests/test_views_simple.py` | Türkçe docstring ve yorumlar |
 | `test/leads/test_integration.py` | "Email entegrasyon testleri" vb. |
 
-Örnek çeviriler:
+Example translations:
 - "Test verilerini hazırla" → "Set up test data"
 - "Form başlatma testi" → "Form initialization test"
 - "Geçerli veri ile form testi" → "Form test with valid data"
@@ -167,22 +167,22 @@ Aşağıdaki dosyalarda **Türkçe docstring** ve **Türkçe yorum satırları**
 
 ---
 
-## 5. Özet tablo (migrations hariç)
+## 5. Summary table (excluding migrations)
 
-| Kategori | Dosya sayısı (yaklaşık) | Öncelik |
+| Category | Approx. file count | Priority |
 |----------|--------------------------|---------|
-| HTML (UI) | 3 | Yüksek (kullanıcı görür) |
-| Python uygulama (yorum) | 1 (`ProductsAndStock/views.py`) | Orta |
-| Dokümantasyon (MD) | 10+ | Orta |
-| Test dosyaları (docstring/yorum) | 9+ | Düşük (isteğe bağlı) |
+| HTML (UI) | 3 | High (user-facing) |
+| Python app (comment) | 1 (`ProductsAndStock/views.py`) | Medium |
+| Documentation (MD) | 10+ | Medium |
+| Test files (docstring/comment) | 9+ | Low (optional) |
 
 ---
 
 ## 6. Migration’lar hakkında
 
-**Migrations dahil edilmedi.**  
-`activity_log/migrations/0001_initial.py`, `tasks/migrations/0001_initial.py` vb. dosyalarda `verbose_name` ve choice metinleri Türkçe (örn. "Organisor oluşturuldu", "Başlık", "İçerik"). Bunları değiştirmek yeni migration üretir veya veritabanı ile uyumsuzluk riski taşır; sadece **yeni** modellerde/alanlarda İngilizce kullanmanız önerilir. Eski migration dosyalarını dokunmadan bırakabilirsiniz.
+**Migrations are excluded.**  
+Files such as `activity_log/migrations/0001_initial.py`, `tasks/migrations/0001_initial.py` contain Turkish `verbose_name` and choice texts (e.g. "Organisor oluşturuldu", "Başlık", "İçerik"). Changing these would generate new migrations or risk database incompatibility; use English only for **new** models/fields. Leave existing migration files untouched.
 
 ---
 
-*Bu rapor otomatik tarama ve incelemeyle oluşturuldu. Ek Türkçe metin fark ederseniz bu listeye ekleyebilirsiniz.*
+*This report was created via automatic scanning and review. Add any additional Turkish text you notice to this list.*

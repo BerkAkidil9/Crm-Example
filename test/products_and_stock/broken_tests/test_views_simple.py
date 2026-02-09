@@ -51,13 +51,13 @@ class TestProductAndStockViewsSimple(TestCase):
         if created:
             self.agent_profile.save()
         
-        # Test kategorisi
+        # Test category
         self.category = Category.objects.create(
             name="Test Category",
             description="Test category description"
         )
         
-        # Test alt kategorisi
+        # Test subcategory
         self.subcategory = SubCategory.objects.create(
             name="Test SubCategory",
             category=self.category,

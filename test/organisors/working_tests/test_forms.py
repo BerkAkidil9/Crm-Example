@@ -26,7 +26,7 @@ class TestOrganisorModelForm(TestCase):
     """OrganisorModelForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur
         self.user = User.objects.create_user(
             username="testuser_organisor_forms",
@@ -322,7 +322,7 @@ class TestOrganisorCreateForm(TestCase):
     """OrganisorCreateForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.valid_data = {
             'email': 'new_organisor_create@example.com',
             'username': 'new_organisor_create',

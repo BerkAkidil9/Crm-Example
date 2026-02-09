@@ -29,7 +29,7 @@ class TestOrganisorCompleteIntegration(TestCase):
     """Organisor tam entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Admin kullanıcısı oluştur (superuser)
@@ -96,7 +96,7 @@ class TestOrganisorCompleteIntegration(TestCase):
         """Tam organisor yaşam döngüsü testi"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # 1. Organisor list sayfasına git
+        # 1. Go to organisor list page
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Admin')
@@ -197,19 +197,19 @@ class TestOrganisorCompleteIntegration(TestCase):
         response = self.client.get(reverse('organisors:organisor-create'))
         self.assertEqual(response.status_code, 200)
         
-        # Detay görüntüleme (kendi profili)
+        # Detail view (own profile)
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Detay görüntüleme (başka profili)
+        # Detail view (other profile)
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Güncelleme (kendi profili)
+        # Update (own profile)
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Güncelleme (başka profili)
+        # Update (other profile)
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
@@ -217,32 +217,32 @@ class TestOrganisorCompleteIntegration(TestCase):
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Normal organisor kullanıcısı sınırlı işlemler yapabilmeli
+        # Normal organisor user should have limited operations
         self.client.login(username='normal_integration_test', password='testpass123')
         
-        # List görüntüleme (erişemez)
+        # List view (no access)
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('leads:lead-list'))
         
-        # Oluşturma (erişemez)
+        # Create (no access)
         response = self.client.get(reverse('organisors:organisor-create'))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('leads:lead-list'))
         
-        # Detay görüntüleme (kendi profili)
+        # Detail view (own profile)
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Detay görüntüleme (başka profili - erişemez)
+        # Detail view (other profile - no access)
         response = self.client.get(reverse('organisors:organisor-detail', kwargs={'pk': self.admin_organisor.pk}))
         self.assertEqual(response.status_code, 404)
         
-        # Güncelleme (kendi profili)
+        # Update (own profile)
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Güncelleme (başka profili - erişemez)
+        # Update (other profile - no access)
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}))
         self.assertEqual(response.status_code, 404)
         
@@ -429,7 +429,7 @@ class TestOrganisorCompleteIntegration(TestCase):
             self.assertEqual(User.objects.filter(username__startswith='bulk_organisor_').count(), 3)
             self.assertEqual(Organisor.objects.filter(user__username__startswith='bulk_organisor_').count(), 3)
         
-        # Organisor list sayfasında hepsi görünüyor mu
+        # Are all visible on organisor list page
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Bulk1')

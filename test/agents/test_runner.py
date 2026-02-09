@@ -126,7 +126,7 @@ def main():
             print("\n\nÇıkılıyor...")
             break
         except Exception as e:
-            print(f"\n❌ Hata oluştu: {e}")
+            print(f"\n❌ Error occurred: {e}")
             input("\nDevam etmek için Enter'a basın...")
 
 if __name__ == "__main__":

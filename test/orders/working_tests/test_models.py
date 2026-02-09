@@ -26,7 +26,7 @@ class TestOrdersModel(TestCase):
     """Orders model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='orders_organisor_test',
@@ -177,7 +177,7 @@ class TestOrderProductModel(TestCase):
     """OrderProduct model testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='orderproduct_organisor_test',
@@ -397,7 +397,7 @@ class TestOrdersModelSignals(TransactionTestCase):
     """Orders model signal testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='signals_organisor_test',
@@ -532,7 +532,7 @@ class TestOrdersModelIntegration(TestCase):
     """Orders model entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='integration_organisor_test',

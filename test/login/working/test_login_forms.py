@@ -26,7 +26,7 @@ class TestCustomAuthenticationForm(TestCase):
     """CustomAuthenticationForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur (email doğrulanmış)
         self.user = User.objects.create_user(
             username='testuser_login_forms',
@@ -305,7 +305,7 @@ class TestLoginFormIntegration(TestCase):
     """Login form entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='integration_form_user',

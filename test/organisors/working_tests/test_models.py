@@ -23,7 +23,7 @@ class TestOrganisorModel(TestCase):
     """Organisor modeli testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur
         self.user = User.objects.create_user(
             username="testuser_organisor_models",
@@ -163,7 +163,7 @@ class TestOrganisorModelRelationships(TestCase):
     """Organisor model ilişkileri testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Admin kullanıcısı oluştur
         self.admin_user = User.objects.create_user(
             username="admin_organisor_relationships",

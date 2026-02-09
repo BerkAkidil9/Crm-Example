@@ -31,7 +31,7 @@ class TestProductAndStockListView(TestCase):
     """ProductAndStockListView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Kullanıcılar oluştur
@@ -186,7 +186,7 @@ class TestProductAndStockDetailView(TestCase):
     """ProductAndStockDetailView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.admin_user = User.objects.create_user(
@@ -293,7 +293,7 @@ class TestProductAndStockCreateView(TestCase):
     """ProductAndStockCreateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.admin_user = User.objects.create_user(
@@ -414,7 +414,7 @@ class TestProductAndStockUpdateView(TestCase):
     """ProductAndStockUpdateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.admin_user = User.objects.create_user(
@@ -541,7 +541,7 @@ class TestProductAndStockDeleteView(TestCase):
     """ProductAndStockDeleteView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.admin_user = User.objects.create_user(
@@ -626,7 +626,7 @@ class TestGetSubcategoriesView(TestCase):
     """get_subcategories view testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.category = Category.objects.create(name="Electronics")
@@ -680,7 +680,7 @@ class TestBulkPriceUpdateView(TestCase):
     """BulkPriceUpdateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.admin_user = User.objects.create_user(
@@ -845,7 +845,7 @@ class TestSalesDashboardView(TestCase):
     """SalesDashboardView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         self.admin_user = User.objects.create_user(

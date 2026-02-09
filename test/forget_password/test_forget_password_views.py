@@ -31,7 +31,7 @@ class TestCustomPasswordResetView(TestCase):
     """CustomPasswordResetView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur (email doğrulanmış)
@@ -231,7 +231,7 @@ class TestPasswordResetDoneView(TestCase):
     """PasswordResetDoneView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
     
     def test_password_reset_done_view_get(self):
@@ -253,7 +253,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
     """CustomPasswordResetConfirmView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur
@@ -403,7 +403,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': self.uid, 'token': fake_token})
         )
         
-        # Hata sayfasına yönlendirilmeli veya form gösterilmemeli
+        # Should redirect to error page or form should not be shown
         self.assertIn(response.status_code, [200, 302, 404])
     
     def test_password_reset_confirm_view_invalid_uid(self):
@@ -414,7 +414,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': fake_uid, 'token': self.token})
         )
         
-        # Hata sayfasına yönlendirilmeli veya form gösterilmemeli
+        # Should redirect to error page or form should not be shown
         self.assertIn(response.status_code, [200, 302, 404])
     
     def test_password_reset_confirm_view_expired_token(self):
@@ -464,7 +464,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': fake_uid, 'token': fake_token})
         )
         
-        # Hata sayfasına yönlendirilmeli veya form gösterilmemeli
+        # Should redirect to error page or form should not be shown
         self.assertIn(response.status_code, [200, 302, 404])
     
     def test_password_reset_confirm_view_inactive_user(self):
@@ -477,7 +477,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': self.uid, 'token': self.token})
         )
         
-        # Hata sayfasına yönlendirilmeli veya form gösterilmemeli
+        # Should redirect to error page or form should not be shown
         self.assertIn(response.status_code, [200, 302, 404])
 
 
@@ -485,7 +485,7 @@ class TestPasswordResetCompleteView(TestCase):
     """PasswordResetCompleteView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
     
     def test_password_reset_complete_view_get(self):
@@ -508,7 +508,7 @@ class TestForgetPasswordIntegration(TestCase):
     """Forget password entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur
@@ -647,18 +647,18 @@ class TestForgetPasswordIntegration(TestCase):
         data = {'email': 'INTEGRATION_FORGET_PASSWORD@EXAMPLE.COM'}
         with patch('django.core.mail.send_mail'):
             response = self.client.post(reverse('reset-password'), data)
-            self.assertEqual(response.status_code, 302)  # Başarılı
+            self.assertEqual(response.status_code, 302)  # Success
         
         # Whitespace içeren email
         data = {'email': '  integration_forget_password@example.com  '}
         with patch('django.core.mail.send_mail'):
             response = self.client.post(reverse('reset-password'), data)
-            self.assertEqual(response.status_code, 302)  # Başarılı
+            self.assertEqual(response.status_code, 302)  # Success
         
         # Var olmayan email için de success döner (güvenlik için)
         data = {'email': 'nonexistent@example.com'}
         response = self.client.post(reverse('reset-password'), data)
-        self.assertEqual(response.status_code, 302)  # Başarılı
+        self.assertEqual(response.status_code, 302)  # Success
 
 
 if __name__ == "__main__":

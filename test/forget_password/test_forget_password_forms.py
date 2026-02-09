@@ -27,7 +27,7 @@ class TestCustomPasswordResetForm(TestCase):
     """CustomPasswordResetForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='testuser_password_reset_form',
@@ -265,7 +265,7 @@ class TestCustomSetPasswordForm(TestCase):
     """CustomSetPasswordForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='testuser_set_password_form',
@@ -547,7 +547,7 @@ class TestForgetPasswordFormIntegration(TestCase):
     """Forget password form entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Test kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='integration_form_user',

@@ -26,7 +26,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
     """EmailOrUsernameModelBackend testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.backend = EmailOrUsernameModelBackend()
         
         # Test kullanıcısı oluştur (email doğrulanmış)
@@ -382,7 +382,7 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
     """EmailOrUsernameModelBackend entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.backend = EmailOrUsernameModelBackend()
         
         # Test kullanıcısı oluştur

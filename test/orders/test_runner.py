@@ -161,7 +161,7 @@ def run_all_tests():
     
     print("-" * 60)
     print(f"Toplam: {len(results)} test")
-    print(f"Başarılı: {passed}")
+    print(f"Passed: {passed}")
     print(f"Başarısız: {failed}")
     print(f"Başarı Oranı: {(passed/len(results)*100):.1f}%")
     

@@ -80,7 +80,7 @@ python test/agents/test_runner.py
 - ✅ Email Verification Workflow (çalışıyor)
 - ✅ Form Integration (çalışıyor)
 
-## 🧪 Test Detayları
+## 🧪 Test Details
 
 ### Model Testleri (test_models.py)
 - **TestAgentModel**: Agent modeli temel işlevleri

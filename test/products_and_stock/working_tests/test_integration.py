@@ -395,7 +395,7 @@ class TestProductsAndStockWorkflow(TestCase):
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
         
-        # Admin kullanıcı ile test
+        # Test with admin user
         self.client.force_login(self.admin_user)
         
         # Can admin perform all operations
@@ -426,7 +426,7 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertEqual(data['subcategories'][0]['name'], 'Smartphones')
     
     def test_form_validation_integration(self):
-        """Form validasyon entegrasyonu testi"""
+        """Form validation integration test"""
         # Form test with invalid data
         invalid_data = {
             'product_name': '',  # Empty name

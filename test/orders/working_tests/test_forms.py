@@ -28,7 +28,7 @@ class TestOrderModelForm(TestCase):
     """OrderModelForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='orderform_test_user',
@@ -186,7 +186,7 @@ class TestOrderForm(TestCase):
     """OrderForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='orderproductform_test_user',
@@ -341,7 +341,7 @@ class TestOrderProductFormSet(TestCase):
     """OrderProductFormSet testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='formset_test_user',
@@ -415,7 +415,7 @@ class TestOrderProductFormSet(TestCase):
         
         formset = OrderProductFormSet(data=formset_data)
         if not formset.is_valid():
-            # Hata detaylarını yazdır
+            # Print error details
             print(f"Formset errors: {formset.errors}")
             print(f"Formset non_form_errors: {formset.non_form_errors()}")
         self.assertTrue(formset.is_valid())
@@ -486,7 +486,7 @@ class TestOrderProductFormSet(TestCase):
         
         formset = OrderProductFormSet(data=formset_data, instance=self.order)
         if not formset.is_valid():
-            # Hata detaylarını yazdır
+            # Print error details
             print(f"Formset errors: {formset.errors}")
             print(f"Formset non_form_errors: {formset.non_form_errors()}")
             # Formset geçersizse testi geç
@@ -550,7 +550,7 @@ class TestFormIntegration(TestCase):
     """Form entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='integration_form_test_user',
@@ -716,7 +716,7 @@ class TestFormIntegration(TestCase):
         # Formset geçersiz olmalı
         self.assertFalse(formset.is_valid())
         
-        # Hata mesajları olmalı
+        # Error messages should be present
         self.assertTrue(formset.errors)
         
         # İlk form geçerli olmalı

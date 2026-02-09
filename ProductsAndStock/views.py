@@ -585,7 +585,7 @@ class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
         context['critical_alerts_count'] = len(critical_alerts_list)
         context['critical_alerts_list'] = critical_alerts_list
         
-        # Products with Active Alerts: limit yok, sadece alert durumu hala gecerli olanlar (sorun devam ediyorsa)
+        # Products with Active Alerts: no limit, only those still in alert state (issue ongoing)
         products_with_unresolved = products.filter(
             stock_alerts__is_resolved=False
         ).distinct()

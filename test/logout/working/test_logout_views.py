@@ -27,7 +27,7 @@ class TestLogoutView(TestCase):
     """LogoutView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur (email doğrulanmış)
@@ -316,7 +316,7 @@ class TestLogoutViewSecurity(TestCase):
     """Logout güvenlik testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.client = Client()
         
         # Test kullanıcısı oluştur

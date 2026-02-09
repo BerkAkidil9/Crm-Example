@@ -17,7 +17,7 @@ class TestAdminOnlyMixin(TestCase):
     """AdminOnlyMixin testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Admin kullanıcısı oluştur
         self.admin_user = User.objects.create_user(
             username='admin_mixin_test',
@@ -74,7 +74,7 @@ class TestOrganisorAndAdminMixin(TestCase):
     """OrganisorAndAdminMixin testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='organisor_mixin_test',
@@ -133,7 +133,7 @@ class TestSelfProfileOnlyMixin(TestCase):
     """SelfProfileOnlyMixin testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Admin kullanıcısı oluştur
         self.admin_user = User.objects.create_user(
             username='admin_self_profile_test',
@@ -212,7 +212,7 @@ class TestMixinIntegration(TestCase):
     """Mixin entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Farklı rollerde kullanıcılar oluştur
         self.admin_user = User.objects.create_user(
             username='admin_integration_test',

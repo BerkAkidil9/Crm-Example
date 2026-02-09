@@ -29,7 +29,7 @@ class TestOrderCompleteWorkflow(TestCase):
     """Order tam workflow entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='workflow_test_user',
@@ -121,7 +121,7 @@ class TestOrderCompleteWorkflow(TestCase):
         
         # 3. Order oluşturuldu mu kontrol et
         if response.status_code == 302:
-            # Başarılı durumda redirect olmalı
+            # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
         else:
             # Başarısız durumda form tekrar gösterilir
@@ -233,7 +233,7 @@ class TestOrderCompleteWorkflow(TestCase):
         
         # Güncelleme başarılı mı kontrol et
         if response.status_code == 302:
-            # Başarılı durumda redirect olmalı
+            # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
         else:
             # Başarısız durumda form tekrar gösterilir
@@ -278,7 +278,7 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
     """Order stok yönetimi entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='stock_integration_test_user',
@@ -460,7 +460,7 @@ class TestOrderFinanceIntegration(TestCase):
     """Order finance entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='finance_integration_test_user',
@@ -606,7 +606,7 @@ class TestOrderMultiUserIntegration(TestCase):
     """Order çoklu kullanıcı entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # İlk kullanıcı ve organisation
         self.user1 = User.objects.create_user(
             username='multi_user1',

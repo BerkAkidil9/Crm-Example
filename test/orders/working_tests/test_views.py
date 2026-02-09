@@ -30,7 +30,7 @@ class TestOrderListView(TestCase):
     """OrderListView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='orderlist_test_user',
@@ -148,7 +148,7 @@ class TestOrderDetailView(TestCase):
     """OrderDetailView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='orderdetail_test_user',
@@ -282,7 +282,7 @@ class TestOrderCreateView(TestCase):
     """OrderCreateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='ordercreate_test_user',
@@ -375,7 +375,7 @@ class TestOrderCreateView(TestCase):
         
         # Form validation başarısız olabilir, bu durumda 200 döner
         if response.status_code == 302:
-            # Başarılı durumda redirect olmalı
+            # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
         else:
             # Başarısız durumda form tekrar gösterilir
@@ -454,7 +454,7 @@ class TestOrderUpdateView(TestCase):
     """OrderUpdateView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='orderupdate_test_user',
@@ -560,7 +560,7 @@ class TestOrderCancelView(TestCase):
     """OrderCancelView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='ordercancel_test_user',
@@ -675,7 +675,7 @@ class TestOrderDeleteView(TestCase):
     """OrderDeleteView testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.user = User.objects.create_user(
             username='orderdelete_test_user',

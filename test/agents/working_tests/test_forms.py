@@ -1,6 +1,6 @@
 """
-Agent Forms Test Dosyası
-Bu dosya Agent ile ilgili tüm formları test eder.
+Agent Forms Test File
+This file tests all forms related to Agent.
 """
 
 import os
@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core import mail
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -27,8 +27,8 @@ class TestAgentModelForm(TestCase):
     """AgentModelForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='organisor_forms',
             email='organisor_forms@example.com',
@@ -45,7 +45,7 @@ class TestAgentModelForm(TestCase):
         self.organisor_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
         Organisor.objects.create(user=self.organisor_user, organisation=self.organisor_profile)
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='agent_forms',
             email='agent_forms@example.com',
@@ -76,10 +76,10 @@ class TestAgentModelForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = AgentModelForm(instance=self.agent_user)
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('email', form.fields)
         self.assertIn('first_name', form.fields)
@@ -91,7 +91,7 @@ class TestAgentModelForm(TestCase):
         self.assertIn('password2', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = AgentModelForm(data=self.valid_data, instance=self.agent_user)
         self.assertTrue(form.is_valid())
     
@@ -207,10 +207,10 @@ class TestAgentModelForm(TestCase):
         self.assertIn('password1', form.errors)
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget attributes test"""
         form = AgentModelForm(instance=self.agent_user)
         
-        # CSS sınıfları ve placeholder kontrol et
+        # Check CSS classes and placeholder
         self.assertIn('placeholder="Username"', str(form['username'].as_widget()))
         self.assertIn('placeholder="Enter email address"', str(form['email'].as_widget()))
         self.assertIn('placeholder="First Name"', str(form['first_name'].as_widget()))
@@ -309,7 +309,7 @@ class TestAgentCreateForm(TestCase):
     """AgentCreateForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.valid_data = {
             'username': 'new_agent_forms',
             'email': 'new_agent_forms@example.com',
@@ -324,10 +324,10 @@ class TestAgentCreateForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = AgentCreateForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('email', form.fields)
         self.assertIn('first_name', form.fields)
@@ -339,7 +339,7 @@ class TestAgentCreateForm(TestCase):
         self.assertIn('password2', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = AgentCreateForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
@@ -449,10 +449,10 @@ class TestAgentCreateForm(TestCase):
         self.assertTrue(user.check_password('testpass123!'))
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget attributes test"""
         form = AgentCreateForm()
         
-        # CSS sınıfları ve placeholder kontrol et
+        # Check CSS classes and placeholder
         self.assertIn('placeholder="Username"', str(form['username'].as_widget()))
         self.assertIn('placeholder="Enter email address"', str(form['email'].as_widget()))
         self.assertIn('placeholder="First Name"', str(form['first_name'].as_widget()))
@@ -463,8 +463,8 @@ class TestAdminAgentCreateForm(TestCase):
     """AdminAgentCreateForm testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='admin_organisor',
             email='admin_organisor@example.com',
@@ -496,10 +496,10 @@ class TestAdminAgentCreateForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = AdminAgentCreateForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('email', form.fields)
         self.assertIn('first_name', form.fields)
@@ -512,7 +512,7 @@ class TestAdminAgentCreateForm(TestCase):
         self.assertIn('password2', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = AdminAgentCreateForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
@@ -574,10 +574,10 @@ class TestAdminAgentCreateForm(TestCase):
         self.assertTrue(user.check_password('testpass123!'))
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget attributes test"""
         form = AdminAgentCreateForm()
         
-        # CSS sınıfları ve placeholder kontrol et
+        # Check CSS classes and placeholder
         self.assertIn('placeholder="Username"', str(form['username'].as_widget()))
         self.assertIn('placeholder="Enter email address"', str(form['email'].as_widget()))
         self.assertIn('placeholder="First Name"', str(form['first_name'].as_widget()))
@@ -591,8 +591,8 @@ class TestAgentFormIntegration(TestCase):
     """Agent form entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='integration_organisor',
             email='integration_organisor@example.com',
@@ -697,7 +697,7 @@ class TestAgentFormIntegration(TestCase):
         # Kullanıcı oluşturuldu mu
         self.assertTrue(User.objects.filter(username='admin_agent').exists())
         
-        # Agent oluştur
+        # Create agent
         agent = Agent.objects.create(user=user, organisation=self.organisor_profile)
         
         # Agent doğru organisation'a atandı mı
@@ -727,9 +727,9 @@ class TestAgentFormIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Agent Forms Testleri Başlatılıyor...")
+    print("Agent Forms Tests Starting...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

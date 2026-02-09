@@ -35,7 +35,7 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
     """OrganisorAndLoginRequiredMixin testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.factory = RequestFactory()
         
         # Normal kullanıcı
@@ -138,7 +138,7 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
     """AgentAndOrganisorLoginRequiredMixin testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.factory = RequestFactory()
         
         # Normal kullanıcı
@@ -257,7 +257,7 @@ class TestProductsAndStockAccessMixin(TestCase):
     """ProductsAndStockAccessMixin testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.factory = RequestFactory()
         
         # Normal kullanıcı

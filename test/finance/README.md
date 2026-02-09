@@ -92,7 +92,7 @@ python test/finance/test_runner.py --module integration
 - ✅ Date filtering
 - ✅ Organisation filtering
 
-## 🎯 Test Detayları
+## 🎯 Test Details
 
 ### OrderFinanceReport Model Testleri (15 test)
 1. **Model Creation Tests**

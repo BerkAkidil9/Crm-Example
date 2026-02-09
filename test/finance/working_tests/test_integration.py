@@ -32,7 +32,7 @@ class TestFinanceOrdersIntegration(TestCase):
     """Finance-Orders entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='finance_orders_integration',
@@ -346,7 +346,7 @@ class TestFinanceProductsIntegration(TestCase):
     """Finance-Products entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='finance_products_integration',
@@ -531,7 +531,7 @@ class TestFinanceViewsIntegration(TestCase):
     """Finance Views entegrasyon testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='finance_views_integration',
@@ -667,7 +667,7 @@ class TestFinanceDataConsistency(TransactionTestCase):
     """Finance veri tutarlılığı testleri"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         # Organisor kullanıcısı oluştur
         self.organisor_user = User.objects.create_user(
             username='finance_consistency',
