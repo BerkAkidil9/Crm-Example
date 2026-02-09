@@ -195,7 +195,24 @@ The following have been translated to English (migrations left unchanged as per 
 - **Finance tests:** `test/finance/working_tests/test_models.py`, `test_integration.py`, `test_forms.py` (docstrings and comments)
 - **Organisors tests:** `test/organisors/working_tests/test_integration.py` (one comment)
 
-**Remaining (optional):** test/leads (test_forms, test_models, test_views), test/login/working, test/forget_password (test_*_forms.py, test_*_views.py), test/logout/working, test/products_and_stock (all), test/signup – may still contain Turkish docstrings/comments. HTML templates and app code (non-migration) are already in English or were not Turkish.
+**Remaining (optional):** test/leads (test_forms, test_models, test_views), test/login/working, test/logout/working, test/products_and_stock (broken_tests), test/signup – may still contain Turkish docstrings/comments.
+
+---
+
+## 8. Latest translation pass (February 2025 – full pass)
+
+The following were translated to English in this session (migrations left unchanged):
+
+- **Application code:** `ProductsAndStock/forms.py` (comment), `leads/management/commands/create_default_categories.py` (comments), `agents/mixins.py` (comments).
+- **Test init:** `test/__init__.py`, `test/forget_password/__init__.py`.
+- **Forget password tests:** `test/forget_password/test_forget_password_forms.py`, `test/forget_password/test_forget_password_views.py` (all docstrings and comments).
+- **Orders tests:** `test/orders/working_tests/test_forms.py`, `test/orders/working_tests/test_views.py` (remaining Turkish comments).
+- **Finance tests:** `test/finance/working_tests/test_forms.py` (docstrings: testi → test, testleri → tests).
+- **Organisors tests:** `test/organisors/working_tests/test_views.py` (one comment).
+- **Agents tests:** `test/agents/working_tests/test_mixins.py` (one comment).
+
+**Still containing Turkish (optional to translate):**  
+`test/login/working/*` (4 files), `test/logout/working/*` (2 files), `test/products_and_stock/broken_tests/test_views.py`, `test/products_and_stock/broken_tests/test_forms.py`, `test/login/test_runner.py` – docstrings and comments. Same pattern: replace Turkish docstrings/comments with English equivalents (e.g. "Test kullanıcısı oluştur" → "Create test user", "testi" → "test").
 
 ---
 

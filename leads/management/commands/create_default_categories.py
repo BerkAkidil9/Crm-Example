@@ -5,7 +5,7 @@ class Command(BaseCommand):
     help = 'Create default source and value categories for all organizations'
 
     def handle(self, *args, **options):
-        # Kaynak bazlı kategoriler
+        # Source-based categories
         source_categories = [
             "Website",
             "Social Media", 
@@ -19,23 +19,23 @@ class Command(BaseCommand):
             "Unassigned"
         ]
         
-        # Değer bazlı kategoriler
+        # Value-based categories
         value_categories = [
-            "Enterprise",      # Büyük şirketler
-            "SMB",            # Orta ölçekli işletmeler  
-            "Small Business", # Küçük işletmeler
-            "Individual",     # Bireysel müşteriler
-            "High Value",     # Yüksek değer
-            "Medium Value",   # Orta değer
-            "Low Value",      # Düşük değer
+            "Enterprise",      # Large companies
+            "SMB",            # Mid-size businesses
+            "Small Business", # Small businesses
+            "Individual",     # Individual customers
+            "High Value",     # High value
+            "Medium Value",   # Medium value
+            "Low Value",      # Low value
             "Unassigned"
         ]
         
-        # Tüm organizasyonlar için kategorileri oluştur
+        # Create categories for all organizations
         for organisation in UserProfile.objects.all():
             self.stdout.write(f'Creating categories for {organisation.user.username}...')
             
-            # Kaynak kategorilerini oluştur
+            # Create source categories
             for category_name in source_categories:
                 source_cat, created = SourceCategory.objects.get_or_create(
                     name=category_name,
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 if created:
                     self.stdout.write(f'  Created source category: {category_name}')
             
-            # Değer kategorilerini oluştur
+            # Create value categories
             for category_name in value_categories:
                 value_cat, created = ValueCategory.objects.get_or_create(
                     name=category_name,

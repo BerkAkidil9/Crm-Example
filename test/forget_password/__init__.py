@@ -1,6 +1,6 @@
 """
-Forget Password Test Modülü
-Bu modül forget password ile ilgili tüm testleri içerir.
+Forget Password Test Module
+This module contains all tests related to forget password.
 """
 
-# Test modülü başlatma
+# Test module initialization

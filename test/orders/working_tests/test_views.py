@@ -373,14 +373,14 @@ class TestOrderCreateView(TestCase):
         
         response = self.client.post(reverse('orders:order-create'), form_data)
         
-        # Form validation başarısız olabilir, bu durumda 200 döner
+        # Form validation may fail, in which case 200 is returned
         if response.status_code == 302:
             # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
         else:
-            # Başarısız durumda form tekrar gösterilir
+            # On failure the form is shown again
             self.assertEqual(response.status_code, 200)
-            # Form hatalarını kontrol et
+            # Check form errors
             self.assertContains(response, 'form')
         
         # Order should have been created
@@ -423,7 +423,7 @@ class TestOrderCreateView(TestCase):
         
         response = self.client.post(reverse('orders:order-create'), form_data)
         
-        # Form invalid olmalı (redirect olmamalı)
+        # Form should be invalid (no redirect)
         self.assertEqual(response.status_code, 200)
         
         # Order should not have been created
@@ -443,7 +443,7 @@ class TestOrderCreateView(TestCase):
         
         response = self.client.post(reverse('orders:order-create'), form_data)
         
-        # Form invalid olmalı
+        # Form should be invalid
         self.assertEqual(response.status_code, 200)
         
         # Order should not have been created
@@ -451,7 +451,7 @@ class TestOrderCreateView(TestCase):
 
 
 class TestOrderUpdateView(TestCase):
-    """OrderUpdateView testleri"""
+    """OrderUpdateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -508,7 +508,7 @@ class TestOrderUpdateView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'orders/order_update.html')
         
-        # Context'te form olmalı
+        # Context should contain form
         self.assertIn('form', response.context)
         self.assertIn('leads', response.context)
         self.assertIn('products', response.context)

@@ -285,7 +285,7 @@ class TestOrderForm(TestCase):
         }
         
         form = OrderForm(data=form_data)
-        # Ürün seçilmemişse quantity validation çalışmamalı
+        # If no product is selected, quantity validation should not run
         # Form may be invalid but should not have quantity error
         if not form.is_valid():
             self.assertNotIn('product_quantity', form.errors)
@@ -300,11 +300,11 @@ class TestOrderForm(TestCase):
             self.assertIn(field, form.fields)
     
     def test_order_form_meta_model(self):
-        """OrderForm Meta model testi"""
+        """OrderForm Meta model test"""
         self.assertEqual(OrderForm._meta.model, OrderProduct)
     
     def test_order_form_meta_fields(self):
-        """OrderForm Meta fields testi"""
+        """OrderForm Meta fields test"""
         expected_fields = ['id', 'product', 'product_quantity']
         self.assertEqual(OrderForm._meta.fields, expected_fields)
     
@@ -430,7 +430,7 @@ class TestOrderProductFormSet(TestCase):
             'orderproduct_set-0-product': '',
             'orderproduct_set-0-product_quantity': '',
             'orderproduct_set-1-product': self.product2.id,
-            'orderproduct_set-1-product_quantity': '100',  # Yetersiz stok
+            'orderproduct_set-1-product_quantity': '100',  # Insufficient stock
         }
         
         formset = OrderProductFormSet(data=formset_data)
@@ -489,7 +489,7 @@ class TestOrderProductFormSet(TestCase):
             # Print error details
             print(f"Formset errors: {formset.errors}")
             print(f"Formset non_form_errors: {formset.non_form_errors()}")
-            # Formset geçersizse testi geç
+            # If formset is invalid, pass the test
             self.assertTrue(True)
             return
         
@@ -659,7 +659,7 @@ class TestFormIntegration(TestCase):
         formset.instance = order
         formset.save()
         
-        # Sonuçları kontrol et
+        # Check results
         self.assertTrue(orders.objects.filter(order_name='Integration Order').exists())
         self.assertEqual(OrderProduct.objects.filter(order=order).count(), 2)
         
@@ -676,10 +676,10 @@ class TestFormIntegration(TestCase):
         # Test different quantity values for same product
         test_cases = [
             {'quantity': 1, 'should_be_valid': True},
-            {'quantity': 50, 'should_be_valid': True},  # Tam stok
-            {'quantity': 51, 'should_be_valid': False},  # Stoktan fazla
-            {'quantity': 0, 'should_be_valid': False},  # Sıfır
-            {'quantity': -1, 'should_be_valid': False},  # Negatif
+            {'quantity': 50, 'should_be_valid': True},  # Full stock
+            {'quantity': 51, 'should_be_valid': False},  # Over stock
+            {'quantity': 0, 'should_be_valid': False},  # Zero
+            {'quantity': -1, 'should_be_valid': False},  # Negative
         ]
         
         for case in test_cases:
@@ -704,30 +704,30 @@ class TestFormIntegration(TestCase):
             'orderproduct_set-MIN_NUM_FORMS': '0',
             'orderproduct_set-MAX_NUM_FORMS': '1000',
             'orderproduct_set-0-product': self.product1.id,
-            'orderproduct_set-0-product_quantity': '10',  # Geçerli
+            'orderproduct_set-0-product_quantity': '10',  # Valid
             'orderproduct_set-1-product': '',  # Invalid (empty)
             'orderproduct_set-1-product_quantity': '',
             'orderproduct_set-2-product': self.product2.id,
-            'orderproduct_set-2-product_quantity': '100',  # Geçersiz (stoktan fazla)
+            'orderproduct_set-2-product_quantity': '100',  # Invalid (over stock)
         }
         
         formset = OrderProductFormSet(data=formset_data)
         
-        # Formset geçersiz olmalı
+        # Formset should be invalid
         self.assertFalse(formset.is_valid())
         
         # Error messages should be present
         self.assertTrue(formset.errors)
         
-        # İlk form geçerli olmalı
+        # First form should be valid
         self.assertTrue(formset.forms[0].is_valid())
         
         # Second form should be invalid (empty) - but formset may accept empty forms
-        # Bu durumda testi geç
+        # In this case pass the test
         self.assertTrue(True)
         
         # Third form should be invalid (over stock) - formset may not catch this
-        # Bu durumda testi geç
+        # In this case pass the test
         self.assertTrue(True)
 
 
@@ -735,6 +735,6 @@ if __name__ == "__main__":
     print("Starting Orders Forms Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

@@ -906,7 +906,7 @@ class TestOrganisorViewIntegration(TestCase):
         self.assertEqual(updated_user.email, 'updated_integration_new_organisor@example.com')
         self.assertEqual(updated_user.first_name, 'Updated')
         
-        # 7. Yeni organisor sil
+        # 7. Delete new organisor
         response = self.client.post(reverse('organisors:organisor-delete', kwargs={'pk': new_organisor.pk}))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))

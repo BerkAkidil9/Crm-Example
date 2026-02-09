@@ -38,7 +38,7 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
         """Set up test data"""
         self.factory = RequestFactory()
         
-        # Normal kullanıcı
+        # Normal user
         self.normal_user = User.objects.create_user(
             username='normal_user',
             email='normal@example.com',

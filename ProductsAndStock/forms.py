@@ -173,7 +173,7 @@ class AdminProductAndStockModelForm(forms.ModelForm):
         subcategory = cleaned_data.get('subcategory')
         
         if product_name and organisation:
-            # Aynı organizasyon altında aynı isimde ürün var mı kontrol et
+            # Check if a product with the same name exists under the same organization
             existing_product = ProductsAndStock.objects.filter(
                 product_name=product_name,
                 organisation=organisation

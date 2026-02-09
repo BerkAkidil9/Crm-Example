@@ -38,13 +38,13 @@ class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
         if request.user.is_superuser or self.is_admin_user(request.user):
             return super().dispatch(request, *args, **kwargs)
         
-        # Organisor'lar her şeyi görebilir
+        # Organisors can see everything
         if request.user.is_organisor:
             return super().dispatch(request, *args, **kwargs)
         
-        # Agent'lar sadece kendi profillerini görebilir
+        # Agents can only see their own profiles
         if request.user.is_agent:
-            # Detail ve Update view'ları için pk kontrolü
+            # pk check for Detail and Update views
             if 'pk' in kwargs:
                 try:
                     agent = Agent.objects.get(pk=kwargs['pk'])
@@ -54,7 +54,7 @@ class AgentAndOrganisorLoginRequiredMixin(AccessMixin):
                     raise Http404("Agent not found.")
             return super().dispatch(request, *args, **kwargs)
         
-        # Ne organisor ne de agent ise redirect
+        # If neither organisor nor agent, redirect
         return redirect("leads:lead-list")
     
     def is_admin_user(self, user):
