@@ -37,7 +37,7 @@ class SimpleProductsAndStockTest(TestCase):
     def test_category_creation(self):
         """Category creation test"""
         self.assertEqual(self.category.name, "Test Category")
-        # Category modelinde organisation alanı yok
+        # Category model has no organisation field
     
     def test_subcategory_creation(self):
         """Subcategory creation test"""

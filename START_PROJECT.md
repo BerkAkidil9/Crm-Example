@@ -1,48 +1,48 @@
-# Django CRM Projesi Başlatma Rehberi
+# Django CRM Project Startup Guide
 
-## Projeyi Sıfırdan Başlatmak İçin Gerekli Komutlar
+## Required Commands to Start the Project from Scratch
 
-### 1. Terminal/PowerShell'i açın ve proje klasörüne gidin:
+### 1. Open Terminal/PowerShell and go to the project folder:
 ```powershell
 cd "C:\Users\berka\Desktop\GITHUB REPOSITORıES\env"
 ```
 
-### 2. Django sunucusunu başlatın:
+### 2. Start the Django server:
 ```powershell
 .\new_env\Scripts\python.exe manage.py runserver
 ```
 
-### 3. Tarayıcınızda şu adrese gidin:
+### 3. Go to the following address in your browser:
 ```
 http://127.0.0.1:8000/
 ```
 
-## Alternatif Komutlar (Eğer yukarıdaki çalışmazsa):
+## Alternative Commands (If the above does not work):
 
-### Eğer Python modülü bulunamazsa:
+### If Python module is not found:
 ```powershell
-# Önce gerekli paketleri yükleyin
+# First install the required packages
 .\new_env\Scripts\python.exe -m pip install -r requirements.txt
 
-# Sonra sunucuyu başlatın
+# Then start the server
 .\new_env\Scripts\python.exe manage.py runserver
 ```
 
-### Eğer port meşgulse:
+### If the port is in use:
 ```powershell
-# Çalışan Python işlemlerini durdurun
+# Stop running Python processes
 taskkill /f /im python.exe
 
-# Sonra sunucuyu başlatın
+# Then start the server
 .\new_env\Scripts\python.exe manage.py runserver
 ```
 
-## Tek Komut ile Başlatma (Önerilen):
+## Start with Single Command (Recommended):
 ```powershell
 cd "C:\Users\berka\Desktop\GITHUB REPOSITORıES\env" && .\new_env\Scripts\python.exe manage.py runserver
 ```
 
-## Not:
-- Sunucuyu durdurmak için terminal'de `Ctrl+C` tuşlarına basın
-- Proje http://127.0.0.1:8000/ adresinde çalışacak
-- Eğer hata alırsanız, önce `taskkill /f /im python.exe` komutunu çalıştırın
+## Note:
+- To stop the server, press `Ctrl+C` in the terminal
+- The project will run at http://127.0.0.1:8000/
+- If you get an error, run `taskkill /f /im python.exe` first

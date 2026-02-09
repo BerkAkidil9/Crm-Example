@@ -1,6 +1,6 @@
 """
-Leads Forms Test Dosyası
-Bu dosya Leads modülündeki tüm formları test eder.
+Leads Forms Test File
+This file tests all forms in the Leads module.
 """
 
 import os
@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core import mail
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -28,13 +28,13 @@ User = get_user_model()
 
 
 class TestPhoneNumberWidget(TestCase):
-    """PhoneNumberWidget testleri"""
-    
+    """PhoneNumberWidget tests"""
+
     def test_widget_initialization(self):
-        """Widget başlatma testi"""
+        """Widget initialization test"""
         widget = PhoneNumberWidget()
-        
-        # Widget'ın iki alt widget'ı olmalı
+
+        # Widget should have two sub-widgets
         self.assertEqual(len(widget.widgets), 2)
         
         # First widget is Select (country code)
@@ -76,7 +76,7 @@ class TestPhoneNumberWidget(TestCase):
         result = widget.value_from_datadict(data, {}, 'phone_number')
         self.assertEqual(result, '+905551234567')
         
-        # Boş telefon numarası
+        # Empty phone number
         data = {
             'phone_number_0': '+90',
             'phone_number_1': ''
@@ -87,11 +87,11 @@ class TestPhoneNumberWidget(TestCase):
 
 
 class TestLeadModelForm(TestCase):
-    """LeadModelForm testleri"""
-    
+    """LeadModelForm tests"""
+
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='lead_forms_organisor',
             email='lead_forms_organisor@example.com',
@@ -109,7 +109,7 @@ class TestLeadModelForm(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='lead_forms_agent',
             email='lead_forms_agent@example.com',
@@ -128,10 +128,10 @@ class TestLeadModelForm(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent'ın organisation'ı da organisor_profile
+        # Agent's organisation is also organisor_profile
         self.agent_profile = self.organisor_profile
         
-        # Kategoriler oluştur
+        # Create categories
         self.category = Category.objects.create(
             name="Test Category",
             organisation=self.organisor_profile
@@ -147,7 +147,7 @@ class TestLeadModelForm(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent'ın organisation'ı için de kategori oluştur
+        # Create category for agent's organisation too
         self.agent_source_category = SourceCategory.objects.create(
             name="Social Media",
             organisation=self.agent_profile
@@ -174,13 +174,13 @@ class TestLeadModelForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = LeadModelForm(request=request)
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('first_name', form.fields)
         self.assertIn('last_name', form.fields)
         self.assertIn('age', form.fields)
@@ -193,7 +193,7 @@ class TestLeadModelForm(TestCase):
         self.assertIn('address', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
@@ -201,11 +201,11 @@ class TestLeadModelForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
+        """Required fields test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
-        # Tüm alanlar zorunlu
+        # All fields are required
         required_fields = [
             'first_name', 'last_name', 'age', 'description', 
             'phone_number', 'email', 'address'
@@ -220,8 +220,8 @@ class TestLeadModelForm(TestCase):
             self.assertIn(field, form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
-        # Önce bir lead oluştur
+        """Email uniqueness validation test"""
+        # First create a lead
         Lead.objects.create(
             first_name='Existing',
             last_name='Lead',
@@ -236,7 +236,7 @@ class TestLeadModelForm(TestCase):
         request = self.factory.get('/')
         request.user = self.organisor_user
         
-        # Aynı email ile form oluştur
+        # Create form with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
@@ -246,8 +246,8 @@ class TestLeadModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['email']))
     
     def test_form_phone_number_validation_unique(self):
-        """Telefon numarası benzersizlik validasyonu testi"""
-        # Önce bir lead oluştur
+        """Phone number uniqueness validation test"""
+        # First create a lead
         Lead.objects.create(
             first_name='Existing',
             last_name='Lead',
@@ -262,7 +262,7 @@ class TestLeadModelForm(TestCase):
         request = self.factory.get('/')
         request.user = self.organisor_user
         
-        # Aynı telefon numarası ile form oluştur
+        # Create form with same phone number
         data = self.valid_data.copy()
         data['phone_number'] = '+905552222222'
         
@@ -272,13 +272,13 @@ class TestLeadModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['phone_number']))
     
     def test_form_queryset_filtering_organisor(self):
-        """Organisor için queryset filtreleme testi"""
+        """Queryset filtering test for organisor"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = LeadModelForm(request=request)
         
-        # Sadece kendi organizasyonunun kategorileri ve agentları olmalı
+        # Only own organisation's categories and agents should be present
         self.assertEqual(
             set(form.fields['source_category'].queryset),
             set(SourceCategory.objects.filter(organisation=self.organisor_profile))
@@ -293,22 +293,22 @@ class TestLeadModelForm(TestCase):
         )
     
     def test_form_queryset_filtering_agent(self):
-        """Agent için queryset filtreleme testi"""
+        """Queryset filtering test for agent"""
         request = self.factory.get('/')
         request.user = self.agent_user
         
         form = LeadModelForm(request=request)
         
-        # Sadece kendi organizasyonunun kategorileri ve agentları olmalı
-        # Form agent ile başlatıldığında queryset'ler filtrelenmiş olmalı
-        # Ancak form __init__ içinde queryset'ler set edilir
-        # Bu test queryset'lerin var olduğunu test eder
+        # Only own organisation's categories and agents should be present
+        # When form is initialized with agent, querysets should be filtered
+        # But querysets are set in form __init__
+        # This test checks that querysets exist
         self.assertIsNotNone(form.fields['source_category'].queryset)
         self.assertIsNotNone(form.fields['value_category'].queryset)
         self.assertIsNotNone(form.fields['agent'].queryset)
     
     def test_form_queryset_filtering_superuser(self):
-        """Superuser için queryset filtreleme testi"""
+        """Queryset filtering test for superuser"""
         superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
@@ -320,20 +320,20 @@ class TestLeadModelForm(TestCase):
         
         form = LeadModelForm(request=request)
         
-        # Tüm kategoriler ve agentlar olmalı
-        # Queryset'lerin var olduğunu test et
+        # All categories and agents should be present
+        # Test that querysets exist
         self.assertIsNotNone(form.fields['source_category'].queryset)
         self.assertIsNotNone(form.fields['value_category'].queryset)
         self.assertIsNotNone(form.fields['agent'].queryset)
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget properties test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = LeadModelForm(request=request)
         
-        # CSS sınıfları ve placeholder kontrol et
+        # Check CSS classes and placeholder
         self.assertIn('placeholder="First Name"', str(form['first_name'].as_widget()))
         self.assertIn('placeholder="Last Name"', str(form['last_name'].as_widget()))
         self.assertIn('placeholder="Age"', str(form['age'].as_widget()))
@@ -343,7 +343,7 @@ class TestLeadModelForm(TestCase):
         self.assertIn('placeholder="Address"', str(form['address'].as_widget()))
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
@@ -354,7 +354,7 @@ class TestLeadModelForm(TestCase):
         lead.organisation = self.organisor_profile
         lead.save()
         
-        # Lead alanları doğru mu
+        # Lead fields correct
         self.assertEqual(lead.first_name, 'John')
         self.assertEqual(lead.last_name, 'Doe')
         self.assertEqual(lead.age, 30)
@@ -369,11 +369,11 @@ class TestLeadModelForm(TestCase):
 
 
 class TestAdminLeadModelForm(TestCase):
-    """AdminLeadModelForm testleri"""
+    """AdminLeadModelForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='admin_lead_forms_organisor',
             email='admin_lead_forms_organisor@example.com',
@@ -391,7 +391,7 @@ class TestAdminLeadModelForm(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='admin_lead_forms_agent',
             email='admin_lead_forms_agent@example.com',
@@ -410,10 +410,10 @@ class TestAdminLeadModelForm(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent'ın organisation'ı da organisor_profile
+        # Agent's organisation is also organisor_profile
         self.agent_profile = self.organisor_profile
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -424,7 +424,7 @@ class TestAdminLeadModelForm(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent'ın organisation'ı için de kategori oluştur
+        # Create category for agent's organisation too
         self.agent_source_category = SourceCategory.objects.create(
             name="Social Media",
             organisation=self.agent_profile
@@ -452,10 +452,10 @@ class TestAdminLeadModelForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = AdminLeadModelForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('first_name', form.fields)
         self.assertIn('last_name', form.fields)
         self.assertIn('age', form.fields)
@@ -469,37 +469,37 @@ class TestAdminLeadModelForm(TestCase):
         self.assertIn('address', form.fields)
     
     def test_form_organisation_field(self):
-        """Organisation alanı testi"""
+        """Organisation field test"""
         form = AdminLeadModelForm()
         
-        # Organisation field'ı doğru queryset'e sahip mi
+        # Organisation field has correct queryset
         self.assertIn(self.organisor_profile, form.fields['organisation'].queryset)
         
-        # Empty label kontrol et
+        # Check empty label
         self.assertEqual(form.fields['organisation'].empty_label, "Select Organisation")
     
     def test_form_organisation_queryset(self):
-        """Organisation queryset testi"""
+        """Organisation queryset test"""
         form = AdminLeadModelForm()
         
-        # Sadece organisor'ların organisation'ları olmalı
+        # Only organisors' organisations should be present
         queryset = form.fields['organisation'].queryset
         for profile in queryset:
             self.assertTrue(profile.user.is_organisor)
             self.assertFalse(profile.user.is_superuser)
     
     def test_form_initial_querysets_empty(self):
-        """Form başlangıç queryset'leri boş testi"""
+        """Form initial querysets empty test"""
         form = AdminLeadModelForm()
         
-        # Başlangıçta boş queryset'ler
+        # Initially empty querysets
         self.assertEqual(form.fields['agent'].queryset.count(), 0)
         self.assertEqual(form.fields['source_category'].queryset.count(), 0)
         self.assertEqual(form.fields['value_category'].queryset.count(), 0)
     
     def test_form_with_instance_querysets_populated(self):
-        """Form instance ile queryset'ler dolu testi"""
-        # Lead oluştur
+        """Form instance with filled querysets test"""
+        # Create lead
         lead = Lead.objects.create(
             first_name='Test',
             last_name='Lead',
@@ -513,23 +513,23 @@ class TestAdminLeadModelForm(TestCase):
         
         form = AdminLeadModelForm(instance=lead)
         
-        # Instance ile queryset'ler dolu olmalı
+        # With instance, querysets should be filled
         self.assertGreater(form.fields['agent'].queryset.count(), 0)
         self.assertGreater(form.fields['source_category'].queryset.count(), 0)
         self.assertGreater(form.fields['value_category'].queryset.count(), 0)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
-        # AdminLeadModelForm queryset'leri boş olduğu için form invalid olacak
-        # Bu beklenen davranış - form'un agent/category seçimleri olması gerekir
+        """Form test with valid data"""
+        # AdminLeadModelForm has empty querysets so form will be invalid
+        # This is expected - form needs agent/category selections
         form = AdminLeadModelForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
-        # Agent, source ve value category hataları olmalı
+        # Agent, source and value category errors should be present
         self.assertIn('agent', form.errors)
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
-        # Tüm alanlar zorunlu
+        """Required fields test"""
+        # All fields are required
         required_fields = [
             'first_name', 'last_name', 'age', 'organisation',
             'description', 'phone_number', 'email', 'address'
@@ -544,8 +544,8 @@ class TestAdminLeadModelForm(TestCase):
             self.assertIn(field, form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
-        # Önce bir lead oluştur
+        """Email uniqueness validation test"""
+        # First create a lead
         Lead.objects.create(
             first_name='Existing',
             last_name='Lead',
@@ -557,7 +557,7 @@ class TestAdminLeadModelForm(TestCase):
             address='456 Existing Street'
         )
         
-        # Aynı email ile form oluştur
+        # Create form with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
@@ -567,8 +567,8 @@ class TestAdminLeadModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['email']))
     
     def test_form_phone_number_validation_unique(self):
-        """Telefon numarası benzersizlik validasyonu testi"""
-        # Önce bir lead oluştur
+        """Phone number uniqueness validation test"""
+        # First create a lead
         Lead.objects.create(
             first_name='Existing',
             last_name='Lead',
@@ -580,7 +580,7 @@ class TestAdminLeadModelForm(TestCase):
             address='456 Existing Street'
         )
         
-        # Aynı telefon numarası ile form oluştur
+        # Create form with same phone number
         data = self.valid_data.copy()
         data['phone_number'] = '+905555555555'
         
@@ -590,19 +590,19 @@ class TestAdminLeadModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['phone_number']))
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
-        # AdminLeadModelForm queryset'leri boş olduğu için save edilemez
-        # Form invalid olduğu için save çağrılamaz
+        """Form save method test"""
+        # AdminLeadModelForm has empty querysets so cannot save
+        # Form is invalid so save cannot be called
         form = AdminLeadModelForm(data=self.valid_data)
         self.assertFalse(form.is_valid())
-        # Form invalid olduğunda save etmeyi test etmiyoruz
+        # We do not test save when form is invalid
 
 
 class TestLeadForm(TestCase):
-    """LeadForm testleri"""
+    """LeadForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.valid_data = {
             'first_name': 'John',
             'last_name': 'Doe',
@@ -610,21 +610,21 @@ class TestLeadForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = LeadForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('first_name', form.fields)
         self.assertIn('last_name', form.fields)
         self.assertIn('age', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = LeadForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
+        """Required fields test"""
         required_fields = ['first_name', 'last_name', 'age']
         
         for field in required_fields:
@@ -636,8 +636,8 @@ class TestLeadForm(TestCase):
             self.assertIn(field, form.errors)
     
     def test_form_age_validation(self):
-        """Yaş validasyonu testi"""
-        # Negatif yaş
+        """Age validation test"""
+        # Negative age
         data = self.valid_data.copy()
         data['age'] = -1
         
@@ -645,7 +645,7 @@ class TestLeadForm(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('age', form.errors)
         
-        # Sıfır yaş (geçerli)
+        # Zero age (valid)
         data = self.valid_data.copy()
         data['age'] = 0
         
@@ -654,10 +654,10 @@ class TestLeadForm(TestCase):
 
 
 class TestCustomUserCreationForm(TestCase):
-    """CustomUserCreationForm testleri"""
+    """CustomUserCreationForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.valid_data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
@@ -672,10 +672,10 @@ class TestCustomUserCreationForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = CustomUserCreationForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('email', form.fields)
         self.assertIn('first_name', form.fields)
@@ -687,12 +687,12 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('password2', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
+        """Required fields test"""
         required_fields = [
             'username', 'email', 'first_name', 'last_name', 
             'phone_number', 'date_of_birth', 'gender', 'password1', 'password2'
@@ -711,15 +711,15 @@ class TestCustomUserCreationForm(TestCase):
             self.assertIn(field, form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Email uniqueness validation test"""
+        # First create a user
         User.objects.create_user(
             username='existinguser',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı email ile form oluştur
+        # Create form with same email
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
@@ -729,15 +729,15 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('already exists', str(form.errors['email']))
     
     def test_form_username_validation_unique(self):
-        """Kullanıcı adı benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Username uniqueness validation test"""
+        # First create a user
         User.objects.create_user(
             username='existinguser',
             email='existing@example.com',
             password='testpass123'
         )
         
-        # Aynı kullanıcı adı ile form oluştur
+        # Create form with same username
         data = self.valid_data.copy()
         data['username'] = 'existinguser'
         
@@ -747,8 +747,8 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('already exists', str(form.errors['username']))
     
     def test_form_phone_number_validation_unique(self):
-        """Telefon numarası benzersizlik validasyonu testi"""
-        # Önce bir kullanıcı oluştur
+        """Phone number uniqueness validation test"""
+        # First create a user
         User.objects.create_user(
             username='existinguser',
             email='existing@example.com',
@@ -756,7 +756,7 @@ class TestCustomUserCreationForm(TestCase):
             phone_number='+905556666666'
         )
         
-        # Aynı telefon numarası ile form oluştur
+        # Create form with same phone number
         data = self.valid_data.copy()
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5556666666'
@@ -767,8 +767,8 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('already exists', str(form.errors['phone_number']))
     
     def test_form_password_validation(self):
-        """Şifre validasyonu testi"""
-        # Farklı şifreler
+        """Password validation test"""
+        # Different passwords
         data = self.valid_data.copy()
         data['password1'] = 'testpass123!'
         data['password2'] = 'differentpass123!'
@@ -779,13 +779,13 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn("didn", str(form.errors['password2']))
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
         
         user = form.save()
         
-        # Kullanıcı alanları doğru mu
+        # User fields correct
         self.assertEqual(user.username, 'newuser')
         self.assertEqual(user.email, 'newuser@example.com')
         self.assertEqual(user.first_name, 'New')
@@ -795,14 +795,14 @@ class TestCustomUserCreationForm(TestCase):
         self.assertEqual(user.date_of_birth, date(1990, 1, 1))
         self.assertEqual(user.gender, 'M')
         
-        # Şifre doğru set edildi mi
+        # Password set correctly
         self.assertTrue(user.check_password('testpass123!'))
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget properties test"""
         form = CustomUserCreationForm()
         
-        # CSS sınıfları ve placeholder kontrol et
+        # Check CSS classes and placeholder
         self.assertIn('placeholder="Username"', str(form['username'].as_widget()))
         self.assertIn('placeholder="Email"', str(form['email'].as_widget()))
         self.assertIn('placeholder="First Name"', str(form['first_name'].as_widget()))
@@ -811,28 +811,28 @@ class TestCustomUserCreationForm(TestCase):
         self.assertIn('autocomplete="new-password"', str(form['password2'].as_widget()))
     
     def test_form_phone_number_widget(self):
-        """Telefon numarası widget testi"""
+        """Phone number widget test"""
         form = CustomUserCreationForm()
         
-        # PhoneNumberWidget kullanılıyor mu
+        # PhoneNumberWidget is used
         from leads.forms import PhoneNumberWidget
         self.assertIsInstance(form.fields['phone_number'].widget, PhoneNumberWidget)
     
     def test_form_gender_choices(self):
-        """Cinsiyet seçenekleri testi"""
+        """Gender choices test"""
         form = CustomUserCreationForm()
         
-        # Gender field'ı doğru choices'a sahip mi
+        # Gender field has correct choices
         expected_choices = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
         self.assertEqual(form.fields['gender'].choices, expected_choices)
 
 
 class TestAssignAgentForm(TestCase):
-    """AssignAgentForm testleri"""
+    """AssignAgentForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='assign_forms_organisor',
             email='assign_forms_organisor@example.com',
@@ -850,7 +850,7 @@ class TestAssignAgentForm(TestCase):
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create agent
         self.agent_user = User.objects.create_user(
             username='assign_forms_agent',
             email='assign_forms_agent@example.com',
@@ -873,34 +873,34 @@ class TestAssignAgentForm(TestCase):
         self.factory = RequestFactory()
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = AssignAgentForm(request=request)
         
-        # Agent field'ı var mı
+        # Agent field exists
         self.assertIn('agent', form.fields)
         
-        # Queryset doğru mu
+        # Queryset correct
         self.assertEqual(
             set(form.fields['agent'].queryset),
             set(Agent.objects.filter(organisation=self.organisor_profile))
         )
     
     def test_form_queryset_filtering(self):
-        """Form queryset filtreleme testi"""
+        """Form queryset filtering test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = AssignAgentForm(request=request)
         
-        # Sadece kendi organizasyonunun agentları olmalı
+        # Only own organisation's agents should be present
         self.assertEqual(form.fields['agent'].queryset.count(), 1)
         self.assertIn(self.agent, form.fields['agent'].queryset)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
@@ -910,11 +910,11 @@ class TestAssignAgentForm(TestCase):
 
 
 class TestLeadCategoryUpdateForm(TestCase):
-    """LeadCategoryUpdateForm testleri"""
+    """LeadCategoryUpdateForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Organisor oluştur
+        """Set up test data"""
+        # Create organisor
         self.organisor_user = User.objects.create_user(
             username='category_update_forms_organisor',
             email='category_update_forms_organisor@example.com',
@@ -932,10 +932,10 @@ class TestLeadCategoryUpdateForm(TestCase):
             user=self.organisor_user
         )
         
-        # Agent profile için de aynı organisation'ı kullan
+        # Use same organisation for agent profile too
         self.agent_profile = self.organisor_profile
         
-        # Kategoriler oluştur
+        # Create categories
         self.source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -946,7 +946,7 @@ class TestLeadCategoryUpdateForm(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent'ın organisation'ı için de kategori oluştur
+        # Create category for agent's organisation too
         self.agent_source_category = SourceCategory.objects.create(
             name="Social Media",
             organisation=self.agent_profile
@@ -965,18 +965,18 @@ class TestLeadCategoryUpdateForm(TestCase):
         }
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = LeadCategoryUpdateForm(request=request)
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('source_category', form.fields)
         self.assertIn('value_category', form.fields)
     
     def test_form_valid_data(self):
-        """Geçerli veri ile form testi"""
+        """Form test with valid data"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
@@ -984,13 +984,13 @@ class TestLeadCategoryUpdateForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_queryset_filtering_organisor(self):
-        """Organisor için queryset filtreleme testi"""
+        """Queryset filtering test for organisor"""
         request = self.factory.get('/')
         request.user = self.organisor_user
         
         form = LeadCategoryUpdateForm(request=request)
         
-        # Sadece kendi organizasyonunun kategorileri olmalı
+        # Only own organisation's categories should be present
         expected_source_categories = set(SourceCategory.objects.filter(organisation=self.organisor_profile))
         actual_source_categories = set(form.fields['source_category'].queryset)
         self.assertEqual(actual_source_categories, expected_source_categories)
@@ -1000,8 +1000,8 @@ class TestLeadCategoryUpdateForm(TestCase):
         self.assertEqual(actual_value_categories, expected_value_categories)
     
     def test_form_queryset_filtering_agent(self):
-        """Agent için queryset filtreleme testi"""
-        # Agent oluştur
+        """Queryset filtering test for agent"""
+        # Create agent
         agent_user = User.objects.create_user(
             username='category_update_forms_agent',
             email='category_update_forms_agent@example.com',
@@ -1025,13 +1025,13 @@ class TestLeadCategoryUpdateForm(TestCase):
         
         form = LeadCategoryUpdateForm(request=request)
         
-        # Sadece kendi organizasyonunun kategorileri olmalı
-        # Queryset'lerin var olduğunu test et
+        # Only own organisation's categories should be present
+        # Test that querysets exist
         self.assertIsNotNone(form.fields['source_category'].queryset)
         self.assertIsNotNone(form.fields['value_category'].queryset)
     
     def test_form_queryset_filtering_superuser(self):
-        """Superuser için queryset filtreleme testi"""
+        """Queryset filtering test for superuser"""
         superuser = User.objects.create_superuser(
             username='superuser',
             email='superuser@example.com',
@@ -1043,17 +1043,17 @@ class TestLeadCategoryUpdateForm(TestCase):
         
         form = LeadCategoryUpdateForm(request=request)
         
-        # Tüm kategoriler olmalı
-        # Queryset'lerin var olduğunu test et
+        # All categories should be present
+        # Test that querysets exist
         self.assertIsNotNone(form.fields['source_category'].queryset)
         self.assertIsNotNone(form.fields['value_category'].queryset)
 
 
 class TestCustomAuthenticationForm(TestCase):
-    """CustomAuthenticationForm testleri"""
+    """CustomAuthenticationForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username='auth_test',
             email='auth_test@example.com',
@@ -1068,62 +1068,62 @@ class TestCustomAuthenticationForm(TestCase):
         )
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = CustomAuthenticationForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('password', form.fields)
     
     def test_form_username_field_attributes(self):
-        """Username field özellikleri testi"""
+        """Username field properties test"""
         form = CustomAuthenticationForm()
         
-        # Label kontrol et
+        # Check label
         self.assertEqual(form.fields['username'].label, 'Username or Email')
         
-        # Widget özellikleri kontrol et
+        # Check widget properties
         widget_attrs = form.fields['username'].widget.attrs
         self.assertIn('autofocus', widget_attrs)
         self.assertIn('placeholder', widget_attrs)
         self.assertIn('class', widget_attrs)
     
     def test_form_password_field_attributes(self):
-        """Password field özellikleri testi"""
+        """Password field properties test"""
         form = CustomAuthenticationForm()
         
-        # Widget özellikleri kontrol et
+        # Check widget properties
         widget_attrs = form.fields['password'].widget.attrs
         self.assertIn('placeholder', widget_attrs)
         self.assertIn('class', widget_attrs)
     
     def test_form_error_messages_removed(self):
-        """Form error mesajları kaldırılmış testi"""
+        """Form error messages removed test"""
         form = CustomAuthenticationForm()
         
-        # Error mesajları boş olmalı
+        # Error messages should be empty
         self.assertEqual(form.fields['username'].error_messages['required'], '')
         self.assertEqual(form.fields['password'].error_messages['required'], '')
 
 
 class TestCustomPasswordResetForm(TestCase):
-    """CustomPasswordResetForm testleri"""
+    """CustomPasswordResetForm tests"""
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = CustomPasswordResetForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('email', form.fields)
     
     def test_form_email_field_attributes(self):
-        """Email field özellikleri testi"""
+        """Email field properties test"""
         form = CustomPasswordResetForm()
         
-        # Label kontrol et
+        # Check label
         self.assertEqual(form.fields['email'].label, 'Email')
         
-        # Widget özellikleri kontrol et
+        # Check widget properties
         widget_attrs = form.fields['email'].widget.attrs
         self.assertIn('autofocus', widget_attrs)
         self.assertIn('placeholder', widget_attrs)
@@ -1131,10 +1131,10 @@ class TestCustomPasswordResetForm(TestCase):
 
 
 class TestCustomSetPasswordForm(TestCase):
-    """CustomSetPasswordForm testleri"""
+    """CustomSetPasswordForm tests"""
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
@@ -1143,12 +1143,12 @@ class TestCustomSetPasswordForm(TestCase):
         )
         form = CustomSetPasswordForm(user=user)
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('new_password1', form.fields)
         self.assertIn('new_password2', form.fields)
     
     def test_form_new_password1_field_attributes(self):
-        """New password1 field özellikleri testi"""
+        """New password1 field properties test"""
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
@@ -1157,20 +1157,20 @@ class TestCustomSetPasswordForm(TestCase):
         )
         form = CustomSetPasswordForm(user=user)
         
-        # Label kontrol et
+        # Check label
         self.assertEqual(form.fields['new_password1'].label, 'New password')
         
-        # Widget özellikleri kontrol et
+        # Check widget properties
         widget_attrs = form.fields['new_password1'].widget.attrs
         self.assertIn('autofocus', widget_attrs)
         self.assertIn('placeholder', widget_attrs)
         self.assertIn('class', widget_attrs)
         
-        # Help text kontrol et
+        # Check help text
         self.assertIn("8 characters", form.fields['new_password1'].help_text)
     
     def test_form_new_password2_field_attributes(self):
-        """New password2 field özellikleri testi"""
+        """New password2 field properties test"""
         user = User.objects.create_user(
             username='testuser',
             email='test@example.com',
@@ -1179,19 +1179,19 @@ class TestCustomSetPasswordForm(TestCase):
         )
         form = CustomSetPasswordForm(user=user)
         
-        # Label kontrol et
+        # Check label
         self.assertEqual(form.fields['new_password2'].label, 'New password confirmation')
         
-        # Widget özellikleri kontrol et
+        # Check widget properties
         widget_attrs = form.fields['new_password2'].widget.attrs
         self.assertIn('placeholder', widget_attrs)
         self.assertIn('class', widget_attrs)
 
 
 if __name__ == "__main__":
-    print("Leads Forms Testleri Başlatılıyor...")
+    print("Starting Leads Forms Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

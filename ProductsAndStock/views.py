@@ -564,8 +564,8 @@ class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
             relevant_recs.append(rec)
         context['stock_recommendations'] = relevant_recs
         
-        # Critical Alerts: sadece urun hala kritik durumdaysa say ve listele (duzelince dusar)
-        # Ayni urun birden fazla alert kaydi ile tekrar etmesin: urun basina bir tane (en guncel alert)
+        # Critical Alerts: only count/list product if still in critical state (drop when fixed)
+        # Same product should not repeat with multiple alert records: one per product (latest alert)
         critical_alerts_qs = StockAlert.objects.filter(
             product__in=products,
             is_resolved=False,

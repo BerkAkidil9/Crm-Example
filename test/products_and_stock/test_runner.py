@@ -45,7 +45,7 @@ class ProductsAndStockTestRunner:
             print("-" * 60)
             
             try:
-                # Test modülünü import et
+                # Import test module
                 module = __import__(f'test.{test_module}', fromlist=[test_module])
                 
                 # Create test suite
@@ -121,7 +121,7 @@ class ProductsAndStockTestRunner:
                 print(f"✅ {test_name} SUCCESSFUL")
                 return True
             else:
-                print(f"❌ {test_name} BAŞARISIZ")
+                print(f"❌ {test_name} FAILED")
                 return False
                 
         except Exception as e:

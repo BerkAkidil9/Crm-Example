@@ -1,6 +1,6 @@
 """
-ProductsAndStock View Testleri - Basitleştirilmiş Versiyon
-Sadece temel access control testleri
+ProductsAndStock View Tests - Simplified Version
+Basic access control tests only
 """
 
 from django.test import TestCase, Client
@@ -13,11 +13,11 @@ User = get_user_model()
 
 
 class TestProductAndStockViewsSimple(TestCase):
-    """Basitleştirilmiş view testleri - sadece access control"""
+    """Simplified view tests - access control only"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
-        # Admin kullanıcı
+        """Set up test data"""
+        # Admin user
         self.admin_user = User.objects.create_user(
             username="admin_simple",
             email="admin_simple@example.com",
@@ -25,7 +25,7 @@ class TestProductAndStockViewsSimple(TestCase):
             is_superuser=True
         )
         
-        # Organisor kullanıcı
+        # Organisor user
         self.organisor_user = User.objects.create_user(
             username="organisor_simple",
             email="organisor_simple@example.com",
@@ -38,7 +38,7 @@ class TestProductAndStockViewsSimple(TestCase):
         if created:
             self.organisor_profile.save()
         
-        # Agent kullanıcı
+        # Agent user
         self.agent_user = User.objects.create_user(
             username="agent_simple",
             email="agent_simple@example.com",
@@ -64,7 +64,7 @@ class TestProductAndStockViewsSimple(TestCase):
             description="Test subcategory description"
         )
         
-        # Test ürünü (organisor için)
+        # Test product (for organisor)
         self.product = ProductsAndStock.objects.create(
             product_name="Test Product",
             product_price=100.0,
@@ -74,127 +74,127 @@ class TestProductAndStockViewsSimple(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent için aynı organisation'dan ürün
+        # Product from same organisation for agent
         self.agent_product = ProductsAndStock.objects.create(
             product_name="Agent Product",
             product_price=200.0,
             product_quantity=30,
             category=self.category,
             subcategory=self.subcategory,
-            organisation=self.agent_profile  # Agent'ın kendi organisation'ı
+            organisation=self.agent_profile  # Agent's own organisation
         )
         
         self.client = Client()
     
     def test_list_view_admin_access(self):
-        """Admin kullanıcı list view erişimi"""
+        """Admin user list view access"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_list_view_organisor_access(self):
-        """Organisor kullanıcı list view erişimi"""
+        """Organisor user list view access"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_list_view_agent_access(self):
-        """Agent kullanıcı list view erişimi"""
+        """Agent user list view access"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_list_view_anonymous_redirect(self):
-        """Anonim kullanıcı redirect"""
+        """Anonymous user redirect"""
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 302)
     
     def test_detail_view_admin_access(self):
-        """Admin kullanıcı detail view erişimi"""
+        """Admin user detail view access"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_detail_view_organisor_access(self):
-        """Organisor kullanıcı detail view erişimi"""
+        """Organisor user detail view access"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_detail_view_agent_access(self):
-        """Agent kullanıcı detail view erişimi"""
+        """Agent user detail view access"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.agent_product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_create_view_admin_access(self):
-        """Admin kullanıcı create view erişimi"""
+        """Admin user create view access"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
     
     def test_create_view_organisor_access(self):
-        """Organisor kullanıcı create view erişimi"""
+        """Organisor user create view access"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
     
     def test_create_view_agent_access(self):
-        """Agent kullanıcı create view erişimi"""
+        """Agent user create view access"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
     
     def test_update_view_admin_access(self):
-        """Admin kullanıcı update view erişimi"""
+        """Admin user update view access"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-update', kwargs={'pk': self.product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_update_view_organisor_access(self):
-        """Organisor kullanıcı update view erişimi"""
+        """Organisor user update view access"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-update', kwargs={'pk': self.product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_update_view_agent_access(self):
-        """Agent kullanıcı update view erişimi"""
+        """Agent user update view access"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-update', kwargs={'pk': self.agent_product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_delete_view_admin_access(self):
-        """Admin kullanıcı delete view erişimi"""
+        """Admin user delete view access"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-delete', kwargs={'pk': self.product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_delete_view_organisor_access(self):
-        """Organisor kullanıcı delete view erişimi"""
+        """Organisor user delete view access"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-delete', kwargs={'pk': self.product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_delete_view_agent_access(self):
-        """Agent kullanıcı delete view erişimi"""
+        """Agent user delete view access"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-delete', kwargs={'pk': self.agent_product.pk}))
         self.assertEqual(response.status_code, 200)
     
     def test_sales_dashboard_admin_access(self):
-        """Admin kullanıcı sales dashboard erişimi"""
+        """Admin user sales dashboard access"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 200)
     
     def test_sales_dashboard_organisor_access(self):
-        """Organisor kullanıcı sales dashboard erişimi"""
+        """Organisor user sales dashboard access"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 200)
     
     def test_sales_dashboard_agent_access(self):
-        """Agent kullanıcı sales dashboard erişimi"""
+        """Agent user sales dashboard access"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 200)

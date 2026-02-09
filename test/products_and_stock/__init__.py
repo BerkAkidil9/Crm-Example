@@ -1,3 +1,3 @@
 """
-ProductsAndStock modülü testleri
+ProductsAndStock module tests
 """

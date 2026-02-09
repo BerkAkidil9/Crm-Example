@@ -1,8 +1,8 @@
-# Login Test Sistemi
+# Login Test System
 
-Bu klasör login ile ilgili tüm test dosyalarını içerir.
+This folder contains all test files related to login.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/login/
@@ -20,76 +20,76 @@ test/login/
     └── test_login_views.py
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Çalışan Testler
+### ✅ Working Tests
 ```bash
-# Login view testleri
+# Login view tests
 python manage.py test test.login.working.test_login_views
 
-# Login form testleri
+# Login form tests
 python manage.py test test.login.working.test_login_forms
 
-# Authentication backend testleri
+# Authentication backend tests
 python manage.py test test.login.working.test_login_authentication
 
-# Login entegrasyon testleri
+# Login integration tests
 python manage.py test test.login.working.test_login_integration
 
-# Tüm login testleri
+# All login tests
 python manage.py test test.login.working
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
 ### Views (1 view)
-- ✅ CustomLoginView (test edilecek)
+- ✅ CustomLoginView (to be tested)
 
 ### Forms (1 form)
-- ✅ CustomAuthenticationForm (test edilecek)
+- ✅ CustomAuthenticationForm (to be tested)
 
 ### Authentication Backend (1 backend)
-- ✅ EmailOrUsernameModelBackend (test edilecek)
+- ✅ EmailOrUsernameModelBackend (to be tested)
 
 ### Integration Tests
-- ✅ Complete login flow (test edilecek)
-- ✅ Email verification requirement (test edilecek)
-- ✅ Redirect behavior (test edilecek)
+- ✅ Complete login flow (to be tested)
+- ✅ Email verification requirement (to be tested)
+- ✅ Redirect behavior (to be tested)
 
-## 🔧 Test Özellikleri
+## 🔧 Test Features
 
-### Login View Testleri
-- GET request testi
-- POST request geçerli veri testi
-- POST request geçersiz veri testi
-- Template kullanımı testi
-- Form class testi
-- Redirect testi
+### Login View Tests
+- GET request test
+- POST request with valid data test
+- POST request with invalid data test
+- Template usage test
+- Form class test
+- Redirect test
 
-### Login Form Testleri
-- Form başlatma testi
-- Geçerli veri testi
-- Geçersiz veri testi
-- Widget özellikleri testi
-- Error mesajları testi
+### Login Form Tests
+- Form initialization test
+- Valid data test
+- Invalid data test
+- Widget properties test
+- Error messages test
 
-### Authentication Backend Testleri
-- Username ile giriş testi
-- Email ile giriş testi
-- Geçersiz credentials testi
-- Email doğrulanmamış kullanıcı testi
-- User can authenticate testi
+### Authentication Backend Tests
+- Login with username test
+- Login with email test
+- Invalid credentials test
+- Unverified email user test
+- User can authenticate test
 
-### Integration Testleri
-- Tam login akışı testi
-- Email doğrulama gereksinimi testi
-- Redirect davranışı testi
-- Session yönetimi testi
+### Integration Tests
+- Full login flow test
+- Email verification requirement test
+- Redirect behavior test
+- Session management test
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is created and torn down automatically
+- Mock used for email sending
+- Factory pattern used for test data creation

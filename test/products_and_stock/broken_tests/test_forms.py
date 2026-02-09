@@ -1,6 +1,6 @@
 """
-ProductsAndStock Formları Test Dosyası
-Bu dosya ProductsAndStock modülündeki tüm formları test eder.
+ProductsAndStock Forms Test File
+This file tests all forms in the ProductsAndStock module.
 """
 
 import os
@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 

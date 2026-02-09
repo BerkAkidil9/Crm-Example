@@ -1,6 +1,6 @@
 """
-ProductsAndStock Formları Test Dosyası
-Bu dosya ProductsAndStock modülündeki tüm formları test eder.
+ProductsAndStock Forms Test File
+This file tests all forms in the ProductsAndStock module.
 """
 
 import os
@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -24,7 +24,7 @@ class TestProductAndStockModelForm(TestCase):
     """ProductAndStockModelForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_forms_main",
             email="test_forms_main@example.com",
@@ -220,7 +220,7 @@ class TestAdminProductAndStockModelForm(TestCase):
     """AdminProductAndStockModelForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_forms_main",
             email="test_forms_main@example.com",
@@ -255,7 +255,7 @@ class TestAdminProductAndStockModelForm(TestCase):
         """Form initialization test"""
         form = AdminProductAndStockModelForm()
         
-        # Admin formunda organisation alanı olmalı
+        # Admin form should have organisation field
         self.assertIn('organisation', form.fields)
         self.assertIn('product_name', form.fields)
         self.assertIn('category', form.fields)
@@ -270,7 +270,7 @@ class TestAdminProductAndStockModelForm(TestCase):
         """Organisation queryset test"""
         form = AdminProductAndStockModelForm()
         
-        # Sadece organisor kullanıcıların profilleri olmalı
+        # Only organisor users' profiles should be present
         expected_queryset = UserProfile.objects.filter(
             user__is_organisor=True,
             user__is_superuser=False
@@ -361,7 +361,7 @@ class TestBulkPriceUpdateForm(TestCase):
     """BulkPriceUpdateForm tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -638,7 +638,7 @@ class TestFormIntegration(TestCase):
     """Form integration tests"""
     
     def setUp(self):
-        """Test verilerini hazırla"""
+        """Set up test data"""
         self.user = User.objects.create_user(
             username="testuser_forms_main",
             email="test_forms_main@example.com",
@@ -705,7 +705,7 @@ class TestFormIntegration(TestCase):
             organisation=self.user_profile
         )
         
-        # Güncelleme verisi
+        # Update data
         data = {
             'product_name': 'Updated Product',
             'product_description': 'Updated Description',
@@ -736,9 +736,9 @@ class TestFormIntegration(TestCase):
     
     def test_form_validation_edge_cases(self):
         """Form validation edge cases test"""
-        # Boş ürün adı (geçersiz)
+        # Empty product name (invalid)
         data = {
-            'product_name': '',  # Boş ürün adı
+            'product_name': '',  # Empty product name
             'product_description': 'Test Description',
             'product_price': 100.0,
             'cost_price': 80.00,
@@ -766,21 +766,21 @@ class TestFormIntegration(TestCase):
             'minimum_stock_level': 2,
             'category': self.category.id,
             'subcategory': self.subcategory.id,
-            'discount_percentage': 150.0,  # 100'den büyük
+            'discount_percentage': 150.0,  # Greater than 100
             'discount_amount': 0,
         }
         
         form = ProductAndStockModelForm(data=data)
         form.user_organisation = self.user_profile
         # Form does not validate, should be checked at model level
-        # Bu test form seviyesinde geçerli olacak
+        # This test will pass at form level
         self.assertTrue(form.is_valid())
 
 
 if __name__ == "__main__":
-    print("ProductsAndStock Formları Testleri Başlatılıyor...")
+    print("Starting ProductsAndStock Forms Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

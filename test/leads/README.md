@@ -1,226 +1,225 @@
-# Leads Test Sistemi
+# Leads Test System
 
-Bu klasör Leads modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the Leads module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/leads/
 ├── __init__.py
-├── test_models.py          # Model testleri
-├── test_forms.py           # Form testleri
-├── test_views.py           # View testleri
-├── test_integration.py     # Entegrasyon testleri
-├── test_runner.py          # Test çalıştırıcı
-└── README.md              # Bu dosya
+├── test_models.py          # Model tests
+├── test_forms.py           # Form tests
+├── test_views.py           # View tests
+├── test_integration.py     # Integration tests
+├── test_runner.py          # Test runner
+└── README.md              # This file
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### Interaktif Test Çalıştırıcı
+### Interactive Test Runner
 ```bash
 python test/leads/test_runner.py
 ```
 
-### Komut Satırından
+### From Command Line
 ```bash
-# Tüm testler
+# All tests
 python test/leads/test_runner.py all
 
-# Sadece model testleri
+# Model tests only
 python test/leads/test_runner.py models
 
-# Sadece form testleri
+# Form tests only
 python test/leads/test_runner.py forms
 
-# Sadece view testleri
+# View tests only
 python test/leads/test_runner.py views
 
-# Sadece entegrasyon testleri
+# Integration tests only
 python test/leads/test_runner.py integration
 
-# Hızlı testler
+# Quick tests
 python test/leads/test_runner.py quick
 
-# Test kapsamını göster
+# Show test coverage
 python test/leads/test_runner.py coverage
 ```
 
-### Django Test Komutu
+### Django Test Command
 ```bash
-# Tüm leads testleri
+# All leads tests
 python manage.py test test.leads
 
-# Sadece model testleri
+# Model tests only
 python manage.py test test.leads.test_models
 
-# Sadece form testleri
+# Form tests only
 python manage.py test test.leads.test_forms
 
-# Sadece view testleri
+# View tests only
 python manage.py test test.leads.test_views
 
-# Sadece entegrasyon testleri
+# Integration tests only
 python manage.py test test.leads.test_integration
 
-# Verbose mod
+# Verbose mode
 python manage.py test test.leads -v 2
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
-### Models (8 model)
-- ✅ User - Tam kapsam
-- ✅ UserProfile - Tam kapsam
-- ✅ Lead - Tam kapsam
-- ✅ Agent - Tam kapsam
-- ✅ EmailVerificationToken - Tam kapsam
-- ✅ Category - Tam kapsam
-- ✅ SourceCategory - Tam kapsam
-- ✅ ValueCategory - Tam kapsam
+### Models (8 models)
+- ✅ User - Full coverage
+- ✅ UserProfile - Full coverage
+- ✅ Lead - Full coverage
+- ✅ Agent - Full coverage
+- ✅ EmailVerificationToken - Full coverage
+- ✅ Category - Full coverage
+- ✅ SourceCategory - Full coverage
+- ✅ ValueCategory - Full coverage
 
-### Forms (10 form)
-- ✅ LeadModelForm - Tam kapsam
-- ✅ AdminLeadModelForm - Tam kapsam
-- ✅ LeadForm - Tam kapsam
-- ✅ CustomUserCreationForm - Tam kapsam
-- ✅ AssignAgentForm - Tam kapsam
-- ✅ LeadCategoryUpdateForm - Tam kapsam
-- ✅ CustomAuthenticationForm - Tam kapsam
-- ✅ CustomPasswordResetForm - Tam kapsam
-- ✅ CustomSetPasswordForm - Tam kapsam
-- ✅ PhoneNumberWidget - Tam kapsam
+### Forms (10 forms)
+- ✅ LeadModelForm - Full coverage
+- ✅ AdminLeadModelForm - Full coverage
+- ✅ LeadForm - Full coverage
+- ✅ CustomUserCreationForm - Full coverage
+- ✅ AssignAgentForm - Full coverage
+- ✅ LeadCategoryUpdateForm - Full coverage
+- ✅ CustomAuthenticationForm - Full coverage
+- ✅ CustomPasswordResetForm - Full coverage
+- ✅ CustomSetPasswordForm - Full coverage
+- ✅ PhoneNumberWidget - Full coverage
 
-### Views (12 view)
-- ✅ LandingPageView - Tam kapsam
-- ✅ SignupView - Tam kapsam
-- ✅ EmailVerificationViews - Tam kapsam
-- ✅ CustomLoginView - Tam kapsam
-- ✅ LeadListView - Tam kapsam
-- ✅ LeadDetailView - Tam kapsam
-- ✅ LeadCreateView - Tam kapsam
-- ✅ LeadUpdateView - Tam kapsam
-- ✅ LeadDeleteView - Tam kapsam
-- ✅ AssignAgentView - Tam kapsam
-- ✅ CategoryListView - Tam kapsam
-- ✅ get_agents_by_org - Tam kapsam
+### Views (12 views)
+- ✅ LandingPageView - Full coverage
+- ✅ SignupView - Full coverage
+- ✅ EmailVerificationViews - Full coverage
+- ✅ CustomLoginView - Full coverage
+- ✅ LeadListView - Full coverage
+- ✅ LeadDetailView - Full coverage
+- ✅ LeadCreateView - Full coverage
+- ✅ LeadUpdateView - Full coverage
+- ✅ LeadDeleteView - Full coverage
+- ✅ AssignAgentView - Full coverage
+- ✅ CategoryListView - Full coverage
+- ✅ get_agents_by_org - Full coverage
 
-### Integration (6 kategori)
-- ✅ Lead Workflow - Tam kapsam
-- ✅ User Registration Workflow - Tam kapsam
-- ✅ Permission System - Tam kapsam
-- ✅ Form Integration - Tam kapsam
-- ✅ Email Integration - Tam kapsam
-- ✅ Database Integration - Tam kapsam
+### Integration (6 categories)
+- ✅ Lead Workflow - Full coverage
+- ✅ User Registration Workflow - Full coverage
+- ✅ Permission System - Full coverage
+- ✅ Form Integration - Full coverage
+- ✅ Email Integration - Full coverage
+- ✅ Database Integration - Full coverage
 
-## 🧪 Test Türleri
+## 🧪 Test Types
 
-### 1. Model Testleri (`test_models.py`)
-- Model oluşturma ve kaydetme
-- Model ilişkileri (ForeignKey, OneToOneField)
-- Model validasyonları
-- Model metotları (__str__, save, clean)
-- Cascade delete işlemleri
-- Unique constraint'ler
-- Default değerler
-- Signal işlemleri
+### 1. Model Tests (`test_models.py`)
+- Model creation and saving
+- Model relationships (ForeignKey, OneToOneField)
+- Model validations
+- Model methods (__str__, save, clean)
+- Cascade delete operations
+- Unique constraints
+- Default values
+- Signal operations
 
-### 2. Form Testleri (`test_forms.py`)
-- Form başlatma ve alan kontrolü
-- Form validasyonu (geçerli/geçersiz veri)
-- Form save metodu
-- Form widget'ları ve özellikleri
-- Form queryset filtreleme
-- Form error mesajları
-- Custom widget testleri
+### 2. Form Tests (`test_forms.py`)
+- Form initialization and field check
+- Form validation (valid/invalid data)
+- Form save method
+- Form widgets and properties
+- Form queryset filtering
+- Form error messages
+- Custom widget tests
 
-### 3. View Testleri (`test_views.py`)
-- View GET/POST işlemleri
-- Template kullanımı
-- Context data kontrolü
-- Permission kontrolü
-- Redirect işlemleri
-- Status code kontrolü
+### 3. View Tests (`test_views.py`)
+- View GET/POST operations
+- Template usage
+- Context data check
+- Permission check
+- Redirect operations
+- Status code check
 - Authentication/Authorization
 
-### 4. Entegrasyon Testleri (`test_integration.py`)
-- Tam workflow testleri
-- Kullanıcı kayıt süreci
-- Lead yönetim süreci
-- İzin sistemi entegrasyonu
-- Form entegrasyonu
-- Email entegrasyonu
-- Veritabanı entegrasyonu
+### 4. Integration Tests (`test_integration.py`)
+- Full workflow tests
+- User registration process
+- Lead management process
+- Permission system integration
+- Form integration
+- Email integration
+- Database integration
 
-## 🔧 Test Özellikleri
+## 🔧 Test Features
 
-### Test Verisi Yönetimi
-- Her test sınıfında `setUp()` metodu ile test verisi hazırlama
-- Benzersiz kullanıcı adları ve email'ler kullanma
-- Test sonrası veri temizleme (Django TestCase otomatik)
+### Test Data Management
+- Test data setup via `setUp()` in each test class
+- Use unique usernames and emails
+- Data cleanup after tests (Django TestCase automatic)
 
-### Mock Kullanımı
-- Email gönderimi için `patch` kullanımı
-- Zaman işlemleri için `timezone.now` mock'u
-- External servisler için mock'lar
+### Mock Usage
+- `patch` for email sending
+- `timezone.now` mock for time operations
+- Mocks for external services
 
-### Assertion'lar
-- Model alanları kontrolü
-- Form validasyonu kontrolü
-- View response kontrolü
-- Template kullanımı kontrolü
-- Context data kontrolü
-- Permission kontrolü
+### Assertions
+- Model field checks
+- Form validation checks
+- View response checks
+- Template usage checks
+- Context data checks
+- Permission checks
 
-### Test İzolasyonu
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Test verileri çakışmaz
+### Test Isolation
+- Each test runs independently
+- Test database is created and torn down automatically
+- Test data does not conflict
 
-## 📈 Test İstatistikleri
+## 📈 Test Statistics
 
-- **Toplam Test Sayısı**: ~200+ test
-- **Kapsam**: %95+
-- **Durum**: ✅ Tamamlandı
-- **Ortalama Çalışma Süresi**: ~30-60 saniye
-- **Başarı Oranı**: %100 (tüm testler geçiyor)
+- **Total Test Count:** ~200+ tests
+- **Coverage:** 95%+
+- **Status:** ✅ Completed
+- **Average Run Time:** ~30-60 seconds
+- **Success Rate:** 100% (all tests pass)
 
-## 🐛 Hata Ayıklama
+## 🐛 Debugging
 
-### Test Başarısız Olursa
-1. Test çıktısını kontrol edin
-2. Hata mesajlarını okuyun
-3. Test verilerini kontrol edin
-4. Model ilişkilerini kontrol edin
-5. Form validasyonlarını kontrol edin
+### If a Test Fails
+1. Check the test output
+2. Read the error messages
+3. Check the test data
+4. Check model relationships
+5. Check form validations
 
-### Yaygın Sorunlar
-- **Unique constraint hatası**: Test verilerinde benzersiz değerler kullanın
-- **Permission hatası**: Test kullanıcısının doğru izinlere sahip olduğundan emin olun
-- **Template hatası**: Template dosyalarının mevcut olduğundan emin olun
-- **Form hatası**: Form alanlarının doğru tanımlandığından emin olun
+### Common Issues
+- **Unique constraint error:** Use unique values in test data
+- **Permission error:** Ensure test user has correct permissions
+- **Template error:** Ensure template files exist
+- **Form error:** Ensure form fields are defined correctly
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
-- Comprehensive test coverage sağlanmıştır
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is created and torn down automatically
+- Mock used for email sending
+- Factory pattern used for test data creation
+- Comprehensive test coverage is provided
 
-## 🎯 Gelecek Planları
+## 🎯 Future Plans
 
-1. **Performance testleri ekle**
-2. **API testleri ekle**
-3. **Selenium testleri ekle**
-4. **Test coverage raporu ekle**
-5. **CI/CD entegrasyonu**
+1. **Add performance tests**
+2. **Add API tests**
+3. **Add Selenium tests**
+4. **Add test coverage report**
+5. **CI/CD integration**
 
-## 📞 Destek
+## 📞 Support
 
-Test sistemi ile ilgili sorularınız için:
-- Test dosyalarını inceleyin
-- Django test dokümantasyonunu okuyun
-- Hata mesajlarını analiz edin
-
+For questions about the test system:
+- Review the test files
+- Read Django test documentation
+- Analyze error messages

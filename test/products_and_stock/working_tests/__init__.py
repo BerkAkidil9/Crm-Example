@@ -1,3 +1,3 @@
 """
-Çalışan testler - ProductsAndStock modülü
+Working tests - ProductsAndStock module
 """

@@ -1,90 +1,90 @@
-# Orders App Test Sistemi
+# Orders App Test System
 
-Bu klasör Orders modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the Orders module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/orders/
 ├── __init__.py
-├── working_tests/          # ✅ Çalışan testler
+├── working_tests/          # ✅ Working tests
 │   ├── __init__.py
 │   ├── test_models.py
 │   ├── test_views.py
 │   ├── test_forms.py
 │   └── test_integration.py
-├── test_runner.py          # İnteraktif test çalıştırıcı
+├── test_runner.py          # Interactive test runner
 └── README.md
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Çalışan Testler
+### ✅ Working Tests
 ```bash
-# Model testleri
+# Model tests
 python manage.py test test.orders.working_tests.test_models
 
-# View testleri
+# View tests
 python manage.py test test.orders.working_tests.test_views
 
-# Form testleri
+# Form tests
 python manage.py test test.orders.working_tests.test_forms
 
-# Entegrasyon testleri
+# Integration tests
 python manage.py test test.orders.working_tests.test_integration
 
-# Tüm orders testleri
+# All orders tests
 python manage.py test test.orders.working_tests
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
-### Models (2 model)
-- ✅ orders (çalışıyor)
-- ✅ OrderProduct (çalışıyor)
+### Models (2 models)
+- ✅ orders (working)
+- ✅ OrderProduct (working)
 
-### Views (6 view)
-- ✅ OrderListView (çalışıyor)
-- ✅ OrderDetailView (çalışıyor)
-- ✅ OrderCreateView (çalışıyor)
-- ✅ OrderUpdateView (çalışıyor)
-- ✅ OrderCancelView (çalışıyor)
-- ✅ OrderDeleteView (çalışıyor)
+### Views (6 views)
+- ✅ OrderListView (working)
+- ✅ OrderDetailView (working)
+- ✅ OrderCreateView (working)
+- ✅ OrderUpdateView (working)
+- ✅ OrderCancelView (working)
+- ✅ OrderDeleteView (working)
 
-### Forms (3 form)
-- ✅ OrderModelForm (çalışıyor)
-- ✅ OrderForm (çalışıyor)
-- ✅ OrderProductFormSet (çalışıyor)
+### Forms (3 forms)
+- ✅ OrderModelForm (working)
+- ✅ OrderForm (working)
+- ✅ OrderProductFormSet (working)
 
-## 🔧 Özel Test Özellikleri
+## 🔧 Custom Test Features
 
-### Stock Management Testleri
-- Otomatik stok azaltma testleri
-- Stok geri yükleme testleri
-- Yetersiz stok kontrolü testleri
+### Stock Management Tests
+- Automatic stock reduction tests
+- Stock restoration tests
+- Insufficient stock check tests
 
-### Signal Testleri
-- OrderProduct oluşturma signal testleri
-- Order iptal etme signal testleri
-- Stok hareket kayıt testleri
+### Signal Tests
+- OrderProduct creation signal tests
+- Order cancel signal tests
+- Stock movement record tests
 
-### Finance Integration Testleri
-- OrderFinanceReport oluşturma testleri
-- Toplam fiyat hesaplama testleri
+### Finance Integration Tests
+- OrderFinanceReport creation tests
+- Total price calculation tests
 
-## 📈 Test İstatistikleri
+## 📈 Test Statistics
 
-- **Toplam Test Sayısı:** 45+ test
-- **Model Testleri:** 15 test
-- **View Testleri:** 20 test
-- **Form Testleri:** 8 test
-- **Entegrasyon Testleri:** 5 test
+- **Total Test Count:** 45+ tests
+- **Model Tests:** 15 tests
+- **View Tests:** 20 tests
+- **Form Tests:** 8 tests
+- **Integration Tests:** 5 tests
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
-- Signal testleri için TransactionTestCase kullanılır
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is created and torn down automatically
+- Mock used for email sending
+- Factory pattern used for test data creation
+- TransactionTestCase used for signal tests

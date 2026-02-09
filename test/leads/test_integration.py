@@ -621,7 +621,7 @@ class TestLeadFormIntegration(TestCase):
 
 
 class TestEmailIntegration(TestCase):
-    """Email entegrasyon testleri"""
+    """Email integration tests"""
     
     def setUp(self):
         """Set up test data"""

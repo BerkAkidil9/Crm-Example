@@ -1,261 +1,261 @@
-# Forget Password Test Sistemi
+# Forget Password Test System
 
-Bu klasör forget password (şifre sıfırlama) modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the forget password (password reset) module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/forget_password/
 ├── __init__.py
-├── test_forget_password_views.py      # View testleri
-├── test_forget_password_forms.py      # Form testleri
-├── test_runner.py                     # Test çalıştırıcı
-└── README.md                          # Bu dosya
+├── test_forget_password_views.py      # View tests
+├── test_forget_password_forms.py      # Form tests
+├── test_runner.py                     # Test runner
+└── README.md                          # This file
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### Tüm Testleri Çalıştır
+### Run All Tests
 ```bash
-# Tüm forget password testleri
+# All forget password tests
 python manage.py test test.forget_password
 
-# Verbose mod
+# Verbose mode
 python manage.py test test.forget_password -v 2
 
-# Test runner ile
+# With test runner
 python test/forget_password/test_runner.py
 ```
 
-### Belirli Test Dosyalarını Çalıştır
+### Run Specific Test Files
 ```bash
-# Sadece view testleri
+# View tests only
 python manage.py test test.forget_password.test_forget_password_views
 
-# Sadece form testleri
+# Form tests only
 python manage.py test test.forget_password.test_forget_password_forms
 ```
 
-### Belirli Test Sınıflarını Çalıştır
+### Run Specific Test Classes
 ```bash
-# Password reset view testleri
+# Password reset view tests
 python manage.py test test.forget_password.test_forget_password_views.TestCustomPasswordResetView
 
-# Password reset form testleri
+# Password reset form tests
 python manage.py test test.forget_password.test_forget_password_forms.TestCustomPasswordResetForm
 
-# Set password form testleri
+# Set password form tests
 python manage.py test test.forget_password.test_forget_password_forms.TestCustomSetPasswordForm
 ```
 
-### Belirli Test Metodlarını Çalıştır
+### Run Specific Test Methods
 ```bash
-# Belirli bir test metodu
+# A specific test method
 python manage.py test test.forget_password.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_get
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
-### View Testleri (test_forget_password_views.py)
+### View Tests (test_forget_password_views.py)
 
-#### CustomPasswordResetView Testleri
-- ✅ GET isteği testi
-- ✅ Template testi
-- ✅ Form class testi
-- ✅ Geçerli email ile POST testi
-- ✅ Geçersiz email ile POST testi
-- ✅ Var olmayan email ile POST testi
-- ✅ Doğrulanmamış email ile POST testi
-- ✅ Boş email ile POST testi
-- ✅ Case insensitive email testi
-- ✅ Whitespace içeren email testi
-- ✅ Email gönderimi detayları testi
-- ✅ Birden fazla istek testi
+#### CustomPasswordResetView Tests
+- ✅ GET request test
+- ✅ Template test
+- ✅ Form class test
+- ✅ POST test with valid email
+- ✅ POST test with invalid email
+- ✅ POST test with non-existent email
+- ✅ POST test with unverified email
+- ✅ POST test with empty email
+- ✅ Case insensitive email test
+- ✅ Email with whitespace test
+- ✅ Email sending details test
+- ✅ Multiple request test
 
-#### PasswordResetDoneView Testleri
-- ✅ GET isteği testi
-- ✅ Template testi
-- ✅ İçerik testi
+#### PasswordResetDoneView Tests
+- ✅ GET request test
+- ✅ Template test
+- ✅ Content test
 
-#### CustomPasswordResetConfirmView Testleri
-- ✅ Geçerli token ile GET testi
-- ✅ Form class testi
-- ✅ Geçerli veri ile POST testi
-- ✅ Şifre uyumsuzluğu testi
-- ✅ Zayıf şifre testi
-- ✅ Boş şifre testi
-- ✅ Geçersiz token testi
-- ✅ Geçersiz uid testi
-- ✅ Süresi dolmuş token testi
-- ✅ Var olmayan kullanıcı testi
-- ✅ Inactive kullanıcı testi
+#### CustomPasswordResetConfirmView Tests
+- ✅ GET test with valid token
+- ✅ Form class test
+- ✅ POST test with valid data
+- ✅ Password mismatch test
+- ✅ Weak password test
+- ✅ Empty password test
+- ✅ Invalid token test
+- ✅ Invalid uid test
+- ✅ Expired token test
+- ✅ Non-existent user test
+- ✅ Inactive user test
 
-#### PasswordResetCompleteView Testleri
-- ✅ GET isteği testi
-- ✅ Template testi
-- ✅ İçerik testi
+#### PasswordResetCompleteView Tests
+- ✅ GET request test
+- ✅ Template test
+- ✅ Content test
 
-#### Entegrasyon Testleri
-- ✅ Tam forget password akışı testi
-- ✅ Geçersiz email ile test
-- ✅ Doğrulanmamış email ile test
-- ✅ Form validasyon testi
-- ✅ Güvenlik önlemleri testi
+#### Integration Tests
+- ✅ Full forget password flow test
+- ✅ Test with invalid email
+- ✅ Test with unverified email
+- ✅ Form validation test
+- ✅ Security measures test
 
-### Form Testleri (test_forget_password_forms.py)
+### Form Tests (test_forget_password_forms.py)
 
-#### CustomPasswordResetForm Testleri
-- ✅ Form başlatma testi
-- ✅ Widget özellikleri testi
-- ✅ Geçerli veri testi
-- ✅ Geçersiz email formatı testi
-- ✅ Boş email testi
-- ✅ Var olmayan email testi
-- ✅ Case insensitive email testi
-- ✅ Whitespace email testi
-- ✅ Uzun email testi
-- ✅ Özel karakterler içeren email testi
-- ✅ Birden fazla @ sembolü testi
-- ✅ @ sembolü olmayan email testi
-- ✅ Domain olmayan email testi
-- ✅ Local part olmayan email testi
-- ✅ Unicode email testi
-- ✅ Sayısal email testi
-- ✅ Nokta içeren email testi
-- ✅ + sembolü içeren email testi
-- ✅ Tire içeren email testi
-- ✅ Alt çizgi içeren email testi
+#### CustomPasswordResetForm Tests
+- ✅ Form initialization test
+- ✅ Widget properties test
+- ✅ Valid data test
+- ✅ Invalid email format test
+- ✅ Empty email test
+- ✅ Non-existent email test
+- ✅ Case insensitive email test
+- ✅ Whitespace email test
+- ✅ Long email test
+- ✅ Email with special characters test
+- ✅ Multiple @ symbols test
+- ✅ Email without @ test
+- ✅ Email without domain test
+- ✅ Email without local part test
+- ✅ Unicode email test
+- ✅ Numeric email test
+- ✅ Email with dot test
+- ✅ Email with + test
+- ✅ Email with hyphen test
+- ✅ Email with underscore test
 
-#### CustomSetPasswordForm Testleri
-- ✅ Form başlatma testi
-- ✅ Widget özellikleri testi
-- ✅ Help text testi
-- ✅ Geçerli veri testi
-- ✅ Şifre uyumsuzluğu testi
-- ✅ Boş şifre testi
-- ✅ Kısa şifre testi
-- ✅ Yaygın şifre testi
-- ✅ Tamamen sayısal şifre testi
-- ✅ Kullanıcı adına benzer şifre testi
-- ✅ Email'e benzer şifre testi
-- ✅ Ad'a benzer şifre testi
-- ✅ Soyad'a benzer şifre testi
-- ✅ Whitespace şifre testi
-- ✅ Unicode şifre testi
-- ✅ Özel karakterler içeren şifre testi
-- ✅ Uzun şifre testi
-- ✅ Save fonksiyonalitesi testi
-- ✅ Save commit=False testi
+#### CustomSetPasswordForm Tests
+- ✅ Form initialization test
+- ✅ Widget properties test
+- ✅ Help text test
+- ✅ Valid data test
+- ✅ Password mismatch test
+- ✅ Empty password test
+- ✅ Short password test
+- ✅ Common password test
+- ✅ Fully numeric password test
+- ✅ Password similar to username test
+- ✅ Password similar to email test
+- ✅ Password similar to first name test
+- ✅ Password similar to last name test
+- ✅ Whitespace password test
+- ✅ Unicode password test
+- ✅ Password with special characters test
+- ✅ Long password test
+- ✅ Save functionality test
+- ✅ Save commit=False test
 
-#### Entegrasyon Testleri
-- ✅ Mevcut kullanıcı ile password reset form testi
-- ✅ Var olmayan kullanıcı ile password reset form testi
-- ✅ Geçerli veri ile set password form testi
-- ✅ Geçersiz veri ile set password form testi
-- ✅ Form validasyon edge case'leri testi
-- ✅ Form alan özellikleri testi
+#### Integration Tests
+- ✅ Password reset form test with existing user
+- ✅ Password reset form test with non-existent user
+- ✅ Set password form test with valid data
+- ✅ Set password form test with invalid data
+- ✅ Form validation edge cases test
+- ✅ Form field properties test
 
-## 🔧 Test Özellikleri
+## 🔧 Test Features
 
-### Güvenlik Testleri
+### Security Tests
 - ✅ Case insensitive email handling
 - ✅ Whitespace trimming
-- ✅ Var olmayan email için de success döner (güvenlik)
+- ✅ Returns success for non-existent email too (security)
 - ✅ Token validation
 - ✅ Password strength validation
 - ✅ Similarity checks
 
-### Edge Case Testleri
-- ✅ Boş formlar
+### Edge Case Tests
+- ✅ Empty forms
 - ✅ None data
-- ✅ Geçersiz formatlar
-- ✅ Çok uzun veriler
-- ✅ Unicode karakterler
-- ✅ Özel karakterler
+- ✅ Invalid formats
+- ✅ Very long data
+- ✅ Unicode characters
+- ✅ Special characters
 
-### Entegrasyon Testleri
-- ✅ Tam password reset akışı
-- ✅ Form validasyonları
-- ✅ Email gönderimi
-- ✅ Password değişikliği
+### Integration Tests
+- ✅ Full password reset flow
+- ✅ Form validations
+- ✅ Email sending
+- ✅ Password change
 - ✅ Error handling
 
-## 📈 Test İstatistikleri
+## 📈 Test Statistics
 
-### Toplam Test Sayısı
-- **View Testleri:** 25+ test metodu
-- **Form Testleri:** 30+ test metodu
-- **Entegrasyon Testleri:** 10+ test metodu
-- **Toplam:** 65+ test metodu
+### Total Test Count
+- **View Tests:** 25+ test methods
+- **Form Tests:** 30+ test methods
+- **Integration Tests:** 10+ test methods
+- **Total:** 65+ test methods
 
-### Test Sınıfları
-- **TestCustomPasswordResetView:** 12 test
-- **TestPasswordResetDoneView:** 3 test
-- **TestCustomPasswordResetConfirmView:** 10 test
-- **TestPasswordResetCompleteView:** 3 test
-- **TestForgetPasswordIntegration:** 5 test
-- **TestCustomPasswordResetForm:** 20 test
-- **TestCustomSetPasswordForm:** 18 test
-- **TestForgetPasswordFormIntegration:** 6 test
+### Test Classes
+- **TestCustomPasswordResetView:** 12 tests
+- **TestPasswordResetDoneView:** 3 tests
+- **TestCustomPasswordResetConfirmView:** 10 tests
+- **TestPasswordResetCompleteView:** 3 tests
+- **TestForgetPasswordIntegration:** 5 tests
+- **TestCustomPasswordResetForm:** 20 tests
+- **TestCustomSetPasswordForm:** 18 tests
+- **TestForgetPasswordFormIntegration:** 6 tests
 
-## 🎯 Test Hedefleri
+## 🎯 Test Goals
 
-### Fonksiyonel Testler
-- ✅ Password reset formu çalışıyor
-- ✅ Email gönderimi çalışıyor
-- ✅ Password değişikliği çalışıyor
-- ✅ Form validasyonları çalışıyor
+### Functional Tests
+- ✅ Password reset form works
+- ✅ Email sending works
+- ✅ Password change works
+- ✅ Form validations work
 
-### Güvenlik Testleri
-- ✅ Güvenli email handling
-- ✅ Güvenli password validation
+### Security Tests
+- ✅ Secure email handling
+- ✅ Secure password validation
 - ✅ Token security
 - ✅ Input sanitization
 
-### Kullanılabilirlik Testleri
+### Usability Tests
 - ✅ User-friendly error messages
 - ✅ Proper form styling
 - ✅ Responsive design
 - ✅ Accessibility
 
-## 🚨 Bilinen Sorunlar
+## 🚨 Known Issues
 
-Şu anda bilinen bir sorun bulunmamaktadır.
+There are currently no known issues.
 
-## 🔮 Gelecek Planları
+## 🔮 Future Plans
 
-1. **Performance testleri ekle**
-2. **Load testleri ekle**
-3. **Mobile responsive testleri ekle**
-4. **Accessibility testleri ekle**
-5. **Internationalization testleri ekle**
+1. **Add performance tests**
+2. **Add load tests**
+3. **Add mobile responsive tests**
+4. **Add accessibility tests**
+5. **Add internationalization tests**
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is created and torn down automatically
+- Mock used for email sending
+- Factory pattern used for test data creation
 - Comprehensive error handling
 - Edge case coverage
 - Security testing included
 
-## 🏃‍♂️ Hızlı Başlangıç
+## 🏃‍♂️ Quick Start
 
 ```bash
-# 1. Test runner'ı çalıştır
+# 1. Run the test runner
 python test/forget_password/test_runner.py
 
-# 2. Menüden seçim yap
-# 3. Testleri çalıştır
-# 4. Sonuçları incele
+# 2. Select from the menu
+# 3. Run the tests
+# 4. Review the results
 ```
 
-## 📞 Destek
+## 📞 Support
 
-Testlerle ilgili sorunlar için:
-1. Test runner'ı kullanın
-2. Verbose modda çalıştırın
-3. Belirli testleri izole edin
-4. Log dosyalarını kontrol edin
+For issues with the tests:
+1. Use the test runner
+2. Run in verbose mode
+3. Isolate specific tests
+4. Check log files

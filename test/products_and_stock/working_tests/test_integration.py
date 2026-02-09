@@ -260,7 +260,7 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertTrue(stock_recommendations.exists())
         self.assertEqual(stock_recommendations.first().recommendation_type, 'RESTOCK')
         
-        # Stok tükendiğinde uyarı
+        # Warning when stock is depleted
         product.product_quantity = 0
         product.save()
         
@@ -273,7 +273,7 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertEqual(out_of_stock_alerts.first().severity, 'CRITICAL')
     
     def test_discount_system(self):
-        """İndirim sistemi testi"""
+        """Discount system test"""
         # Create product with discount
         product = ProductsAndStock.objects.create(
             product_name='Discounted Product',
@@ -327,11 +327,11 @@ class TestProductsAndStockWorkflow(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kar marjı miktarı
+        # Profit margin amount
         expected_profit_margin = 150.0 - 100.0
         self.assertEqual(product.profit_margin_amount, expected_profit_margin)
         
-        # Kar marjı yüzdesi
+        # Profit margin percentage
         expected_profit_percentage = (50.0 / 100.0) * 100
         self.assertEqual(product.profit_margin_percentage, expected_profit_percentage)
         
@@ -339,7 +339,7 @@ class TestProductsAndStockWorkflow(TestCase):
         expected_total_profit = 50.0 * 20
         self.assertEqual(product.total_profit, expected_total_profit)
         
-        # Toplam değer
+        # Total value
         expected_total_value = 150.0 * 20
         self.assertEqual(product.total_value, expected_total_value)
     
@@ -376,11 +376,11 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertIn(new_subcategory, new_category.subcategories.all())
     
     def test_user_permissions_workflow(self):
-        """Kullanıcı izinleri iş akışı testi"""
-        # Agent kullanıcı ile test
+        """User permissions workflow test"""
+        # Test with agent user
         self.client.force_login(self.agent_user)
-        
-        # Agent ürün listesini görebilir mi
+
+        # Can agent see product list
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
         
@@ -388,7 +388,7 @@ class TestProductsAndStockWorkflow(TestCase):
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)  # Agent can create products
         
-        # Organisor kullanıcı ile test
+        # Test with organisor user
         self.client.force_login(self.organisor_user)
         
         # Can organisor create product
@@ -398,7 +398,7 @@ class TestProductsAndStockWorkflow(TestCase):
         # Admin kullanıcı ile test
         self.client.force_login(self.admin_user)
         
-        # Admin tüm işlemleri yapabilir mi
+        # Can admin perform all operations
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
         
@@ -427,9 +427,9 @@ class TestProductsAndStockWorkflow(TestCase):
     
     def test_form_validation_integration(self):
         """Form validasyon entegrasyonu testi"""
-        # Geçersiz veri ile form testi
+        # Form test with invalid data
         invalid_data = {
-            'product_name': '',  # Boş isim
+            'product_name': '',  # Empty name
             'product_description': 'Test Description',
             'product_price': -10,  # Negative price
             'cost_price': 80.00,
@@ -446,7 +446,7 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertIn('product_name', form.errors)
     
     def test_database_transactions(self):
-        """Veritabanı işlemleri testi"""
+        """Database operations test"""
         # Create product with transaction
         with transaction.atomic():
             product = ProductsAndStock.objects.create(
@@ -466,7 +466,7 @@ class TestProductsAndStockWorkflow(TestCase):
             self.assertEqual(stock_movements.count(), 1)
     
     def test_performance_with_multiple_products(self):
-        """Çoklu ürün performans testi"""
+        """Multiple product performance test"""
         # Create many products
         products = []
         for i in range(50):
@@ -483,7 +483,7 @@ class TestProductsAndStockWorkflow(TestCase):
             )
             products.append(product)
         
-        # Liste sayfası performansı
+        # List page performance
         self.client.force_login(self.organisor_user)
         
         import time
@@ -492,15 +492,15 @@ class TestProductsAndStockWorkflow(TestCase):
         end_time = time.time()
         
         self.assertEqual(response.status_code, 200)
-        self.assertLess(end_time - start_time, 2.0)  # 2 saniyeden az olmalı
+        self.assertLess(end_time - start_time, 2.0)  # Should be less than 2 seconds
         
-        # Dashboard performansı
+        # Dashboard performance
         start_time = time.time()
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         end_time = time.time()
         
         self.assertEqual(response.status_code, 200)
-        self.assertLess(end_time - start_time, 3.0)  # 3 saniyeden az olmalı
+        self.assertLess(end_time - start_time, 3.0)  # Should be less than 3 seconds
 
 
 class TestProductsAndStockSignals(TransactionTestCase):

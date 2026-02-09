@@ -1,194 +1,194 @@
-# Test Sistemi
+# Test System
 
-Bu klasör tüm modüller için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for all modules.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/
 ├── __init__.py
 ├── README.md
-├── agents/                     # Agent testleri
-├── finance/                    # Finans testleri
-├── forget_password/            # Şifre sıfırlama testleri
-├── leads/                      # Lead testleri
-├── login/                      # Login testleri
-│   ├── working/               # ✅ Çalışan testler
-│   ├── broken_tests/          # ❌ Çalışmayan testler
+├── agents/                     # Agent tests
+├── finance/                    # Finance tests
+├── forget_password/            # Password reset tests
+├── leads/                      # Lead tests
+├── login/                      # Login tests
+│   ├── working/               # ✅ Working tests
+│   ├── broken_tests/          # ❌ Broken tests
 │   ├── test_runner.py
 │   └── README.md
-├── logout/                     # 🆕 Logout testleri
-│   ├── working/               # ✅ Çalışan testler (33 test)
+├── logout/                     # 🆕 Logout tests
+│   ├── working/               # ✅ Working tests (33 tests)
 │   ├── test_runner.py
 │   ├── README.md
 │   └── TEST_RESULTS.md
-├── orders/                     # Sipariş testleri
-├── organisors/                 # Organizatör testleri
-├── products_and_stock/         # Ürün ve stok testleri
-└── signup/                     # Kayıt testleri
+├── orders/                     # Order tests
+├── organisors/                 # Organisor tests
+├── products_and_stock/         # Product and stock tests
+└── signup/                     # Signup tests
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### 🆕 Logout Testleri (YENİ!)
+### 🆕 Logout Tests (NEW!)
 ```bash
-# Tüm logout testleri (33 test - %100 başarılı!)
+# All logout tests (33 tests - 100% success!)
 python manage.py test test.logout.working
 
-# Logout view testleri
+# Logout view tests
 python manage.py test test.logout.working.test_logout_views
 
-# Logout entegrasyon testleri
+# Logout integration tests
 python manage.py test test.logout.working.test_logout_integration
 
-# İnteraktif test runner
+# Interactive test runner
 python test/logout/test_runner.py
 ```
 
-### Login Testleri
+### Login Tests
 ```bash
-# Tüm login testleri
+# All login tests
 python manage.py test test.login.working
 
-# Login view testleri
+# Login view tests
 python manage.py test test.login.working.test_login_views
 
-# Login authentication testleri
+# Login authentication tests
 python manage.py test test.login.working.test_login_authentication
 ```
 
-### Signup Testleri
+### Signup Tests
 ```bash
-# Tüm signup testleri
+# All signup tests
 python manage.py test test.signup.working
 ```
 
-### Diğer Modül Testleri
+### Other Module Tests
 ```bash
-# Agents testleri
+# Agents tests
 python manage.py test test.agents.working_tests
 
-# Finance testleri
+# Finance tests
 python manage.py test test.finance.working_tests
 
-# Orders testleri
+# Orders tests
 python manage.py test test.orders.working_tests
 
-# Organisors testleri
+# Organisors tests
 python manage.py test test.organisors.working_tests
 
-# Products and Stock testleri
+# Products and Stock tests
 python manage.py test test.products_and_stock.working_tests
 ```
 
-## 📊 Test Durumu
+## 📊 Test Status
 
-### 🆕 Logout Testleri (YENİ!)
-- **Status:** ✅ 33/33 test başarılı (%100)
-- **Kapsam:** Views, entegrasyon, güvenlik, performans
-- **Süre:** ~19 saniye
-- **Dosyalar:** 
-  - `test_logout_views.py` (19 test)
-  - `test_logout_integration.py` (14 test)
+### 🆕 Logout Tests (NEW!)
+- **Status:** ✅ 33/33 tests passing (100%)
+- **Coverage:** Views, integration, security, performance
+- **Duration:** ~19 seconds
+- **Files:** 
+  - `test_logout_views.py` (19 tests)
+  - `test_logout_integration.py` (14 tests)
 
-### Login Testleri
-- **Status:** ✅ Çalışan testler mevcut
-- **Kapsam:** Views, forms, authentication, entegrasyon
-- **Dosyalar:** 4 test dosyası
+### Login Tests
+- **Status:** ✅ Working tests available
+- **Coverage:** Views, forms, authentication, integration
+- **Files:** 4 test files
 
-### Signup Testleri
-- **Status:** ✅ Çalışan testler mevcut
-- **Kapsam:** Views, forms, models, entegrasyon
-- **Dosyalar:** 4 test dosyası
+### Signup Tests
+- **Status:** ✅ Working tests available
+- **Coverage:** Views, forms, models, integration
+- **Files:** 4 test files
 
-### Agents Testleri
-- **Status:** ✅ Çalışan testler mevcut
-- **Kapsam:** Views, forms, models, mixins, entegrasyon
-- **Dosyalar:** 6 test dosyası
+### Agents Tests
+- **Status:** ✅ Working tests available
+- **Coverage:** Views, forms, models, mixins, integration
+- **Files:** 6 test files
 
-### Finance Testleri
-- **Status:** ✅ Çalışan testler mevcut
-- **Kapsam:** Views, forms, models, entegrasyon
-- **Dosyalar:** 4 test dosyası
+### Finance Tests
+- **Status:** ✅ Working tests available
+- **Coverage:** Views, forms, models, integration
+- **Files:** 4 test files
 
-### Orders Testleri
-- **Status:** ✅ Çalışan testler mevcut
-- **Kapsam:** Views, forms, models, entegrasyon
-- **Dosyalar:** 4 test dosyası
+### Orders Tests
+- **Status:** ✅ Working tests available
+- **Coverage:** Views, forms, models, integration
+- **Files:** 4 test files
 
-### Organisors Testleri
-- **Status:** ✅ Çalışan testler mevcut
-- **Kapsam:** Views, forms, models, mixins, entegrasyon
-- **Dosyalar:** 5 test dosyası
+### Organisors Tests
+- **Status:** ✅ Working tests available
+- **Coverage:** Views, forms, models, mixins, integration
+- **Files:** 5 test files
 
-### Products and Stock Testleri
-- **Status:** ⚠️ Kısmi başarılı (working_tests + broken_tests)
-- **Çalışan:** 5 test
-- **Sorunlu:** 80+ test
-- **Sorunlar:** UserProfile unique constraint, form validasyonları
+### Products and Stock Tests
+- **Status:** ⚠️ Partially passing (working_tests + broken_tests)
+- **Working:** 5 tests
+- **Issues:** 80+ tests
+- **Issues:** UserProfile unique constraint, form validations
 
-## 🎯 Test Kapsamı Genel
+## 🎯 Overall Test Coverage
 
 ### Authentication & Authorization
-- ✅ Login (çoklu test dosyası)
-- ✅ **Logout (33 test - YENİ!)**
-- ✅ Signup (çoklu test dosyası)
-- ✅ Forget Password (test dosyaları)
-- ✅ Email Verification (login testlerinde kapsanmış)
+- ✅ Login (multiple test files)
+- ✅ **Logout (33 tests - NEW!)**
+- ✅ Signup (multiple test files)
+- ✅ Forget Password (test files)
+- ✅ Email Verification (covered in login tests)
 
 ### Core Modules
-- ✅ Leads (5 test dosyası)
-- ✅ Agents (6 test dosyası)
-- ✅ Organisors (5 test dosyası)
-- ✅ Orders (4 test dosyası)
-- ✅ Finance (4 test dosyası)
-- ⚠️ Products and Stock (kısmi)
+- ✅ Leads (5 test files)
+- ✅ Agents (6 test files)
+- ✅ Organisors (5 test files)
+- ✅ Orders (4 test files)
+- ✅ Finance (4 test files)
+- ⚠️ Products and Stock (partial)
 
-### Test Türleri
-- ✅ View testleri
-- ✅ Form testleri
-- ✅ Model testleri
-- ✅ Authentication backend testleri
-- ✅ Entegrasyon testleri
-- ✅ Güvenlik testleri
-- ✅ Performans testleri
-- ✅ Mixin testleri
+### Test Types
+- ✅ View tests
+- ✅ Form tests
+- ✅ Model tests
+- ✅ Authentication backend tests
+- ✅ Integration tests
+- ✅ Security tests
+- ✅ Performance tests
+- ✅ Mixin tests
 
-## 🆕 Yenilikler
+## 🆕 Recent Additions
 
-### Logout Test Sistemi (12 Ekim 2025)
-- 🎉 **33 test** başarıyla eklendi
-- ✅ %100 test başarı oranı
-- 📁 Organize klasör yapısı
-- 📖 Detaylı dokümantasyon
-- 🏃 İnteraktif test runner
-- 🔒 Kapsamlı güvenlik testleri
-- ⚡ Performans testleri
-- 🔗 Entegrasyon testleri
+### Logout Test System (October 12, 2025)
+- 🎉 **33 tests** added successfully
+- ✅ 100% test pass rate
+- 📁 Organized folder structure
+- 📖 Detailed documentation
+- 🏃 Interactive test runner
+- 🔒 Comprehensive security tests
+- ⚡ Performance tests
+- 🔗 Integration tests
 
-### Özellikler
-- Django LogoutView testi
-- Session yönetimi testleri
-- CSRF koruması testleri
-- Session hijacking koruması
-- Session fixation koruması
-- Token invalidation testleri
-- Çoklu session yönetimi
-- Farklı kullanıcı tipleri (organizer, agent, superuser)
-- Edge case senaryoları
+### Features
+- Django LogoutView tests
+- Session management tests
+- CSRF protection tests
+- Session hijacking protection
+- Session fixation protection
+- Token invalidation tests
+- Multi-session management
+- Different user types (organizer, agent, superuser)
+- Edge case scenarios
 
-## 🎯 Gelecek Planları
+## 🎯 Future Plans
 
-1. ✅ **Logout testleri eklendi** (TAMAMLANDI!)
-2. **Diğer modüller için test genişletmeleri**
-3. **Test coverage raporu ekle**
-4. **CI/CD entegrasyonu**
-5. **Performance benchmark testleri**
+1. ✅ **Logout tests added** (COMPLETED!)
+2. **Test extensions for other modules**
+3. **Add test coverage report**
+4. **CI/CD integration**
+5. **Performance benchmark tests**
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is created and torn down automatically
+- Mock used for email sending
+- Factory pattern used for test data creation

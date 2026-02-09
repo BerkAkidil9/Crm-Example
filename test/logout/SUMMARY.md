@@ -35,7 +35,7 @@
 ### Documentation
 5. ✅ `test/logout/README.md` (Detailed usage guide)
 6. ✅ `test/logout/TEST_RESULTS.md` (Test results)
-7. ✅ `test/logout/OZET.md` (This file)
+7. ✅ `test/logout/SUMMARY.md` (This file)
 8. ✅ `test/logout/test_runner.py` (Interactive test runner)
 
 ### Updates
@@ -172,9 +172,9 @@ python manage.py test test.logout.working.test_logout_views.TestLogoutView.test_
 test/logout/
 ├── README.md              # Detailed usage guide
 ├── TEST_RESULTS.md        # Test results report
-├── OZET.md               # This summary report
-├── test_runner.py        # Interactive test runner
-└── working/              # Working tests
+├── SUMMARY.md             # This summary report
+├── test_runner.py         # Interactive test runner
+└── working/               # Working tests
     ├── __init__.py
     ├── test_logout_views.py        (19 tests)
     └── test_logout_integration.py  (14 tests)
