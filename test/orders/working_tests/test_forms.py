@@ -152,7 +152,7 @@ class TestOrderModelForm(TestCase):
             organisation=other_profile
         )
         
-        # Form'da sadece bu organisation'ın lead'leri olmalı
+        # Form should only contain this organisation's leads
         # (Bu test form'un queryset'ini doğrudan test etmez,
         # çünkü form view'da set ediliyor, ama form yapısını test eder)
         form = OrderModelForm()

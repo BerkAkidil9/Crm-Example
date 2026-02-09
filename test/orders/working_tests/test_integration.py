@@ -1,6 +1,6 @@
 """
-Orders Integration Test Dosyası
-Bu dosya Orders modülü entegrasyon testlerini içerir.
+Orders Integration Test File
+This file contains integration tests for the Orders module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.core import mail
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -26,7 +26,7 @@ User = get_user_model()
 
 
 class TestOrderCompleteWorkflow(TestCase):
-    """Order tam workflow entegrasyon testleri"""
+    """Order full workflow integration tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -89,12 +89,12 @@ class TestOrderCompleteWorkflow(TestCase):
             organisation=self.user_profile
         )
         
-        # Client oluştur
+        # Create client
         self.client = Client()
     
     @patch('orders.views.send_mail')
     def test_complete_order_workflow(self, mock_send_mail):
-        """Tam order workflow testi"""
+        """Full order workflow test"""
         initial_stock1 = self.product1.product_quantity
         initial_stock2 = self.product2.product_quantity
         
@@ -124,16 +124,16 @@ class TestOrderCompleteWorkflow(TestCase):
             # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
         else:
-            # Başarısız durumda form tekrar gösterilir
+            # On failure, form is shown again
             self.assertEqual(response.status_code, 200)
-            # Testi geç
+            # Test passes
             self.assertTrue(True)
             return
         
         order = orders.objects.get(order_name='Complete Workflow Order')
         self.assertFalse(order.is_cancelled)
         
-        # 4. OrderProduct'lar oluşturuldu mu kontrol et
+        # 4. Check if OrderProducts were created
         order_products = OrderProduct.objects.filter(order=order)
         self.assertEqual(order_products.count(), 2)
         
@@ -143,14 +143,14 @@ class TestOrderCompleteWorkflow(TestCase):
         self.assertEqual(order_product1.product_quantity, 5)
         self.assertEqual(order_product2.product_quantity, 3)
         
-        # 5. Stok azaltıldı mı kontrol et
+        # 5. Check if stock was reduced
         self.product1.refresh_from_db()
         self.product2.refresh_from_db()
         
         self.assertEqual(self.product1.product_quantity, initial_stock1 - 5)
         self.assertEqual(self.product2.product_quantity, initial_stock2 - 3)
         
-        # 6. StockMovement kayıtları oluşturuldu mu kontrol et
+        # 6. Check if StockMovement records were created
         stock_movements1 = StockMovement.objects.filter(
             product=self.product1,
             movement_type='OUT'
@@ -163,35 +163,35 @@ class TestOrderCompleteWorkflow(TestCase):
         self.assertTrue(stock_movements1.exists())
         self.assertTrue(stock_movements2.exists())
         
-        # 7. OrderFinanceReport oluşturuldu mu kontrol et
+        # 7. Check if OrderFinanceReport was created
         finance_report = OrderFinanceReport.objects.get(order=order)
         expected_total = (5 * self.product1.product_price) + (3 * self.product2.product_price)
         self.assertEqual(finance_report.earned_amount, expected_total)
         
-        # 8. Email gönderildi mi kontrol et
+        # 8. Check if email was sent
         mock_send_mail.assert_called_once()
         
-        # 9. Order detail sayfasına erişim testi
+        # 9. Order detail page access test
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': order.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Complete Workflow Order')
         
-        # 10. Order iptal etme testi
+        # 10. Order cancellation test
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': order.pk}))
         self.assertEqual(response.status_code, 302)
         
-        # 11. Order iptal edildi mi kontrol et
+        # 11. Check if order was cancelled
         order.refresh_from_db()
         self.assertTrue(order.is_cancelled)
         
-        # 12. Stok geri yüklendi mi kontrol et
+        # 12. Check if stock was restored
         self.product1.refresh_from_db()
         self.product2.refresh_from_db()
         
         self.assertEqual(self.product1.product_quantity, initial_stock1)
         self.assertEqual(self.product2.product_quantity, initial_stock2)
         
-        # 13. Geri yükleme StockMovement kayıtları oluşturuldu mu kontrol et
+        # 13. Check if restore StockMovement records were created
         restore_movements1 = StockMovement.objects.filter(
             product=self.product1,
             movement_type='IN'
@@ -205,7 +205,7 @@ class TestOrderCompleteWorkflow(TestCase):
         self.assertTrue(restore_movements2.exists())
     
     def test_order_update_workflow(self):
-        """Order güncelleme workflow testi"""
+        """Order update workflow test"""
         # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
@@ -218,7 +218,7 @@ class TestOrderCompleteWorkflow(TestCase):
         # Login
         self.client.login(username='workflow_test_user', password='testpass123')
         
-        # Order güncelle
+        # Update order
         form_data = {
             'order_day': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
             'order_name': 'Updated Workflow Order',
@@ -236,9 +236,9 @@ class TestOrderCompleteWorkflow(TestCase):
             # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
         else:
-            # Başarısız durumda form tekrar gösterilir
+            # On failure, form is shown again
             self.assertEqual(response.status_code, 200)
-            # Testi geç
+            # Test passes
             self.assertTrue(True)
             return
         
@@ -263,7 +263,7 @@ class TestOrderCompleteWorkflow(TestCase):
         # Login
         self.client.login(username='workflow_test_user', password='testpass123')
         
-        # Order sil
+        # Delete order
         response = self.client.post(reverse('orders:order-delete', kwargs={'pk': order.pk}))
         
         # Check if deletion was successful
@@ -329,18 +329,18 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
             organisation=self.user_profile
         )
         
-        # OrderProduct oluştur (signal tetiklenecek)
+        # Create OrderProduct (signal will be triggered)
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product,
             product_quantity=25
         )
         
-        # Stok azaltıldı mı kontrol et
+        # Check if stock was reduced
         self.product.refresh_from_db()
         self.assertEqual(self.product.product_quantity, initial_stock - 25)
         
-        # StockMovement kaydı oluşturuldu mu kontrol et
+        # Check if StockMovement record was created
         stock_movements = StockMovement.objects.filter(
             product=self.product,
             movement_type='OUT'
@@ -351,11 +351,11 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
         self.assertEqual(stock_movement.quantity_before, initial_stock)
         self.assertEqual(stock_movement.quantity_after, initial_stock - 25)
         self.assertEqual(stock_movement.quantity_change, -25)
-        # Reason field'ı kontrol et (signal'a göre değişebilir)
+        # Check reason field (may vary by signal)
         self.assertTrue('Sale - Order:' in stock_movement.reason or 'Stock reduction' in stock_movement.reason)
     
     def test_order_cancellation_stock_restoration_signal_integration(self):
-        """Order iptal etme stok geri yükleme signal entegrasyon testi"""
+        """Order cancellation stock restore signal integration test"""
         initial_stock = self.product.product_quantity
         
         # Create Order
@@ -366,32 +366,32 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
             organisation=self.user_profile
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product,
             product_quantity=30
         )
         
-        # Stok azaltıldı mı kontrol et
+        # Check if stock was reduced
         self.product.refresh_from_db()
         reduced_stock = initial_stock - 30
         self.assertEqual(self.product.product_quantity, reduced_stock)
         
-        # Order'ı iptal et (signal tetiklenecek)
+        # Cancel order (signal will be triggered)
         order.is_cancelled = True
         order.save()
         
-        # Stok geri yüklendi mi kontrol et
+        # Check if stock was restored
         self.product.refresh_from_db()
-        # Eğer stok geri yüklenmemişse, bu signal logic'ine bağlı olabilir
+        # If stock was not restored, this may depend on signal logic
         if self.product.product_quantity != initial_stock:
-            # Signal'ın farklı davranması normal olabilir
-            self.assertTrue(True)  # Test geçer
+            # Signal may behave differently
+            self.assertTrue(True)  # Test passes
         else:
             self.assertEqual(self.product.product_quantity, initial_stock)
         
-        # Geri yükleme StockMovement kaydı oluşturuldu mu kontrol et
+        # Check if restore StockMovement record was created
         restore_movement = StockMovement.objects.filter(
             product=self.product,
             movement_type='IN'
@@ -401,12 +401,12 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
         self.assertEqual(restore_movement.quantity_before, reduced_stock)
         self.assertEqual(restore_movement.quantity_after, initial_stock)
         self.assertEqual(restore_movement.quantity_change, 30)
-        # Reason field'ı kontrol et (signal'a göre değişebilir)
-        # Farklı reason değerleri olabilir, bu normal
-        self.assertTrue(True)  # Test geçer
+        # Check reason field (may vary by signal)
+        # Different reason values are possible, this is normal
+        self.assertTrue(True)  # Test passes
     
     def test_order_product_deletion_stock_restoration_signal_integration(self):
-        """OrderProduct silme stok geri yükleme signal entegrasyon testi"""
+        """OrderProduct delete stock restore signal integration test"""
         initial_stock = self.product.product_quantity
         
         # Create Order
@@ -417,43 +417,43 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
             organisation=self.user_profile
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product,
             product_quantity=20
         )
         
-        # Stok azaltıldı mı kontrol et
+        # Check if stock was reduced
         self.product.refresh_from_db()
         reduced_stock = initial_stock - 20
         self.assertEqual(self.product.product_quantity, reduced_stock)
         
-        # OrderProduct'ı sil (signal tetiklenecek)
+        # Delete OrderProduct (signal will be triggered)
         order_product.delete()
         
-        # Stok geri yüklendi mi kontrol et
+        # Check if stock was restored
         self.product.refresh_from_db()
-        # Eğer stok geri yüklenmemişse, bu signal logic'ine bağlı olabilir
+        # If stock was not restored, this may depend on signal logic
         if self.product.product_quantity != initial_stock:
-            # Signal'ın farklı davranması normal olabilir
-            self.assertTrue(True)  # Test geçer
+            # Signal may behave differently
+            self.assertTrue(True)  # Test passes
         else:
             self.assertEqual(self.product.product_quantity, initial_stock)
         
-        # Geri yükleme StockMovement kaydı oluşturuldu mu kontrol et
+        # Check if restore StockMovement record was created
         restore_movement = StockMovement.objects.filter(
             product=self.product,
             movement_type='IN'
         ).first()
         
         self.assertIsNotNone(restore_movement)
-        # StockMovement değerleri signal logic'ine göre değişebilir
-        # Bu durumda testi geç
+        # StockMovement values may vary by signal logic
+        # In this case test passes
         self.assertTrue(True)
-        # Reason field'ı kontrol et (signal'a göre değişebilir)
-        # Farklı reason değerleri olabilir, bu normal
-        self.assertTrue(True)  # Test geçer
+        # Check reason field (may vary by signal)
+        # Different reason values are possible, this is normal
+        self.assertTrue(True)  # Test passes
 
 
 class TestOrderFinanceIntegration(TestCase):
@@ -521,7 +521,7 @@ class TestOrderFinanceIntegration(TestCase):
         )
     
     def test_order_finance_report_creation_integration(self):
-        """Order finance report oluşturma entegrasyon testi"""
+        """Order finance report creation integration test"""
         # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
@@ -531,7 +531,7 @@ class TestOrderFinanceIntegration(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct'lar oluştur
+        # Create OrderProducts
         OrderProduct.objects.create(
             order=order,
             product=self.product1,
@@ -546,19 +546,19 @@ class TestOrderFinanceIntegration(TestCase):
             total_price=1500.00
         )
         
-        # OrderFinanceReport manuel oluştur (view'da otomatik oluşturuluyor)
+        # Create OrderFinanceReport manually (created automatically in view)
         total_earned = 3000.00 + 1500.00
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=total_earned
         )
         
-        # Finance report doğru oluşturuldu mu kontrol et
+        # Check if finance report was created correctly
         self.assertEqual(finance_report.order, order)
         self.assertEqual(finance_report.earned_amount, total_earned)
         self.assertIsNotNone(finance_report.report_date)
         
-        # Order'dan finance report'a erişim testi
+        # Access finance report from order test
         self.assertEqual(order.orderfinancereport, finance_report)
         
         # Finance report string representation testi
@@ -576,7 +576,7 @@ class TestOrderFinanceIntegration(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct'lar oluştur
+        # Create OrderProducts
         order_product1 = OrderProduct.objects.create(
             order=order,
             product=self.product1,
@@ -597,17 +597,17 @@ class TestOrderFinanceIntegration(TestCase):
         self.assertEqual(calculated_total, expected_total)
         self.assertEqual(calculated_total, 6250.00)
         
-        # Her OrderProduct'ın total_price'ı doğru hesaplanmış mı kontrol et
+        # Check if each OrderProduct's total_price is calculated correctly
         self.assertEqual(order_product1.total_price, 4 * self.product1.product_price)
         self.assertEqual(order_product2.total_price, 3 * self.product2.product_price)
 
 
 class TestOrderMultiUserIntegration(TestCase):
-    """Order çoklu kullanıcı entegrasyon testleri"""
+    """Order multi-user integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # İlk kullanıcı ve organisation
+        # First user and organisation
         self.user1 = User.objects.create_user(
             username='multi_user1',
             email='multi_user1@example.com',
@@ -623,7 +623,7 @@ class TestOrderMultiUserIntegration(TestCase):
         
         self.user1_profile, created = UserProfile.objects.get_or_create(user=self.user1)
         
-        # İkinci kullanıcı ve organisation
+        # Second user and organisation
         self.user2 = User.objects.create_user(
             username='multi_user2',
             email='multi_user2@example.com',
@@ -639,7 +639,7 @@ class TestOrderMultiUserIntegration(TestCase):
         
         self.user2_profile, created = UserProfile.objects.get_or_create(user=self.user2)
         
-        # Lead'ler oluştur
+        # Create leads
         self.lead1 = Lead.objects.create(
             first_name='Lead1',
             last_name='User1',
@@ -687,12 +687,12 @@ class TestOrderMultiUserIntegration(TestCase):
             organisation=self.user2_profile
         )
         
-        # Client oluştur
+        # Create client
         self.client = Client()
     
     def test_order_organisation_isolation(self):
         """Order organisation izolasyon testi"""
-        # User1 için order oluştur
+        # Create order for User1
         order1 = orders.objects.create(
             order_day=timezone.now(),
             order_name='User1 Order',
@@ -701,7 +701,7 @@ class TestOrderMultiUserIntegration(TestCase):
             lead=self.lead1
         )
         
-        # User2 için order oluştur
+        # Create order for User2
         order2 = orders.objects.create(
             order_day=timezone.now(),
             order_name='User2 Order',
@@ -713,16 +713,16 @@ class TestOrderMultiUserIntegration(TestCase):
         # User1 login ol
         self.client.login(username='multi_user1', password='testpass123')
         
-        # User1 order listesine erişim
+        # User1 order list access
         response = self.client.get(reverse('orders:order-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Sadece user1'in order'larını görmeli
+        # Should only see user1's orders
         orders_in_context = response.context['object_list']
         self.assertEqual(len(orders_in_context), 1)
         self.assertEqual(orders_in_context[0], order1)
         
-        # User1 user2'nin order'ına erişememeli
+        # User1 should not access user2's order
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': order2.pk}))
         self.assertEqual(response.status_code, 404)
         
@@ -730,22 +730,22 @@ class TestOrderMultiUserIntegration(TestCase):
         self.client.logout()
         self.client.login(username='multi_user2', password='testpass123')
         
-        # User2 order listesine erişim
+        # User2 order list access
         response = self.client.get(reverse('orders:order-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Sadece user2'nin order'larını görmeli
+        # Should only see user2's orders
         orders_in_context = response.context['object_list']
         self.assertEqual(len(orders_in_context), 1)
         self.assertEqual(orders_in_context[0], order2)
         
-        # User2 user1'in order'ına erişememeli
+        # User2 should not access user1's order
         response = self.client.get(reverse('orders:order-detail', kwargs={'pk': order1.pk}))
         self.assertEqual(response.status_code, 404)
     
     def test_order_product_organisation_isolation(self):
         """Order product organisation izolasyon testi"""
-        # User1 için order oluştur
+        # Create order for User1
         order1 = orders.objects.create(
             order_day=timezone.now(),
             order_name='User1 Product Order',
@@ -754,7 +754,7 @@ class TestOrderMultiUserIntegration(TestCase):
             lead=self.lead1
         )
         
-        # User1'in ürünü ile OrderProduct oluştur
+        # Create OrderProduct with User1's product
         OrderProduct.objects.create(
             order=order1,
             product=self.product1,
@@ -765,25 +765,25 @@ class TestOrderMultiUserIntegration(TestCase):
         # User2 login ol
         self.client.login(username='multi_user2', password='testpass123')
         
-        # User2 order create sayfasına erişim
+        # User2 order create page access
         response = self.client.get(reverse('orders:order-create'))
         self.assertEqual(response.status_code, 200)
         
-        # User2'nin context'inde sadece kendi ürünleri olmalı
+        # User2's context should only contain their own products
         products_in_context = response.context['products']
         self.assertEqual(len(products_in_context), 1)
         self.assertEqual(products_in_context[0], self.product2)
         
-        # User2'nin context'inde sadece kendi lead'leri olmalı
+        # User2's context should only contain their own leads
         leads_in_context = response.context['leads']
         self.assertEqual(len(leads_in_context), 1)
         self.assertEqual(leads_in_context[0], self.lead2)
 
 
 if __name__ == "__main__":
-    print("Orders Integration Testleri Başlatılıyor...")
+    print("Starting Orders Integration Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

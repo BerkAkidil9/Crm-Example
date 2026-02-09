@@ -1,6 +1,6 @@
 """
-Finance Forms Test Dosyası
-Bu dosya Finance modülündeki tüm form'ları test eder.
+Finance Forms Test File
+This file tests all forms in the Finance module.
 """
 
 import os
@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from datetime import date, timedelta
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -18,10 +18,10 @@ from finance.forms import DateRangeForm
 
 
 class TestDateRangeForm(TestCase):
-    """DateRangeForm testleri"""
+    """DateRangeForm tests"""
     
     def test_date_range_form_valid_data(self):
-        """DateRangeForm valid data testi"""
+        """DateRangeForm valid data test"""
         today = date.today()
         tomorrow = today + timedelta(days=1)
         
@@ -144,11 +144,11 @@ class TestDateRangeForm(TestCase):
         """DateRangeForm widget years range testi"""
         form = DateRangeForm()
         
-        # Widget'ların years range'i kontrol et
+        # Check widgets' years range
         start_date_widget = form.fields['start_date'].widget
         end_date_widget = form.fields['end_date'].widget
         
-        # Range objesi ile karşılaştır
+        # Compare with range object
         self.assertEqual(start_date_widget.years, range(2000, 2101))
         self.assertEqual(end_date_widget.years, range(2000, 2101))
     
@@ -180,7 +180,7 @@ class TestDateRangeForm(TestCase):
         
         form = DateRangeForm(data=form_data)
         
-        # Form valid olmalı
+        # Form should be valid
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data['start_date'], today)
         self.assertEqual(form.cleaned_data['end_date'], tomorrow)
@@ -196,7 +196,7 @@ class TestDateRangeForm(TestCase):
         
         form = DateRangeForm(data=form_data)
         
-        # Form valid olmalı (aynı tarihler geçerli)
+        # Form should be valid (aynı tarihler geçerli)
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data['start_date'], today)
         self.assertEqual(form.cleaned_data['end_date'], today)
@@ -213,7 +213,7 @@ class TestDateRangeForm(TestCase):
         """DateRangeForm field required testi"""
         form = DateRangeForm()
         
-        # Field'ların required olup olmadığını kontrol et
+        # Check whether fields are required
         self.assertTrue(form.fields['start_date'].required)
         self.assertTrue(form.fields['end_date'].required)
     
@@ -221,10 +221,10 @@ class TestDateRangeForm(TestCase):
         """DateRangeForm field labels testi"""
         form = DateRangeForm()
         
-        # Field label'larını kontrol et (Django otomatik label oluşturur)
-        # Label None ise, Django field name'den otomatik oluşturur
-        self.assertIsNone(form.fields['start_date'].label)  # None olmalı
-        self.assertIsNone(form.fields['end_date'].label)    # None olmalı
+        # Check field labels (Django creates labels automatically)
+        # If label is None, Django creates it from field name
+        self.assertIsNone(form.fields['start_date'].label)  # Should be None
+        self.assertIsNone(form.fields['end_date'].label)    # Should be None
     
     def test_date_range_form_initial_data(self):
         """DateRangeForm initial data testi"""
@@ -238,7 +238,7 @@ class TestDateRangeForm(TestCase):
         
         form = DateRangeForm(initial=initial_data)
         
-        # Initial data doğru ayarlanmış olmalı
+        # Initial data should be set correctly
         self.assertEqual(form.initial['start_date'], today)
         self.assertEqual(form.initial['end_date'], tomorrow)
     
@@ -270,14 +270,14 @@ class TestDateRangeForm(TestCase):
         
         form = DateRangeForm(data=form_data)
         
-        # Form valid olmadan önce cleaned_data'ya erişim
+        # Access cleaned_data before form is valid
         with self.assertRaises(AttributeError):
             _ = form.cleaned_data
         
         # Form'u validate et
         self.assertTrue(form.is_valid())
         
-        # Şimdi cleaned_data'ya erişim olmalı
+        # Now access to cleaned_data should be available
         self.assertEqual(form.cleaned_data['start_date'], today)
         self.assertEqual(form.cleaned_data['end_date'], tomorrow)
     
@@ -291,11 +291,11 @@ class TestDateRangeForm(TestCase):
         form = DateRangeForm(data=form_data)
         self.assertFalse(form.is_valid())
         
-        # Error mesajlarını kontrol et
+        # Check error messages
         self.assertIn('start_date', form.errors)
         self.assertIn('end_date', form.errors)
         
-        # Error mesajları list olmalı
+        # Error messages should be a list
         self.assertIsInstance(form.errors['start_date'], list)
         self.assertIsInstance(form.errors['end_date'], list)
     
@@ -391,9 +391,9 @@ class TestDateRangeFormEdgeCases(TestCase):
 
 
 if __name__ == "__main__":
-    print("Finance Forms Testleri Başlatılıyor...")
+    print("Starting Finance Forms Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

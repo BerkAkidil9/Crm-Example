@@ -15,7 +15,7 @@ django.setup()
 
 def run_tests():
     """Run tests"""
-    print("Leads Test Sistemi")
+    print("Leads Test System")
     print("=" * 60)
     print()
     

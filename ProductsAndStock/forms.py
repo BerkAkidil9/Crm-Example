@@ -66,12 +66,12 @@ class ProductAndStockModelForm(forms.ModelForm):
         product_name = self.cleaned_data.get('product_name')
         organisation = self.instance.organisation if self.instance.pk else None
         
-        # Eğer instance varsa (update), organisation'ı instance'dan al
+        # If instance exists (update), get organisation from instance
         if not organisation and hasattr(self, 'user_organisation'):
             organisation = self.user_organisation
         
         if organisation:
-            # Aynı organizasyon altında aynı isimde ürün var mı kontrol et
+            # Check if a product with the same name exists in this organization
             existing_product = ProductsAndStock.objects.filter(
                 product_name=product_name,
                 organisation=organisation

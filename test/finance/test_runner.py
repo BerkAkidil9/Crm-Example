@@ -1,6 +1,6 @@
 """
 Finance Test Runner
-Bu dosya Finance modülü testlerini çalıştırmak için kullanılır.
+This file is used to run tests for the Finance module.
 """
 
 import os
@@ -9,20 +9,20 @@ import django
 from django.test.utils import get_runner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 def run_finance_tests():
-    """Finance testlerini çalıştır"""
-    print("Finance Testleri Başlatılıyor...")
+    """Run Finance tests"""
+    print("Starting Finance Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modüllerini belirle
+    # Define test modules
     test_modules = [
         'test.finance.working_tests.test_models',
         'test.finance.working_tests.test_views',
@@ -30,49 +30,49 @@ def run_finance_tests():
         'test.finance.working_tests.test_integration',
     ]
     
-    # Testleri çalıştır
+    # Run tests
     failures = test_runner.run_tests(test_modules, verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} test(s) failed!")
         return False
     else:
-        print("\n✅ Tüm testler başarılı!")
+        print("\n✅ All tests passed!")
         return True
 
 def run_specific_test(test_module):
-    """Belirli bir test modülünü çalıştır"""
-    print(f"Finance {test_module} Testleri Başlatılıyor...")
+    """Run a specific test module"""
+    print(f"Starting Finance {test_module} Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modülünü çalıştır
+    # Run test module
     failures = test_runner.run_tests([f'test.finance.working_tests.{test_module}'], verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} test(s) failed!")
         return False
     else:
-        print("\n✅ Tüm testler başarılı!")
+        print("\n✅ All tests passed!")
         return True
 
 def run_model_tests():
-    """Model testlerini çalıştır"""
+    """Run model tests"""
     return run_specific_test('test_models')
 
 def run_view_tests():
-    """View testlerini çalıştır"""
+    """Run view tests"""
     return run_specific_test('test_views')
 
 def run_form_tests():
-    """Form testlerini çalıştır"""
+    """Run form tests"""
     return run_specific_test('test_forms')
 
 def run_integration_tests():
-    """Integration testlerini çalıştır"""
+    """Run integration tests"""
     return run_specific_test('test_integration')
 
 if __name__ == "__main__":
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Finance Test Runner')
     parser.add_argument('--module', choices=['models', 'views', 'forms', 'integration', 'all'], 
-                       default='all', help='Hangi test modülünü çalıştırmak istiyorsunuz?')
+                       default='all', help='Which test module do you want to run?')
     
     args = parser.parse_args()
     

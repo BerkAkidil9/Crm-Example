@@ -348,7 +348,7 @@ class TestOrganisorCompleteIntegration(TestCase):
         self.assertEqual(self.normal_organisor.organisation, self.admin_profile)
         self.assertNotEqual(self.normal_organisor.organisation, self.normal_profile)
         
-        # Cascade silme testi
+        # Cascade delete test
         user_id = self.normal_user.id
         organisor_id = self.normal_organisor.id
         

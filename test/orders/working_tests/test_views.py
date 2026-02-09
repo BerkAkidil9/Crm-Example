@@ -137,7 +137,7 @@ class TestOrderListView(TestCase):
         self.client.login(username='orderlist_test_user', password='testpass123')
         response = self.client.get(reverse('orders:order-list'))
         
-        # Sadece kendi organisation'ının order'larını görmeli
+        # Should only see their own organisation's orders
         self.assertEqual(len(response.context['object_list']), 2)  # Aktif ve iptal edilmiş
         self.assertIn(self.order1, response.context['object_list'])
         self.assertIn(self.order2, response.context['object_list'])

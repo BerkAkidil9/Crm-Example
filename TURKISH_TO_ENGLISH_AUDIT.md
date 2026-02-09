@@ -187,4 +187,18 @@ Files such as `activity_log/migrations/0001_initial.py`, `tasks/migrations/0001_
 
 ---
 
+## 7. Completed translations (February 2025)
+
+The following have been translated to English (migrations left unchanged as per section 6):
+
+- **Application code:** `ProductsAndStock/forms.py` (comments)
+- **Test runners:** `test/finance/test_runner.py`, `test/orders/test_runner.py`, `test/leads/test_runner.py` (all Turkish strings)
+- **Orders tests:** `test/orders/working_tests/test_models.py`, `test_integration.py`, `test_views.py`, `test_forms.py` (docstrings and comments)
+- **Finance tests:** `test/finance/working_tests/test_models.py`, `test_integration.py`, `test_forms.py` (docstrings and comments)
+- **Organisors tests:** `test/organisors/working_tests/test_integration.py` (one comment)
+
+Remaining (optional): test/leads/test_forms.py, test/login, test/forget_password, test/logout, test/products_and_stock, test/agents (runners and some comments), leads/management/commands, agents/mixins.py – may still contain Turkish docstrings/comments.
+
+---
+
 *This report was created via automatic scanning and review. Add any additional Turkish text you notice to this list.*

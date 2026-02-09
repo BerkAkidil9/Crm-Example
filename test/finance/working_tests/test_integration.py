@@ -237,7 +237,7 @@ class TestFinanceOrdersIntegration(TestCase):
         self.assertEqual(OrderFinanceReport.objects.count(), 3)
     
     def test_finance_report_date_filtering_with_orders(self):
-        """Finance report tarih filtreleme order'larla entegrasyonu"""
+        """Finance report date filtering integration with orders"""
         # Create orders on different dates - fix to start of day
         from datetime import datetime
         now = timezone.now()
@@ -298,7 +298,7 @@ class TestFinanceOrdersIntegration(TestCase):
         
         org2_profile, created = UserProfile.objects.get_or_create(user=org2_user)
         
-        # Her organizasyon için order ve finance report oluştur
+        # Create order and finance report for each organisation
         order1 = orders.objects.create(
             order_day=timezone.now(),
             order_name='Org1 Order',
@@ -486,7 +486,7 @@ class TestFinanceProductsIntegration(TestCase):
         self.assertAlmostEqual(total_profit, expected_profit, places=2)
     
     def test_finance_report_stock_movement_integration(self):
-        """Finance report stok hareket entegrasyonu"""
+        """Finance report stock movement integration"""
         # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
@@ -496,7 +496,7 @@ class TestFinanceProductsIntegration(TestCase):
             lead=self.lead
         )
         
-        # Create OrderProduct (stok azaltılacak)
+        # Create OrderProduct (stock will be reduced)
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product1,
