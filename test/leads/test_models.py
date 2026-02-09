@@ -1,6 +1,6 @@
 """
-Leads Models Test Dosyası
-Bu dosya Leads modülündeki tüm modelleri test eder.
+Leads Models Test File
+This file tests all models in the Leads module.
 """
 
 import os
@@ -14,7 +14,7 @@ from django.db import IntegrityError
 from unittest.mock import patch, MagicMock
 from datetime import timedelta
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -25,7 +25,7 @@ User = get_user_model()
 
 
 class TestUserModel(TestCase):
-    """User model testleri"""
+    """User model tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -44,7 +44,7 @@ class TestUserModel(TestCase):
         }
     
     def test_user_creation(self):
-        """User oluşturma testi"""
+        """User creation test"""
         user = User.objects.create_user(**self.user_data)
         
         self.assertEqual(user.username, 'testuser')
@@ -59,15 +59,15 @@ class TestUserModel(TestCase):
         self.assertTrue(user.email_verified)
     
     def test_user_str_representation(self):
-        """User __str__ metodu testi"""
+        """User __str__ method test"""
         user = User.objects.create_user(**self.user_data)
         self.assertEqual(str(user), 'testuser')
     
     def test_user_email_unique(self):
-        """User email benzersizlik testi"""
+        """User email uniqueness test"""
         User.objects.create_user(**self.user_data)
         
-        # Aynı email ile ikinci user oluşturmaya çalış
+        # Try to create second user with same email
         with self.assertRaises(IntegrityError):
             User.objects.create_user(
                 username='testuser2',
@@ -76,10 +76,10 @@ class TestUserModel(TestCase):
             )
     
     def test_user_username_unique(self):
-        """User username benzersizlik testi"""
+        """User username uniqueness test"""
         User.objects.create_user(**self.user_data)
         
-        # Aynı username ile ikinci user oluşturmaya çalış
+        # Try to create second user with same username
         with self.assertRaises(IntegrityError):
             User.objects.create_user(
                 username='testuser',
@@ -88,10 +88,10 @@ class TestUserModel(TestCase):
             )
     
     def test_user_phone_number_unique(self):
-        """User phone_number benzersizlik testi"""
+        """User phone_number uniqueness test"""
         User.objects.create_user(**self.user_data)
         
-        # Aynı phone_number ile ikinci user oluşturmaya çalış
+        # Try to create second user with same phone_number
         with self.assertRaises(IntegrityError):
             User.objects.create_user(
                 username='testuser2',
@@ -101,8 +101,8 @@ class TestUserModel(TestCase):
             )
     
     def test_user_gender_choices(self):
-        """User gender seçenekleri testi"""
-        # Geçerli gender değerleri
+        """User gender choices test"""
+        # Valid gender values
         valid_genders = ['M', 'F', 'O']
         for i, gender in enumerate(valid_genders):
             user_data = self.user_data.copy()
@@ -115,7 +115,7 @@ class TestUserModel(TestCase):
             self.assertEqual(user.gender, gender)
     
     def test_user_default_values(self):
-        """User default değerleri testi"""
+        """User default values test"""
         user = User.objects.create_user(
             username='defaultuser',
             email='default@example.com',
@@ -131,7 +131,7 @@ class TestUserModel(TestCase):
 
 
 class TestUserProfileModel(TestCase):
-    """UserProfile model testleri"""
+    """UserProfile model tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -149,8 +149,8 @@ class TestUserProfileModel(TestCase):
         )
     
     def test_userprofile_creation(self):
-        """UserProfile oluşturma testi"""
-        # User oluşturulduğunda UserProfile otomatik oluşturulmuş olmalı
+        """UserProfile creation test"""
+        # UserProfile should be created automatically when user is created
         self.assertTrue(UserProfile.objects.filter(user=self.user).exists())
         
         profile = UserProfile.objects.get(user=self.user)
@@ -158,19 +158,19 @@ class TestUserProfileModel(TestCase):
         self.assertEqual(str(profile), 'profileuser')
     
     def test_userprofile_one_to_one_relationship(self):
-        """UserProfile-OneToOneField ilişkisi testi"""
-        # User oluşturulduğunda UserProfile otomatik oluşturulmuş olmalı
+        """UserProfile-OneToOneField relationship test"""
+        # UserProfile should be created automatically when user is created
         profile = UserProfile.objects.get(user=self.user)
         
-        # User'dan profile'a erişim
+        # Access profile from user
         self.assertEqual(self.user.userprofile, profile)
         
-        # Profile'dan user'a erişim
+        # Access user from profile
         self.assertEqual(profile.user, self.user)
     
     def test_userprofile_unique_constraint(self):
-        """UserProfile unique constraint testi"""
-        # UserProfile zaten mevcut, yeni user ile test et
+        """UserProfile unique constraint test"""
+        # UserProfile already exists, test with new user
         new_user = User.objects.create_user(
             username='newuser',
             email='newuser@example.com',
@@ -178,28 +178,28 @@ class TestUserProfileModel(TestCase):
             phone_number='+905551234568'
         )
         
-        # Aynı user ile ikinci profile oluşturmaya çalış
+        # Try to create second profile with same user
         with self.assertRaises(IntegrityError):
             UserProfile.objects.create(user=new_user)
     
     def test_userprofile_cascade_delete_user(self):
-        """UserProfile cascade delete user testi"""
+        """UserProfile cascade delete user test"""
         profile = UserProfile.objects.get(user=self.user)
         profile_id = profile.id
         
-        # User'ı sil
+        # Delete user
         self.user.delete()
         
-        # Profile da silinmeli
+        # Profile should also be deleted
         self.assertFalse(UserProfile.objects.filter(id=profile_id).exists())
 
 
 class TestLeadModel(TestCase):
-    """Lead model testleri"""
+    """Lead model tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='lead_organisor_test',
             email='lead_organisor_test@example.com',
@@ -213,12 +213,12 @@ class TestLeadModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create Agent
         self.agent_user = User.objects.create_user(
             username='lead_agent_test',
             email='lead_agent_test@example.com',
@@ -241,7 +241,7 @@ class TestLeadModel(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.category = Category.objects.create(
             name="Test Category",
             organisation=self.organisor_profile
@@ -258,7 +258,7 @@ class TestLeadModel(TestCase):
         )
     
     def test_lead_creation(self):
-        """Lead oluşturma testi"""
+        """Lead creation test"""
         lead = Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -289,7 +289,7 @@ class TestLeadModel(TestCase):
         self.assertIsNotNone(lead.date_added)
     
     def test_lead_str_representation(self):
-        """Lead __str__ metodu testi"""
+        """Lead __str__ method test"""
         lead = Lead.objects.create(
             first_name='Jane',
             last_name='Smith',
@@ -304,7 +304,7 @@ class TestLeadModel(TestCase):
         self.assertEqual(str(lead), 'Jane Smith')
     
     def test_lead_email_unique(self):
-        """Lead email benzersizlik testi"""
+        """Lead email uniqueness test"""
         Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -316,7 +316,7 @@ class TestLeadModel(TestCase):
             address='123 Test Street'
         )
         
-        # Aynı email ile ikinci lead oluşturmaya çalış
+        # Try to create second lead with same email
         with self.assertRaises(IntegrityError):
             Lead.objects.create(
                 first_name='Jane',
@@ -330,7 +330,7 @@ class TestLeadModel(TestCase):
             )
     
     def test_lead_phone_number_unique(self):
-        """Lead phone_number benzersizlik testi"""
+        """Lead phone_number uniqueness test"""
         Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -342,7 +342,7 @@ class TestLeadModel(TestCase):
             address='123 Test Street'
         )
         
-        # Aynı phone_number ile ikinci lead oluşturmaya çalış
+        # Try to create second lead with same phone_number
         with self.assertRaises(IntegrityError):
             Lead.objects.create(
                 first_name='Jane',
@@ -356,7 +356,7 @@ class TestLeadModel(TestCase):
             )
     
     def test_lead_organisation_relationship(self):
-        """Lead-organisation ilişkisi testi"""
+        """Lead-organisation relationship test"""
         lead = Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -372,7 +372,7 @@ class TestLeadModel(TestCase):
         self.assertEqual(lead.organisation.user, self.organisor_user)
     
     def test_lead_agent_relationship(self):
-        """Lead-agent ilişkisi testi"""
+        """Lead-agent relationship test"""
         lead = Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -389,7 +389,7 @@ class TestLeadModel(TestCase):
         self.assertEqual(lead.agent.user, self.agent_user)
     
     def test_lead_cascade_delete_organisation(self):
-        """Lead cascade delete organisation testi"""
+        """Lead cascade delete organisation test"""
         lead = Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -403,14 +403,14 @@ class TestLeadModel(TestCase):
         
         lead_id = lead.id
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # Lead da silinmeli
+        # Lead should also be deleted
         self.assertFalse(Lead.objects.filter(id=lead_id).exists())
     
     def test_lead_agent_set_null_on_delete(self):
-        """Lead agent SET_NULL on delete testi"""
+        """Lead agent SET_NULL on delete test"""
         lead = Lead.objects.create(
             first_name='John',
             last_name='Doe',
@@ -423,16 +423,16 @@ class TestLeadModel(TestCase):
             address='123 Test Street'
         )
         
-        # Agent'ı sil
+        # Delete agent
         self.agent.delete()
         
-        # Lead'de agent null olmalı
+        # Lead's agent should be null
         lead.refresh_from_db()
         self.assertIsNone(lead.agent)
     
     def test_lead_save_method_default_categories(self):
-        """Lead save metodu default kategoriler testi"""
-        # Yeni lead oluştur (kategoriler olmadan)
+        """Lead save method default categories test"""
+        # Create new lead (without categories)
         lead = Lead(
             first_name='John',
             last_name='Doe',
@@ -444,27 +444,27 @@ class TestLeadModel(TestCase):
             address='123 Test Street'
         )
         
-        # Save öncesi kategoriler None
+        # Categories None before save
         self.assertIsNone(lead.category)
         self.assertIsNone(lead.source_category)
         self.assertIsNone(lead.value_category)
         
-        # Save işlemi
+        # Save operation
         lead.save()
         
-        # Save sonrası default kategoriler atanmış olmalı
+        # Default categories should be assigned after save
         self.assertIsNotNone(lead.category)
         self.assertIsNotNone(lead.source_category)
         self.assertIsNotNone(lead.value_category)
         
-        # "Unassigned" kategorileri oluşturulmuş olmalı
+        # "Unassigned" categories should be created
         self.assertEqual(lead.category.name, "Unassigned")
         self.assertEqual(lead.source_category.name, "Unassigned")
         self.assertEqual(lead.value_category.name, "Unassigned")
     
     def test_lead_save_method_existing_categories(self):
-        """Lead save metodu mevcut kategoriler testi"""
-        # Mevcut kategorilerle lead oluştur
+        """Lead save method existing categories test"""
+        # Create lead with existing categories
         lead = Lead(
             first_name='John',
             last_name='Doe',
@@ -481,18 +481,18 @@ class TestLeadModel(TestCase):
         
         lead.save()
         
-        # Mevcut kategoriler korunmalı
+        # Existing categories should be preserved
         self.assertEqual(lead.category, self.category)
         self.assertEqual(lead.source_category, self.source_category)
         self.assertEqual(lead.value_category, self.value_category)
 
 
 class TestAgentModel(TestCase):
-    """Agent model testleri"""
+    """Agent model tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='agent_organisor_test',
             email='agent_organisor_test@example.com',
@@ -506,12 +506,12 @@ class TestAgentModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Agent kullanıcısı oluştur
+        # Create agent user
         self.agent_user = User.objects.create_user(
             username='agent_test',
             email='agent_test@example.com',
@@ -530,7 +530,7 @@ class TestAgentModel(TestCase):
         )
     
     def test_agent_creation(self):
-        """Agent oluşturma testi"""
+        """Agent creation test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -541,7 +541,7 @@ class TestAgentModel(TestCase):
         self.assertTrue(Agent.objects.filter(user=self.agent_user).exists())
     
     def test_agent_str_representation(self):
-        """Agent __str__ metodu testi"""
+        """Agent __str__ method test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -551,37 +551,37 @@ class TestAgentModel(TestCase):
         self.assertEqual(str(agent), expected_str)
     
     def test_agent_user_relationship(self):
-        """Agent-User ilişkisi testi"""
+        """Agent-User relationship test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # OneToOneField testi
+        # OneToOneField test
         self.assertEqual(agent.user, self.agent_user)
         self.assertEqual(agent.user.is_agent, True)
         self.assertEqual(agent.user.is_organisor, True)
     
     def test_agent_organisation_relationship(self):
-        """Agent-Organisation ilişkisi testi"""
+        """Agent-Organisation relationship test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # ForeignKey testi
+        # ForeignKey test
         self.assertEqual(agent.organisation, self.organisor_profile)
         self.assertEqual(agent.organisation.user, self.organisor_user)
     
     def test_agent_unique_user_constraint(self):
-        """Agent unique user constraint testi"""
-        # İlk agent oluştur
+        """Agent unique user constraint test"""
+        # Create first agent
         Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
         )
         
-        # Aynı user ile ikinci agent oluşturmaya çalış
+        # Try to create second agent with same user
         with self.assertRaises(IntegrityError):
             Agent.objects.create(
                 user=self.agent_user,
@@ -589,7 +589,7 @@ class TestAgentModel(TestCase):
             )
     
     def test_agent_cascade_delete_user(self):
-        """Agent cascade delete user testi"""
+        """Agent cascade delete user test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -598,15 +598,15 @@ class TestAgentModel(TestCase):
         agent_id = agent.id
         user_id = self.agent_user.id
         
-        # User'ı sil
+        # Delete user
         self.agent_user.delete()
         
-        # Agent da silinmeli
+        # Agent should also be deleted
         self.assertFalse(Agent.objects.filter(id=agent_id).exists())
         self.assertFalse(User.objects.filter(id=user_id).exists())
     
     def test_agent_cascade_delete_organisation(self):
-        """Agent cascade delete organisation testi"""
+        """Agent cascade delete organisation test"""
         agent = Agent.objects.create(
             user=self.agent_user,
             organisation=self.organisor_profile
@@ -614,15 +614,15 @@ class TestAgentModel(TestCase):
         
         agent_id = agent.id
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # Agent da silinmeli
+        # Agent should also be deleted
         self.assertFalse(Agent.objects.filter(id=agent_id).exists())
 
 
 class TestEmailVerificationTokenModel(TestCase):
-    """EmailVerificationToken model testleri"""
+    """EmailVerificationToken model tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -640,7 +640,7 @@ class TestEmailVerificationTokenModel(TestCase):
         )
     
     def test_token_creation(self):
-        """Token oluşturma testi"""
+        """Token creation test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         self.assertEqual(token.user, self.user)
@@ -649,94 +649,94 @@ class TestEmailVerificationTokenModel(TestCase):
         self.assertIsNotNone(token.created_at)
     
     def test_token_str_representation(self):
-        """Token __str__ metodu testi"""
+        """Token __str__ method test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         expected_str = f"Verification token for {self.user.email}"
         self.assertEqual(str(token), expected_str)
     
     def test_token_uniqueness(self):
-        """Token benzersizlik testi"""
+        """Token uniqueness test"""
         token1 = EmailVerificationToken.objects.create(user=self.user)
         token2 = EmailVerificationToken.objects.create(user=self.user)
         
-        # Her iki token farklı olmalı
+        # Both tokens should be different
         self.assertNotEqual(token1.token, token2.token)
         
-        # Aynı user için birden fazla token olabilir
+        # Multiple tokens can exist for same user
         self.assertEqual(EmailVerificationToken.objects.filter(user=self.user).count(), 2)
     
     def test_token_expiration(self):
-        """Token süresi dolma testi"""
+        """Token expiration test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Yeni oluşturulan token süresi dolmamış olmalı
+        # Newly created token should not be expired
         self.assertFalse(token.is_expired())
         
-        # Mock ile 25 saat sonrasını simüle et
+        # Simulate 25 hours later with mock
         with patch('django.utils.timezone.now') as mock_now:
             mock_now.return_value = token.created_at + timedelta(hours=25)
             
-            # Token süresi dolmuş olmalı
+            # Token should be expired
             self.assertTrue(token.is_expired())
     
     def test_token_is_used_default(self):
-        """Token is_used default değeri testi"""
+        """Token is_used default value test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         self.assertFalse(token.is_used)
     
     def test_token_cascade_delete_user(self):
-        """Token cascade delete user testi"""
+        """Token cascade delete user test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
         token_id = token.id
         user_id = self.user.id
         
-        # User'ı sil
+        # Delete user
         self.user.delete()
         
-        # Token da silinmeli
+        # Token should also be deleted
         self.assertFalse(EmailVerificationToken.objects.filter(id=token_id).exists())
         self.assertFalse(User.objects.filter(id=user_id).exists())
     
     def test_multiple_tokens_for_same_user(self):
-        """Aynı kullanıcı için birden fazla token testi"""
+        """Multiple tokens for same user test"""
         token1 = EmailVerificationToken.objects.create(user=self.user)
         token2 = EmailVerificationToken.objects.create(user=self.user)
         
-        # Her iki token farklı olmalı
+        # Both tokens should be different
         self.assertNotEqual(token1.token, token2.token)
         
-        # Aynı user'a ait olmalı
+        # Should belong to same user
         self.assertEqual(token1.user, self.user)
         self.assertEqual(token2.user, self.user)
         
-        # Toplam 2 token olmalı
+        # Total should be 2 tokens
         self.assertEqual(EmailVerificationToken.objects.filter(user=self.user).count(), 2)
     
     def test_token_used_status_update(self):
-        """Token kullanıldı durumu güncelleme testi"""
+        """Token used status update test"""
         token = EmailVerificationToken.objects.create(user=self.user)
         
-        # Başlangıçta kullanılmamış
+        # Initially unused
         self.assertFalse(token.is_used)
         
-        # Kullanıldı olarak işaretle
+        # Mark as used
         token.is_used = True
         token.save()
         
-        # Güncellenmiş token'ı al
+        # Fetch updated token
         updated_token = EmailVerificationToken.objects.get(id=token.id)
         self.assertTrue(updated_token.is_used)
 
 
 class TestCategoryModels(TestCase):
-    """Category, SourceCategory, ValueCategory model testleri"""
+    """Category, SourceCategory, ValueCategory model tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='category_organisor_test',
             email='category_organisor_test@example.com',
@@ -750,13 +750,13 @@ class TestCategoryModels(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
     
     def test_category_creation(self):
-        """Category oluşturma testi"""
+        """Category creation test"""
         category = Category.objects.create(
             name="Electronics",
             organisation=self.organisor_profile
@@ -767,7 +767,7 @@ class TestCategoryModels(TestCase):
         self.assertEqual(str(category), "Electronics")
     
     def test_source_category_creation(self):
-        """SourceCategory oluşturma testi"""
+        """SourceCategory creation test"""
         source_category = SourceCategory.objects.create(
             name="Website",
             organisation=self.organisor_profile
@@ -778,7 +778,7 @@ class TestCategoryModels(TestCase):
         self.assertEqual(str(source_category), "Website")
     
     def test_value_category_creation(self):
-        """ValueCategory oluşturma testi"""
+        """ValueCategory creation test"""
         value_category = ValueCategory.objects.create(
             name="High Value",
             organisation=self.organisor_profile
@@ -789,7 +789,7 @@ class TestCategoryModels(TestCase):
         self.assertEqual(str(value_category), "High Value")
     
     def test_category_organisation_relationship(self):
-        """Category-organisation ilişkisi testi"""
+        """Category-organisation relationship test"""
         category = Category.objects.create(
             name="Test Category",
             organisation=self.organisor_profile
@@ -799,7 +799,7 @@ class TestCategoryModels(TestCase):
         self.assertEqual(category.organisation.user, self.organisor_user)
     
     def test_category_cascade_delete_organisation(self):
-        """Category cascade delete organisation testi"""
+        """Category cascade delete organisation test"""
         category = Category.objects.create(
             name="Test Category",
             organisation=self.organisor_profile
@@ -807,14 +807,14 @@ class TestCategoryModels(TestCase):
         
         category_id = category.id
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # Category da silinmeli
+        # Category should also be deleted
         self.assertFalse(Category.objects.filter(id=category_id).exists())
     
     def test_source_category_cascade_delete_organisation(self):
-        """SourceCategory cascade delete organisation testi"""
+        """SourceCategory cascade delete organisation test"""
         source_category = SourceCategory.objects.create(
             name="Test Source",
             organisation=self.organisor_profile
@@ -822,14 +822,14 @@ class TestCategoryModels(TestCase):
         
         source_category_id = source_category.id
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # SourceCategory da silinmeli
+        # SourceCategory should also be deleted
         self.assertFalse(SourceCategory.objects.filter(id=source_category_id).exists())
     
     def test_value_category_cascade_delete_organisation(self):
-        """ValueCategory cascade delete organisation testi"""
+        """ValueCategory cascade delete organisation test"""
         value_category = ValueCategory.objects.create(
             name="Test Value",
             organisation=self.organisor_profile
@@ -837,19 +837,19 @@ class TestCategoryModels(TestCase):
         
         value_category_id = value_category.id
         
-        # Organisation'ı sil
+        # Delete organisation
         self.organisor_profile.delete()
         
-        # ValueCategory da silinmeli
+        # ValueCategory should also be deleted
         self.assertFalse(ValueCategory.objects.filter(id=value_category_id).exists())
 
 
 class TestLeadModelSignals(TransactionTestCase):
-    """Lead model signal testleri"""
+    """Lead model signal tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='signal_organisor_test',
             email='signal_organisor_test@example.com',
@@ -863,14 +863,14 @@ class TestLeadModelSignals(TransactionTestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
     
     def test_user_created_signal(self):
-        """User oluşturma signal testi"""
-        # Yeni user oluştur
+        """User creation signal test"""
+        # Create new user
         new_user = User.objects.create_user(
             username='signal_user_test',
             email='signal_user_test@example.com',
@@ -884,20 +884,20 @@ class TestLeadModelSignals(TransactionTestCase):
             email_verified=True
         )
         
-        # UserProfile otomatik oluşturulmuş olmalı
+        # UserProfile should be created automatically
         self.assertTrue(UserProfile.objects.filter(user=new_user).exists())
         
-        # UserProfile doğru user'a ait olmalı
+        # UserProfile should belong to correct user
         user_profile = UserProfile.objects.get(user=new_user)
         self.assertEqual(user_profile.user, new_user)
 
 
 class TestLeadModelIntegration(TestCase):
-    """Lead model entegrasyon testleri"""
+    """Lead model integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='integration_organisor_test',
             email='integration_organisor_test@example.com',
@@ -911,12 +911,12 @@ class TestLeadModelIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Agent oluştur
+        # Create Agent
         self.agent_user = User.objects.create_user(
             username='integration_agent_test',
             email='integration_agent_test@example.com',
@@ -935,7 +935,7 @@ class TestLeadModelIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategoriler oluştur
+        # Create categories
         self.category = Category.objects.create(
             name="Integration Category",
             organisation=self.organisor_profile
@@ -952,7 +952,7 @@ class TestLeadModelIntegration(TestCase):
         )
     
     def test_lead_with_all_relationships(self):
-        """Tüm ilişkilerle lead oluşturma testi"""
+        """Lead creation with all relationships test"""
         lead = Lead.objects.create(
             first_name='Integration',
             last_name='Lead',
@@ -968,24 +968,24 @@ class TestLeadModelIntegration(TestCase):
             address='789 Integration Street'
         )
         
-        # Tüm ilişkiler doğru mu
+        # Are all relationships correct
         self.assertEqual(lead.organisation, self.organisor_profile)
         self.assertEqual(lead.agent, self.agent)
         self.assertEqual(lead.category, self.category)
         self.assertEqual(lead.source_category, self.source_category)
         self.assertEqual(lead.value_category, self.value_category)
         
-        # Agent'ın organisation'ı doğru mu
+        # Is agent's organisation correct
         self.assertEqual(lead.agent.organisation, self.organisor_profile)
         
-        # Kategorilerin organisation'ı doğru mu
+        # Are categories' organisation correct
         self.assertEqual(lead.category.organisation, self.organisor_profile)
         self.assertEqual(lead.source_category.organisation, self.organisor_profile)
         self.assertEqual(lead.value_category.organisation, self.organisor_profile)
     
     def test_lead_agent_lead_relationship(self):
-        """Lead-agent-lead ilişkisi testi"""
-        # Birden fazla lead aynı agent'a atanabilir
+        """Lead-agent-lead relationship test"""
+        # Multiple leads can be assigned to same agent
         lead1 = Lead.objects.create(
             first_name='Lead1',
             last_name='Test',
@@ -1010,19 +1010,19 @@ class TestLeadModelIntegration(TestCase):
             address='456 Second Street'
         )
         
-        # Her iki lead aynı agent'a ait olmalı
+        # Both leads should belong to same agent
         self.assertEqual(lead1.agent, self.agent)
         self.assertEqual(lead2.agent, self.agent)
         
-        # Agent'dan lead'lere erişim
+        # Access leads from agent
         agent_leads = Lead.objects.filter(agent=self.agent)
         self.assertEqual(agent_leads.count(), 2)
         self.assertIn(lead1, agent_leads)
         self.assertIn(lead2, agent_leads)
     
     def test_lead_category_lead_relationship(self):
-        """Lead-category-lead ilişkisi testi"""
-        # Birden fazla lead aynı kategorilere atanabilir
+        """Lead-category-lead relationship test"""
+        # Multiple leads can be assigned to same categories
         lead1 = Lead.objects.create(
             first_name='Lead1',
             last_name='Test',
@@ -1051,7 +1051,7 @@ class TestLeadModelIntegration(TestCase):
             address='456 Second Street'
         )
         
-        # Her iki lead aynı kategorilere ait olmalı
+        # Both leads should belong to same categories
         self.assertEqual(lead1.category, self.category)
         self.assertEqual(lead2.category, self.category)
         self.assertEqual(lead1.source_category, self.source_category)
@@ -1059,7 +1059,7 @@ class TestLeadModelIntegration(TestCase):
         self.assertEqual(lead1.value_category, self.value_category)
         self.assertEqual(lead2.value_category, self.value_category)
         
-        # Kategorilerden lead'lere erişim
+        # Access leads from categories
         category_leads = self.category.leads.all()
         self.assertEqual(category_leads.count(), 2)
         self.assertIn(lead1, category_leads)
@@ -1067,9 +1067,9 @@ class TestLeadModelIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Leads Models Testleri Başlatılıyor...")
+    print("Starting Leads Models Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

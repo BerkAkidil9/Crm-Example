@@ -1,6 +1,6 @@
 """
 Leads Test Runner
-Bu dosya Leads modülü için test çalıştırıcısıdır.
+This file is the test runner for the Leads module.
 """
 
 import os
@@ -9,130 +9,130 @@ import django
 from django.test.utils import get_runner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 def run_tests():
-    """Testleri çalıştır"""
+    """Run tests"""
     print("Leads Test Sistemi")
     print("=" * 60)
     print()
     
-    # Test seçenekleri
+    # Test options
     test_options = {
         '1': {
-            'name': 'Tüm Testleri Çalıştır',
+            'name': 'Run All Tests',
             'command': 'test.leads',
-            'description': 'Models, Forms, Views ve Integration testlerini çalıştırır'
+            'description': 'Runs Models, Forms, Views and Integration tests'
         },
         '2': {
-            'name': 'Model Testleri',
+            'name': 'Model Tests',
             'command': 'test.leads.test_models',
-            'description': 'Sadece model testlerini çalıştırır'
+            'description': 'Runs model tests only'
         },
         '3': {
-            'name': 'Form Testleri',
+            'name': 'Form Tests',
             'command': 'test.leads.test_forms',
-            'description': 'Sadece form testlerini çalıştırır'
+            'description': 'Runs form tests only'
         },
         '4': {
-            'name': 'View Testleri',
+            'name': 'View Tests',
             'command': 'test.leads.test_views',
-            'description': 'Sadece view testlerini çalıştırır'
+            'description': 'Runs view tests only'
         },
         '5': {
-            'name': 'Integration Testleri',
+            'name': 'Integration Tests',
             'command': 'test.leads.test_integration',
-            'description': 'Sadece entegrasyon testlerini çalıştırır'
+            'description': 'Runs integration tests only'
         },
         '6': {
-            'name': 'Verbose Mod - Tüm Testler',
+            'name': 'Verbose Mode - All Tests',
             'command': 'test.leads',
             'description': 'Run all tests with verbose output',
             'verbose': True
         }
     }
     
-    # Test seçeneklerini göster
-    print("Mevcut Test Seçenekleri:")
+    # Show test options
+    print("Available Test Options:")
     print("-" * 40)
     for key, option in test_options.items():
         print(f"{key}. {option['name']}")
         print(f"   {option['description']}")
         print()
     
-    # Kullanıcı seçimi
+    # User choice
     while True:
         try:
-            choice = input("Hangi testi çalıştırmak istiyorsunuz? (1-6): ").strip()
+            choice = input("Which test do you want to run? (1-6): ").strip()
             if choice in test_options:
                 break
             else:
-                print("Geçersiz seçim! Lütfen 1-6 arasında bir sayı girin.")
+                print("Invalid choice! Please enter a number between 1-6.")
         except KeyboardInterrupt:
-            print("\nTest iptal edildi.")
+            print("\nTest cancelled.")
             return
         except EOFError:
-            print("\nTest iptal edildi.")
+            print("\nTest cancelled.")
             return
     
-    # Seçilen testi çalıştır
+    # Run selected test
     selected_option = test_options[choice]
-    print(f"\n{selected_option['name']} çalıştırılıyor...")
+    print(f"\nRunning {selected_option['name']}...")
     print("-" * 40)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner(verbosity=2 if selected_option.get('verbose') else 1)
     
-    # Testleri çalıştır
+    # Run tests
     try:
         failures = test_runner.run_tests([selected_option['command']])
         
         if failures:
-            print(f"\n❌ {failures} test başarısız oldu!")
+            print(f"\n❌ {failures} tests failed!")
         else:
-            print(f"\n✅ Tüm testler başarılı!")
+            print(f"\n✅ All tests passed!")
             
     except Exception as e:
-        print(f"\n❌ Test çalıştırılırken hata oluştu: {e}")
+        print(f"\n❌ Error while running tests: {e}")
         return
     
     print("\n" + "=" * 60)
-    print("Test tamamlandı!")
+    print("Tests completed!")
 
 def run_specific_test(test_name):
-    """Belirli bir testi çalıştır"""
-    print(f"Leads {test_name} Testleri Çalıştırılıyor...")
+    """Run a specific test"""
+    print(f"Running Leads {test_name} Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner(verbosity=2)
     
-    # Testi çalıştır
+    # Run test
     try:
         failures = test_runner.run_tests([f'test.leads.{test_name}'])
         
         if failures:
-            print(f"\n❌ {failures} test başarısız oldu!")
+            print(f"\n❌ {failures} tests failed!")
         else:
-            print(f"\n✅ Tüm {test_name} testleri başarılı!")
+            print(f"\n✅ All {test_name} tests passed!")
             
     except Exception as e:
-        print(f"\n❌ Test çalıştırılırken hata oluştu: {e}")
+        print(f"\n❌ Error while running tests: {e}")
 
 def run_quick_tests():
-    """Hızlı testler çalıştır"""
-    print("Leads Hızlı Testler Çalıştırılıyor...")
+    """Run quick tests"""
+    print("Running Leads Quick Tests...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner(verbosity=1)
     
-    # Hızlı testler
+    # Quick tests
     quick_tests = [
         'test.leads.test_models.TestUserModel',
         'test.leads.test_models.TestLeadModel',
@@ -144,63 +144,63 @@ def run_quick_tests():
         failures = test_runner.run_tests(quick_tests)
         
         if failures:
-            print(f"\n❌ {failures} test başarısız oldu!")
+            print(f"\n❌ {failures} tests failed!")
         else:
-            print(f"\n✅ Tüm hızlı testler başarılı!")
+            print(f"\n✅ All quick tests passed!")
             
     except Exception as e:
-        print(f"\n❌ Test çalıştırılırken hata oluştu: {e}")
+        print(f"\n❌ Error while running tests: {e}")
 
 def show_test_coverage():
-    """Test kapsamını göster"""
-    print("Leads Test Kapsamı")
+    """Show test coverage"""
+    print("Leads Test Coverage")
     print("=" * 60)
     print()
     
     coverage_info = {
         'Models': {
-            'User': '✅ Tam kapsam',
-            'UserProfile': '✅ Tam kapsam',
-            'Lead': '✅ Tam kapsam',
-            'Agent': '✅ Tam kapsam',
-            'EmailVerificationToken': '✅ Tam kapsam',
-            'Category': '✅ Tam kapsam',
-            'SourceCategory': '✅ Tam kapsam',
-            'ValueCategory': '✅ Tam kapsam'
+            'User': '✅ Full coverage',
+            'UserProfile': '✅ Full coverage',
+            'Lead': '✅ Full coverage',
+            'Agent': '✅ Full coverage',
+            'EmailVerificationToken': '✅ Full coverage',
+            'Category': '✅ Full coverage',
+            'SourceCategory': '✅ Full coverage',
+            'ValueCategory': '✅ Full coverage'
         },
         'Forms': {
-            'LeadModelForm': '✅ Tam kapsam',
-            'AdminLeadModelForm': '✅ Tam kapsam',
-            'LeadForm': '✅ Tam kapsam',
-            'CustomUserCreationForm': '✅ Tam kapsam',
-            'AssignAgentForm': '✅ Tam kapsam',
-            'LeadCategoryUpdateForm': '✅ Tam kapsam',
-            'CustomAuthenticationForm': '✅ Tam kapsam',
-            'CustomPasswordResetForm': '✅ Tam kapsam',
-            'CustomSetPasswordForm': '✅ Tam kapsam',
-            'PhoneNumberWidget': '✅ Tam kapsam'
+            'LeadModelForm': '✅ Full coverage',
+            'AdminLeadModelForm': '✅ Full coverage',
+            'LeadForm': '✅ Full coverage',
+            'CustomUserCreationForm': '✅ Full coverage',
+            'AssignAgentForm': '✅ Full coverage',
+            'LeadCategoryUpdateForm': '✅ Full coverage',
+            'CustomAuthenticationForm': '✅ Full coverage',
+            'CustomPasswordResetForm': '✅ Full coverage',
+            'CustomSetPasswordForm': '✅ Full coverage',
+            'PhoneNumberWidget': '✅ Full coverage'
         },
         'Views': {
-            'LandingPageView': '✅ Tam kapsam',
-            'SignupView': '✅ Tam kapsam',
-            'EmailVerificationViews': '✅ Tam kapsam',
-            'CustomLoginView': '✅ Tam kapsam',
-            'LeadListView': '✅ Tam kapsam',
-            'LeadDetailView': '✅ Tam kapsam',
-            'LeadCreateView': '✅ Tam kapsam',
-            'LeadUpdateView': '✅ Tam kapsam',
-            'LeadDeleteView': '✅ Tam kapsam',
-            'AssignAgentView': '✅ Tam kapsam',
-            'CategoryListView': '✅ Tam kapsam',
-            'get_agents_by_org': '✅ Tam kapsam'
+            'LandingPageView': '✅ Full coverage',
+            'SignupView': '✅ Full coverage',
+            'EmailVerificationViews': '✅ Full coverage',
+            'CustomLoginView': '✅ Full coverage',
+            'LeadListView': '✅ Full coverage',
+            'LeadDetailView': '✅ Full coverage',
+            'LeadCreateView': '✅ Full coverage',
+            'LeadUpdateView': '✅ Full coverage',
+            'LeadDeleteView': '✅ Full coverage',
+            'AssignAgentView': '✅ Full coverage',
+            'CategoryListView': '✅ Full coverage',
+            'get_agents_by_org': '✅ Full coverage'
         },
         'Integration': {
-            'Lead Workflow': '✅ Tam kapsam',
-            'User Registration Workflow': '✅ Tam kapsam',
-            'Permission System': '✅ Tam kapsam',
-            'Form Integration': '✅ Tam kapsam',
-            'Email Integration': '✅ Tam kapsam',
-            'Database Integration': '✅ Tam kapsam'
+            'Lead Workflow': '✅ Full coverage',
+            'User Registration Workflow': '✅ Full coverage',
+            'Permission System': '✅ Full coverage',
+            'Form Integration': '✅ Full coverage',
+            'Email Integration': '✅ Full coverage',
+            'Database Integration': '✅ Full coverage'
         }
     }
     
@@ -210,12 +210,12 @@ def show_test_coverage():
             print(f"  {status} {test}")
         print()
     
-    print("Toplam Test Sayısı: ~200+ test")
-    print("Kapsam: %95+")
-    print("Durum: ✅ Tamamlandı")
+    print("Total Test Count: ~200+ tests")
+    print("Coverage: 95%+")
+    print("Status: ✅ Completed")
 
 def main():
-    """Ana fonksiyon"""
+    """Main function"""
     if len(sys.argv) > 1:
         command = sys.argv[1].lower()
         
@@ -234,8 +234,8 @@ def main():
         elif command == 'all':
             run_tests()
         else:
-            print(f"Bilinmeyen komut: {command}")
-            print("Kullanılabilir komutlar: models, forms, views, integration, quick, coverage, all")
+            print(f"Unknown command: {command}")
+            print("Available commands: models, forms, views, integration, quick, coverage, all")
     else:
         run_tests()
 
