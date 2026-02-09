@@ -165,8 +165,8 @@ class TestAgentModelForm(TestCase):
         self.assertIn('already exists', str(form.errors['phone_number']))
     
     def test_form_password_validation(self):
-        """Şifre validasyonu testi"""
-        # Farklı şifreler
+        """Password validation test"""
+        # Different passwords
         data = self.valid_data.copy()
         data['password1'] = 'newpass123!'
         data['password2'] = 'differentpass123!'

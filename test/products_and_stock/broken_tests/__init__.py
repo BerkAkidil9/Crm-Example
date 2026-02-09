@@ -1,4 +1,4 @@
 """
-Çalışmayan testler - ProductsAndStock modülü
-Düzeltilmesi gereken testler
+Broken tests - ProductsAndStock module
+Tests that need to be fixed
 """

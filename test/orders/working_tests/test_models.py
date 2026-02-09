@@ -318,10 +318,10 @@ class TestOrderProductModel(TestCase):
         """OrderProduct reduce_stock başarılı testi"""
         initial_stock = self.product.product_quantity
         
-        # Stok azaltma işlemi
+        # Stock reduction operation
         success = self.order_product.reduce_stock()
         
-        # İşlem başarılı olmalı
+        # Operation should succeed
         self.assertTrue(success)
         
         # Stok azaltılmış olmalı
@@ -329,7 +329,7 @@ class TestOrderProductModel(TestCase):
         expected_stock = initial_stock - self.order_product.product_quantity
         self.assertEqual(self.product.product_quantity, expected_stock)
         
-        # StockMovement kaydı oluşturulmuş olmalı
+        # StockMovement record should have been created
         self.assertTrue(StockMovement.objects.filter(
             product=self.product,
             movement_type='OUT'
@@ -345,7 +345,7 @@ class TestOrderProductModel(TestCase):
         self.order_product.product_quantity = 5
         self.order_product.save()
         
-        # Stok azaltma işlemi başarısız olmalı
+        # Stock reduction operation başarısız olmalı
         success = self.order_product.reduce_stock()
         self.assertFalse(success)
         
@@ -355,38 +355,38 @@ class TestOrderProductModel(TestCase):
     
     def test_order_product_reduce_stock_cancelled_order(self):
         """OrderProduct reduce_stock iptal edilmiş order testi"""
-        # Order'ı iptal et
+        # Cancel Order
         self.order.is_cancelled = True
         self.order.save()
         
-        # Stok azaltma işlemi
+        # Stock reduction operation
         success = self.order_product.reduce_stock()
         
-        # İptal edilmiş order için stok azaltılmamalı
-        self.assertTrue(success)  # Method başarılı döner ama stok azaltmaz
+        # Stock should not be reduced for cancelled order
+        self.assertTrue(success)  # Method returns success but does not reduce stock
         
-        # Stok değişmemiş olmalı
+        # Stock should remain unchanged
         self.product.refresh_from_db()
         self.assertEqual(self.product.product_quantity, 50)
     
     def test_order_product_restore_stock(self):
-        """OrderProduct restore_stock testi"""
-        # İlk önce stok azalt
+        """OrderProduct restore_stock test"""
+        # First reduce stock
         initial_stock = self.product.product_quantity
         self.order_product.reduce_stock()
         
-        # Order'ı iptal et
+        # Cancel Order
         self.order.is_cancelled = True
         self.order.save()
         
-        # Stok geri yükle
+        # Restore stock
         self.order_product.restore_stock()
         
-        # Stok geri yüklenmiş olmalı
+        # Restore stocknmiş olmalı
         self.product.refresh_from_db()
         self.assertEqual(self.product.product_quantity, initial_stock)
         
-        # StockMovement kaydı oluşturulmuş olmalı
+        # StockMovement record should have been created
         self.assertTrue(StockMovement.objects.filter(
             product=self.product,
             movement_type='IN'
@@ -460,7 +460,7 @@ class TestOrdersModelSignals(TransactionTestCase):
         expected_stock = initial_stock - 5
         self.assertEqual(self.product.product_quantity, expected_stock)
         
-        # StockMovement kaydı oluşturulmuş olmalı
+        # StockMovement record should have been created
         self.assertTrue(StockMovement.objects.filter(
             product=self.product,
             movement_type='OUT'
@@ -484,7 +484,7 @@ class TestOrdersModelSignals(TransactionTestCase):
         if not self.order.is_cancelled:
             order_product.delete()
             
-            # Stok geri yüklenmiş olmalı
+            # Restore stocknmiş olmalı
             self.product.refresh_from_db()
             expected_stock = initial_stock_after_reduction + 5
             # Eğer stok geri yüklenmemişse, bu signal logic'ine bağlı olabilir
@@ -512,16 +512,16 @@ class TestOrdersModelSignals(TransactionTestCase):
         self.product.refresh_from_db()
         initial_stock_after_reduction = self.product.product_quantity
         
-        # Order'ı iptal et (signal tetiklenecek)
+        # Cancel Order (signal tetiklenecek)
         self.order.is_cancelled = True
         self.order.save()
         
-        # Stok geri yüklenmiş olmalı
+        # Restore stocknmiş olmalı
         self.product.refresh_from_db()
         expected_stock = initial_stock_after_reduction + 5
         self.assertEqual(self.product.product_quantity, expected_stock)
         
-        # StockMovement kaydı oluşturulmuş olmalı
+        # StockMovement record should have been created
         self.assertTrue(StockMovement.objects.filter(
             product=self.product,
             movement_type='IN'
@@ -737,11 +737,11 @@ class TestOrdersModelIntegration(TestCase):
         self.assertEqual(self.product1.product_quantity, initial_stock1 - 5)
         self.assertEqual(self.product2.product_quantity, initial_stock2 - 3)
         
-        # Order'ı iptal et
+        # Cancel Order
         self.order.is_cancelled = True
         self.order.save()
         
-        # Stok geri yüklenmiş olmalı
+        # Restore stocknmiş olmalı
         self.product1.refresh_from_db()
         self.product2.refresh_from_db()
         

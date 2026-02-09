@@ -1,6 +1,6 @@
 """
-Finance Integration Test Dosyası
-Bu dosya Finance modülünün diğer modüllerle entegrasyonunu test eder.
+Finance Integration Test File
+This file tests the integration of the Finance module with other modules.
 """
 
 import os
@@ -14,7 +14,7 @@ from django.db import IntegrityError
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -29,11 +29,11 @@ User = get_user_model()
 
 
 class TestFinanceOrdersIntegration(TestCase):
-    """Finance-Orders entegrasyon testleri"""
+    """Finance-Orders integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='finance_orders_integration',
             email='finance_orders_integration@example.com',
@@ -47,12 +47,12 @@ class TestFinanceOrdersIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -61,7 +61,7 @@ class TestFinanceOrdersIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ve ürünler oluştur
+        # Create category and products
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -93,8 +93,8 @@ class TestFinanceOrdersIntegration(TestCase):
         )
     
     def test_order_creation_with_finance_report(self):
-        """Order oluşturma ile finance report entegrasyonu"""
-        # Order oluştur
+        """Order creation with finance report integration"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Integration Test Order',
@@ -103,7 +103,7 @@ class TestFinanceOrdersIntegration(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct'lar oluştur
+        # Create OrderProducts
         order_product1 = OrderProduct.objects.create(
             order=order,
             product=self.product1,
@@ -116,28 +116,28 @@ class TestFinanceOrdersIntegration(TestCase):
             product_quantity=3
         )
         
-        # Toplam kazanç hesapla
+        # Calculate total earned
         total_earned = order_product1.total_price + order_product2.total_price
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=total_earned
         )
         
-        # Entegrasyon doğrulaması
+        # Integration verification
         self.assertEqual(finance_report.order, order)
         self.assertEqual(finance_report.earned_amount, total_earned)
         self.assertEqual(order.orderfinancereport, finance_report)
         
-        # Order'dan products'a erişim
+        # Access products from Order
         self.assertEqual(order.products.count(), 2)
         self.assertIn(self.product1, order.products.all())
         self.assertIn(self.product2, order.products.all())
     
     def test_order_cancellation_finance_report_impact(self):
-        """Order iptal etme finance report etkisi"""
-        # Order oluştur
+        """Order cancellation finance report impact"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Cancellation Test Order',
@@ -146,30 +146,30 @@ class TestFinanceOrdersIntegration(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product1,
             product_quantity=5
         )
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=order_product.total_price
         )
         
-        # Order'ı iptal et
+        # Cancel Order
         order.is_cancelled = True
         order.save()
         
-        # Finance report hala mevcut olmalı (iptal edilmiş order'lar için de rapor tutulabilir)
+        # Finance report should still exist (reports can be kept for cancelled orders)
         self.assertTrue(OrderFinanceReport.objects.filter(id=finance_report.id).exists())
         self.assertEqual(order.orderfinancereport, finance_report)
     
     def test_order_deletion_finance_report_cascade(self):
-        """Order silme finance report cascade testi"""
-        # Order oluştur
+        """Order deletion finance report cascade test"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Deletion Test Order',
@@ -178,7 +178,7 @@ class TestFinanceOrdersIntegration(TestCase):
             lead=self.lead
         )
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=1000.0
@@ -186,18 +186,18 @@ class TestFinanceOrdersIntegration(TestCase):
         
         finance_report_id = finance_report.id
         
-        # Order'ı sil
+        # Delete Order
         order.delete()
         
-        # Finance report da silinmeli (CASCADE)
+        # Finance report should also be deleted (CASCADE)
         self.assertFalse(OrderFinanceReport.objects.filter(id=finance_report_id).exists())
     
     def test_multiple_orders_finance_reports_aggregation(self):
-        """Birden fazla order finance report toplamı"""
+        """Multiple orders finance report aggregation"""
         orders_list = []
         total_expected_earned = 0
         
-        # Birden fazla order oluştur
+        # Create multiple orders
         for i in range(3):
             order = orders.objects.create(
                 order_day=timezone.now(),
@@ -208,7 +208,7 @@ class TestFinanceOrdersIntegration(TestCase):
             )
             orders_list.append(order)
             
-            # Her order için farklı ürün ve miktar
+            # Different product and quantity for each order
             product = self.product1 if i % 2 == 0 else self.product2
             quantity = (i + 1) * 2
             
@@ -218,7 +218,7 @@ class TestFinanceOrdersIntegration(TestCase):
                 product_quantity=quantity
             )
             
-            # Finance report oluştur
+            # Create finance report
             earned_amount = order_product.total_price
             total_expected_earned += earned_amount
             
@@ -227,7 +227,7 @@ class TestFinanceOrdersIntegration(TestCase):
                 earned_amount=earned_amount
             )
         
-        # Toplam kazanç hesapla
+        # Calculate total earned
         from django.db.models import Sum
         total_earned = OrderFinanceReport.objects.aggregate(
             total=Sum('earned_amount')
@@ -238,7 +238,7 @@ class TestFinanceOrdersIntegration(TestCase):
     
     def test_finance_report_date_filtering_with_orders(self):
         """Finance report tarih filtreleme order'larla entegrasyonu"""
-        # Farklı tarihlerde order'lar oluştur - günün başlangıcına sabitle
+        # Create orders on different dates - fix to start of day
         from datetime import datetime
         now = timezone.now()
         yesterday = timezone.make_aware(datetime.combine(
@@ -272,17 +272,17 @@ class TestFinanceOrdersIntegration(TestCase):
                 earned_amount=1000.0
             )
         
-        # Bugünkü order'ları filtrele
+        # Filter today's orders
         today_reports = OrderFinanceReport.objects.filter(
             order__creation_date__date=today.date()
         )
         
-        self.assertEqual(today_reports.count(), 1)  # Sadece bugünkü order
+        self.assertEqual(today_reports.count(), 1)  # Only today's order
         self.assertIn('Today Order', [report.order.order_name for report in today_reports])
     
     def test_finance_report_organisation_filtering(self):
         """Finance report organizasyon filtreleme"""
-        # Farklı organizasyon oluştur
+        # Create different organisation
         org2_user = User.objects.create_user(
             username='org2_finance_integration',
             email='org2_finance_integration@example.com',
@@ -325,7 +325,7 @@ class TestFinanceOrdersIntegration(TestCase):
             earned_amount=2000.0
         )
         
-        # Sadece org1'in finance report'larını filtrele
+        # Filter only org1's finance reports
         org1_reports = OrderFinanceReport.objects.filter(
             order__organisation=self.organisor_profile
         )
@@ -333,7 +333,7 @@ class TestFinanceOrdersIntegration(TestCase):
         self.assertEqual(org1_reports.count(), 1)
         self.assertEqual(org1_reports.first(), finance_report1)
         
-        # Sadece org2'nin finance report'larını filtrele
+        # Filter only org2's finance reports
         org2_reports = OrderFinanceReport.objects.filter(
             order__organisation=org2_profile
         )
@@ -347,7 +347,7 @@ class TestFinanceProductsIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='finance_products_integration',
             email='finance_products_integration@example.com',
@@ -361,12 +361,12 @@ class TestFinanceProductsIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -375,7 +375,7 @@ class TestFinanceProductsIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ve ürünler oluştur
+        # Create category and products
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -407,8 +407,8 @@ class TestFinanceProductsIntegration(TestCase):
         )
     
     def test_finance_report_product_profit_calculation(self):
-        """Finance report ürün kar hesaplama entegrasyonu"""
-        # Order oluştur
+        """Finance report product profit calculation integration"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Profit Calculation Order',
@@ -417,14 +417,14 @@ class TestFinanceProductsIntegration(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product1,
             product_quantity=2
         )
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=order_product.total_price
@@ -435,14 +435,14 @@ class TestFinanceProductsIntegration(TestCase):
         total_cost = order_product.product_quantity * order_product.product.cost_price
         profit = total_revenue - total_cost
         
-        # Kar hesaplaması doğrulaması
+        # Profit calculation verification
         expected_profit = 2 * (self.product1.product_price - self.product1.cost_price)
         self.assertEqual(profit, expected_profit)
         self.assertEqual(finance_report.earned_amount, total_revenue)
     
     def test_finance_report_multiple_products_profit(self):
-        """Finance report birden fazla ürün kar hesaplama"""
-        # Order oluştur
+        """Finance report multiple products profit calculation"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Multiple Products Order',
@@ -451,7 +451,7 @@ class TestFinanceProductsIntegration(TestCase):
             lead=self.lead
         )
         
-        # Birden fazla OrderProduct oluştur
+        # Create multiple OrderProducts
         order_product1 = OrderProduct.objects.create(
             order=order,
             product=self.product1,
@@ -464,30 +464,30 @@ class TestFinanceProductsIntegration(TestCase):
             product_quantity=3
         )
         
-        # Toplam gelir ve maliyet hesapla
+        # Calculate total revenue and cost
         total_revenue = order_product1.total_price + order_product2.total_price
         total_cost = (order_product1.product_quantity * order_product1.product.cost_price + 
                      order_product2.product_quantity * order_product2.product.cost_price)
         total_profit = total_revenue - total_cost
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=total_revenue
         )
         
-        # Hesaplamaları doğrula
+        # Verify calculations
         self.assertEqual(finance_report.earned_amount, total_revenue)
-        self.assertGreater(total_profit, 0)  # Kar pozitif olmalı
+        self.assertGreater(total_profit, 0)  # Profit should be positive
         
-        # Beklenen kar hesaplaması (float precision için almost equal kullan)
+        # Expected profit calculation (use almost equal for float precision)
         expected_profit = (2 * (self.product1.product_price - self.product1.cost_price) + 
                           3 * (self.product2.product_price - self.product2.cost_price))
         self.assertAlmostEqual(total_profit, expected_profit, places=2)
     
     def test_finance_report_stock_movement_integration(self):
         """Finance report stok hareket entegrasyonu"""
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Stock Movement Order',
@@ -496,20 +496,20 @@ class TestFinanceProductsIntegration(TestCase):
             lead=self.lead
         )
         
-        # OrderProduct oluştur (stok azaltılacak)
+        # Create OrderProduct (stok azaltılacak)
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product1,
             product_quantity=5
         )
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=order_product.total_price
         )
         
-        # Stok hareketi oluşturulmuş olmalı
+        # Stock movement should have been created
         stock_movements = StockMovement.objects.filter(
             product=self.product1,
             movement_type='OUT'
@@ -517,12 +517,12 @@ class TestFinanceProductsIntegration(TestCase):
         
         self.assertTrue(stock_movements.exists())
         
-        # Stok miktarı azaltılmış olmalı
+        # Stock quantity should have been reduced
         self.product1.refresh_from_db()
         expected_stock = 50 - 5  # Initial stock - quantity
         self.assertEqual(self.product1.product_quantity, expected_stock)
         
-        # Finance report ile stok hareketi ilişkisi
+        # Finance report and stock movement relationship
         self.assertEqual(finance_report.order, order)
         self.assertEqual(order.products.first(), self.product1)
 
@@ -532,7 +532,7 @@ class TestFinanceViewsIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='finance_views_integration',
             email='finance_views_integration@example.com',
@@ -546,12 +546,12 @@ class TestFinanceViewsIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -560,7 +560,7 @@ class TestFinanceViewsIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -579,7 +579,7 @@ class TestFinanceViewsIntegration(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Tarih değişkenleri
+        # Date variables
         from datetime import datetime
         now = timezone.now()
         self.today = timezone.make_aware(datetime.combine(
@@ -592,7 +592,7 @@ class TestFinanceViewsIntegration(TestCase):
         
         client = Client()
         
-        # Order ve finance report oluştur
+        # Create Order and finance report
         order = orders.objects.create(
             order_day=self.today,
             order_name='Full Workflow Order',
@@ -640,7 +640,7 @@ class TestFinanceViewsIntegration(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
         
-        # Form DateRangeForm olmalı
+        # Form should be DateRangeForm
         self.assertIsInstance(response.context['form'], DateRangeForm)
         
         # POST request - form validation
@@ -660,15 +660,15 @@ class TestFinanceViewsIntegration(TestCase):
             'end_date': yesterday
         })
         self.assertEqual(response.status_code, 200)
-        # Form hatalı olduğu için GET response döner
+        # Returns GET response because form is invalid
 
 
 class TestFinanceDataConsistency(TransactionTestCase):
-    """Finance veri tutarlılığı testleri"""
+    """Finance data consistency tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='finance_consistency',
             email='finance_consistency@example.com',
@@ -682,12 +682,12 @@ class TestFinanceDataConsistency(TransactionTestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -696,7 +696,7 @@ class TestFinanceDataConsistency(TransactionTestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -716,8 +716,8 @@ class TestFinanceDataConsistency(TransactionTestCase):
         )
     
     def test_finance_report_data_consistency(self):
-        """Finance report veri tutarlılığı testi"""
-        # Order oluştur
+        """Finance report data consistency test"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Consistency Test Order',
@@ -726,35 +726,35 @@ class TestFinanceDataConsistency(TransactionTestCase):
             lead=self.lead
         )
         
-        # OrderProduct oluştur
+        # Create OrderProduct
         order_product = OrderProduct.objects.create(
             order=order,
             product=self.product,
             product_quantity=3
         )
         
-        # Finance report oluştur
+        # Create finance report
         finance_report = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=order_product.total_price
         )
         
-        # Veri tutarlılığı kontrolü
+        # Data consistency check
         self.assertEqual(finance_report.order, order)
         self.assertEqual(finance_report.earned_amount, order_product.total_price)
         self.assertEqual(order.orderfinancereport, finance_report)
         
-        # Order'dan products'a erişim
+        # Access products from Order
         self.assertEqual(order.products.count(), 1)
         self.assertEqual(order.products.first(), self.product)
         
-        # OrderProduct'dan order'a erişim
+        # Access order from OrderProduct
         self.assertEqual(order_product.order, order)
         self.assertEqual(order_product.product, self.product)
     
     def test_finance_report_unique_constraint(self):
         """Finance report unique constraint testi"""
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Unique Constraint Order',
@@ -763,29 +763,29 @@ class TestFinanceDataConsistency(TransactionTestCase):
             lead=self.lead
         )
         
-        # İlk finance report oluştur
+        # Create first finance report
         finance_report1 = OrderFinanceReport.objects.create(
             order=order,
             earned_amount=1000.0
         )
         
-        # Aynı order ile ikinci finance report oluşturmaya çalış
+        # Try to create second finance report with same order
         with self.assertRaises(IntegrityError):
             OrderFinanceReport.objects.create(
                 order=order,
                 earned_amount=2000.0
             )
         
-        # TransactionTestCase kullandığımız için rollback olmaz
-        # Sadece bir finance report olmalı
+        # No rollback because we use TransactionTestCase
+        # Only one finance report should exist
         self.assertEqual(OrderFinanceReport.objects.filter(order=order).count(), 1)
         self.assertEqual(OrderFinanceReport.objects.get(order=order), finance_report1)
 
 
 if __name__ == "__main__":
-    print("Finance Integration Testleri Başlatılıyor...")
+    print("Starting Finance Integration Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

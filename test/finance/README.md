@@ -1,70 +1,70 @@
-# Finance Test Sistemi
+# Finance Test System
 
-Bu klasör Finance modülü için organize edilmiş test dosyalarını içerir.
+This folder contains organized test files for the Finance module.
 
-## 📁 Klasör Yapısı
+## 📁 Folder Structure
 
 ```
 test/finance/
 ├── __init__.py
-├── working_tests/          # ✅ Çalışan testler
+├── working_tests/          # ✅ Working tests
 │   ├── __init__.py
-│   ├── test_models.py      # Model testleri
-│   ├── test_views.py       # View testleri
-│   ├── test_forms.py       # Form testleri
-│   └── test_integration.py # Entegrasyon testleri
-├── test_runner.py          # İnteraktif test çalıştırıcı
+│   ├── test_models.py      # Model tests
+│   ├── test_views.py       # View tests
+│   ├── test_forms.py       # Form tests
+│   └── test_integration.py # Integration tests
+├── test_runner.py          # Interactive test runner
 └── README.md
 ```
 
-## 🚀 Test Çalıştırma
+## 🚀 Running Tests
 
-### ✅ Tüm Testler
+### ✅ All Tests
 ```bash
-# Tüm finance testleri
+# All finance tests
 python manage.py test test.finance.working_tests
 
-# Verbose mod
+# Verbose mode
 python manage.py test test.finance.working_tests -v 2
 
-# Test runner kullanarak
+# Using test runner
 python test/finance/test_runner.py --module all
 ```
 
-### 📊 Modül Bazında Testler
+### 📊 Module-Based Tests
 ```bash
-# Model testleri
+# Model tests
 python manage.py test test.finance.working_tests.test_models
 python test/finance/test_runner.py --module models
 
-# View testleri
+# View tests
 python manage.py test test.finance.working_tests.test_views
 python test/finance/test_runner.py --module views
 
-# Form testleri
+# Form tests
 python manage.py test test.finance.working_tests.test_forms
 python test/finance/test_runner.py --module forms
 
-# Entegrasyon testleri
+# Integration tests
 python manage.py test test.finance.working_tests.test_integration
 python test/finance/test_runner.py --module integration
 ```
 
-## 📊 Test Kapsamı
+## 📊 Test Coverage
 
 ### Models (1 model)
-- ✅ OrderFinanceReport (çalışıyor)
-  - Model oluşturma
+- ✅ OrderFinanceReport (working)
+  - Model creation
   - String representation
-  - Default değerler
-  - OneToOneField ilişkisi
+  - Default values
+  - OneToOneField relationship
   - Unique constraint
   - Cascade delete
   - Float precision
   - Edge cases
 
 ### Views (1 view)
-- ✅ FinancialReportView (çalışıyor)
+- ✅ FinancialReportView (working)
   - GET request
   - POST request (valid/invalid)
   - Date range filtering
@@ -74,7 +74,7 @@ python test/finance/test_runner.py --module integration
   - Edge cases
 
 ### Forms (1 form)
-- ✅ DateRangeForm (çalışıyor)
+- ✅ DateRangeForm (working)
   - Valid data
   - Invalid data
   - Date validation
@@ -84,19 +84,19 @@ python test/finance/test_runner.py --module integration
   - Edge cases
 
 ### Integration Tests
-- ✅ Finance-Orders entegrasyonu
-- ✅ Finance-Products entegrasyonu
-- ✅ Finance-Views entegrasyonu
-- ✅ Veri tutarlılığı
+- ✅ Finance-Orders integration
+- ✅ Finance-Products integration
+- ✅ Finance-Views integration
+- ✅ Data consistency
 - ✅ Cascade operations
 - ✅ Date filtering
 - ✅ Organisation filtering
 
 ## 🎯 Test Details
 
-### OrderFinanceReport Model Testleri (15 test)
+### OrderFinanceReport Model Tests (15 tests)
 1. **Model Creation Tests**
-   - OrderFinanceReport oluşturma
+   - OrderFinanceReport creation
    - String representation
    - Default report_date
    - Manual report_date
@@ -117,7 +117,7 @@ python test/finance/test_runner.py --module integration
    - Organisation filtering
    - Aggregation
 
-### FinancialReportView Tests (15 test)
+### FinancialReportView Tests (15 tests)
 1. **GET Request Tests**
    - Template rendering
    - Context data
@@ -139,7 +139,7 @@ python test/finance/test_runner.py --module integration
    - Orders without finance reports
    - Zero/negative amounts
 
-### DateRangeForm Tests (20 test)
+### DateRangeForm Tests (20 tests)
 1. **Validation Tests**
    - Valid data
    - Invalid data
@@ -164,7 +164,7 @@ python test/finance/test_runner.py --module integration
    - Year boundaries
    - None values
 
-### Integration Tests (15 test)
+### Integration Tests (15 tests)
 1. **Finance-Orders Integration**
    - Order creation with finance report
    - Order cancellation impact
@@ -184,41 +184,41 @@ python test/finance/test_runner.py --module integration
    - Data integrity
    - Unique constraints
 
-## 📈 Test İstatistikleri
+## 📈 Test Statistics
 
-### Toplam Test Sayısı: 65 test
-- **Model Tests:** 15 test
-- **View Tests:** 15 test  
-- **Form Tests:** 20 test
-- **Integration Tests:** 15 test
+### Total Test Count: 65 tests
+- **Model Tests:** 15 tests
+- **View Tests:** 15 tests  
+- **Form Tests:** 20 tests
+- **Integration Tests:** 15 tests
 
-### Test Kategorileri
-- **Unit Tests:** 50 test
-- **Integration Tests:** 15 test
+### Test Categories
+- **Unit Tests:** 50 tests
+- **Integration Tests:** 15 tests
 
-### Kapsanan Modüller
+### Covered Modules
 - ✅ OrderFinanceReport model
 - ✅ FinancialReportView
 - ✅ DateRangeForm
-- ✅ Finance-Orders entegrasyonu
-- ✅ Finance-Products entegrasyonu
-- ✅ Finance-Views entegrasyonu
+- ✅ Finance-Orders integration
+- ✅ Finance-Products integration
+- ✅ Finance-Views integration
 
-## 🔧 Test Özellikleri
+## 🔧 Test Features
 
 ### Test Setup
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı gerektiğinde
-- Factory pattern test verisi oluşturma için
+- Each test runs independently
+- Test database is automatically created and torn down
+- Mock used when needed
+- Factory pattern for test data creation
 
 ### Test Data
-- Organisor kullanıcıları
-- UserProfile'lar
-- Lead'ler
-- Kategoriler ve ürünler
-- Order'lar ve OrderProduct'lar
-- Finance report'lar
+- Organisor users
+- UserProfiles
+- Leads
+- Categories and products
+- Orders and OrderProducts
+- Finance reports
 
 ### Assertions
 - Model field validations
@@ -228,20 +228,20 @@ python test/finance/test_runner.py --module integration
 - Database queries
 - Data relationships
 
-## 🎯 Gelecek Planları
+## 🎯 Future Plans
 
-1. **Performance Tests** - Büyük veri setleri ile test
-2. **Security Tests** - Authorization ve authentication
-3. **API Tests** - REST API endpoint'leri
-4. **Load Tests** - Yüksek trafik senaryoları
-5. **Coverage Reports** - Test coverage analizi
+1. **Performance Tests** - Testing with large datasets
+2. **Security Tests** - Authorization and authentication
+3. **API Tests** - REST API endpoints
+4. **Load Tests** - High traffic scenarios
+5. **Coverage Reports** - Test coverage analysis
 
-## 📝 Notlar
+## 📝 Notes
 
-- Testler Django TestCase kullanır
-- Her test bağımsız çalışır
-- Test veritabanı otomatik oluşturulur ve silinir
-- Mock kullanımı email gönderimi için
-- Factory pattern kullanımı test verisi oluşturma için
-- Integration testler modüller arası etkileşimi test eder
-- Edge case testler sınır durumları kapsar
+- Tests use Django TestCase
+- Each test runs independently
+- Test database is automatically created and torn down
+- Mock used for email sending
+- Factory pattern used for test data creation
+- Integration tests test cross-module interaction
+- Edge case tests cover boundary conditions

@@ -30,7 +30,7 @@ class TestOrderCompleteWorkflow(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='workflow_test_user',
             email='workflow_test@example.com',
@@ -44,12 +44,12 @@ class TestOrderCompleteWorkflow(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Workflow',
             last_name='Lead',
@@ -58,7 +58,7 @@ class TestOrderCompleteWorkflow(TestCase):
             organisation=self.user_profile
         )
         
-        # Kategori ve ürünler oluştur
+        # Create category and products
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -101,7 +101,7 @@ class TestOrderCompleteWorkflow(TestCase):
         # 1. Login
         self.client.login(username='workflow_test_user', password='testpass123')
         
-        # 2. Order oluştur
+        # 2. Create Order
         form_data = {
             'order_day': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
             'order_name': 'Complete Workflow Order',
@@ -119,7 +119,7 @@ class TestOrderCompleteWorkflow(TestCase):
         
         response = self.client.post(reverse('orders:order-create'), form_data)
         
-        # 3. Order oluşturuldu mu kontrol et
+        # 3. Check if order was created
         if response.status_code == 302:
             # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
@@ -206,7 +206,7 @@ class TestOrderCompleteWorkflow(TestCase):
     
     def test_order_update_workflow(self):
         """Order güncelleme workflow testi"""
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Update Workflow Order',
@@ -231,7 +231,7 @@ class TestOrderCompleteWorkflow(TestCase):
             form_data
         )
         
-        # Güncelleme başarılı mı kontrol et
+        # Check if update was successful
         if response.status_code == 302:
             # Should redirect on success
             self.assertRedirects(response, reverse('orders:order-list'))
@@ -242,14 +242,14 @@ class TestOrderCompleteWorkflow(TestCase):
             self.assertTrue(True)
             return
         
-        # Order güncellendi mi kontrol et
+        # Check if order was updated
         order.refresh_from_db()
         self.assertEqual(order.order_name, 'Updated Workflow Order')
         self.assertEqual(order.order_description, 'Updated order description')
     
     def test_order_delete_workflow(self):
-        """Order silme workflow testi"""
-        # Order oluştur
+        """Order delete workflow test"""
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Delete Workflow Order',
@@ -266,20 +266,20 @@ class TestOrderCompleteWorkflow(TestCase):
         # Order sil
         response = self.client.post(reverse('orders:order-delete', kwargs={'pk': order.pk}))
         
-        # Silme başarılı mı kontrol et
+        # Check if deletion was successful
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('orders:order-list'))
         
-        # Order silindi mi kontrol et
+        # Check if order was deleted
         self.assertFalse(orders.objects.filter(id=order_id).exists())
 
 
 class TestOrderStockManagementIntegration(TransactionTestCase):
-    """Order stok yönetimi entegrasyon testleri"""
+    """Order stock management integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='stock_integration_test_user',
             email='stock_integration_test@example.com',
@@ -293,12 +293,12 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -321,7 +321,7 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
         """Order stok azaltma signal entegrasyon testi"""
         initial_stock = self.product.product_quantity
         
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Stock Reduction Order',
@@ -358,7 +358,7 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
         """Order iptal etme stok geri yükleme signal entegrasyon testi"""
         initial_stock = self.product.product_quantity
         
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Stock Restoration Order',
@@ -409,7 +409,7 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
         """OrderProduct silme stok geri yükleme signal entegrasyon testi"""
         initial_stock = self.product.product_quantity
         
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Product Deletion Order',
@@ -461,7 +461,7 @@ class TestOrderFinanceIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.user = User.objects.create_user(
             username='finance_integration_test_user',
             email='finance_integration_test@example.com',
@@ -475,12 +475,12 @@ class TestOrderFinanceIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(
             user=self.user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -489,7 +489,7 @@ class TestOrderFinanceIntegration(TestCase):
             organisation=self.user_profile
         )
         
-        # Kategori ve ürünler oluştur
+        # Create category and products
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -522,7 +522,7 @@ class TestOrderFinanceIntegration(TestCase):
     
     def test_order_finance_report_creation_integration(self):
         """Order finance report oluşturma entegrasyon testi"""
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Finance Integration Order',
@@ -567,7 +567,7 @@ class TestOrderFinanceIntegration(TestCase):
     
     def test_order_total_price_calculation_integration(self):
         """Order toplam fiyat hesaplama entegrasyon testi"""
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Total Price Calculation Order',
@@ -656,7 +656,7 @@ class TestOrderMultiUserIntegration(TestCase):
             organisation=self.user2_profile
         )
         
-        # Kategori ve ürünler oluştur
+        # Create category and products
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",

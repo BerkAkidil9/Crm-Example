@@ -1,6 +1,6 @@
 """
-Finance Models Test Dosyası
-Bu dosya Finance modülündeki tüm modelleri test eder.
+Finance Models Test File
+This file tests all models in the Finance module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.db import IntegrityError
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -24,11 +24,11 @@ from ProductsAndStock.models import ProductsAndStock, Category, SubCategory
 
 
 class TestOrderFinanceReportModel(TestCase):
-    """OrderFinanceReport model testleri"""
+    """OrderFinanceReport model tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='finance_organisor_test',
             email='finance_organisor_test@example.com',
@@ -42,12 +42,12 @@ class TestOrderFinanceReportModel(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Finance',
             last_name='Lead',
@@ -56,7 +56,7 @@ class TestOrderFinanceReportModel(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Kategori ve ürün oluştur
+        # Create category and product
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
@@ -75,7 +75,7 @@ class TestOrderFinanceReportModel(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Order oluştur
+        # Create Order
         self.order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Finance Test Order',
@@ -196,10 +196,10 @@ class TestOrderFinanceReportModel(TestCase):
         finance_report_id = finance_report.id
         order_id = self.order.id
         
-        # Order'ı sil
+        # Delete Order
         self.order.delete()
         
-        # Finance report da silinmeli
+        # Finance report should also be deleted
         self.assertFalse(OrderFinanceReport.objects.filter(id=finance_report_id).exists())
         self.assertFalse(orders.objects.filter(id=order_id).exists())
     
@@ -230,7 +230,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        # Organisor kullanıcısı oluştur
+        # Create organisor user
         self.organisor_user = User.objects.create_user(
             username='integration_finance_organisor',
             email='integration_finance_organisor@example.com',
@@ -244,12 +244,12 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.organisor_profile, created = UserProfile.objects.get_or_create(
             user=self.organisor_user
         )
         
-        # Lead oluştur
+        # Create Lead
         self.lead = Lead.objects.create(
             first_name='Integration',
             last_name='Lead',
@@ -291,7 +291,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
     
     def test_order_finance_report_with_order_products(self):
         """OrderFinanceReport ile OrderProduct entegrasyon testi"""
-        # Order oluştur
+        # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
             order_name='Integration Test Order',
@@ -313,7 +313,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             product_quantity=3
         )
         
-        # Toplam kazanç hesapla
+        # Calculate total earned
         total_earned = order_product1.total_price + order_product2.total_price
         
         # Finance report oluştur
@@ -330,8 +330,8 @@ class TestOrderFinanceReportModelIntegration(TestCase):
         self.assertEqual(order.orderfinancereport, finance_report)
     
     def test_multiple_orders_finance_reports(self):
-        """Birden fazla order ve finance report testi"""
-        # Birden fazla order oluştur
+        """Multiple orders and finance report test"""
+        # Create multiple orders
         order1 = orders.objects.create(
             order_day=timezone.now(),
             order_name='Order 1',
@@ -369,7 +369,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
     
     def test_order_finance_report_date_filtering(self):
         """OrderFinanceReport tarih filtreleme testi"""
-        # Farklı tarihlerde order'lar oluştur - günün başlangıcına sabitle
+        # Create orders on different dates - fix to start of day
         from datetime import datetime
         now = timezone.now()
         yesterday = timezone.make_aware(datetime.combine(
@@ -425,7 +425,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             earned_amount=3000.0
         )
         
-        # Bugünkü order'ları filtrele
+        # Filter today's orders
         today_reports = OrderFinanceReport.objects.filter(
             order__creation_date__date=today.date()
         )
@@ -439,8 +439,8 @@ class TestOrderFinanceReportModelIntegration(TestCase):
         self.assertEqual(all_reports.count(), 3)
     
     def test_order_finance_report_aggregation(self):
-        """OrderFinanceReport toplam hesaplama testi"""
-        # Birden fazla order ve finance report oluştur
+        """OrderFinanceReport total calculation test"""
+        # Create multiple orders and finance reports
         orders_list = []
         for i in range(5):
             order = orders.objects.create(
@@ -457,7 +457,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
                 earned_amount=1000.0 * (i + 1)  # 1000, 2000, 3000, 4000, 5000
             )
         
-        # Toplam kazanç hesapla
+        # Calculate total earned
         from django.db.models import Sum
         total_earned = OrderFinanceReport.objects.aggregate(
             total=Sum('earned_amount')
@@ -468,7 +468,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
     
     def test_order_finance_report_organisation_filtering(self):
         """OrderFinanceReport organizasyon filtreleme testi"""
-        # Farklı organizasyonlar oluştur
+        # Create different organisations
         org2_user = User.objects.create_user(
             username='org2_finance_test',
             email='org2_finance_test@example.com',
@@ -511,7 +511,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
             earned_amount=2000.0
         )
         
-        # Sadece org1'in finance report'larını filtrele
+        # Filter only org1's finance reports
         org1_reports = OrderFinanceReport.objects.filter(
             order__organisation=self.organisor_profile
         )

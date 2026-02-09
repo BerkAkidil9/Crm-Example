@@ -1,6 +1,6 @@
 """
-Agent Mixin Test Dosyası
-Bu dosya Agent modülü ile ilgili mixin testlerini içerir.
+Agent Mixin Test File
+This file contains mixin tests for the Agent module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -26,13 +26,13 @@ User = get_user_model()
 
 
 class MockView(View):
-    """Mixin testleri için mock view"""
+    """Mock view for mixin tests"""
     def dispatch(self, request, *args, **kwargs):
         return HttpResponse("Mock response")
 
 
 class TestOrganisorAndLoginRequiredMixin(TestCase):
-    """OrganisorAndLoginRequiredMixin testleri"""
+    """OrganisorAndLoginRequiredMixin tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -53,7 +53,7 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
             email_verified=True
         )
         
-        # Organisor kullanıcı
+        # Organisor user
         self.organisor_user = User.objects.create_user(
             username='organisor_user',
             email='organisor@example.com',
@@ -78,12 +78,12 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
             last_name='User'
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         user_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
         Organisor.objects.create(user=self.organisor_user, organisation=user_profile)
     
     def test_organisor_access(self):
-        """Organisor erişimi testi"""
+        """Organisor access test"""
         request = self.factory.get('/test/')
         request.user = self.organisor_user
         
@@ -95,7 +95,7 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_superuser_access(self):
-        """Superuser erişimi testi"""
+        """Superuser access test"""
         request = self.factory.get('/test/')
         request.user = self.superuser
         
@@ -107,7 +107,7 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_normal_user_access_denied(self):
-        """Normal kullanıcı erişimi reddedilme testi"""
+        """Normal user access denied test"""
         request = self.factory.get('/test/')
         request.user = self.normal_user
         
@@ -116,12 +116,12 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin normal kullanıcıları redirect etmeli (ne organisor ne admin)
+        # Mixin should redirect normal users (neither organisor nor admin)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/leads/')
     
     def test_anonymous_user_access_denied(self):
-        """Anonim kullanıcı erişimi reddedilme testi"""
+        """Anonymous user access denied test"""
         request = self.factory.get('/test/')
         request.user = User()  # Anonymous user
         
@@ -130,18 +130,18 @@ class TestOrganisorAndLoginRequiredMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin anonim kullanıcıları redirect etmiyor, normal response döndürüyor
+        # Mixin does not redirect anonymous users, returns normal response
         self.assertEqual(response.status_code, 200)
 
 
 class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
-    """AgentAndOrganisorLoginRequiredMixin testleri"""
+    """AgentAndOrganisorLoginRequiredMixin tests"""
     
     def setUp(self):
         """Set up test data"""
         self.factory = RequestFactory()
         
-        # Normal kullanıcı
+        # Normal user
         self.normal_user = User.objects.create_user(
             username='normal_user2',
             email='normal2@example.com',
@@ -156,7 +156,7 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
             email_verified=True
         )
         
-        # Organisor kullanıcı
+        # Organisor user
         self.organisor_user = User.objects.create_user(
             username='organisor_user2',
             email='organisor2@example.com',
@@ -172,7 +172,7 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
             email_verified=True
         )
         
-        # Agent kullanıcı
+        # Agent user
         self.agent_user = User.objects.create_user(
             username='agent_user',
             email='agent@example.com',
@@ -196,14 +196,14 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
             last_name='User2'
         )
         
-        # UserProfile ve Agent oluştur
+        # Create UserProfile and Agent
         organisor_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
         agent_profile, created = UserProfile.objects.get_or_create(user=self.agent_user)
         Organisor.objects.create(user=self.organisor_user, organisation=organisor_profile)
         Agent.objects.create(user=self.agent_user, organisation=organisor_profile)
     
     def test_organisor_access(self):
-        """Organisor erişimi testi"""
+        """Organisor access test"""
         request = self.factory.get('/test/')
         request.user = self.organisor_user
         
@@ -215,7 +215,7 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_agent_access(self):
-        """Agent erişimi testi"""
+        """Agent access test"""
         request = self.factory.get('/test/')
         request.user = self.agent_user
         
@@ -227,7 +227,7 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_superuser_access(self):
-        """Superuser erişimi testi"""
+        """Superuser access test"""
         request = self.factory.get('/test/')
         request.user = self.superuser
         
@@ -239,7 +239,7 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_normal_user_access_denied(self):
-        """Normal kullanıcı erişimi reddedilme testi"""
+        """Normal user access denied test"""
         request = self.factory.get('/test/')
         request.user = self.normal_user
         
@@ -248,19 +248,19 @@ class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin normal kullanıcıları redirect etmeli (ne agent ne organisor ne admin)
+        # Mixin should redirect normal users (not agent, organisor or admin)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/leads/')
 
 
 class TestProductsAndStockAccessMixin(TestCase):
-    """ProductsAndStockAccessMixin testleri"""
+    """ProductsAndStockAccessMixin tests"""
     
     def setUp(self):
         """Set up test data"""
         self.factory = RequestFactory()
         
-        # Normal kullanıcı
+        # Normal user
         self.normal_user = User.objects.create_user(
             username='normal_user3',
             email='normal3@example.com',
@@ -275,7 +275,7 @@ class TestProductsAndStockAccessMixin(TestCase):
             email_verified=True
         )
         
-        # Organisor kullanıcı
+        # Organisor user
         self.organisor_user = User.objects.create_user(
             username='organisor_user3',
             email='organisor3@example.com',
@@ -291,7 +291,7 @@ class TestProductsAndStockAccessMixin(TestCase):
             email_verified=True
         )
         
-        # Agent kullanıcı
+        # Agent user
         self.agent_user = User.objects.create_user(
             username='agent_user2',
             email='agent2@example.com',
@@ -315,14 +315,14 @@ class TestProductsAndStockAccessMixin(TestCase):
             last_name='User3'
         )
         
-        # UserProfile ve Agent oluştur
+        # Create UserProfile and Agent
         organisor_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
         agent_profile, created = UserProfile.objects.get_or_create(user=self.agent_user)
         Organisor.objects.create(user=self.organisor_user, organisation=organisor_profile)
         Agent.objects.create(user=self.agent_user, organisation=organisor_profile)
     
     def test_organisor_access(self):
-        """Organisor erişimi testi"""
+        """Organisor access test"""
         request = self.factory.get('/test/')
         request.user = self.organisor_user
         
@@ -334,7 +334,7 @@ class TestProductsAndStockAccessMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_agent_access(self):
-        """Agent erişimi testi"""
+        """Agent access test"""
         request = self.factory.get('/test/')
         request.user = self.agent_user
         
@@ -346,7 +346,7 @@ class TestProductsAndStockAccessMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_superuser_access(self):
-        """Superuser erişimi testi"""
+        """Superuser access test"""
         request = self.factory.get('/test/')
         request.user = self.superuser
         
@@ -358,7 +358,7 @@ class TestProductsAndStockAccessMixin(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_normal_user_access_denied(self):
-        """Normal kullanıcı erişimi reddedilme testi"""
+        """Normal user access denied test"""
         request = self.factory.get('/test/')
         request.user = self.normal_user
         
@@ -367,15 +367,15 @@ class TestProductsAndStockAccessMixin(TestCase):
         
         view = TestView()
         response = view.dispatch(request)
-        # Mixin normal kullanıcıları redirect etmeli (ne agent ne organisor ne admin)
+        # Mixin should redirect normal users (not agent, organisor or admin)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/leads/')
 
 
 if __name__ == "__main__":
-    print("Agent Mixin Testleri Başlatılıyor...")
+    print("Starting Agent Mixin Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

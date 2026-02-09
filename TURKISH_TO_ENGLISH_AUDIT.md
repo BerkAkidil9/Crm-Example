@@ -2,15 +2,17 @@
 
 This file lists all Turkish content in the project **excluding migration files**. Use it as a reference when translating to English.
 
+**Last updated:** February 2025 - Most translations have been completed.
+
 ---
 
 ## 1. HTML Templates (UI text)
 
-| File | Turkish text | Suggested English |
-|-------|--------------|---------------------|
-| `organisors/templates/organisors/organisor_list.html` | `Ara` (label) | `Search` |
-| `agents/templates/agents/agent_list.html` | `Ara` (label) | `Search` |
-| `leads/templates/leads/lead_list.html` | `Ara` (label) | `Search` |
+| File | Turkish text | Suggested English | Status |
+|-------|--------------|---------------------|--------|
+| `organisors/templates/organisors/organisor_list.html` | `Ara` (label) | `Search` | ✅ Already English |
+| `agents/templates/agents/agent_list.html` | `Ara` (label) | `Search` | ✅ Already English |
+| `leads/templates/leads/lead_list.html` | `Ara` (label) | `Search` | ✅ Already English |
 
 ---
 

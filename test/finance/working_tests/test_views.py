@@ -177,7 +177,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn('reports', response.context)
         
         # Only today's order should be filtered
-        self.assertEqual(response.context['total_earned'], 2000.0)  # Sadece order2
+        self.assertEqual(response.context['total_earned'], 2000.0)  # Only order2
         self.assertEqual(len(response.context['reports']), 1)
         self.assertIn(self.finance_report2, response.context['reports'])
     
@@ -316,7 +316,7 @@ class TestFinancialReportView(TestCase):
         self.assertEqual(response.status_code, 200)
         
         # Only today's order should be filtered
-        self.assertEqual(response.context['total_earned'], 2000.0)  # Sadece order2
+        self.assertEqual(response.context['total_earned'], 2000.0)  # Only order2
         self.assertEqual(len(response.context['reports']), 1)
     
     def test_financial_report_view_aggregation(self):

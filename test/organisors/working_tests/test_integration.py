@@ -213,7 +213,7 @@ class TestOrganisorCompleteIntegration(TestCase):
         response = self.client.get(reverse('organisors:organisor-update', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
-        # Silme
+        # Delete
         response = self.client.get(reverse('organisors:organisor-delete', kwargs={'pk': self.normal_organisor.pk}))
         self.assertEqual(response.status_code, 200)
         
