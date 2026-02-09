@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models.signals import post_save, pre_save
-from django.core.mail import send_mail
-from django.conf import settings
+from django.dispatch import receiver
 from leads.models import User, UserProfile  # Import User and UserProfile from leads app
 
 class Category(models.Model):
@@ -262,50 +261,6 @@ class ProductsAndStock(models.Model):
 			return last_order.order.creation_date if last_order else None
 		except:
 			return None
-	
-	def send_low_stock_alert(self):
-		"""Send email alert when stock is low"""
-		if self.is_low_stock and self.organisation.user.email:
-			subject = f'🚨 CRITICAL STOCK ALERT - {self.product_name}'
-			message = f"""
-Hello {self.organisation.user.first_name},
-
-Your {self.product_name} product stock level is critical!
-
-📊 Stock Information:
-• Product Name: {self.product_name}
-• Current Stock: {self.product_quantity}
-• Minimum Stock Level: {self.minimum_stock_level}
-• Stock Status: {self.stock_status}
-
-⚠️ Urgent stock replenishment is recommended.
-
-This message was sent automatically.
-Darkenyas CRM System
-			"""
-			
-			try:
-				send_mail(
-					subject,
-					message,
-					settings.DEFAULT_FROM_EMAIL,
-					[self.organisation.user.email],
-					fail_silently=False,
-				)
-				print(f"Low stock alert sent for {self.product_name} to {self.organisation.user.email}")
-			except Exception as e:
-				print(f"Failed to send low stock alert: {e}")
-
-def check_stock_level(sender, instance, **kwargs):
-	"""Signal to check stock level after save"""
-	# Only check if this is an update (not creation)
-	if instance.pk:
-		# Check if stock is now low
-		if instance.is_low_stock:
-			instance.send_low_stock_alert()
-
-# Connect the signal
-post_save.connect(check_stock_level, sender=ProductsAndStock)
 
 # Store previous data for tracking
 _previous_data = {}
@@ -597,6 +552,30 @@ class StockAlert(models.Model):
 	
 	def __str__(self):
 		return f"{self.product.product_name} - {self.get_alert_type_display()} ({self.severity})"
+
+
+@receiver(post_save, sender=StockAlert)
+def notify_organisor_on_stock_alert(sender, instance, created, **kwargs):
+	"""When a new stock alert is created, notify the product's organisation (organisor)."""
+	if not created:
+		return
+	try:
+		from django.urls import reverse
+		from tasks.models import Notification
+		product = instance.product
+		organisor_user = product.organisation.user
+		product_url = reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': product.pk})
+		Notification.objects.create(
+			user=organisor_user,
+			task=None,
+			title="A stock alert was created",
+			message=f'Product "{product.product_name}": {instance.get_alert_type_display()} ({instance.get_severity_display()}) - {instance.message}',
+			action_url=product_url,
+			action_label='View Product',
+		)
+	except Exception:
+		pass  # Avoid breaking product/stock save if notification fails
+
 
 class StockRecommendation(models.Model):
 	RECOMMENDATION_TYPES = [

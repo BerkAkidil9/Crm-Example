@@ -14,26 +14,63 @@
 
     <!-- Search and filter -->
     <div class="w-full mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <form method="get" action="{% url 'tasks:task-list' %}" class="flex flex-wrap items-end gap-3">
-        <div class="flex-1 min-w-[200px]">
-          <label for="task-search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input type="text" name="q" id="task-search" value="{{ request.GET.q }}"
-                 placeholder="Title or content..."
-                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      <form method="get" action="{% url 'tasks:task-list' %}" class="space-y-4">
+        <div class="flex flex-wrap items-end gap-3">
+          {% if request.user.is_superuser or request.user.is_organisor %}
+          {% if show_organisation_filter %}
+          <div class="min-w-[200px]">
+            <label for="task-organisation" class="block text-sm font-medium text-gray-700 mb-1">Organisation</label>
+            <select name="organisation" id="task-organisation" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+              <option value="">All organisations</option>
+              {% for org in organisations %}
+              <option value="{{ org.pk }}" {% if selected_organisation_id == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.user.username }}{% if org.user.email %} ({{ org.user.email }}){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="min-w-[200px]">
+            <label for="task-agent" class="block text-sm font-medium text-gray-700 mb-1">Agent (assigned to) {% if show_organisation_filter and not selected_organisation_id %}<span class="text-gray-400 font-normal">— select organisation first</span>{% endif %}</label>
+            <select name="agent" id="task-agent" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" {% if show_organisation_filter and not selected_organisation_id %}disabled{% endif %}>
+              <option value="">All agents</option>
+              {% for agent in agents %}
+              <option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
+              {% endfor %}
+            </select>
+            {% if show_organisation_filter and not selected_organisation_id %}<input type="hidden" name="agent" value="">{% endif %}
+          </div>
+          {% endif %}
+          <div class="flex-1 min-w-[200px]">
+            <label for="task-search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <input type="text" name="q" id="task-search" value="{{ request.GET.q }}"
+                   placeholder="Title or content..."
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label for="task-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select name="status" id="task-status" class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+              <option value="">All</option>
+              <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+              <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+            </select>
+          </div>
+          <div>
+            <label for="task-priority" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select name="priority" id="task-priority" class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+              <option value="">All</option>
+              <option value="critical" {% if request.GET.priority == 'critical' %}selected{% endif %}>Critical</option>
+              <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+              <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+              <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label for="task-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select name="status" id="task-status" class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
-            <option value="">All</option>
-            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
-            <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
-            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
-          </select>
+        <div class="flex gap-2">
+          <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Filter</button>
+          {% if request.GET.q or request.GET.status or request.GET.priority or request.GET.organisation or request.GET.agent %}
+          <a href="{% url 'tasks:task-list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Clear</a>
+          {% endif %}
         </div>
-        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Filter</button>
-        {% if request.GET.q or request.GET.status %}
-        <a href="{% url 'tasks:task-list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Clear</a>
-        {% endif %}
       </form>
     </div>
 
@@ -56,6 +93,13 @@
                 {% if task.status == 'in_progress' %}<span class="text-blue-600">In Progress</span>{% endif %}
                 {% if task.status == 'completed' %}<span class="text-green-600">Completed</span>{% endif %}
               </span>
+              <span>
+                <strong>Priority:</strong>
+                {% if task.priority == 'critical' %}<span class="text-red-600 font-medium">Critical</span>{% endif %}
+                {% if task.priority == 'high' %}<span class="text-orange-600 font-medium">High</span>{% endif %}
+                {% if task.priority == 'medium' %}<span class="text-blue-600">Medium</span>{% endif %}
+                {% if task.priority == 'low' %}<span class="text-gray-600">Low</span>{% endif %}
+              </span>
               <span><strong>Assigned to:</strong> {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
             </div>
             <a href="{% url 'tasks:task-detail' task.pk %}" class="mt-2 text-indigo-500 inline-flex items-center hover:text-blue-900">
@@ -76,13 +120,15 @@
 
     {% if page_obj and page_obj.paginator.num_pages > 1 %}
     <div class="w-full mt-6 flex justify-center gap-2">
+      {% with params=request.GET.urlencode %}
       {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Previous</a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if params %}&{{ params }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Previous</a>
       {% endif %}
       <span class="px-3 py-1">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
       {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Next</a>
+      <a href="?page={{ page_obj.next_page_number }}{% if params %}&{{ params }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Next</a>
       {% endif %}
+      {% endwith %}
     </div>
     {% endif %}
   </div>

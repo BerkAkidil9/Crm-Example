@@ -565,12 +565,18 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class AssignAgentForm(forms.Form):
-    agent=forms.ModelChoiceField(queryset=Agent.objects.none())
+    agent = forms.ModelChoiceField(queryset=Agent.objects.none())
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop("request")
-        agents = Agent.objects.filter(organisation=request.user.userprofile)
+        lead = kwargs.pop("lead", None)
         super(AssignAgentForm, self).__init__(*args, **kwargs)
+        if request.user.is_superuser and lead and getattr(lead, "organisation", None):
+            agents = Agent.objects.filter(organisation=lead.organisation)
+        elif getattr(request.user, "userprofile", None):
+            agents = Agent.objects.filter(organisation=request.user.userprofile)
+        else:
+            agents = Agent.objects.none()
         self.fields["agent"].queryset = agents
 
 class LeadCategoryUpdateForm(forms.ModelForm):

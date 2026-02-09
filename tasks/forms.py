@@ -25,13 +25,14 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['title', 'content', 'start_date', 'end_date', 'status']
+        fields = ['title', 'content', 'start_date', 'end_date', 'status', 'priority']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'placeholder': 'Task title'}),
             'content': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'rows': 4, 'placeholder': 'Task description'}),
             'start_date': forms.DateInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'type': 'date'}),
             'status': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500'}),
+            'priority': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -66,13 +67,14 @@ class TaskFormAdmin(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['organisation', 'title', 'content', 'start_date', 'end_date', 'status']
+        fields = ['organisation', 'title', 'content', 'start_date', 'end_date', 'status', 'priority']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'placeholder': 'Task title'}),
             'content': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'rows': 4, 'placeholder': 'Task description'}),
             'start_date': forms.DateInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500', 'type': 'date'}),
             'status': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500'}),
+            'priority': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -154,7 +156,7 @@ class TaskFormWithAssignee(TaskForm):
     )
 
     class Meta(TaskForm.Meta):
-        fields = ['title', 'content', 'start_date', 'end_date', 'status', 'assigned_to']
+        fields = ['title', 'content', 'start_date', 'end_date', 'status', 'priority', 'assigned_to']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

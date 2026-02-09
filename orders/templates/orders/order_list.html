@@ -13,37 +13,60 @@
 		</a>
 	</div>
 
-	{% if request.user.is_superuser or request.user.is_organisor %}
 	<div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
-		<h3 class="text-lg font-semibold text-gray-800 mb-3">Filter by organisation & agent</h3>
-		<form method="get" class="flex flex-wrap gap-4 items-end">
-			{% if show_organisation_filter %}
-			<div class="min-w-[200px]">
-				<label for="organisation" class="block text-sm font-medium text-gray-700 mb-1">Organisation</label>
-				<select name="organisation" id="organisation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-					<option value="">All organisations</option>
-					{% for org in organisations %}
-					<option value="{{ org.pk }}" {% if selected_organisation_id == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.user.username }}{% if org.user.email %} ({{ org.user.email }}){% endif %}</option>
-					{% endfor %}
-				</select>
+		<h3 class="text-lg font-semibold text-gray-800 mb-3">Filters</h3>
+		<form method="get" id="orders-filter-form" class="space-y-4">
+			<div class="flex flex-wrap gap-6 items-end">
+				{% if request.user.is_superuser or request.user.is_organisor %}
+				{% if show_organisation_filter %}
+				<div class="min-w-[200px]">
+					<label for="organisation" class="block text-sm font-medium text-gray-700 mb-1">Organisation</label>
+					<select name="organisation" id="organisation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+						<option value="">All organisations</option>
+						{% for org in organisations %}
+						<option value="{{ org.pk }}" {% if selected_organisation_id == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.user.username }}{% if org.user.email %} ({{ org.user.email }}){% endif %}</option>
+						{% endfor %}
+					</select>
+				</div>
+				{% endif %}
+				<div class="min-w-[200px]">
+					<label for="agent" class="block text-sm font-medium text-gray-700 mb-1">Agent (lead’s agent) {% if show_organisation_filter and not selected_organisation_id %}<span class="text-gray-400 font-normal">— select organisation first</span>{% endif %}</label>
+					<select name="agent" id="agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" {% if show_organisation_filter and not selected_organisation_id %}disabled{% endif %}>
+						<option value="">All agents</option>
+						{% for agent in agents %}
+						<option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
+						{% endfor %}
+					</select>
+					{% if show_organisation_filter and not selected_organisation_id %}<input type="hidden" name="agent" value="">{% endif %}
+				</div>
+				{% endif %}
+				<div class="flex flex-wrap gap-4 items-center">
+					<span class="text-sm font-medium text-gray-700">Show order types:</span>
+					<label class="inline-flex items-center gap-2 cursor-pointer">
+						<input type="hidden" name="show_active" value="0">
+						<input type="checkbox" name="show_active" value="1" {% if show_active %}checked{% endif %} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+						<span class="text-sm text-gray-700">Active</span>
+					</label>
+					<label class="inline-flex items-center gap-2 cursor-pointer">
+						<input type="hidden" name="show_completed" value="0">
+						<input type="checkbox" name="show_completed" value="1" {% if show_completed %}checked{% endif %} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+						<span class="text-sm text-gray-700">Completed</span>
+					</label>
+					<label class="inline-flex items-center gap-2 cursor-pointer">
+						<input type="hidden" name="show_cancelled" value="0">
+						<input type="checkbox" name="show_cancelled" value="1" {% if show_cancelled %}checked{% endif %} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+						<span class="text-sm text-gray-700">Cancelled</span>
+					</label>
+				</div>
 			</div>
-			{% endif %}
-			<div class="min-w-[200px]">
-				<label for="agent" class="block text-sm font-medium text-gray-700 mb-1">Agent (lead’s agent) {% if show_organisation_filter and not selected_organisation_id %}<span class="text-gray-400 font-normal">— select organisation first</span>{% endif %}</label>
-				<select name="agent" id="agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" {% if show_organisation_filter and not selected_organisation_id %}disabled{% endif %}>
-					<option value="">All agents</option>
-					{% for agent in agents %}
-					<option value="{{ agent.pk }}" {% if selected_agent_id == agent.pk|stringformat:"s" %}selected{% endif %}>{{ agent.user.username }}{% if agent.user.email %} ({{ agent.user.email }}){% endif %}</option>
-					{% endfor %}
-				</select>
-				{% if show_organisation_filter and not selected_organisation_id %}<input type="hidden" name="agent" value="">{% endif %}
+			<div class="flex gap-2">
+				<button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Apply filters</button>
+				<a href="{% url 'orders:order-list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Clear all</a>
 			</div>
-			<button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Filter</button>
-			<a href="{% url 'orders:order-list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Clear</a>
 		</form>
 	</div>
-	{% endif %}
 
+	{% if show_active %}
 	<!-- Active orders -->
 	<div class="mb-10">
 		<h2 class="text-lg font-semibold text-gray-800 mb-4">Active orders</h2>
@@ -87,7 +110,54 @@
 			{% endfor %}
 		</div>
 	</div>
+	{% endif %}
 
+	{% if show_completed %}
+	<!-- Completed orders (order day has passed) -->
+	<div class="mb-10">
+		<h2 class="text-lg font-semibold text-gray-800 mb-4">Completed orders</h2>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			{% for order in completed_orders %}
+			<div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+				<div class="p-5">
+					<div class="flex items-start justify-between gap-3 mb-3">
+						<h3 class="font-semibold text-gray-900 truncate">{{ order.order_name }}</h3>
+						<span class="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Completed</span>
+					</div>
+					<p class="text-sm text-gray-500 line-clamp-2 mb-3">{{ order.order_description|truncatewords:15 }}</p>
+					<dl class="space-y-1.5 text-sm text-gray-600 mb-4">
+						{% if request.user.is_superuser and order.organisation %}
+						<div class="flex justify-between"><dt class="text-gray-500">Organisation</dt><dd class="font-medium text-gray-800">{{ order.organisation.user.username }}</dd></div>
+						{% endif %}
+						{% if order.lead %}
+						<div class="flex justify-between"><dt class="text-gray-500">Lead</dt><dd class="font-medium text-gray-800">{{ order.lead.first_name }} {{ order.lead.last_name }}</dd></div>
+						{% if order.lead.agent and not request.user.is_agent %}
+						<div class="flex justify-between"><dt class="text-gray-500">Agent</dt><dd class="font-medium text-gray-800">{{ order.lead.agent.user.username }}</dd></div>
+						{% endif %}
+						{% endif %}
+						<div class="flex justify-between"><dt class="text-gray-500">Order day</dt><dd>{{ order.order_day|date:"M d, Y H:i" }}</dd></div>
+						<div class="flex justify-between"><dt class="text-gray-500">Created</dt><dd>{{ order.creation_date|date:"M d, Y" }}</dd></div>
+					</dl>
+					<div class="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
+						<span class="text-gray-500">{{ order.items_count }} item(s)</span>
+						<span class="font-semibold text-gray-900">${{ order.total_order_price|floatformat:2 }}</span>
+					</div>
+					<div class="mt-4 pt-4 border-t border-gray-100 flex gap-2">
+						<a href="{% url 'orders:order-detail' order.pk %}" class="flex-1 text-center py-2 text-sm font-medium text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-50">View</a>
+						<a href="{% url 'orders:order-update' order.pk %}" class="flex-1 text-center py-2 text-sm font-medium text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100">Edit</a>
+					</div>
+				</div>
+			</div>
+			{% empty %}
+			<div class="col-span-full py-8 text-center text-gray-400 text-sm bg-gray-50 rounded-xl border border-gray-200">
+				No completed orders.
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	{% endif %}
+
+	{% if show_cancelled %}
 	<!-- Cancelled orders -->
 	<div>
 		<h2 class="text-lg font-semibold text-gray-800 mb-4">Cancelled orders</h2>
@@ -129,5 +199,6 @@
 			{% endfor %}
 		</div>
 	</div>
+	{% endif %}
 </div>
 {% endblock %}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load tailwind_filters %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 
@@ -48,14 +49,18 @@
     <h1 class="text-gray-800 text-medium">Create a new organisor</h1>
     <form method="post" class="form-small-text" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form|crispy }}
+        {% for field in form %}
+            {{ field|as_crispy_field }}
+            {% if field.name == 'profile_image' %}
+        <div id="profile-preview-container" class="mt-2 mb-3 hidden">
+            <p class="text-sm text-gray-600 mb-2">Profile Photo Preview:</p>
+            <img id="profile-preview" src="" alt="Preview" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
+        </div>
+            {% endif %}
+        {% endfor %}
         <div class="flex items-center mt-2 mb-3">
             <input id="show-password-organisor-create" type="checkbox" class="mr-2">
             <label for="show-password-organisor-create">Show Password</label>
-        </div>
-        <div id="profile-preview-container" class="mt-3 hidden">
-            <p class="text-sm text-gray-600 mb-2">Profile Photo Preview:</p>
-            <img id="profile-preview" src="" alt="Preview" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
         </div>
         <button type="submit" class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Create</button>
         {% for error in form.non_field_errors %}

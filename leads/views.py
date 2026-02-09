@@ -1,6 +1,7 @@
 from typing import Any
 from django.core.mail import send_mail
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView
 from django.http import HttpResponse, JsonResponse
@@ -371,6 +372,19 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 			lead.organisation = user.userprofile
 			
 		lead.save()
+		# Notify agent when lead is created with an agent assigned
+		if lead.agent_id and lead.agent.user_id != self.request.user.pk:
+			from tasks.models import Notification
+			lead_name = f"{lead.first_name} {lead.last_name}".strip() or lead.email
+			lead_url = reverse("leads:lead-detail", kwargs={"pk": lead.pk})
+			Notification.objects.create(
+				user=lead.agent.user,
+				task=None,
+				title="New lead assigned to you",
+				message=f'Lead "{lead_name}" has been assigned to you. Contact: {lead.email}',
+				action_url=lead_url,
+				action_label="View Lead",
+			)
 		return super(LeadCreateView, self).form_valid(form)
 
 def lead_create(request):
@@ -413,6 +427,25 @@ class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 	def get_success_url(self):
 		return reverse("leads:lead-list")
 
+	def form_valid(self, form):
+		previous_agent_id = self.object.agent_id if self.object.pk else None
+		response = super().form_valid(form)
+		# Notify agent when lead is assigned (or reassigned) to them
+		new_agent = self.object.agent
+		if new_agent and new_agent.pk != previous_agent_id and new_agent.user_id != self.request.user.pk:
+			from tasks.models import Notification
+			lead_name = f"{self.object.first_name} {self.object.last_name}".strip() or self.object.email
+			lead_url = reverse("leads:lead-detail", kwargs={"pk": self.object.pk})
+			Notification.objects.create(
+				user=new_agent.user,
+				task=None,
+				title="New lead assigned to you",
+				message=f'Lead "{lead_name}" has been assigned to you. Contact: {self.object.email}',
+				action_url=lead_url,
+				action_label="View Lead",
+			)
+		return response
+
 def lead_update(request, pk):
 	lead = Lead.objects.get(id=pk)
 	form = LeadModelForm(instance=lead)
@@ -453,8 +486,10 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 
 	def get_form_kwargs(self, **kwargs):
 		kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
+		lead = get_object_or_404(Lead, pk=self.kwargs["pk"])
 		kwargs.update({
-			"request": self.request
+			"request": self.request,
+			"lead": lead,
 		})
 		return kwargs
 
@@ -466,6 +501,22 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 		lead = Lead.objects.get(id=self.kwargs["pk"])
 		lead.agent = agent
 		lead.save()
+		# Notify agent: new lead assigned to you (skip if assigner is the same user)
+		if agent.user_id != self.request.user.pk:
+			try:
+				from tasks.models import Notification
+				lead_name = f"{lead.first_name} {lead.last_name}".strip() or lead.email
+				lead_url = reverse("leads:lead-detail", kwargs={"pk": lead.pk})
+				Notification.objects.create(
+					user=agent.user,
+					task=None,
+					title="New lead assigned to you",
+					message=f'Lead "{lead_name}" has been assigned to you. Contact: {lead.email}',
+					action_url=lead_url,
+					action_label="View Lead",
+				)
+			except Exception:
+				pass  # Don't break assign flow if notification fails
 		return super(AssignAgentView, self).form_valid(form)
 	
 from django.db.models import Count

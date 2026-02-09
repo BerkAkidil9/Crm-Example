@@ -10,7 +10,6 @@ from leads.models import UserProfile
 from agents.mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin, ProductsAndStockAccessMixin
 from .forms import ProductAndStockModelForm, AdminProductAndStockModelForm
 from .bulk_price_form import BulkPriceUpdateForm
-from django.core.mail import send_mail
 
 class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 	template_name = "ProductsAndStock/ProductAndStock_list.html"
@@ -173,12 +172,6 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
         # For admin, organisation is already set by the form
             
         product.save()
-        send_mail(
-           subject="A ProductAndStock has been created",
-            message="Go to the site to see the new ProductsAndStock",
-            from_email="test@test.com",
-            recipient_list=["test2@test.com"]
-        )
         return super(ProductAndStockCreateView, self).form_valid(form)
     
 class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto">
+    <div class="w-full mb-6 py-4 flex justify-between items-center border-b border-gray-200">
+      <h1 class="text-3xl text-gray-800">Notifications</h1>
+      {% if notification_list %}
+      <form method="post" action="{% url 'tasks:notification-mark-all-read' %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="text-sm text-blue-500 hover:text-blue-600">Mark all as read</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <div class="space-y-3">
+      {% for notification in notification_list %}
+      <div class="border rounded-lg p-4 {% if not notification.is_read %}bg-blue-50 border-blue-200{% else %}bg-gray-50 border-gray-200{% endif %}">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="font-medium text-gray-900 {% if not notification.is_read %}font-semibold{% endif %}">
+              {{ notification.title }}
+            </h3>
+            <p class="text-sm text-gray-600 mt-1">{{ notification.message|truncatewords:30 }}</p>
+            <p class="text-xs text-gray-400 mt-2">{{ notification.created_at|date:"M d, Y H:i" }}</p>
+          </div>
+          <div class="ml-4 flex flex-col gap-2 items-end">
+            {% if notification.display_url %}
+            <a href="{{ notification.display_url }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap">
+              {{ notification.display_label|default:"View" }}
+            </a>
+            {% endif %}
+            {% if not notification.is_read %}
+            <a href="{% url 'tasks:notification-mark-read' notification.pk %}" class="text-xs text-gray-500 hover:text-gray-700">Mark read</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 py-8 text-center">No notifications yet.</p>
+      {% endfor %}
+    </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <div class="mt-6 flex justify-center gap-2">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border rounded hover:bg-gray-100">Previous</a>
+      {% endif %}
+      <span class="px-3 py-1">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border rounded hover:bg-gray-100">Next</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock content %}

@@ -3,10 +3,11 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
+from django.views.generic.base import View
 
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from leads.models import Agent, UserProfile
-from .models import Task
+from .models import Task, Notification
 from .forms import TaskForm, TaskFormWithAssignee, TaskFormAdmin
 
 
@@ -36,13 +37,68 @@ class TaskListView(TaskAccessMixin, generic.ListView):
     def get_queryset(self):
         from django.db.models import Q
         qs = super().get_queryset()
+        user = self.request.user
+        if user.is_superuser:
+            org_id = self.request.GET.get('organisation', '').strip()
+            if org_id:
+                qs = qs.filter(organisation_id=org_id)
+            agent_id = self.request.GET.get('agent', '').strip()
+            if agent_id:
+                try:
+                    agent_user_id = Agent.objects.filter(pk=agent_id).values_list('user_id', flat=True).first()
+                    if agent_user_id:
+                        qs = qs.filter(assigned_to_id=agent_user_id)
+                except (ValueError, TypeError):
+                    pass
+        elif user.is_organisor:
+            agent_id = self.request.GET.get('agent', '').strip()
+            if agent_id:
+                try:
+                    agent = Agent.objects.filter(pk=agent_id, organisation=user.userprofile).first()
+                    if agent:
+                        qs = qs.filter(assigned_to_id=agent.user_id)
+                except (ValueError, TypeError):
+                    pass
         status = self.request.GET.get('status', '').strip()
         if status:
             qs = qs.filter(status=status)
+        priority = self.request.GET.get('priority', '').strip()
+        if priority:
+            qs = qs.filter(priority=priority)
         search = self.request.GET.get('q', '').strip()
         if search:
             qs = qs.filter(Q(title__icontains=search) | Q(content__icontains=search))
         return qs.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_superuser or user.is_organisor:
+            selected_org_id = self.request.GET.get("organisation", "")
+            selected_agent_id = self.request.GET.get("agent", "")
+            context["selected_organisation_id"] = selected_org_id
+            context["selected_agent_id"] = selected_agent_id
+            if user.is_superuser:
+                org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
+                profile = getattr(user, "userprofile", None)
+                if profile:
+                    org_qs = org_qs.exclude(pk=profile.pk)
+                context["organisations"] = org_qs
+                context["show_organisation_filter"] = True
+                if selected_org_id:
+                    context["agents"] = Agent.objects.filter(organisation_id=selected_org_id).select_related("user").order_by("user__username")
+                else:
+                    context["agents"] = []
+            else:
+                context["organisations"] = []
+                context["show_organisation_filter"] = False
+                context["agents"] = Agent.objects.filter(organisation=user.userprofile).select_related("user").order_by("user__username")
+        else:
+            context["show_organisation_filter"] = False
+            context["organisations"] = []
+            context["agents"] = []
+            context["selected_organisation_id"] = context["selected_agent_id"] = ""
+        return context
 
 
 class TaskDetailView(TaskAccessMixin, generic.DetailView):
@@ -108,6 +164,20 @@ class TaskCreateView(LoginRequiredMixin, generic.CreateView):
             task.assigned_to = self.request.user
             task.assigned_by = None
         task.save()
+        # Notify assignee: new task assigned to you
+        if task.assigned_to_id and task.assigned_to_id != self.request.user.pk:
+            task_url = reverse('tasks:task-detail', kwargs={'pk': task.pk})
+            Notification.objects.get_or_create(
+                user_id=task.assigned_to_id,
+                task=task,
+                key=f"task_assigned_{task.id}",
+                defaults={
+                    'title': f'New task assigned to you: {task.title}',
+                    'message': f'A new task "{task.title}" (due {task.end_date}) has been assigned to you.',
+                    'action_url': task_url,
+                    'action_label': 'View Task',
+                },
+            )
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -140,6 +210,7 @@ class TaskUpdateView(TaskAccessMixin, generic.UpdateView):
         return initial
 
     def form_valid(self, form):
+        previous_assigned_to_pk = self.object.assigned_to_id
         if self.request.user.is_superuser:
             from django.contrib.auth import get_user_model
             User = get_user_model()
@@ -148,7 +219,20 @@ class TaskUpdateView(TaskAccessMixin, generic.UpdateView):
             self.object.assigned_by = self.request.user
         elif self.request.user.is_organisor:
             self.object.assigned_by = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        # Notify new assignee if assignee changed
+        new_pk = self.object.assigned_to_id
+        if new_pk and new_pk != previous_assigned_to_pk and new_pk != self.request.user.pk:
+            task_url = reverse('tasks:task-detail', kwargs={'pk': self.object.pk})
+            Notification.objects.create(
+                user_id=new_pk,
+                task=self.object,
+                title=f'Task assigned to you: {self.object.title}',
+                message=f'Task "{self.object.title}" (due {self.object.end_date}) has been assigned to you.',
+                action_url=task_url,
+                action_label='View Task',
+            )
+        return response
 
     def get_success_url(self):
         return reverse('tasks:task-detail', kwargs={'pk': self.object.pk})
@@ -161,3 +245,37 @@ class TaskDeleteView(TaskAccessMixin, generic.DeleteView):
 
     def get_success_url(self):
         return reverse('tasks:task-list')
+
+
+class NotificationListView(LoginRequiredMixin, generic.ListView):
+    """List all notifications for the current user."""
+    model = Notification
+    template_name = 'tasks/notification_list.html'
+    context_object_name = 'notification_list'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).select_related('task')
+
+
+class NotificationMarkReadView(LoginRequiredMixin, View):
+    """Mark a single notification as read and redirect to task or notification list."""
+
+    def get(self, request, pk):
+        notification = get_object_or_404(Notification, pk=pk, user=request.user)
+        notification.is_read = True
+        notification.save()
+        if notification.task_id:
+            return redirect('tasks:task-detail', pk=notification.task_id)
+        return redirect('tasks:notification-list')
+
+
+class NotificationMarkAllReadView(LoginRequiredMixin, View):
+    """Mark all notifications as read."""
+
+    def post(self, request):
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        return redirect('tasks:notification-list')
+
+    def get(self, request):
+        return redirect('tasks:notification-list')

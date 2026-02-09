@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic, View
-from django.core.mail import send_mail
+from django.urls import reverse_lazy, reverse
 from .models import orders, OrderProduct
 from leads.models import Lead, Agent
 from leads.models import UserProfile
@@ -10,10 +10,10 @@ from ProductsAndStock.models import ProductsAndStock, Category, SubCategory
 from django.http import HttpResponseRedirect
 from django.forms import inlineformset_factory
 from django.db import transaction
-from django.urls import reverse_lazy
 from django.contrib import messages
 from finance.models import OrderFinanceReport
 from django.utils import timezone
+from tasks.models import Notification
 
 
 def get_organisation_for_user(user):
@@ -62,8 +62,25 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         qs = context.get("order_list") or context.get("object_list") or self.get_queryset()
-        context["active_orders"] = [o for o in qs if not o.is_cancelled]
+        today = timezone.now().date()
+        active_orders = []
+        completed_orders = []
+        for o in qs:
+            if o.is_cancelled:
+                continue
+            order_day_date = o.order_day.date() if hasattr(o.order_day, "date") else o.order_day
+            if order_day_date >= today:
+                active_orders.append(o)
+            else:
+                completed_orders.append(o)
+        context["active_orders"] = active_orders
+        context["completed_orders"] = completed_orders
         context["cancelled_orders"] = [o for o in qs if o.is_cancelled]
+        # Filter which sections to show (default: all)
+        get = self.request.GET
+        context["show_active"] = get.get("show_active", "1") == "1"
+        context["show_completed"] = get.get("show_completed", "1") == "1"
+        context["show_cancelled"] = get.get("show_cancelled", "1") == "1"
         if self.request.user.is_superuser or self.request.user.is_organisor:
             from leads.models import UserProfile
             selected_org_id = self.request.GET.get("organisation", "")
@@ -263,12 +280,23 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
                     earned_amount=total_price
                 )
 
-                send_mail(
-                    subject="An Order has been created",
-                    message="Go to the site to see the new Order",
-                    from_email="test@test.com",
-                    recipient_list=["test2@test.com"]
-                )
+                # Notify organisation (organisor) and agent: order created
+                order.refresh_from_db()
+                users_to_notify = [order.organisation.user]
+                if order.lead_id:
+                    lead = Lead.objects.filter(pk=order.lead_id).select_related('agent__user').first()
+                    if lead and lead.agent:
+                        users_to_notify.append(lead.agent.user)
+                order_url = reverse('orders:order-detail', kwargs={'pk': order.pk})
+                for u in set(users_to_notify):
+                    Notification.objects.create(
+                        user=u,
+                        task=None,
+                        title="An order was created",
+                        message=f'Order "{order.order_name}" has been created.',
+                        action_url=order_url,
+                        action_label='View Order',
+                    )
 
             return super().form_valid(form)
         else:

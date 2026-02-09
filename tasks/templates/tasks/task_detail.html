@@ -29,6 +29,15 @@
           </span>
         </div>
         <div class="flex border-t border-gray-200 py-2">
+          <span class="text-gray-500">Priority</span>
+          <span class="ml-auto">
+            {% if task.priority == 'critical' %}<span class="text-red-600 font-medium">Critical</span>{% endif %}
+            {% if task.priority == 'high' %}<span class="text-orange-600 font-medium">High</span>{% endif %}
+            {% if task.priority == 'medium' %}<span class="text-blue-600">Medium</span>{% endif %}
+            {% if task.priority == 'low' %}<span class="text-gray-600">Low</span>{% endif %}
+          </span>
+        </div>
+        <div class="flex border-t border-gray-200 py-2">
           <span class="text-gray-500">Assigned To</span>
           <span class="ml-auto text-gray-900">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
         </div>
