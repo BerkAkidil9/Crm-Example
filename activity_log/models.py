@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 
 
 # Human-readable action constants
@@ -123,6 +124,26 @@ class ActivityLog(models.Model):
     def __str__(self):
         user_str = self.user.get_full_name() or self.user.username if self.user else 'Unknown'
         return f"{user_str} - {self.get_action_display()} ({self.created_at})"
+
+    def get_detail_url(self):
+        """Return URL to the related object's detail page, or None if not available."""
+        if not self.object_type or self.object_id is None:
+            return None
+        url_config = {
+            'order': ('orders', 'order-detail', {'pk': self.object_id}),
+            'lead': ('leads', 'lead-detail', {'pk': self.object_id}),
+            'task': ('tasks', 'task-detail', {'pk': self.object_id}),
+            'product': ('ProductsAndStock', 'ProductAndStock-detail', {'pk': self.object_id}),
+            'agent': ('agents', 'agent-detail', {'pk': self.object_id}),
+            'organisor': ('organisors', 'organisor-detail', {'pk': self.object_id}),
+        }
+        if self.object_type not in url_config:
+            return None
+        namespace, name, kwargs = url_config[self.object_type]
+        try:
+            return reverse(f'{namespace}:{name}', kwargs=kwargs)
+        except Exception:
+            return None
 
 
 def log_activity(user, action, object_type=None, object_id=None, object_repr='', details=None, organisation=None, affected_agent=None):
