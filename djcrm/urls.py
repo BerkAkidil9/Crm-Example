@@ -15,6 +15,7 @@ urlpatterns = [
     path('orders/', include('orders.urls', namespace='orders')),
     path('finance/', include('finance.urls', namespace='finance')),
     path('tasks/', include('tasks.urls', namespace='tasks')),
+    path('activity-log/', include('activity_log.urls', namespace='activity_log')),
     path('signup/', SignupView.as_view(), name='signup'),
     path('verify-email-sent/', EmailVerificationSentView.as_view(), name='verify-email-sent'),
     path('verify-email/<uuid:token>/', EmailVerificationView.as_view(), name='verify-email'),

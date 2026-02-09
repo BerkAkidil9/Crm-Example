@@ -5,6 +5,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
 from leads.models import Agent, UserProfile, User, EmailVerificationToken
+from activity_log.models import log_activity, ACTION_AGENT_CREATED, ACTION_AGENT_UPDATED, ACTION_AGENT_DELETED
 from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm, AdminAgentModelForm, OrganisorAgentCreateForm, OrganisorAgentModelForm
 from .mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin
 from django.db import transaction, IntegrityError
@@ -98,17 +99,27 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
                 if self.request.user.is_superuser:
                     # Admin için form'dan seçilen organizasyonu kullan
                     selected_organisation = form.cleaned_data.get('organisation')
-                    Agent.objects.create(
+                    agent = Agent.objects.create(
                         user=user,
                         organisation=selected_organisation
                     )
+                    org_for_log = selected_organisation
                 else:
                     # Organisor için kendi organizasyonunu kullan
-                    Agent.objects.create(
+                    agent = Agent.objects.create(
                         user=user,
                         organisation=self.request.user.userprofile
                     )
+                    org_for_log = self.request.user.userprofile
                 logger.info(f"Agent for {user.username} created successfully")
+                log_activity(
+                    self.request.user,
+                    ACTION_AGENT_CREATED,
+                    object_type='agent',
+                    object_id=agent.pk,
+                    object_repr=f"Agent: {user.email}",
+                    organisation=org_for_log,
+                )
 
                 # Email doğrulama token'ı oluştur
                 verification_token = EmailVerificationToken.objects.create(user=user)
@@ -287,14 +298,22 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        # Admin can change agent's organisation
-        if self.request.user.is_superuser and hasattr(form, 'cleaned_data') and 'organisation' in form.cleaned_data:
-            try:
-                agent = self.get_queryset().get(pk=self.kwargs['pk'])
+        try:
+            agent = self.get_queryset().get(pk=self.kwargs['pk'])
+            # Admin can change agent's organisation
+            if self.request.user.is_superuser and hasattr(form, 'cleaned_data') and 'organisation' in form.cleaned_data:
                 agent.organisation = form.cleaned_data['organisation']
                 agent.save()
-            except Agent.DoesNotExist:
-                pass
+            log_activity(
+                self.request.user,
+                ACTION_AGENT_UPDATED,
+                object_type='agent',
+                object_id=agent.pk,
+                object_repr=f"Agent: {agent.user.email}",
+                organisation=agent.organisation,
+            )
+        except Agent.DoesNotExist:
+            pass
         return response
 
     def get_success_url(self):
@@ -329,9 +348,18 @@ class AgentDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
         agent = self.get_object()
         user = agent.user
         username = user.username
-        
+        org = agent.organisation
+        object_repr = f"Agent: {user.email}"
         try:
             with transaction.atomic():
+                log_activity(
+                    self.request.user,
+                    ACTION_AGENT_DELETED,
+                    object_type='agent',
+                    object_id=agent.pk,
+                    object_repr=object_repr,
+                    organisation=org,
+                )
                 # Önce Agent'ı sil
                 agent.delete()
                 # Sonra ilişkili User'ı da sil

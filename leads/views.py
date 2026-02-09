@@ -12,6 +12,7 @@ from django.db import models
 from django.db.models import Q
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
+from activity_log.models import log_activity, ACTION_LEAD_CREATED, ACTION_LEAD_UPDATED, ACTION_LEAD_DELETED
 from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, OrganisorLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
 
 
@@ -372,6 +373,15 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 			lead.organisation = user.userprofile
 			
 		lead.save()
+		log_activity(
+			user,
+			ACTION_LEAD_CREATED,
+			object_type='lead',
+			object_id=lead.pk,
+			object_repr=f"Lead: {lead.first_name} {lead.last_name} ({lead.email})",
+			organisation=lead.organisation,
+			affected_agent=lead.agent if getattr(lead, 'agent_id', None) else None,
+		)
 		# Notify agent when lead is created with an agent assigned
 		if lead.agent_id and lead.agent.user_id != self.request.user.pk:
 			from tasks.models import Notification
@@ -430,6 +440,15 @@ class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 	def form_valid(self, form):
 		previous_agent_id = self.object.agent_id if self.object.pk else None
 		response = super().form_valid(form)
+		log_activity(
+			self.request.user,
+			ACTION_LEAD_UPDATED,
+			object_type='lead',
+			object_id=self.object.pk,
+			object_repr=f"Lead: {self.object.first_name} {self.object.last_name} ({self.object.email})",
+			organisation=self.object.organisation,
+			affected_agent=self.object.agent if getattr(self.object, 'agent_id', None) else None,
+		)
 		# Notify agent when lead is assigned (or reassigned) to them
 		new_agent = self.object.agent
 		if new_agent and new_agent.pk != previous_agent_id and new_agent.user_id != self.request.user.pk:
@@ -475,6 +494,19 @@ class LeadDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 	def get_success_url(self):
 		return reverse("leads:lead-list")
 
+	def form_valid(self, form):
+		lead = self.get_object()
+		log_activity(
+			self.request.user,
+			ACTION_LEAD_DELETED,
+			object_type='lead',
+			object_id=lead.pk,
+			object_repr=f"Lead: {lead.first_name} {lead.last_name} ({lead.email})",
+			organisation=lead.organisation,
+			affected_agent=lead.agent if getattr(lead, 'agent_id', None) else None,
+		)
+		return super().form_valid(form)
+
 def lead_delete(request, pk):
 	lead = Lead.objects.get(id=pk)
 	lead.delete()
@@ -501,6 +533,16 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 		lead = Lead.objects.get(id=self.kwargs["pk"])
 		lead.agent = agent
 		lead.save()
+		log_activity(
+			self.request.user,
+			ACTION_LEAD_UPDATED,
+			object_type='lead',
+			object_id=lead.pk,
+			object_repr=f"Lead: {lead.first_name} {lead.last_name} ({lead.email})",
+			details={'updated': 'agent', 'assigned_to': agent.user.username},
+			organisation=lead.organisation,
+			affected_agent=agent,
+		)
 		# Notify agent: new lead assigned to you (skip if assigner is the same user)
 		if agent.user_id != self.request.user.pk:
 			try:
@@ -765,6 +807,20 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 		if lead.category and lead.category.id == 0:  # Assuming 0 is the ID for "Unassigned" category
 			return reverse("leads:category-detail", kwargs={"pk": 0})
 		return reverse("leads:lead-detail", kwargs={"pk": lead.id})
+
+	def form_valid(self, form):
+		response = super().form_valid(form)
+		log_activity(
+			self.request.user,
+			ACTION_LEAD_UPDATED,
+			object_type='lead',
+			object_id=self.object.pk,
+			object_repr=f"Lead: {self.object.first_name} {self.object.last_name} ({self.object.email})",
+			details={'updated': 'category'},
+			organisation=self.object.organisation,
+			affected_agent=self.object.agent if getattr(self.object, 'agent_id', None) else None,
+		)
+		return response
 
 
 def get_agents_by_org(request, org_id):

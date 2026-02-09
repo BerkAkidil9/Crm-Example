@@ -7,6 +7,7 @@ from django.views.generic.base import View
 
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from leads.models import Agent, UserProfile
+from activity_log.models import log_activity, ACTION_TASK_CREATED, ACTION_TASK_UPDATED, ACTION_TASK_DELETED
 from .models import Task, Notification
 from .forms import TaskForm, TaskFormWithAssignee, TaskFormAdmin
 
@@ -164,6 +165,16 @@ class TaskCreateView(LoginRequiredMixin, generic.CreateView):
             task.assigned_to = self.request.user
             task.assigned_by = None
         task.save()
+        assigned_agent = Agent.objects.filter(user=task.assigned_to).first()
+        log_activity(
+            self.request.user,
+            ACTION_TASK_CREATED,
+            object_type='task',
+            object_id=task.pk,
+            object_repr=f"Task: {task.title}",
+            organisation=task.organisation,
+            affected_agent=assigned_agent,
+        )
         # Notify assignee: new task assigned to you
         if task.assigned_to_id and task.assigned_to_id != self.request.user.pk:
             task_url = reverse('tasks:task-detail', kwargs={'pk': task.pk})
@@ -232,6 +243,16 @@ class TaskUpdateView(TaskAccessMixin, generic.UpdateView):
                 action_url=task_url,
                 action_label='View Task',
             )
+        assigned_agent = Agent.objects.filter(user=self.object.assigned_to).first()
+        log_activity(
+            self.request.user,
+            ACTION_TASK_UPDATED,
+            object_type='task',
+            object_id=self.object.pk,
+            object_repr=f"Task: {self.object.title}",
+            organisation=self.object.organisation,
+            affected_agent=assigned_agent,
+        )
         return response
 
     def get_success_url(self):
@@ -245,6 +266,20 @@ class TaskDeleteView(TaskAccessMixin, generic.DeleteView):
 
     def get_success_url(self):
         return reverse('tasks:task-list')
+
+    def form_valid(self, form):
+        task = self.get_object()
+        assigned_agent = Agent.objects.filter(user=task.assigned_to).first()
+        log_activity(
+            self.request.user,
+            ACTION_TASK_DELETED,
+            object_type='task',
+            object_id=task.pk,
+            object_repr=f"Task: {task.title}",
+            organisation=task.organisation,
+            affected_agent=assigned_agent,
+        )
+        return super().form_valid(form)
 
 
 class NotificationListView(LoginRequiredMixin, generic.ListView):

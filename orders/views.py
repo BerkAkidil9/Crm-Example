@@ -5,6 +5,7 @@ from django.urls import reverse_lazy, reverse
 from .models import orders, OrderProduct
 from leads.models import Lead, Agent
 from leads.models import UserProfile
+from activity_log.models import log_activity, ACTION_ORDER_CREATED, ACTION_ORDER_UPDATED, ACTION_ORDER_CANCELLED
 from .forms import OrderModelForm, OrderForm, OrderProductFormSet
 from ProductsAndStock.models import ProductsAndStock, Category, SubCategory
 from django.http import HttpResponseRedirect
@@ -298,6 +299,17 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
                         action_label='View Order',
                     )
 
+                affected_agent = getattr(getattr(order, 'lead', None), 'agent', None)
+                log_activity(
+                    self.request.user,
+                    ACTION_ORDER_CREATED,
+                    object_type='order',
+                    object_id=order.pk,
+                    object_repr=f"Order: {order.order_name}",
+                    organisation=order.organisation,
+                    affected_agent=affected_agent,
+                )
+
             return super().form_valid(form)
         else:
             return self.form_invalid(form)
@@ -457,6 +469,16 @@ class OrderUpdateView(LoginRequiredMixin, generic.UpdateView):
         product_formset = OrderProductFormSet(self.request.POST, instance=order)
         if product_formset.is_valid():
             product_formset.save()
+            affected_agent = getattr(getattr(order, 'lead', None), 'agent', None)
+            log_activity(
+                self.request.user,
+                ACTION_ORDER_UPDATED,
+                object_type='order',
+                object_id=order.pk,
+                object_repr=f"Order: {order.order_name}",
+                organisation=order.organisation,
+                affected_agent=affected_agent,
+            )
             messages.success(self.request, "Order updated successfully.")
             return super().form_valid(form)
         return self.form_invalid(form)
@@ -494,6 +516,16 @@ class OrderCancelView(LoginRequiredMixin, View):
         
         try:
             with transaction.atomic():
+                affected_agent = getattr(getattr(order, 'lead', None), 'agent', None)
+                log_activity(
+                    self.request.user,
+                    ACTION_ORDER_CANCELLED,
+                    object_type='order',
+                    object_id=order.pk,
+                    object_repr=f"Order: {order.order_name}",
+                    organisation=order.organisation,
+                    affected_agent=affected_agent,
+                )
                 # Stock will be automatically restored by signal when is_cancelled is set to True
                 order.is_cancelled = True
                 order.save()
@@ -549,6 +581,16 @@ class OrderDeleteView(LoginRequiredMixin, generic.DeleteView):
             messages.error(self.request, 'This order has already been canceled.')
             return HttpResponseRedirect(self.get_success_url())
         
+        affected_agent = getattr(getattr(order, 'lead', None), 'agent', None)
+        log_activity(
+            self.request.user,
+            ACTION_ORDER_CANCELLED,
+            object_type='order',
+            object_id=order.pk,
+            object_repr=f"Order: {order.order_name}",
+            organisation=order.organisation,
+            affected_agent=affected_agent,
+        )
         # Stock will be automatically restored by signal when is_cancelled is set to True
         order.is_cancelled = True
         order.save()

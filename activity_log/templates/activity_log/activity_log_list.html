@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto">
+    <div class="w-full mb-6 py-4 flex flex-wrap justify-between items-center border-b border-gray-200 gap-4">
+      <h1 class="text-3xl text-gray-800">Activity Log</h1>
+      {% if request.user.is_superuser and filter_users %}
+      <form method="get" class="flex flex-wrap gap-2 items-center">
+        <label class="text-sm text-gray-600">User:</label>
+        <select name="user" class="border rounded px-2 py-1 text-sm">
+          <option value="">-- All --</option>
+          {% for u in filter_users %}
+          <option value="{{ u.pk }}" {% if selected_user_id == u.pk|stringformat:"s" %}selected{% endif %}>{{ u.username }} ({{ u.email }})</option>
+          {% endfor %}
+        </select>
+        <label class="text-sm text-gray-600 ml-2">Organisation:</label>
+        <select name="organisation" class="border rounded px-2 py-1 text-sm">
+          <option value="">-- All --</option>
+          {% for org in filter_organisations %}
+          <option value="{{ org.pk }}" {% if selected_organisation_id == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.user.username }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">Filter</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">User</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Action</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Object</th>
+            {% if request.user.is_superuser or request.user.is_organisor %}
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Organisation</th>
+            {% endif %}
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in activity_logs %}
+          <tr class="border-t border-gray-200 hover:bg-gray-50">
+            <td class="px-4 py-2 text-sm text-gray-600">{{ log.created_at|date:"M d, Y H:i" }}</td>
+            <td class="px-4 py-2 text-sm">{{ log.user.get_full_name|default:log.user.username }}{% if log.user.email %} ({{ log.user.email }}){% endif %}</td>
+            <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ log.get_action_display }}</td>
+            <td class="px-4 py-2 text-sm text-gray-700">{{ log.object_repr|default:"-" }}</td>
+            {% if request.user.is_superuser or request.user.is_organisor %}
+            <td class="px-4 py-2 text-sm text-gray-600">{% if log.organisation %}{{ log.organisation.user.username }}{% else %}-{% endif %}</td>
+            {% endif %}
+            <td class="px-4 py-2 text-sm text-gray-500">
+              {% if "changes" in log.details %}
+                <span class="font-medium">{{ log.details.count }} product(s) updated</span>
+                {% if log.details.reason %}<span class="text-gray-400"> — {{ log.details.reason|truncatewords:6 }}</span>{% endif %}
+                <details class="mt-1 inline-block">
+                  <summary class="cursor-pointer text-blue-600 hover:text-blue-800 select-none">Show changes</summary>
+                  <ul class="mt-1 ml-2 list-disc list-inside max-h-48 overflow-y-auto text-xs space-y-0.5 border border-gray-200 rounded p-2 bg-gray-50">
+                    {% for c in log.details.changes %}
+                    <li>{{ c.name }}: {{ c.old_price|floatformat:2 }} → {{ c.new_price|floatformat:2 }}</li>
+                    {% endfor %}
+                    {% if log.details.truncated %}
+                    <li class="text-gray-500 italic">… (first 100 shown, {{ log.details.count }} total)</li>
+                    {% endif %}
+                  </ul>
+                </details>
+              {% elif "old_price" in log.details and "new_price" in log.details %}
+                {{ log.details.old_price|floatformat:2 }} → {{ log.details.new_price|floatformat:2 }}{% if log.details.reason %} ({{ log.details.reason|truncatewords:8 }}){% endif %}
+              {% elif "reason" in log.details %}
+                {{ log.details.reason|truncatewords:12 }}
+              {% elif log.details and log.details.items %}
+                {% for key, val in log.details.items %}{% if not forloop.first %}; {% endif %}{{ key }}: {{ val }}{% endfor %}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if request.user.is_superuser or request.user.is_organisor %}6{% else %}5{% endif %}" class="px-4 py-8 text-center text-gray-500">No activity records yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <div class="mt-6 flex justify-center gap-2">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.user.is_superuser %}&user={{ selected_user_id }}&organisation={{ selected_organisation_id }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Previous</a>
+      {% endif %}
+      <span class="px-3 py-1">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.user.is_superuser %}&user={{ selected_user_id }}&organisation={{ selected_organisation_id }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Next</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock content %}

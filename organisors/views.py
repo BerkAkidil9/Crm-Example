@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 
 from leads.models import UserProfile, EmailVerificationToken
+from activity_log.models import log_activity, ACTION_ORGANISOR_CREATED, ACTION_ORGANISOR_UPDATED, ACTION_ORGANISOR_DELETED
 from .models import Organisor
 from .forms import OrganisorModelForm, OrganisorCreateForm
 from .mixins import AdminOnlyMixin, SelfProfileOnlyMixin
@@ -63,11 +64,19 @@ class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):
                     logger.info(f"UserProfile for {user.username} created successfully")
 
                 # Create Organisor
-                Organisor.objects.create(
+                organisor = Organisor.objects.create(
                     user=user,
                     organisation=self.request.user.userprofile
                 )
                 logger.info(f"Organisor for {user.username} created successfully")
+                log_activity(
+                    self.request.user,
+                    ACTION_ORGANISOR_CREATED,
+                    object_type='organisor',
+                    object_id=organisor.pk,
+                    object_repr=f"Organisor: {user.email}",
+                    organisation=self.request.user.userprofile,
+                )
 
                 # Email verification token
                 verification_token = EmailVerificationToken.objects.create(user=user)
@@ -167,6 +176,19 @@ class OrganisorUpdateView(SelfProfileOnlyMixin, generic.UpdateView):
 
     def get_success_url(self):
         return reverse("organisors:organisor-detail", kwargs={"pk": self.kwargs['pk']})
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        organisor = Organisor.objects.get(pk=self.kwargs['pk'])
+        log_activity(
+            self.request.user,
+            ACTION_ORGANISOR_UPDATED,
+            object_type='organisor',
+            object_id=organisor.pk,
+            object_repr=f"Organisor: {organisor.user.email}",
+            organisation=organisor.organisation,
+        )
+        return response
     
     def is_admin_user(self, user):
         """Check if user is admin/superuser."""
@@ -188,9 +210,18 @@ class OrganisorDeleteView(AdminOnlyMixin, generic.DeleteView):
         organisor = self.get_object()
         user = organisor.user
         username = user.username
-        
+        org = organisor.organisation
+        object_repr = f"Organisor: {user.email}"
         try:
             with transaction.atomic():
+                log_activity(
+                    self.request.user,
+                    ACTION_ORGANISOR_DELETED,
+                    object_type='organisor',
+                    object_id=organisor.pk,
+                    object_repr=object_repr,
+                    organisation=org,
+                )
                 # Delete organisor first, then user
                 organisor.delete()
                 user.delete()

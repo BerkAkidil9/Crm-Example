@@ -7,6 +7,15 @@ from django.db import transaction, models
 from django.db.models import F, Case, When, Value, IntegerField
 from .models import ProductsAndStock, Category, SubCategory, PriceHistory, SalesStatistics, StockAlert, StockRecommendation
 from leads.models import UserProfile
+from activity_log.models import (
+    log_activity,
+    ACTION_PRODUCT_CREATED,
+    ACTION_PRODUCT_UPDATED,
+    ACTION_PRODUCT_DELETED,
+    ACTION_PRICE_INCREASED,
+    ACTION_PRICE_DECREASED,
+    ACTION_PRICE_BULK_UPDATE,
+)
 from agents.mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin, ProductsAndStockAccessMixin
 from .forms import ProductAndStockModelForm, AdminProductAndStockModelForm
 from .bulk_price_form import BulkPriceUpdateForm
@@ -172,6 +181,14 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
         # For admin, organisation is already set by the form
             
         product.save()
+        log_activity(
+            user,
+            ACTION_PRODUCT_CREATED,
+            object_type='product',
+            object_id=product.pk,
+            object_repr=f"Product: {product.product_name}",
+            organisation=product.organisation,
+        )
         return super(ProductAndStockCreateView, self).form_valid(form)
     
 class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
@@ -201,21 +218,56 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
     
     def form_valid(self, form):
         user = self.request.user
-        
+        product = self.get_object()
+        old_price = getattr(product, 'product_price', None)
+
         # Organisors için user_organisation'ı set et (clean metodunda kullanmak için)
         if not (user.is_superuser or user.id == 1 or user.username == 'berk'):
             try:
                 form.user_organisation = user.userprofile
-            except:
+            except Exception:
                 pass  # Update'de organisation zaten mevcut
-        
-        return super().form_valid(form)
+
+        response = super().form_valid(form)
+        product.refresh_from_db()
+        log_activity(
+            user,
+            ACTION_PRODUCT_UPDATED,
+            object_type='product',
+            object_id=product.pk,
+            object_repr=f"Product: {product.product_name}",
+            organisation=product.organisation,
+        )
+        if old_price is not None and product.product_price != old_price:
+            price_action = ACTION_PRICE_INCREASED if product.product_price > old_price else ACTION_PRICE_DECREASED
+            log_activity(
+                user,
+                price_action,
+                object_type='product',
+                object_id=product.pk,
+                object_repr=f"Product: {product.product_name}",
+                details={'old_price': old_price, 'new_price': product.product_price},
+                organisation=product.organisation,
+            )
+        return response
 
 class ProductAndStockDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
     template_name = "ProductsAndStock/ProductAndStock_delete.html"
     
     def get_success_url(self):
         return reverse("ProductsAndStock:ProductAndStock-list")
+
+    def form_valid(self, form):
+        product = self.get_object()
+        log_activity(
+            self.request.user,
+            ACTION_PRODUCT_DELETED,
+            object_type='product',
+            object_id=product.pk,
+            object_repr=f"Product: {product.product_name}",
+            organisation=product.organisation,
+        )
+        return super().form_valid(form)
     
     def get_queryset(self):
         user = self.request.user
@@ -281,13 +333,16 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
             products = products.filter(subcategory=subcategory)
         
         updated_count = 0
-        
+        bulk_changes = []  # list of {name, old_price, new_price} for activity log
+        max_changes_stored = 100  # cap for single log entry
+        first_organisation = None
+
         try:
             with transaction.atomic():
                 for product in products:
                     old_price = product.product_price
                     new_price = old_price
-                    
+
                     # Calculate new price based on update type
                     if update_type == 'PERCENTAGE_INCREASE':
                         percentage = form.cleaned_data['percentage_increase']
@@ -303,23 +358,23 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
                         new_price = old_price - amount
                     elif update_type == 'SET_PRICE':
                         new_price = form.cleaned_data['new_price']
-                    
+
                     # Update product price (signal won't create PriceHistory; we add one with custom reason)
                     product.product_price = new_price
                     product._skip_price_history_signal = True
                     product.save()
-                    
+
+                    if first_organisation is None:
+                        first_organisation = product.organisation
+
                     # Create price history record
                     price_change = new_price - old_price
-                    
-                    # Determine change type based on price change
                     if price_change > 0:
                         change_type = 'INCREASE'
                     elif price_change < 0:
                         change_type = 'DECREASE'
                     else:
                         change_type = 'BULK_UPDATE'
-                    
                     PriceHistory.objects.create(
                         product=product,
                         old_price=old_price,
@@ -329,9 +384,32 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
                         change_reason=reason,
                         updated_by=self.request.user
                     )
-                    
+
                     updated_count += 1
-                
+                    if len(bulk_changes) < max_changes_stored:
+                        bulk_changes.append({
+                            'name': product.product_name,
+                            'old_price': round(old_price, 2),
+                            'new_price': round(new_price, 2),
+                        })
+
+                # Single activity log entry for the whole bulk update
+                if updated_count > 0 and first_organisation:
+                    log_activity(
+                        self.request.user,
+                        ACTION_PRICE_BULK_UPDATE,
+                        object_type='product',
+                        object_id=None,
+                        object_repr=f"Bulk update: {updated_count} product(s)",
+                        details={
+                            'count': updated_count,
+                            'reason': reason,
+                            'changes': bulk_changes,
+                            'truncated': updated_count > max_changes_stored,
+                        },
+                        organisation=first_organisation,
+                    )
+
                 messages.success(
                     self.request, 
                     f'Successfully updated prices for {updated_count} products.'
