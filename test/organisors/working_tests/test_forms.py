@@ -104,7 +104,7 @@ class TestOrganisorModelForm(TestCase):
                 self.assertIn(field, form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
+        """Email uniqueness validation test"""
         # Create another user
         other_user = User.objects.create_user(
             username='other_user_organisor_forms',
@@ -377,7 +377,7 @@ class TestOrganisorCreateForm(TestCase):
                 self.assertIn(field, form.errors)
     
     def test_form_email_validation_unique(self):
-        """Email benzersizlik validasyonu testi"""
+        """Email uniqueness validation test"""
         # Create a user first
         User.objects.create_user(
             username='existing_user_create',
@@ -496,7 +496,7 @@ class TestOrganisorCreateForm(TestCase):
 
 
 class TestOrganisorFormIntegration(TestCase):
-    """Organisor form entegrasyon testleri"""
+    """Organisor form integration tests"""
     
     def test_organisor_model_form_with_existing_user(self):
         """OrganisorModelForm test with existing user"""

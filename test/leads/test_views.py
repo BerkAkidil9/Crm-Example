@@ -315,7 +315,7 @@ class TestCustomLoginView(TestCase):
 
 
 class TestLeadListView(TestCase):
-    """LeadListView testleri"""
+    """LeadListView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -468,7 +468,7 @@ class TestLeadListView(TestCase):
 
 
 class TestLeadDetailView(TestCase):
-    """LeadDetailView testleri"""
+    """LeadDetailView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -603,7 +603,7 @@ class TestLeadDetailView(TestCase):
 
 
 class TestLeadCreateView(TestCase):
-    """LeadCreateView testleri"""
+    """LeadCreateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -735,7 +735,7 @@ class TestLeadCreateView(TestCase):
 
 
 class TestLeadUpdateView(TestCase):
-    """LeadUpdateView testleri"""
+    """LeadUpdateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -842,7 +842,7 @@ class TestLeadUpdateView(TestCase):
 
 
 class TestLeadDeleteView(TestCase):
-    """LeadDeleteView testleri"""
+    """LeadDeleteView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -937,7 +937,7 @@ class TestLeadDeleteView(TestCase):
 
 
 class TestAssignAgentView(TestCase):
-    """AssignAgentView testleri"""
+    """AssignAgentView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -1033,7 +1033,7 @@ class TestAssignAgentView(TestCase):
 
 
 class TestCategoryListView(TestCase):
-    """CategoryListView testleri"""
+    """CategoryListView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -1113,7 +1113,7 @@ class TestCategoryListView(TestCase):
 
 
 class TestGetAgentsByOrgView(TestCase):
-    """get_agents_by_org view testleri"""
+    """get_agents_by_org view tests"""
     
     def setUp(self):
         """Set up test data"""

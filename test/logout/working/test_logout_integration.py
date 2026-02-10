@@ -1,6 +1,6 @@
 """
-Logout Entegrasyon Test Dosyası
-Bu dosya logout ile ilgili tüm entegrasyon testlerini test eder.
+Logout Integration Test File
+This file tests all integration tests related to logout.
 """
 
 import os
@@ -24,13 +24,13 @@ User = get_user_model()
 
 
 class TestLogoutIntegration(TestCase):
-    """Logout entegrasyon testleri"""
+    """Logout integration tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur (email doğrulanmış)
+        # Create test user (email verified)
         self.user = User.objects.create_user(
             username='integration_logout_user',
             email='integration_logout@example.com',
@@ -44,14 +44,14 @@ class TestLogoutIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
         # Organisor oluştur
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_complete_logout_flow(self):
-        """Tam logout akışı testi"""
+        """Full logout flow test"""
         # 1. Login sayfasına git
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
@@ -84,7 +84,7 @@ class TestLogoutIntegration(TestCase):
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_login_logout_login_cycle(self):
-        """Login-logout-login döngüsü testi"""
+        """Login-logout-login cycle test"""
         # 1. İlk login
         response = self.client.post(reverse('login'), {
             'username': 'integration_logout_user',
@@ -116,7 +116,7 @@ class TestLogoutIntegration(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_from_different_pages(self):
-        """Farklı sayfalardan logout testi"""
+        """Logout from different pages test"""
         # Login yap
         self.client.login(username='integration_logout_user', password='testpass123')
         
@@ -136,7 +136,7 @@ class TestLogoutIntegration(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_with_active_session_data(self):
-        """Aktif session verisi ile logout testi"""
+        """Logout with active session data test"""
         # Login yap
         self.client.login(username='integration_logout_user', password='testpass123')
         
@@ -160,7 +160,7 @@ class TestLogoutIntegration(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_with_multiple_browser_sessions(self):
-        """Çoklu tarayıcı session'ları ile logout testi"""
+        """Logout with multiple browser sessions test"""
         # İki farklı client (farklı tarayıcıları simüle eder)
         client1 = Client()
         client2 = Client()
@@ -190,7 +190,7 @@ class TestLogoutIntegration(TestCase):
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_logout_redirect_behavior(self):
-        """Logout redirect davranışı testi"""
+        """Logout redirect behavior test"""
         # Login yap
         self.client.login(username='integration_logout_user', password='testpass123')
         
@@ -209,7 +209,7 @@ class TestLogoutIntegration(TestCase):
         self.assertTemplateUsed(response, 'landing.html')
     
     def test_logout_after_password_change(self):
-        """Şifre değişikliği sonrası logout testi"""
+        """Logout after password change test"""
         # Login yap
         self.client.login(username='integration_logout_user', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
@@ -240,7 +240,7 @@ class TestLogoutIntegration(TestCase):
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_logout_with_remember_me(self):
-        """Remember me özelliği ile logout testi"""
+        """Logout with remember me feature test"""
         # Bu test, eğer remember me özelliği eklenirse güncellenebilir
         # Şu anda remember me özelliği olmadığı için basit test
         
@@ -254,7 +254,7 @@ class TestLogoutIntegration(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_performance(self):
-        """Logout performans testi"""
+        """Logout performance test"""
         import time
         
         # Performance test - 10 kez logout
@@ -279,7 +279,7 @@ class TestLogoutIntegration(TestCase):
         self.assertLess(avg_time, 0.5)
     
     def test_logout_with_different_user_types(self):
-        """Farklı kullanıcı tipleri ile logout entegrasyon testi"""
+        """Logout integration test with different user types"""
         # Organizer ile tam akış
         self.client.login(username='integration_logout_user', password='testpass123')
         response = self.client.get(reverse('leads:lead-list'))
@@ -287,7 +287,7 @@ class TestLogoutIntegration(TestCase):
         self.client.post(reverse('logout'))
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Agent kullanıcı oluştur
+        # Create agent user
         agent_user = User.objects.create_user(
             username='agent_integration_logout',
             email='agent_integration_logout@example.com',
@@ -301,7 +301,7 @@ class TestLogoutIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         agent_user_profile, created = UserProfile.objects.get_or_create(user=agent_user)
         
         # Agent ile tam akış
@@ -311,7 +311,7 @@ class TestLogoutIntegration(TestCase):
         self.client.post(reverse('logout'))
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Superuser oluştur
+        # Create superuser
         superuser = User.objects.create_superuser(
             username='superuser_integration_logout',
             email='superuser_integration_logout@example.com',
@@ -333,13 +333,13 @@ class TestLogoutIntegration(TestCase):
 
 
 class TestLogoutSecurityIntegration(TestCase):
-    """Logout güvenlik entegrasyon testleri"""
+    """Logout security integration tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username='security_integration_logout',
             email='security_integration_logout@example.com',
@@ -353,14 +353,14 @@ class TestLogoutSecurityIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
         # Organisor oluştur
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_logout_session_hijacking_protection(self):
-        """Session hijacking saldırısına karşı koruma entegrasyon testi"""
+        """Session hijacking attack protection integration test"""
         # Login yap
         self.client.login(username='security_integration_logout', password='testpass123')
         
@@ -384,7 +384,7 @@ class TestLogoutSecurityIntegration(TestCase):
         self.assertIsNone(self.client.session.get('_auth_user_hash'))
     
     def test_logout_csrf_protection_integration(self):
-        """CSRF koruması entegrasyon testi"""
+        """CSRF protection integration test"""
         # Login yap
         self.client.login(username='security_integration_logout', password='testpass123')
         
@@ -394,10 +394,10 @@ class TestLogoutSecurityIntegration(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
         # Django test client otomatik CSRF token ekler
-        # Manuel CSRF testi için farklı yaklaşım gerekir
+        # A different approach is needed for manual CSRF test
     
     def test_logout_no_information_leakage(self):
-        """Logout sonrası bilgi sızıntısı testi"""
+        """Information leakage after logout test"""
         # Login yap
         self.client.login(username='security_integration_logout', password='testpass123')
         
@@ -414,8 +414,8 @@ class TestLogoutSecurityIntegration(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_session_fixation_protection_integration(self):
-        """Session fixation saldırısına karşı koruma entegrasyon testi"""
-        # İlk session oluştur (saldırgan tarafından oluşturulmuş gibi)
+        """Session fixation attack protection integration test"""
+        # Create initial session (as if created by attacker)
         self.client.get(reverse('landing-page'))
         old_session_key = self.client.session.session_key
         
@@ -430,7 +430,7 @@ class TestLogoutSecurityIntegration(TestCase):
         self.client.post(reverse('logout'))
         logout_session_key = self.client.session.session_key
         
-        # Her aşamada session key farklı olmalı veya yenilenmeli
+        # Session key should be different or refreshed at each step
         # Django logout sonrası session flush eder
         self.assertIsNotNone(old_session_key)
         self.assertIsNotNone(login_session_key)

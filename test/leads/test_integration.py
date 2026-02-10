@@ -436,7 +436,7 @@ class TestLeadPermissionIntegration(TestCase):
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         self.assertIn(response.status_code, [200, 302, 404])
         
-        # Assign agent (yasak - redirect veya form)
+        # Assign agent (forbidden - redirect or form)
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         self.assertIn(response.status_code, [200, 302, 404])
     

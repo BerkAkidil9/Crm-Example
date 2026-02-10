@@ -28,7 +28,7 @@ User = get_user_model()
 
 
 class TestProductAndStockListView(TestCase):
-    """ProductAndStockListView testleri"""
+    """ProductAndStockListView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -183,7 +183,7 @@ class TestProductAndStockListView(TestCase):
 
 
 class TestProductAndStockDetailView(TestCase):
-    """ProductAndStockDetailView testleri"""
+    """ProductAndStockDetailView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -290,7 +290,7 @@ class TestProductAndStockDetailView(TestCase):
 
 
 class TestProductAndStockCreateView(TestCase):
-    """ProductAndStockCreateView testleri"""
+    """ProductAndStockCreateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -411,7 +411,7 @@ class TestProductAndStockCreateView(TestCase):
 
 
 class TestProductAndStockUpdateView(TestCase):
-    """ProductAndStockUpdateView testleri"""
+    """ProductAndStockUpdateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -538,7 +538,7 @@ class TestProductAndStockUpdateView(TestCase):
 
 
 class TestProductAndStockDeleteView(TestCase):
-    """ProductAndStockDeleteView testleri"""
+    """ProductAndStockDeleteView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -623,7 +623,7 @@ class TestProductAndStockDeleteView(TestCase):
 
 
 class TestGetSubcategoriesView(TestCase):
-    """get_subcategories view testleri"""
+    """get_subcategories view tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -677,7 +677,7 @@ class TestGetSubcategoriesView(TestCase):
 
 
 class TestBulkPriceUpdateView(TestCase):
-    """BulkPriceUpdateView testleri"""
+    """BulkPriceUpdateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -842,7 +842,7 @@ class TestBulkPriceUpdateView(TestCase):
 
 
 class TestSalesDashboardView(TestCase):
-    """SalesDashboardView testleri"""
+    """SalesDashboardView tests"""
     
     def setUp(self):
         """Set up test data"""

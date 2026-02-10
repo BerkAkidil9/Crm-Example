@@ -228,7 +228,7 @@ class TestCustomPasswordResetView(TestCase):
 
 
 class TestPasswordResetDoneView(TestCase):
-    """PasswordResetDoneView testleri"""
+    """PasswordResetDoneView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -250,7 +250,7 @@ class TestPasswordResetDoneView(TestCase):
 
 
 class TestCustomPasswordResetConfirmView(TestCase):
-    """CustomPasswordResetConfirmView testleri"""
+    """CustomPasswordResetConfirmView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -295,7 +295,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             self.assertContains(response, 'csrfmiddlewaretoken')
     
     def test_password_reset_confirm_view_form_class(self):
-        """Form class testi"""
+        """Form class test"""
         response = self.client.get(
             reverse('password_reset_confirm', kwargs={'uidb64': self.uid, 'token': self.token})
         )
@@ -340,7 +340,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             data
         )
         
-        # Returns with form errors veya redirect olabilir
+        # Returns with form errors or may redirect
         self.assertIn(response.status_code, [200, 302])
         if response.status_code == 200:
             self.assertContains(response, 'form')
@@ -363,7 +363,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             data
         )
         
-        # Returns with form errors veya redirect olabilir
+        # Returns with form errors or may redirect
         self.assertIn(response.status_code, [200, 302])
         if response.status_code == 200:
             self.assertContains(response, 'form')
@@ -385,7 +385,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
             data
         )
         
-        # Returns with form errors veya redirect olabilir
+        # Returns with form errors or may redirect
         self.assertIn(response.status_code, [200, 302])
         if response.status_code == 200:
             self.assertContains(response, 'form')
@@ -482,7 +482,7 @@ class TestCustomPasswordResetConfirmView(TestCase):
 
 
 class TestPasswordResetCompleteView(TestCase):
-    """PasswordResetCompleteView testleri"""
+    """PasswordResetCompleteView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -505,7 +505,7 @@ class TestPasswordResetCompleteView(TestCase):
 
 
 class TestForgetPasswordIntegration(TestCase):
-    """Forget password entegrasyon testleri"""
+    """Forget password integration tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -543,7 +543,7 @@ class TestForgetPasswordIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('password_reset_done'))
         
-        # 3. Email gönderimi Django'nun built-in mekanizması ile yapılır
+        # 3. Email sending is done via Django's built-in mechanism
         
         # 4. Go to password reset done page
         response = self.client.get(reverse('password_reset_done'))
@@ -589,7 +589,7 @@ class TestForgetPasswordIntegration(TestCase):
         response = self.client.post(reverse('reset-password'), data)
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         
-        # Var olmayan email
+        # Non-existent email
         data = {'email': 'nonexistent@example.com'}
         response = self.client.post(reverse('reset-password'), data)
         self.assertEqual(response.status_code, 302)  # Still redirects to success page
@@ -623,7 +623,7 @@ class TestForgetPasswordIntegration(TestCase):
             self.assertEqual(response.status_code, 302)  # Still redirects to success page
     
     def test_forget_password_form_validation(self):
-        """Forget password form validasyon testi"""
+        """Forget password form validation test"""
         # Empty email
         data = {'email': ''}
         response = self.client.post(reverse('reset-password'), data)

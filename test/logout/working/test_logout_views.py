@@ -24,13 +24,13 @@ User = get_user_model()
 
 
 class TestLogoutView(TestCase):
-    """LogoutView testleri"""
+    """LogoutView tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur (email doğrulanmış)
+        # Create test user (email verified)
         self.user = User.objects.create_user(
             username='testuser_logout_views',
             email='test_logout_views@example.com',
@@ -44,14 +44,14 @@ class TestLogoutView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_logout_view_post_authenticated_user(self):
-        """Giriş yapmış kullanıcı ile logout POST isteği testi"""
+        """Logout POST request test with authenticated user"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -69,7 +69,7 @@ class TestLogoutView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_get_authenticated_user(self):
-        """Giriş yapmış kullanıcı ile logout GET isteği testi"""
+        """Logout GET request test with authenticated user"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -86,7 +86,7 @@ class TestLogoutView(TestCase):
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_unauthenticated_user(self):
-        """Giriş yapmamış kullanıcı ile logout testi"""
+        """Logout test with unauthenticated user"""
         # Session kontrolü - giriş yapmamış olmalı
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
@@ -101,7 +101,7 @@ class TestLogoutView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_redirect_url(self):
-        """Logout sonrası redirect URL testi"""
+        """Redirect URL after logout test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -113,7 +113,7 @@ class TestLogoutView(TestCase):
         self.assertEqual(response.url, '/')
     
     def test_logout_view_session_cleanup(self):
-        """Logout sonrası session temizliği testi"""
+        """Session cleanup after logout test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -133,7 +133,7 @@ class TestLogoutView(TestCase):
         self.assertFalse(session.get('_auth_user_hash'))
     
     def test_logout_view_protected_page_access_after_logout(self):
-        """Logout sonrası korumalı sayfaya erişim testi"""
+        """Protected page access after logout test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -149,7 +149,7 @@ class TestLogoutView(TestCase):
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_logout_view_multiple_logout_calls(self):
-        """Birden fazla logout çağrısı testi"""
+        """Multiple logout calls test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -169,7 +169,7 @@ class TestLogoutView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_csrf_protection(self):
-        """CSRF koruması testi"""
+        """CSRF protection test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -178,10 +178,10 @@ class TestLogoutView(TestCase):
         self.assertEqual(response.status_code, 302)
         
         # Django test client otomatik CSRF token ekler
-        # Manuel CSRF token testi için farklı bir yaklaşım gerekir
+        # A different approach is needed for manual CSRF token test
     
     def test_logout_view_next_parameter(self):
-        """Logout sonrası next parametresi ile redirect testi"""
+        """Redirect with next parameter after logout test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -193,7 +193,7 @@ class TestLogoutView(TestCase):
         self.assertEqual(response.status_code, 302)
     
     def test_logout_view_with_different_user_types(self):
-        """Farklı kullanıcı tipleri ile logout testi"""
+        """Logout test with different user types"""
         # Organizer ile logout
         self.client.login(username='testuser_logout_views', password='testpass123')
         response = self.client.post(reverse('logout'))
@@ -214,7 +214,7 @@ class TestLogoutView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         agent_user_profile, created = UserProfile.objects.get_or_create(user=agent_user)
         
         # Agent ile logout
@@ -224,8 +224,8 @@ class TestLogoutView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_with_superuser(self):
-        """Superuser ile logout testi"""
-        # Superuser oluştur
+        """Logout test with superuser"""
+        # Create superuser
         superuser = User.objects.create_superuser(
             username='superuser_logout',
             email='superuser_logout@example.com',
@@ -248,7 +248,7 @@ class TestLogoutView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_session_data_cleanup(self):
-        """Logout sonrası özel session verilerinin temizliği testi"""
+        """Custom session data cleanup after logout test"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -264,13 +264,13 @@ class TestLogoutView(TestCase):
         response = self.client.post(reverse('logout'))
         
         # Session flush edilir, tüm veriler temizlenir
-        # Yeni session oluşturulur
+        # New session is created
         session = self.client.session
         self.assertIsNone(session.get('custom_data'))
     
     def test_logout_view_concurrent_sessions(self):
-        """Eşzamanlı session'lar ile logout testi"""
-        # İki farklı client oluştur (farklı session'lar)
+        """Logout test with concurrent sessions"""
+        # Create two different clients (different sessions)
         client1 = Client()
         client2 = Client()
         
@@ -291,13 +291,13 @@ class TestLogoutView(TestCase):
         self.assertTrue(client2.session.get('_auth_user_id'))
     
     def test_logout_view_url_pattern(self):
-        """Logout URL pattern testi"""
+        """Logout URL pattern test"""
         # Logout URL'i doğru mu
         logout_url = reverse('logout')
         self.assertEqual(logout_url, '/logout/')
     
     def test_logout_view_with_ajax_request(self):
-        """AJAX isteği ile logout testi"""
+        """Logout test with AJAX request"""
         # Önce giriş yap
         self.client.login(username='testuser_logout_views', password='testpass123')
         
@@ -313,13 +313,13 @@ class TestLogoutView(TestCase):
 
 
 class TestLogoutViewSecurity(TestCase):
-    """Logout güvenlik testleri"""
+    """Logout security tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username='security_logout_user',
             email='security_logout@example.com',
@@ -333,15 +333,15 @@ class TestLogoutViewSecurity(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_logout_view_session_fixation_protection(self):
-        """Session fixation saldırısına karşı koruma testi"""
-        # Önce giriş yap
+        """Session fixation attack protection test"""
+        # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
         # Session ID'yi kaydet
@@ -354,12 +354,12 @@ class TestLogoutViewSecurity(TestCase):
         # Django logout sonrası session flush eder
         new_session_key = self.client.session.session_key
         
-        # Session key'ler farklı olmalı (veya None)
-        # Logout sonrası yeni session oluşturulur
+        # Session keys should be different (or None)
+        # New session is created after logout
         self.assertIsNotNone(old_session_key)
     
     def test_logout_view_no_session_hijacking(self):
-        """Session hijacking saldırısına karşı koruma testi"""
+        """Session hijacking attack protection test"""
         # Önce giriş yap
         self.client.login(username='security_logout_user', password='testpass123')
         
@@ -376,7 +376,7 @@ class TestLogoutViewSecurity(TestCase):
         self.assertEqual(response.status_code, 302)
     
     def test_logout_view_token_invalidation(self):
-        """Logout sonrası token invalidation testi"""
+        """Token invalidation after logout test"""
         # Önce giriş yap
         self.client.login(username='security_logout_user', password='testpass123')
         
@@ -391,7 +391,7 @@ class TestLogoutViewSecurity(TestCase):
         self.assertIsNone(self.client.session.get('_auth_user_hash'))
     
     def test_logout_view_no_caching(self):
-        """Logout sonrası cache kontrol testi"""
+        """Cache control after logout test"""
         # Önce giriş yap
         self.client.login(username='security_logout_user', password='testpass123')
         

@@ -1,6 +1,6 @@
 """
-Login Formları Test Dosyası
-Bu dosya login ile ilgili tüm formları test eder.
+Login Forms Test File
+This file tests all forms related to login.
 """
 
 import os
@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -23,11 +23,11 @@ User = get_user_model()
 
 
 class TestCustomAuthenticationForm(TestCase):
-    """CustomAuthenticationForm testleri"""
+    """CustomAuthenticationForm tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Test kullanıcısı oluştur (email doğrulanmış)
+        # Create test user (email verified)
         self.user = User.objects.create_user(
             username='testuser_login_forms',
             email='test_login_forms@example.com',
@@ -41,13 +41,13 @@ class TestCustomAuthenticationForm(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
         
-        # Email doğrulanmamış kullanıcı
+        # Unverified email user
         self.unverified_user = User.objects.create_user(
             username='unverified_user_forms',
             email='unverified_forms@example.com',
@@ -61,22 +61,22 @@ class TestCustomAuthenticationForm(TestCase):
             email_verified=False
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.unverified_user_profile, created = UserProfile.objects.get_or_create(user=self.unverified_user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.unverified_user, organisation=self.unverified_user_profile)
     
     def test_form_initialization(self):
-        """Form başlatma testi"""
+        """Form initialization test"""
         form = CustomAuthenticationForm()
         
-        # Gerekli alanların varlığını kontrol et
+        # Check presence of required fields
         self.assertIn('username', form.fields)
         self.assertIn('password', form.fields)
     
     def test_form_valid_data_username(self):
-        """Geçerli username veri ile form testi"""
+        """Form test with valid username data"""
         form = CustomAuthenticationForm(data={
             'username': 'testuser_login_forms',
             'password': 'testpass123'
@@ -84,7 +84,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_valid_data_email(self):
-        """Geçerli email veri ile form testi"""
+        """Form test with valid email data"""
         form = CustomAuthenticationForm(data={
             'username': 'test_login_forms@example.com',
             'password': 'testpass123'
@@ -92,8 +92,8 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_required_fields(self):
-        """Zorunlu alanlar testi"""
-        # Username eksik
+        """Required fields test"""
+        # Username missing
         form = CustomAuthenticationForm(data={
             'password': 'testpass123'
         })
@@ -114,7 +114,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('password', form.errors)
     
     def test_form_invalid_credentials(self):
-        """Geçersiz credentials ile form testi"""
+        """Form test with invalid credentials"""
         # Yanlış password
         form = CustomAuthenticationForm(data={
             'username': 'testuser_login_forms',
@@ -124,7 +124,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('__all__', form.errors)
     
     def test_form_nonexistent_user(self):
-        """Var olmayan kullanıcı ile form testi"""
+        """Form test with non-existent user"""
         form = CustomAuthenticationForm(data={
             'username': 'nonexistent_user',
             'password': 'testpass123'
@@ -133,7 +133,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('__all__', form.errors)
     
     def test_form_unverified_email_user(self):
-        """Email doğrulanmamış kullanıcı ile form testi"""
+        """Form test with unverified email user"""
         form = CustomAuthenticationForm(data={
             'username': 'unverified_user_forms',
             'password': 'testpass123'
@@ -142,7 +142,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('__all__', form.errors)
     
     def test_form_widget_attributes(self):
-        """Widget özellikleri testi"""
+        """Widget properties test"""
         form = CustomAuthenticationForm()
         
         # Username widget
@@ -163,14 +163,14 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertEqual(form.fields['password'].label, 'Password')
     
     def test_form_field_max_lengths(self):
-        """Form alan maksimum uzunlukları testi"""
+        """Form field max lengths test"""
         form = CustomAuthenticationForm()
         
-        # Username field max_length 150 (Django default), 254 değil
+        # Username field max_length 150 (Django default), not 254
         self.assertEqual(form.fields['username'].max_length, 150)
     
     def test_form_field_widgets(self):
-        """Form alan widget'ları testi"""
+        """Form field widgets test"""
         form = CustomAuthenticationForm()
         
         # Username widget
@@ -180,33 +180,33 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIsInstance(form.fields['password'].widget, django.forms.PasswordInput)
     
     def test_form_clean_methods(self):
-        """Form clean metodları testi"""
-        # Geçerli veri ile clean testi
+        """Form clean methods test"""
+        # Clean test with valid data
         form = CustomAuthenticationForm(data={
             'username': 'testuser_login_forms',
             'password': 'testpass123'
         })
         if form.is_valid():
-            # CustomAuthenticationForm'da clean_username metodu yok, testi kaldır
+            # CustomAuthenticationForm has no clean_username method, test removed
             pass
     
     def test_form_validation_edge_cases(self):
-        """Form validasyon sınır durumları testi"""
-        # Boş string
+        """Form validation edge cases test"""
+        # Empty string
         form = CustomAuthenticationForm(data={
             'username': '',
             'password': ''
         })
         self.assertFalse(form.is_valid())
         
-        # Sadece boşluk
+        # Whitespace only
         form = CustomAuthenticationForm(data={
             'username': '   ',
             'password': '   '
         })
         self.assertFalse(form.is_valid())
         
-        # Çok uzun username
+        # Very long username
         form = CustomAuthenticationForm(data={
             'username': 'a' * 300,
             'password': 'testpass123'
@@ -232,7 +232,7 @@ class TestCustomAuthenticationForm(TestCase):
     def test_form_whitespace_handling(self):
         """Whitespace handling testi"""
         form = CustomAuthenticationForm(data={
-            'username': '  testuser_login_forms  ',  # Başında ve sonunda boşluk
+            'username': '  testuser_login_forms  ',  # Leading and trailing whitespace
             'password': 'testpass123'
         })
         self.assertTrue(form.is_valid())
@@ -241,19 +241,19 @@ class TestCustomAuthenticationForm(TestCase):
         """Form hata mesajları testi"""
         form = CustomAuthenticationForm()
         
-        # Error mesajları kaldırılmış mı kontrol et
+        # Check if error messages are removed
         self.assertEqual(form.fields['username'].error_messages, {'required': ''})
         self.assertEqual(form.fields['password'].error_messages, {'required': ''})
     
     def test_form_autofocus_attribute(self):
-        """Autofocus özelliği testi"""
+        """Autofocus property test"""
         form = CustomAuthenticationForm()
         
         username_widget = form['username'].as_widget()
         self.assertIn('autofocus', username_widget)
     
     def test_form_password_field_attributes(self):
-        """Password alanı özellikleri testi"""
+        """Password field properties test"""
         form = CustomAuthenticationForm()
         
         password_widget = form['password'].as_widget()
@@ -261,7 +261,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('placeholder="Password"', password_widget)
     
     def test_form_username_field_attributes(self):
-        """Username alanı özellikleri testi"""
+        """Username field properties test"""
         form = CustomAuthenticationForm()
         
         username_widget = form['username'].as_widget()
@@ -277,36 +277,36 @@ class TestCustomAuthenticationForm(TestCase):
         
         form = CustomAuthenticationForm(request=request)
         
-        # Form request ile başlatılabiliyor mu
+        # Form can be initialized with request
         self.assertIsNotNone(form)
     
     def test_form_validation_with_special_characters(self):
-        """Özel karakterler ile validasyon testi"""
-        # Özel karakterler içeren username
+        """Validation test with special characters"""
+        # Username with special characters
         form = CustomAuthenticationForm(data={
             'username': 'test@user#123',
             'password': 'testpass123'
         })
-        # Bu geçerli olmayabilir, test et
+        # May not be valid, test it
         # self.assertFalse(form.is_valid())
     
     def test_form_validation_with_unicode(self):
-        """Unicode karakterler ile validasyon testi"""
+        """Validation test with Unicode characters"""
         # Unicode karakterler içeren username
         form = CustomAuthenticationForm(data={
             'username': 'tëstüsér',
             'password': 'testpass123'
         })
-        # Bu geçerli olmayabilir, test et
+        # May not be valid, test it
         # self.assertFalse(form.is_valid())
 
 
 class TestLoginFormIntegration(TestCase):
-    """Login form entegrasyon testleri"""
+    """Login form integration tests"""
     
     def setUp(self):
         """Set up test data"""
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username='integration_form_user',
             email='integration_form@example.com',
@@ -320,14 +320,14 @@ class TestLoginFormIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_form_authentication_with_different_credentials(self):
-        """Farklı credentials formatları ile authentication testi"""
+        """Authentication test with different credential formats"""
         # Username ile
         form = CustomAuthenticationForm(data={
             'username': 'integration_form_user',
@@ -343,22 +343,22 @@ class TestLoginFormIntegration(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_authentication_failure_scenarios(self):
-        """Authentication başarısızlık senaryoları testi"""
-        # Yanlış password
+        """Authentication failure scenarios test"""
+        # Wrong password
         form = CustomAuthenticationForm(data={
             'username': 'integration_form_user',
             'password': 'wrongpassword'
         })
         self.assertFalse(form.is_valid())
         
-        # Var olmayan kullanıcı
+        # Non-existent user
         form = CustomAuthenticationForm(data={
             'username': 'nonexistent_user',
             'password': 'testpass123'
         })
         self.assertFalse(form.is_valid())
         
-        # Boş credentials
+        # Empty credentials
         form = CustomAuthenticationForm(data={
             'username': '',
             'password': ''
@@ -368,7 +368,7 @@ class TestLoginFormIntegration(TestCase):
     def test_form_with_mock_authentication_backend(self):
         """Mock authentication backend ile form testi"""
         with patch('leads.authentication.EmailOrUsernameModelBackend.authenticate') as mock_authenticate:
-            # Mock authentication başarılı
+            # Mock authentication successful
             mock_authenticate.return_value = self.user
             
             form = CustomAuthenticationForm(data={
@@ -376,14 +376,14 @@ class TestLoginFormIntegration(TestCase):
                 'password': 'testpass123'
             })
             
-            # Form valid olmalı
+            # Form should be valid
             self.assertTrue(form.is_valid())
             
-            # Mock authentication çağrıldı mı
+            # Was mock authentication called
             mock_authenticate.assert_called_once()
     
     def test_form_validation_with_empty_data(self):
-        """Boş veri ile form validasyon testi"""
+        """Form validation test with empty data"""
         form = CustomAuthenticationForm(data={})
         
         self.assertFalse(form.is_valid())
@@ -391,7 +391,7 @@ class TestLoginFormIntegration(TestCase):
         self.assertIn('password', form.errors)
     
     def test_form_validation_with_partial_data(self):
-        """Kısmi veri ile form validasyon testi"""
+        """Form validation test with partial data"""
         # Sadece username
         form = CustomAuthenticationForm(data={
             'username': 'integration_form_user'
@@ -408,9 +408,9 @@ class TestLoginFormIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Login Form Testleri Başlatılıyor...")
+    print("Starting Login Form Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

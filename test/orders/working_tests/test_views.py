@@ -27,7 +27,7 @@ User = get_user_model()
 
 
 class TestOrderListView(TestCase):
-    """OrderListView testleri"""
+    """OrderListView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -145,7 +145,7 @@ class TestOrderListView(TestCase):
 
 
 class TestOrderDetailView(TestCase):
-    """OrderDetailView testleri"""
+    """OrderDetailView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -279,7 +279,7 @@ class TestOrderDetailView(TestCase):
 
 
 class TestOrderCreateView(TestCase):
-    """OrderCreateView testleri"""
+    """OrderCreateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -557,7 +557,7 @@ class TestOrderUpdateView(TestCase):
 
 
 class TestOrderCancelView(TestCase):
-    """OrderCancelView testleri"""
+    """OrderCancelView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -672,7 +672,7 @@ class TestOrderCancelView(TestCase):
 
 
 class TestOrderDeleteView(TestCase):
-    """OrderDeleteView testleri"""
+    """OrderDeleteView tests"""
     
     def setUp(self):
         """Set up test data"""

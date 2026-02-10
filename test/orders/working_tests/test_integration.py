@@ -457,7 +457,7 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
 
 
 class TestOrderFinanceIntegration(TestCase):
-    """Order finance entegrasyon testleri"""
+    """Order finance integration tests"""
     
     def setUp(self):
         """Set up test data"""

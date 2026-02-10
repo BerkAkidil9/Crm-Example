@@ -2,7 +2,7 @@
 
 This file lists all Turkish content in the project **excluding migration files**. Use it as a reference when translating to English.
 
-**Last updated:** February 2025 - Most translations have been completed.
+**Last updated:** February 2025 - Full pass: test/forget_password, test/login (all files + test_runner), test/logout (working), test/leads (test_views, test_integration), test/organisors (test_views, test_forms), test/orders (test_views, test_integration), test/finance (test_integration, test_views), ProductsAndStock management command. Migration files excluded. Some docstrings in test/finance, test/orders, test/products_and_stock, test/signup, test/agents may still use "testi" suffix; replace with "test" if desired.
 
 ---
 

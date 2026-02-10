@@ -1,6 +1,6 @@
 """
-Login Authentication Backend Test Dosyası
-Bu dosya login authentication backend'ini test eder.
+Login Authentication Backend Test File
+This file tests the login authentication backend.
 """
 
 import os
@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -23,13 +23,13 @@ User = get_user_model()
 
 
 class TestEmailOrUsernameModelBackend(TestCase):
-    """EmailOrUsernameModelBackend testleri"""
+    """EmailOrUsernameModelBackend tests"""
     
     def setUp(self):
         """Set up test data"""
         self.backend = EmailOrUsernameModelBackend()
         
-        # Test kullanıcısı oluştur (email doğrulanmış)
+        # Create test user (email verified)
         self.user = User.objects.create_user(
             username='testuser_auth',
             email='test_auth@example.com',
@@ -43,13 +43,13 @@ class TestEmailOrUsernameModelBackend(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
         
-        # Email doğrulanmamış kullanıcı
+        # Unverified email user
         self.unverified_user = User.objects.create_user(
             username='unverified_auth',
             email='unverified_auth@example.com',
@@ -63,14 +63,14 @@ class TestEmailOrUsernameModelBackend(TestCase):
             email_verified=False
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.unverified_user_profile, created = UserProfile.objects.get_or_create(user=self.unverified_user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.unverified_user, organisation=self.unverified_user_profile)
     
     def test_authenticate_with_username(self):
-        """Username ile authentication testi"""
+        """Authentication test with username"""
         user = self.backend.authenticate(
             request=None,
             username='testuser_auth',
@@ -82,7 +82,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.email, 'test_auth@example.com')
     
     def test_authenticate_with_email(self):
-        """Email ile authentication testi"""
+        """Authentication test with email"""
         user = self.backend.authenticate(
             request=None,
             username='test_auth@example.com',
@@ -94,10 +94,10 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.email, 'test_auth@example.com')
     
     def test_authenticate_case_insensitive_username(self):
-        """Case insensitive username ile authentication testi"""
+        """Authentication test with case insensitive username"""
         user = self.backend.authenticate(
             request=None,
-            username='TESTUSER_AUTH',  # Büyük harflerle
+            username='TESTUSER_AUTH',  # Uppercase
             password='testpass123'
         )
         
@@ -105,10 +105,10 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.username, 'testuser_auth')
     
     def test_authenticate_case_insensitive_email(self):
-        """Case insensitive email ile authentication testi"""
+        """Authentication test with case insensitive email"""
         user = self.backend.authenticate(
             request=None,
-            username='TEST_AUTH@EXAMPLE.COM',  # Büyük harflerle
+            username='TEST_AUTH@EXAMPLE.COM',  # Uppercase
             password='testpass123'
         )
         
@@ -117,7 +117,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.email, 'test_auth@example.com')
     
     def test_authenticate_wrong_password(self):
-        """Yanlış password ile authentication testi"""
+        """Authentication test with wrong password"""
         user = self.backend.authenticate(
             request=None,
             username='testuser_auth',
@@ -127,7 +127,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_nonexistent_user(self):
-        """Var olmayan kullanıcı ile authentication testi"""
+        """Authentication test with non-existent user"""
         user = self.backend.authenticate(
             request=None,
             username='nonexistent_user',
@@ -137,7 +137,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_unverified_email(self):
-        """Email doğrulanmamış kullanıcı ile authentication testi"""
+        """Authentication test with unverified email user"""
         user = self.backend.authenticate(
             request=None,
             username='unverified_auth',
@@ -147,7 +147,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_unverified_email_by_email(self):
-        """Email doğrulanmamış kullanıcı ile email ile authentication testi"""
+        """Authentication test with unverified email user by email"""
         user = self.backend.authenticate(
             request=None,
             username='unverified_auth@example.com',
@@ -157,7 +157,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_empty_credentials(self):
-        """Boş credentials ile authentication testi"""
+        """Authentication test with empty credentials"""
         user = self.backend.authenticate(
             request=None,
             username='',
@@ -167,7 +167,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_none_credentials(self):
-        """None credentials ile authentication testi"""
+        """Authentication test with None credentials"""
         user = self.backend.authenticate(
             request=None,
             username=None,
@@ -177,11 +177,11 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_whitespace_username(self):
-        """Whitespace içeren username ile authentication testi"""
-        # Authentication backend whitespace'i trim etmiyor, testi düzelt
+        """Authentication test with username containing whitespace"""
+        # Authentication backend does not trim whitespace, test adjusted
         user = self.backend.authenticate(
             request=None,
-            username='testuser_auth',  # Whitespace olmadan test et
+            username='testuser_auth',  # Test without whitespace
             password='testpass123'
         )
         
@@ -189,11 +189,11 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.username, 'testuser_auth')
     
     def test_authenticate_whitespace_email(self):
-        """Whitespace içeren email ile authentication testi"""
-        # Authentication backend whitespace'i trim etmiyor, testi düzelt
+        """Authentication test with email containing whitespace"""
+        # Authentication backend does not trim whitespace, test adjusted
         user = self.backend.authenticate(
             request=None,
-            username='test_auth@example.com',  # Whitespace olmadan test et
+            username='test_auth@example.com',  # Test without whitespace
             password='testpass123'
         )
         
@@ -202,7 +202,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.email, 'test_auth@example.com')
     
     def test_authenticate_with_request_parameter(self):
-        """Request parametresi ile authentication testi"""
+        """Authentication test with request parameter"""
         from django.test import RequestFactory
         
         factory = RequestFactory()
@@ -218,7 +218,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.username, 'testuser_auth')
     
     def test_authenticate_with_additional_kwargs(self):
-        """Ek kwargs ile authentication testi"""
+        """Authentication test with additional kwargs"""
         user = self.backend.authenticate(
             request=None,
             username='testuser_auth',
@@ -230,10 +230,10 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.username, 'testuser_auth')
     
     def test_authenticate_timing_attack_protection(self):
-        """Timing attack koruması testi"""
+        """Timing attack protection test"""
         import time
         
-        # Var olmayan kullanıcı ile authentication
+        # Authentication with non-existent user
         start_time = time.time()
         user = self.backend.authenticate(
             request=None,
@@ -243,7 +243,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         end_time = time.time()
         nonexistent_time = end_time - start_time
         
-        # Var olan kullanıcı ile yanlış password
+        # Existing user with wrong password
         start_time = time.time()
         user = self.backend.authenticate(
             request=None,
@@ -253,12 +253,12 @@ class TestEmailOrUsernameModelBackend(TestCase):
         end_time = time.time()
         wrong_password_time = end_time - start_time
         
-        # Zaman farkı çok büyük olmamalı (timing attack koruması)
+        # Time difference should not be too large (timing attack protection)
         time_diff = abs(nonexistent_time - wrong_password_time)
-        self.assertLess(time_diff, 0.1)  # 100ms'den az fark olmalı
+        self.assertLess(time_diff, 0.1)  # Less than 100ms difference
     
     def test_get_user_valid_id(self):
-        """Geçerli user ID ile get_user testi"""
+        """get_user test with valid user ID"""
         user = self.backend.get_user(self.user.id)
         
         self.assertIsNotNone(user)
@@ -266,30 +266,30 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertEqual(user.username, 'testuser_auth')
     
     def test_get_user_invalid_id(self):
-        """Geçersiz user ID ile get_user testi"""
-        user = self.backend.get_user(99999)  # Var olmayan ID
+        """get_user test with invalid user ID"""
+        user = self.backend.get_user(99999)  # Non-existent ID
         
         self.assertIsNone(user)
     
     def test_get_user_none_id(self):
-        """None ID ile get_user testi"""
+        """get_user test with None ID"""
         user = self.backend.get_user(None)
         
         self.assertIsNone(user)
     
     def test_get_user_string_id(self):
-        """String ID ile get_user testi"""
-        # String ID geçersiz olduğu için exception fırlatır, testi düzelt
+        """get_user test with string ID"""
+        # String ID is invalid so may raise exception, test adjusted
         try:
             user = self.backend.get_user('invalid')
             self.assertIsNone(user)
         except (ValueError, TypeError):
-            # String ID geçersiz olduğu için exception beklenir
+            # Exception expected for invalid string ID
             pass
     
     def test_user_can_authenticate(self):
-        """user_can_authenticate metodu testi"""
-        # Normal kullanıcı
+        """user_can_authenticate method test"""
+        # Normal user
         self.assertTrue(self.backend.user_can_authenticate(self.user))
         
         # Inactive kullanıcı
@@ -297,14 +297,14 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.user.save()
         self.assertFalse(self.backend.user_can_authenticate(self.user))
         
-        # Tekrar aktif yap
+        # Reactivate
         self.user.is_active = True
         self.user.save()
         self.assertTrue(self.backend.user_can_authenticate(self.user))
     
     def test_authenticate_with_inactive_user(self):
-        """Inactive kullanıcı ile authentication testi"""
-        # Kullanıcıyı inactive yap
+        """Authentication test with inactive user"""
+        # Make user inactive
         self.user.is_active = False
         self.user.save()
         
@@ -317,8 +317,8 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertIsNone(user)
     
     def test_authenticate_with_superuser(self):
-        """Superuser ile authentication testi"""
-        # Superuser oluştur
+        """Authentication test with superuser"""
+        # Create superuser
         superuser = User.objects.create_superuser(
             username='superuser_auth',
             email='superuser_auth@example.com',
@@ -341,8 +341,8 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertTrue(user.is_superuser)
     
     def test_authenticate_with_agent_user(self):
-        """Agent kullanıcı ile authentication testi"""
-        # Agent kullanıcı oluştur
+        """Authentication test with agent user"""
+        # Create agent user
         agent_user = User.objects.create_user(
             username='agent_auth',
             email='agent_auth@example.com',
@@ -356,10 +356,10 @@ class TestEmailOrUsernameModelBackend(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         agent_user_profile, created = UserProfile.objects.get_or_create(user=agent_user)
         
-        # Agent oluştur - agents.models'da Agent yok, testi basitleştir
+        # Create Agent - Agent not in agents.models, test simplified
         # Agent.objects.create(user=agent_user, organisation=self.user_profile)
         
         user = self.backend.authenticate(
@@ -372,20 +372,20 @@ class TestEmailOrUsernameModelBackend(TestCase):
         self.assertTrue(user.is_agent)
     
     def test_authenticate_multiple_users_same_email(self):
-        """Aynı email'e sahip birden fazla kullanıcı testi"""
-        # Bu test email unique constraint nedeniyle çalışmaz, testi kaldır
-        # Email unique olduğu için aynı email ile ikinci kullanıcı oluşturulamaz
+        """Test for multiple users with same email"""
+        # This test does not run due to email unique constraint
+        # Second user cannot be created with same email
         pass
 
 
 class TestEmailOrUsernameModelBackendIntegration(TestCase):
-    """EmailOrUsernameModelBackend entegrasyon testleri"""
+    """EmailOrUsernameModelBackend integration tests"""
     
     def setUp(self):
         """Set up test data"""
         self.backend = EmailOrUsernameModelBackend()
         
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username='integration_auth_user',
             email='integration_auth@example.com',
@@ -399,14 +399,14 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_authenticate_with_different_username_formats(self):
-        """Farklı username formatları ile authentication testi"""
+        """Authentication test with different username formats"""
         # Normal username
         user = self.backend.authenticate(
             request=None,
@@ -432,8 +432,8 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
         self.assertIsNotNone(user)
     
     def test_authenticate_with_special_characters(self):
-        """Özel karakterler içeren username ile authentication testi"""
-        # Özel karakterler içeren kullanıcı oluştur
+        """Authentication test with username containing special characters"""
+        # Create user with special characters
         special_user = User.objects.create_user(
             username='test.user+tag@domain',
             email='special@example.com',
@@ -447,7 +447,7 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
             email_verified=True
         )
         
-        # Username ile authentication
+        # Authentication with username
         user = self.backend.authenticate(
             request=None,
             username='test.user+tag@domain',
@@ -455,7 +455,7 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
         )
         self.assertIsNotNone(user)
         
-        # Email ile authentication
+        # Authentication with email
         user = self.backend.authenticate(
             request=None,
             username='special@example.com',
@@ -464,12 +464,12 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
         self.assertIsNotNone(user)
     
     def test_authenticate_performance(self):
-        """Authentication performans testi"""
+        """Authentication performance test"""
         import time
         
-        # Çok sayıda kullanıcı oluştur
+        # Create many users
         users = []
-        for i in range(50):  # 100 yerine 50 kullanıcı oluştur
+        for i in range(50):  # Create 50 users instead of 100
             user = User.objects.create_user(
                 username=f'perf_user_{i}',
                 email=f'perf_user_{i}@example.com',
@@ -494,16 +494,16 @@ class TestEmailOrUsernameModelBackendIntegration(TestCase):
             )
         end_time = time.time()
         
-        # 5 authentication 3 saniyeden az sürmeli (daha gerçekçi)
+        # 5 authentications should take less than 3 seconds (more realistic)
         self.assertLess(end_time - start_time, 3.0)
         self.assertIsNotNone(user)
 
 
 if __name__ == "__main__":
-    print("Login Authentication Backend Testleri Başlatılıyor...")
+    print("Starting Login Authentication Backend Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     import time
     unittest.main()

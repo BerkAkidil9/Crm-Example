@@ -1,6 +1,6 @@
 """
-Login Viewları Test Dosyası
-Bu dosya login ile ilgili tüm viewları test eder.
+Login Views Test File
+This file tests all views related to login.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.contrib.messages import get_messages
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -24,13 +24,13 @@ User = get_user_model()
 
 
 class TestCustomLoginView(TestCase):
-    """CustomLoginView testleri"""
+    """CustomLoginView tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur (email doğrulanmış)
+        # Create test user (email verified)
         self.user = User.objects.create_user(
             username='testuser_login_views',
             email='test_login_views@example.com',
@@ -44,13 +44,13 @@ class TestCustomLoginView(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
         
-        # Email doğrulanmamış kullanıcı
+        # Unverified email user
         self.unverified_user = User.objects.create_user(
             username='unverified_user',
             email='unverified@example.com',
@@ -64,59 +64,59 @@ class TestCustomLoginView(TestCase):
             email_verified=False
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.unverified_user_profile, created = UserProfile.objects.get_or_create(user=self.unverified_user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.unverified_user, organisation=self.unverified_user_profile)
     
     def test_login_view_get(self):
-        """Login sayfası GET isteği testi"""
+        """Login page GET request test"""
         response = self.client.get(reverse('login'))
         
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Login')
         self.assertContains(response, 'Welcome back!')
         self.assertContains(response, 'form')
-        # CSRF token form içinde olmalı
+        # CSRF token should be in form
         self.assertContains(response, 'csrfmiddlewaretoken')
     
     def test_login_view_post_valid_username(self):
-        """Login POST isteği geçerli username ile testi"""
+        """Login POST request test with valid username"""
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'testpass123'
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # Kullanıcı giriş yapmış mı
+        # Is user logged in
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_valid_email(self):
-        """Login POST isteği geçerli email ile testi"""
+        """Login POST request test with valid email"""
         response = self.client.post(reverse('login'), {
             'username': 'test_login_views@example.com',
             'password': 'testpass123'
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # Kullanıcı giriş yapmış mı
+        # Is user logged in
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_invalid_credentials(self):
-        """Login POST isteği geçersiz credentials ile testi"""
+        """Login POST request test with invalid credentials"""
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'wrongpassword'
         })
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -124,13 +124,13 @@ class TestCustomLoginView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_unverified_email(self):
-        """Email doğrulanmamış kullanıcı ile login testi"""
+        """Login test with unverified email user"""
         response = self.client.post(reverse('login'), {
             'username': 'unverified_user',
             'password': 'testpass123'
         })
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -138,13 +138,13 @@ class TestCustomLoginView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_nonexistent_user(self):
-        """Var olmayan kullanıcı ile login testi"""
+        """Login test with non-existent user"""
         response = self.client.post(reverse('login'), {
             'username': 'nonexistent_user',
             'password': 'testpass123'
         })
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -152,13 +152,13 @@ class TestCustomLoginView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_empty_credentials(self):
-        """Boş credentials ile login testi"""
+        """Login test with empty credentials"""
         response = self.client.post(reverse('login'), {
             'username': '',
             'password': ''
         })
         
-        # Form hataları ile geri döner
+        # Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
@@ -166,7 +166,7 @@ class TestCustomLoginView(TestCase):
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_template(self):
-        """Template testi"""
+        """Template test"""
         response = self.client.get(reverse('login'))
         
         self.assertTemplateUsed(response, 'registration/login.html')
@@ -178,7 +178,7 @@ class TestCustomLoginView(TestCase):
         self.assertContains(response, 'Don\'t have an account?')
     
     def test_login_view_form_class(self):
-        """Form class testi"""
+        """Form class test"""
         response = self.client.get(reverse('login'))
         
         self.assertIn('form', response.context)
@@ -186,14 +186,14 @@ class TestCustomLoginView(TestCase):
         self.assertIsInstance(response.context['form'], CustomAuthenticationForm)
     
     def test_login_view_redirect_authenticated_user(self):
-        """Giriş yapmış kullanıcı redirect testi"""
+        """Redirect test for logged-in user"""
         # Önce giriş yap
         self.client.login(username='testuser_login_views', password='testpass123')
         
         # Login sayfasına git
         response = self.client.get(reverse('login'))
         
-        # Redirect olmalı veya 200 (redirect_authenticated_user=False olabilir)
+        # Should redirect or 200 (redirect_authenticated_user=False)
         self.assertIn(response.status_code, [200, 302])
     
     def test_login_view_success_redirect(self):
@@ -208,7 +208,7 @@ class TestCustomLoginView(TestCase):
         self.assertRedirects(response, reverse('landing-page'))
     
     def test_login_view_form_validation(self):
-        """Form validasyon testi"""
+        """Form validation test"""
         # Geçersiz email formatı
         response = self.client.post(reverse('login'), {
             'username': 'invalid-email-format',
@@ -228,71 +228,71 @@ class TestCustomLoginView(TestCase):
         self.assertContains(response, 'form')
     
     def test_login_view_csrf_protection(self):
-        """CSRF koruması testi"""
+        """CSRF protection test"""
         # CSRF token olmadan POST isteği
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'testpass123'
         }, follow=False)
         
-        # CSRF koruması test ortamında farklı davranabilir, testi düzelt
-        # 403 Forbidden veya 302 Redirect olabilir
+        # CSRF protection may behave differently in test environment, test adjusted
+        # 403 Forbidden or 302 Redirect
         self.assertIn(response.status_code, [403, 302])
     
     def test_login_view_remember_me_functionality(self):
-        """Remember me işlevselliği testi (eğer varsa)"""
+        """Remember me functionality test (if implemented)"""
         # Bu test, eğer remember me özelliği eklenirse güncellenebilir
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'testpass123'
         })
         
-        # Normal giriş testi
+        # Normal login test
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
     
     def test_login_view_case_insensitive_username(self):
-        """Case insensitive username testi"""
+        """Case insensitive username test"""
         response = self.client.post(reverse('login'), {
             'username': 'TESTUSER_LOGIN_VIEWS',  # Büyük harflerle
             'password': 'testpass123'
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
     
     def test_login_view_case_insensitive_email(self):
-        """Case insensitive email testi"""
+        """Case insensitive email test"""
         response = self.client.post(reverse('login'), {
-            'username': 'TEST_LOGIN_VIEWS@EXAMPLE.COM',  # Büyük harflerle
+            'username': 'TEST_LOGIN_VIEWS@EXAMPLE.COM',  # Uppercase
             'password': 'testpass123'
         })
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
     
     def test_login_view_whitespace_handling(self):
-        """Whitespace handling testi"""
+        """Whitespace handling test"""
         response = self.client.post(reverse('login'), {
-            'username': '  testuser_login_views  ',  # Başında ve sonunda boşluk
+            'username': '  testuser_login_views  ',  # Leading and trailing whitespace
             'password': 'testpass123'
         })
         
-        # Redirect olmalı (whitespace trim edilmeli)
+        # Should redirect (whitespace trim edilmeli)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
 
 
 class TestLoginViewIntegration(TestCase):
-    """Login view entegrasyon testleri"""
+    """Login view integration tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur
+        # Create test user
         self.user = User.objects.create_user(
             username='integration_test_user',
             email='integration_test@example.com',
@@ -306,14 +306,14 @@ class TestLoginViewIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_complete_login_flow(self):
-        """Tam login akışı testi"""
+        """Complete login flow test"""
         # 1. Login sayfasına git
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
@@ -329,13 +329,13 @@ class TestLoginViewIntegration(TestCase):
         # 3. Kullanıcı giriş yapmış mı kontrol et
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # 4. Korumalı sayfaya erişim testi
+        # 4. Protected page access test
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_login_with_different_credentials_formats(self):
-        """Farklı credentials formatları ile login testi"""
-        # Username ile
+        """Login test with different credential formats"""
+        # With username
         self.client.logout()
         response = self.client.post(reverse('login'), {
             'username': 'integration_test_user',
@@ -343,7 +343,7 @@ class TestLoginViewIntegration(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         
-        # Email ile
+        # With email
         self.client.logout()
         response = self.client.post(reverse('login'), {
             'username': 'integration_test@example.com',
@@ -352,7 +352,7 @@ class TestLoginViewIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
     
     def test_login_after_logout(self):
-        """Logout sonrası login testi"""
+        """Login test after logout"""
         # Önce giriş yap
         self.client.login(username='integration_test_user', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))

@@ -170,7 +170,7 @@ class TestOrganisorListView(TestCase):
 
 
 class TestOrganisorCreateView(TestCase):
-    """OrganisorCreateView testleri"""
+    """OrganisorCreateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -520,7 +520,7 @@ class TestOrganisorDetailView(TestCase):
 
 
 class TestOrganisorUpdateView(TestCase):
-    """OrganisorUpdateView testleri"""
+    """OrganisorUpdateView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -683,7 +683,7 @@ class TestOrganisorUpdateView(TestCase):
 
 
 class TestOrganisorDeleteView(TestCase):
-    """OrganisorDeleteView testleri"""
+    """OrganisorDeleteView tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -815,7 +815,7 @@ class TestOrganisorDeleteView(TestCase):
 
 
 class TestOrganisorViewIntegration(TestCase):
-    """Organisor view entegrasyon testleri"""
+    """Organisor view integration tests"""
     
     def setUp(self):
         """Set up test data"""

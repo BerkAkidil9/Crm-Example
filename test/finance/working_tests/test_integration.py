@@ -343,7 +343,7 @@ class TestFinanceOrdersIntegration(TestCase):
 
 
 class TestFinanceProductsIntegration(TestCase):
-    """Finance-Products entegrasyon testleri"""
+    """Finance-Products integration tests"""
     
     def setUp(self):
         """Set up test data"""
@@ -528,7 +528,7 @@ class TestFinanceProductsIntegration(TestCase):
 
 
 class TestFinanceViewsIntegration(TestCase):
-    """Finance Views entegrasyon testleri"""
+    """Finance Views integration tests"""
     
     def setUp(self):
         """Set up test data"""

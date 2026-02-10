@@ -422,7 +422,7 @@ class TestFinancialReportView(TestCase):
 
 
 class TestFinancialReportViewEdgeCases(TestCase):
-    """FinancialReportView edge cases testleri"""
+    """FinancialReportView edge cases tests"""
     
     def setUp(self):
         """Set up test data"""

@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 if product.cost_price == 0:
                     product.cost_price = round(product.product_price * 0.4, 2)
                     changed = True
-                # 2) minimum_stock_level 0 ise 10 yap (veya senaryoda belirtilen)
+                # 2) if minimum_stock_level is 0 set to 10 (or as specified in scenario)
                 if product.minimum_stock_level == 0:
                     product.minimum_stock_level = 10
                     changed = True

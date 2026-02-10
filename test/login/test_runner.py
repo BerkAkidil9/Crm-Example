@@ -1,6 +1,6 @@
 """
 Login Test Runner
-Bu dosya login testlerini çalıştırmak için kullanılır.
+This file is used to run login tests.
 """
 
 import os
@@ -9,20 +9,20 @@ import django
 from django.test.utils import get_runner
 from django.conf import settings
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
 def run_login_tests():
-    """Login testlerini çalıştır"""
-    print("Login Test Sistemi Başlatılıyor...")
+    """Run login tests"""
+    print("Starting Login Test System...")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modülleri
+    # Test modules
     test_modules = [
         'test.login.working.test_login_views',
         'test.login.working.test_login_forms',
@@ -30,71 +30,71 @@ def run_login_tests():
         'test.login.working.test_login_integration',
     ]
     
-    # Testleri çalıştır
+    # Run tests
     failures = test_runner.run_tests(test_modules, verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} tests failed!")
         return False
     else:
-        print("\n✅ Tüm testler başarılı!")
+        print("\n✅ All tests passed!")
         return True
 
 def run_specific_login_test(test_name):
-    """Belirli bir login testini çalıştır"""
-    print(f"Login Test Çalıştırılıyor: {test_name}")
+    """Run a specific login test"""
+    print(f"Running Login Test: {test_name}")
     print("=" * 60)
     
-    # Test runner oluştur
+    # Create test runner
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
     
-    # Test modülü
+    # Test module
     test_module = f'test.login.working.{test_name}'
     
-    # Testi çalıştır
+    # Run test
     failures = test_runner.run_tests([test_module], verbosity=2)
     
     if failures:
-        print(f"\n❌ {failures} test başarısız!")
+        print(f"\n❌ {failures} tests failed!")
         return False
     else:
-        print("\n✅ Test başarılı!")
+        print("\n✅ Test passed!")
         return True
 
 def run_login_view_tests():
-    """Login view testlerini çalıştır"""
+    """Run login view tests"""
     return run_specific_login_test('test_login_views')
 
 def run_login_form_tests():
-    """Login form testlerini çalıştır"""
+    """Run login form tests"""
     return run_specific_login_test('test_login_forms')
 
 def run_login_authentication_tests():
-    """Login authentication testlerini çalıştır"""
+    """Run login authentication tests"""
     return run_specific_login_test('test_login_authentication')
 
 def run_login_integration_tests():
-    """Login entegrasyon testlerini çalıştır"""
+    """Run login integration tests"""
     return run_specific_login_test('test_login_integration')
 
 def show_test_menu():
-    """Test menüsünü göster"""
-    print("\nLogin Test Menüsü")
+    """Show test menu"""
+    print("\nLogin Test Menu")
     print("=" * 30)
-    print("1. Tüm login testleri")
-    print("2. Login view testleri")
-    print("3. Login form testleri")
-    print("4. Login authentication testleri")
-    print("5. Login entegrasyon testleri")
-    print("6. Çıkış")
+    print("1. All login tests")
+    print("2. Login view tests")
+    print("3. Login form tests")
+    print("4. Login authentication tests")
+    print("5. Login integration tests")
+    print("6. Exit")
     print("=" * 30)
 
 def main():
-    """Ana fonksiyon"""
+    """Main function"""
     while True:
         show_test_menu()
-        choice = input("\nSeçiminizi yapın (1-6): ").strip()
+        choice = input("\nEnter your choice (1-6): ").strip()
         
         if choice == '1':
             run_login_tests()
@@ -107,12 +107,12 @@ def main():
         elif choice == '5':
             run_login_integration_tests()
         elif choice == '6':
-            print("Çıkılıyor...")
+            print("Exiting...")
             break
         else:
-            print("Geçersiz seçim! Lütfen 1-6 arasında bir sayı girin.")
+            print("Invalid choice! Please enter a number between 1 and 6.")
         
-        input("\nDevam etmek için Enter'a basın...")
+        input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
     main()

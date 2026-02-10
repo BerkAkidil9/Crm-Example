@@ -1,6 +1,6 @@
 """
-Login Entegrasyon Test Dosyası
-Bu dosya login ile ilgili tüm entegrasyon testlerini test eder.
+Login Integration Test File
+This file tests all integration tests related to login.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.contrib.messages import get_messages
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -24,13 +24,13 @@ User = get_user_model()
 
 
 class TestLoginIntegration(TestCase):
-    """Login entegrasyon testleri"""
+    """Login integration tests"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
         
-        # Test kullanıcısı oluştur (email doğrulanmış)
+        # Create test user (email verified)
         self.user = User.objects.create_user(
             username='integration_login_user',
             email='integration_login@example.com',
@@ -44,13 +44,13 @@ class TestLoginIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
         
-        # Email doğrulanmamış kullanıcı
+        # Unverified email user
         self.unverified_user = User.objects.create_user(
             username='unverified_integration',
             email='unverified_integration@example.com',
@@ -64,133 +64,133 @@ class TestLoginIntegration(TestCase):
             email_verified=False
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         self.unverified_user_profile, created = UserProfile.objects.get_or_create(user=self.unverified_user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.unverified_user, organisation=self.unverified_user_profile)
     
     def test_complete_login_flow_with_username(self):
-        """Username ile tam login akışı testi"""
-        # 1. Login sayfasına git
+        """Full login flow test with username"""
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Login')
         
-        # 2. Login form gönder
+        # 2. Submit login form
         response = self.client.post(reverse('login'), {
             'username': 'integration_login_user',
             'password': 'testpass123'
         })
         
-        # 3. Redirect kontrolü
+        # 3. Redirect check
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # 4. Session kontrolü
+        # 4. Session check
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # 5. Korumalı sayfaya erişim
+        # 5. Protected page access
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_complete_login_flow_with_email(self):
-        """Email ile tam login akışı testi"""
-        # 1. Login sayfasına git
+        """Full login flow test with email"""
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Login form gönder
+        # 2. Submit login form
         response = self.client.post(reverse('login'), {
             'username': 'integration_login@example.com',
             'password': 'testpass123'
         })
         
-        # 3. Redirect kontrolü
+        # 3. Redirect check
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # 4. Session kontrolü
+        # 4. Session check
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # 5. Korumalı sayfaya erişim
+        # 5. Protected page access
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_login_flow_with_unverified_email(self):
-        """Email doğrulanmamış kullanıcı ile login akışı testi"""
-        # 1. Login sayfasına git
+        """Login flow test with unverified email user"""
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Login form gönder
+        # 2. Submit login form
         response = self.client.post(reverse('login'), {
             'username': 'unverified_integration',
             'password': 'testpass123'
         })
         
-        # 3. Form hataları ile geri döner
+        # 3. Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # 4. Session oluşmamalı
+        # 4. Session should not be created
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # 5. Korumalı sayfaya erişim engellenmeli
+        # 5. Protected page access should be denied
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_login_flow_with_invalid_credentials(self):
-        """Geçersiz credentials ile login akışı testi"""
-        # 1. Login sayfasına git
+        """Login flow test with invalid credentials"""
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Yanlış password ile login form gönder
+        # 2. Submit login form with wrong password
         response = self.client.post(reverse('login'), {
             'username': 'integration_login_user',
             'password': 'wrongpassword'
         })
         
-        # 3. Form hataları ile geri döner
+        # 3. Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # 4. Session oluşmamalı
+        # 4. Session should not be created
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_flow_with_nonexistent_user(self):
-        """Var olmayan kullanıcı ile login akışı testi"""
-        # 1. Login sayfasına git
+        """Login flow test with non-existent user"""
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Var olmayan kullanıcı ile login form gönder
+        # 2. Submit login form with non-existent user
         response = self.client.post(reverse('login'), {
             'username': 'nonexistent_user',
             'password': 'testpass123'
         })
         
-        # 3. Form hataları ile geri döner
+        # 3. Returns with form errors
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # 4. Session oluşmamalı
+        # 4. Session should not be created
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_redirect_authenticated_user(self):
-        """Giriş yapmış kullanıcı redirect testi"""
-        # 1. Önce giriş yap
+        """Redirect test for logged-in user"""
+        # 1. Log in first
         self.client.login(username='integration_login_user', password='testpass123')
         
-        # 2. Login sayfasına git
+        # 2. Go to login page
         response = self.client.get(reverse('login'))
         
-        # 3. Redirect olmalı veya 200 (redirect_authenticated_user=False olabilir)
+        # 3. Should redirect or 200 (redirect_authenticated_user=False)
         self.assertIn(response.status_code, [200, 302])
     
     def test_login_logout_cycle(self):
-        """Login-logout döngüsü testi"""
+        """Login-logout cycle test"""
         # 1. Login
         response = self.client.post(reverse('login'), {
             'username': 'integration_login_user',
@@ -213,8 +213,8 @@ class TestLoginIntegration(TestCase):
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_login_with_different_user_types(self):
-        """Farklı kullanıcı tipleri ile login testi"""
-        # Agent kullanıcı oluştur
+        """Login test with different user types"""
+        # Create agent user
         agent_user = User.objects.create_user(
             username='agent_integration',
             email='agent_integration@example.com',
@@ -228,14 +228,14 @@ class TestLoginIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         agent_user_profile, created = UserProfile.objects.get_or_create(user=agent_user)
         
-        # Agent oluştur - agents.models'da Agent yok, testi basitleştir
+        # Create Agent - Agent not in agents.models, test simplified
         # from agents.models import Agent
         # Agent.objects.create(user=agent_user, organisation=self.user_profile)
         
-        # Agent ile login
+        # Login as agent
         response = self.client.post(reverse('login'), {
             'username': 'agent_integration',
             'password': 'testpass123'
@@ -243,13 +243,13 @@ class TestLoginIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Agent sayfasına erişim
+        # Agent page access
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
     
     def test_login_with_superuser(self):
-        """Superuser ile login testi"""
-        # Superuser oluştur
+        """Login test with superuser"""
+        # Create superuser
         superuser = User.objects.create_superuser(
             username='superuser_integration',
             email='superuser_integration@example.com',
@@ -262,7 +262,7 @@ class TestLoginIntegration(TestCase):
             email_verified=True
         )
         
-        # Superuser ile login
+        # Login as superuser
         response = self.client.post(reverse('login'), {
             'username': 'superuser_integration',
             'password': 'testpass123'
@@ -270,13 +270,13 @@ class TestLoginIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Admin sayfasına erişim
+        # Admin page access
         response = self.client.get('/admin/')
         self.assertEqual(response.status_code, 200)
     
     def test_login_case_insensitive_credentials(self):
-        """Case insensitive credentials ile login testi"""
-        # Username ile (büyük harflerle)
+        """Login test with case insensitive credentials"""
+        # With username (uppercase)
         response = self.client.post(reverse('login'), {
             'username': 'INTEGRATION_LOGIN_USER',
             'password': 'testpass123'
@@ -287,7 +287,7 @@ class TestLoginIntegration(TestCase):
         # Logout
         self.client.post(reverse('logout'))
         
-        # Email ile (büyük harflerle)
+        # With email (uppercase)
         response = self.client.post(reverse('login'), {
             'username': 'INTEGRATION_LOGIN@EXAMPLE.COM',
             'password': 'testpass123'
@@ -296,8 +296,8 @@ class TestLoginIntegration(TestCase):
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_login_whitespace_handling(self):
-        """Whitespace handling ile login testi"""
-        # Username ile (başında ve sonunda boşluk)
+        """Login test with whitespace handling"""
+        # With username (leading and trailing whitespace)
         response = self.client.post(reverse('login'), {
             'username': '  integration_login_user  ',
             'password': 'testpass123'
@@ -308,7 +308,7 @@ class TestLoginIntegration(TestCase):
         # Logout
         self.client.post(reverse('logout'))
         
-        # Email ile (başında ve sonunda boşluk)
+        # With email (leading and trailing whitespace)
         response = self.client.post(reverse('login'), {
             'username': '  integration_login@example.com  ',
             'password': 'testpass123'
@@ -317,8 +317,8 @@ class TestLoginIntegration(TestCase):
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_login_form_validation_errors(self):
-        """Login form validasyon hataları testi"""
-        # Boş credentials
+        """Login form validation errors test"""
+        # Empty credentials
         response = self.client.post(reverse('login'), {
             'username': '',
             'password': ''
@@ -343,19 +343,19 @@ class TestLoginIntegration(TestCase):
         self.assertContains(response, 'form')
     
     def test_login_csrf_protection(self):
-        """Login CSRF koruması testi"""
-        # CSRF token olmadan POST isteği
+        """Login CSRF protection test"""
+        # POST request without CSRF token
         response = self.client.post(reverse('login'), {
             'username': 'integration_login_user',
             'password': 'testpass123'
         }, follow=False)
         
-        # CSRF koruması test ortamında farklı davranabilir, testi düzelt
-        # 403 Forbidden veya 302 Redirect olabilir
+        # CSRF protection may behave differently in test environment, test adjusted
+        # 403 Forbidden or 302 Redirect
         self.assertIn(response.status_code, [403, 302])
     
     def test_login_session_management(self):
-        """Login session yönetimi testi"""
+        """Login session management test"""
         # Login
         response = self.client.post(reverse('login'), {
             'username': 'integration_login_user',
@@ -369,35 +369,35 @@ class TestLoginIntegration(TestCase):
         self.assertTrue(session.get('_auth_user_backend'))
         self.assertTrue(session.get('_auth_user_hash'))
         
-        # User ID doğru mu
+        # Is user ID correct
         self.assertEqual(int(session.get('_auth_user_id')), self.user.id)
     
     def test_login_redirect_after_login(self):
-        """Login sonrası redirect testi"""
-        # next parametresi ile login
+        """Redirect after login test"""
+        # Login with next parameter
         response = self.client.post(reverse('login') + '?next=/leads/', {
             'username': 'integration_login_user',
             'password': 'testpass123'
         })
         
-        # Leads sayfasına redirect olmalı
+        # Should redirect to leads page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/leads/')
     
     def test_login_with_remember_me(self):
-        """Remember me işlevselliği testi (eğer varsa)"""
-        # Bu test, eğer remember me özelliği eklenirse güncellenebilir
+        """Remember me functionality test (if implemented)"""
+        # This test can be updated if remember me feature is added
         response = self.client.post(reverse('login'), {
             'username': 'integration_login_user',
             'password': 'testpass123'
         })
         
-        # Normal giriş testi
+        # Normal login test
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_login_performance(self):
-        """Login performans testi"""
+        """Login performance test"""
         import time
         
         # Performance test
@@ -411,12 +411,12 @@ class TestLoginIntegration(TestCase):
             self.assertEqual(response.status_code, 302)
         end_time = time.time()
         
-        # 10 login 5 saniyeden az sürmeli
+        # 10 logins should take less than 5 seconds
         self.assertLess(end_time - start_time, 5.0)
     
     def test_login_with_special_characters(self):
-        """Özel karakterler içeren credentials ile login testi"""
-        # Özel karakterler içeren kullanıcı oluştur
+        """Login test with credentials containing special characters"""
+        # Create user with special characters
         special_user = User.objects.create_user(
             username='test.user+tag@domain',
             email='special_integration@example.com',
@@ -430,13 +430,13 @@ class TestLoginIntegration(TestCase):
             email_verified=True
         )
         
-        # UserProfile oluştur
+        # Create UserProfile
         special_user_profile, created = UserProfile.objects.get_or_create(user=special_user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=special_user, organisation=special_user_profile)
         
-        # Username ile login
+        # Login with username
         response = self.client.post(reverse('login'), {
             'username': 'test.user+tag@domain',
             'password': 'testpass123'
@@ -447,7 +447,7 @@ class TestLoginIntegration(TestCase):
         # Logout
         self.client.post(reverse('logout'))
         
-        # Email ile login
+        # Login with email
         response = self.client.post(reverse('login'), {
             'username': 'special_integration@example.com',
             'password': 'testpass123'
@@ -457,10 +457,10 @@ class TestLoginIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Login Entegrasyon Testleri Başlatılıyor...")
+    print("Starting Login Integration Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     import time
     unittest.main()
