@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
+from django.conf import settings
 from leads.models import Agent, UserProfile, User, EmailVerificationToken
 from activity_log.models import log_activity, ACTION_AGENT_CREATED, ACTION_AGENT_UPDATED, ACTION_AGENT_DELETED
 from .forms import AgentModelForm, AgentCreateForm, AdminAgentCreateForm, AdminAgentModelForm, OrganisorAgentCreateForm, OrganisorAgentModelForm
@@ -137,13 +138,14 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
             return self.form_invalid(form)
 
     def send_verification_email(self, user, token):
+        verify_url = self.request.build_absolute_uri(reverse('verify-email', kwargs={'token': token}))
         subject = 'Darkenyas CRM - Agent Account Verification'
         message = f"""
         Hello {user.first_name},
         
         You have been invited to be an agent on Darkenyas CRM! Please click the link below to verify your email and activate your account:
         
-        http://127.0.0.1:8000/verify-email/{token}/
+        {verify_url}
         
         This link is valid for 24 hours.
         
@@ -160,7 +162,7 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
         send_mail(
             subject,
             message,
-            'admin@test.com',
+            settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=False,
         )

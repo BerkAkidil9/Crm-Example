@@ -56,7 +56,7 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 Your password has been successfully reset.
 
-You can now login with your new password at: http://127.0.0.1:8000/login/
+You can now login with your new password at: {self.request.build_absolute_uri(reverse('login'))}
 
 If you did not perform this action, please contact support immediately.
 
@@ -139,7 +139,7 @@ class SignupView(generic.CreateView):
         
         Welcome to Darkenyas CRM! Please click the link below to activate your account:
         
-        http://127.0.0.1:8000/verify-email/{token}/
+        {self.request.build_absolute_uri(reverse('verify-email', kwargs={'token': token}))}
         
         This link is valid for 24 hours.
         

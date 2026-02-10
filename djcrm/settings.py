@@ -215,6 +215,14 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@djcrm.com')
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
 LOGOUT_REDIRECT_URL = '/'
+
+# Site URL for email links (used in management commands where request object is unavailable)
+# In views, use request.build_absolute_uri() instead.
+_render_host = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+SITE_URL = os.getenv(
+    'SITE_URL',
+    f'https://{_render_host}' if _render_host else 'http://127.0.0.1:8000'
+)
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = 'tailwind'
 
