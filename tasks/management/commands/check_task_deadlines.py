@@ -63,7 +63,7 @@ class Command(BaseCommand):
                     f"Task: {task.title}\n"
                     f"End date: {task.end_date}\n"
                     f"Priority: {task.get_priority_display()}\n\n"
-                    f"View task: http://127.0.0.1:8000/tasks/{task.id}/\n\n"
+                    f"View task: {settings.SITE_URL}/tasks/{task.id}/\n\n"
                     f"Darkenyas CRM"
                 )
 
