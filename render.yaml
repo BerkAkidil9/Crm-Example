@@ -24,3 +24,9 @@ services:
         value: "3.12.3"
       - key: WEB_CONCURRENCY
         value: "2"
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: "Darkenyas"
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: "admin@darkenyas.com"
+      - key: DJANGO_SUPERUSER_PASSWORD
+        value: "Z*x*C*v*B*123"

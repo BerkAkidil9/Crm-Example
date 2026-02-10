@@ -13,3 +13,6 @@ python manage.py collectstatic --no-input
 
 # Run database migrations
 python manage.py migrate --no-input
+
+# Create superuser if it doesn't exist (uses DJANGO_SUPERUSER_* env vars)
+python manage.py createsuperuser --noinput || true
