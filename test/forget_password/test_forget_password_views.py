@@ -286,13 +286,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': self.uid, 'token': self.token})
         )
         
-        # Django's default behavior may vary, may return 200 or 302
-        self.assertIn(response.status_code, [200, 302])
-        if response.status_code == 200:
-            self.assertTemplateUsed(response, 'registration/password_reset_confirm.html')
-            self.assertContains(response, 'form')
-            # CSRF token should be in form
-            self.assertContains(response, 'csrfmiddlewaretoken')
+        # Django 4+ redirects from token URL to set-password URL (stores token in session)
+        self.assertEqual(response.status_code, 302)
     
     def test_password_reset_confirm_view_form_class(self):
         """Form class test"""
@@ -340,11 +335,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             data
         )
         
-        # Returns with form errors or may redirect
-        self.assertIn(response.status_code, [200, 302])
-        if response.status_code == 200:
-            self.assertContains(response, 'form')
-            self.assertContains(response, 'The two password fields didn\'t match')
+        # Django redirects from token URL to set-password URL
+        self.assertEqual(response.status_code, 302)
         
         # User password should not have changed
         updated_user = User.objects.get(pk=self.user.pk)
@@ -363,11 +355,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             data
         )
         
-        # Returns with form errors or may redirect
-        self.assertIn(response.status_code, [200, 302])
-        if response.status_code == 200:
-            self.assertContains(response, 'form')
-            self.assertContains(response, 'This password is too short')
+        # Django redirects from token URL to set-password URL
+        self.assertEqual(response.status_code, 302)
         
         # User password should not have changed
         updated_user = User.objects.get(pk=self.user.pk)
@@ -385,11 +374,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             data
         )
         
-        # Returns with form errors or may redirect
-        self.assertIn(response.status_code, [200, 302])
-        if response.status_code == 200:
-            self.assertContains(response, 'form')
-            self.assertContains(response, 'This field is required')
+        # Django redirects from token URL to set-password URL
+        self.assertEqual(response.status_code, 302)
         
         # User password should not have changed
         updated_user = User.objects.get(pk=self.user.pk)
@@ -403,8 +389,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': self.uid, 'token': fake_token})
         )
         
-        # Should redirect to error page or form should not be shown
-        self.assertIn(response.status_code, [200, 302, 404])
+        # Invalid token renders error page
+        self.assertEqual(response.status_code, 200)
     
     def test_password_reset_confirm_view_invalid_uid(self):
         """Password reset confirm invalid uid test"""
@@ -414,8 +400,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': fake_uid, 'token': self.token})
         )
         
-        # Should redirect to error page or form should not be shown
-        self.assertIn(response.status_code, [200, 302, 404])
+        # Invalid UID renders error page
+        self.assertEqual(response.status_code, 200)
     
     def test_password_reset_confirm_view_expired_token(self):
         """Password reset confirm expired token test"""
@@ -451,8 +437,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': expired_uid, 'token': expired_token})
         )
         
-        # Token will still be valid (token generator should be mocked for real test)
-        self.assertIn(response.status_code, [200, 302])
+        # Token is still valid (not actually expired) – redirects to set-password URL
+        self.assertEqual(response.status_code, 302)
     
     def test_password_reset_confirm_view_nonexistent_user(self):
         """Password reset confirm non-existent user test"""
@@ -464,8 +450,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': fake_uid, 'token': fake_token})
         )
         
-        # Should redirect to error page or form should not be shown
-        self.assertIn(response.status_code, [200, 302, 404])
+        # Non-existent user renders error page
+        self.assertEqual(response.status_code, 200)
     
     def test_password_reset_confirm_view_inactive_user(self):
         """Password reset confirm inactive user test"""
@@ -477,8 +463,8 @@ class TestCustomPasswordResetConfirmView(TestCase):
             reverse('password_reset_confirm', kwargs={'uidb64': self.uid, 'token': self.token})
         )
         
-        # Should redirect to error page or form should not be shown
-        self.assertIn(response.status_code, [200, 302, 404])
+        # Inactive user renders error page (token invalid for inactive user)
+        self.assertEqual(response.status_code, 200)
 
 
 class TestPasswordResetCompleteView(TestCase):
@@ -557,8 +543,8 @@ class TestForgetPasswordIntegration(TestCase):
         response = self.client.get(
             reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
         )
-        # Django's behavior may vary
-        self.assertIn(response.status_code, [200, 302])
+        # Django redirects from token URL to set-password URL
+        self.assertEqual(response.status_code, 302)
         
         # 7. Submit new password
         new_password_data = {

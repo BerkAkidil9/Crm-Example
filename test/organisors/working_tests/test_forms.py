@@ -8,6 +8,7 @@ import sys
 import django
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from unittest.mock import patch, MagicMock
 
@@ -50,6 +51,7 @@ class TestOrganisorModelForm(TestCase):
             organisation=self.user_profile
         )
         
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
         self.valid_data = {
             'email': 'updated_organisor_forms@example.com',
             'username': 'updated_organisor_forms',
@@ -60,7 +62,7 @@ class TestOrganisorModelForm(TestCase):
             'date_of_birth': '1985-05-15',
             'gender': 'F',
             'password1': '',
-            'password2': ''
+            'password2': '',
         }
     
     def test_form_initialization(self):
@@ -80,8 +82,8 @@ class TestOrganisorModelForm(TestCase):
     
     def test_form_valid_data(self):
         """Form test with valid data"""
-        form = OrganisorModelForm(data=self.valid_data, instance=self.user)
-        self.assertTrue(form.is_valid())
+        form = OrganisorModelForm(data=self.valid_data, files=self.valid_data_files, instance=self.user)
+        self.assertTrue(form.is_valid(), form.errors)
     
     def test_form_required_fields(self):
         """Required fields test"""
@@ -95,7 +97,7 @@ class TestOrganisorModelForm(TestCase):
             data = self.valid_data.copy()
             del data[field]
             
-            form = OrganisorModelForm(data=data, instance=self.user)
+            form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
             # Form should be invalid or have field error
             if form.is_valid():
                 # If form is valid, field may be optional
@@ -116,7 +118,7 @@ class TestOrganisorModelForm(TestCase):
         data = self.valid_data.copy()
         data['email'] = 'other_organisor_forms@example.com'
         
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         self.assertIn('already exists', str(form.errors['email']))
@@ -134,7 +136,7 @@ class TestOrganisorModelForm(TestCase):
         data = self.valid_data.copy()
         data['username'] = 'other_user_organisor_forms2'
         
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
         self.assertIn('already exists', str(form.errors['username']))
@@ -154,7 +156,7 @@ class TestOrganisorModelForm(TestCase):
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5559999999'
         
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
         self.assertIn('already exists', str(form.errors['phone_number']))
@@ -166,19 +168,18 @@ class TestOrganisorModelForm(TestCase):
         data['password1'] = 'newpass123!'
         data['password2'] = 'differentpass123!'
         
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn('password2', form.errors)
     
     def test_form_password_optional(self):
         """Password fields optional test"""
-        # Password fields can be left empty
+        # Password fields can be left empty (profile_image still required)
         data = self.valid_data.copy()
         data['password1'] = ''
         data['password2'] = ''
-        
-        form = OrganisorModelForm(data=data, instance=self.user)
-        self.assertTrue(form.is_valid())
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
+        self.assertTrue(form.is_valid(), form.errors)
     
     def test_form_password_required_together(self):
         """Password fields must be entered together test"""
@@ -187,7 +188,7 @@ class TestOrganisorModelForm(TestCase):
         data['password1'] = 'newpass123!'
         data['password2'] = ''
         
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         if not form.is_valid():
             # Should have password2 error
             self.assertIn('password2', form.errors)
@@ -197,7 +198,7 @@ class TestOrganisorModelForm(TestCase):
         data['password1'] = ''
         data['password2'] = 'newpass123!'
         
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         if not form.is_valid():
             # Should have password1 or password2 error
             self.assertTrue('password1' in form.errors or 'password2' in form.errors)
@@ -234,8 +235,8 @@ class TestOrganisorModelForm(TestCase):
         data['password1'] = 'newpass123!'
         data['password2'] = 'newpass123!'
         
-        form = OrganisorModelForm(data=data, instance=self.user)
-        self.assertTrue(form.is_valid())
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
+        self.assertTrue(form.is_valid(), form.errors)
         
         updated_user = form.save()
         
@@ -255,8 +256,8 @@ class TestOrganisorModelForm(TestCase):
         """Form save without password change test"""
         original_password = self.user.password
         
-        form = OrganisorModelForm(data=self.valid_data, instance=self.user)
-        self.assertTrue(form.is_valid())
+        form = OrganisorModelForm(data=self.valid_data, files=self.valid_data_files, instance=self.user)
+        self.assertTrue(form.is_valid(), form.errors)
         
         updated_user = form.save()
         
@@ -265,7 +266,7 @@ class TestOrganisorModelForm(TestCase):
     
     def test_form_clean_methods(self):
         """Form clean methods test"""
-        form = OrganisorModelForm(data=self.valid_data, instance=self.user)
+        form = OrganisorModelForm(data=self.valid_data, files=self.valid_data_files, instance=self.user)
         if form.is_valid():
             # Email clean
             cleaned_email = form.clean_email()
@@ -284,20 +285,20 @@ class TestOrganisorModelForm(TestCase):
         # Invalid email format
         data = self.valid_data.copy()
         data['email'] = 'invalid-email'
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
         
         # Too short password
         data = self.valid_data.copy()
         data['password1'] = '123'
         data['password2'] = '123'
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
         
         # Invalid date format
         data = self.valid_data.copy()
         data['date_of_birth'] = 'invalid-date'
-        form = OrganisorModelForm(data=data, instance=self.user)
+        form = OrganisorModelForm(data=data, files=self.valid_data_files, instance=self.user)
         self.assertFalse(form.is_valid())
     
     def test_form_field_help_texts(self):
@@ -306,7 +307,7 @@ class TestOrganisorModelForm(TestCase):
         
         self.assertEqual(form.fields['email'].help_text, "Email address is required")
         self.assertIn("Select your country and enter your phone number", form.fields['phone_number'].help_text)
-        self.assertIn("Leave blank to keep current password", form.fields['password1'].help_text)
+        self.assertIn("Leave blank to keep your current password", form.fields['password1'].help_text)
         self.assertIn("Enter the same password as above", form.fields['password2'].help_text)
     
     def test_form_meta_class(self):
@@ -314,7 +315,7 @@ class TestOrganisorModelForm(TestCase):
         form = OrganisorModelForm(instance=self.user)
         
         self.assertEqual(form.Meta.model, User)
-        expected_fields = ('email', 'username', 'first_name', 'last_name', 'phone_number', 'date_of_birth', 'gender')
+        expected_fields = ('email', 'username', 'first_name', 'last_name', 'phone_number', 'date_of_birth', 'gender', 'profile_image')
         self.assertEqual(form.Meta.fields, expected_fields)
 
 
@@ -323,6 +324,7 @@ class TestOrganisorCreateForm(TestCase):
     
     def setUp(self):
         """Set up test data"""
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
         self.valid_data = {
             'email': 'new_organisor_create@example.com',
             'username': 'new_organisor_create',
@@ -353,8 +355,8 @@ class TestOrganisorCreateForm(TestCase):
     
     def test_form_valid_data(self):
         """Form test with valid data"""
-        form = OrganisorCreateForm(data=self.valid_data)
-        self.assertTrue(form.is_valid())
+        form = OrganisorCreateForm(data=self.valid_data, files=self.valid_data_files)
+        self.assertTrue(form.is_valid(), form.errors)
     
     def test_form_required_fields(self):
         """Required fields test"""
@@ -368,7 +370,7 @@ class TestOrganisorCreateForm(TestCase):
             data = self.valid_data.copy()
             del data[field]
             
-            form = OrganisorCreateForm(data=data)
+            form = OrganisorCreateForm(data=data, files=self.valid_data_files)
             # Form should be invalid or have field error
             if form.is_valid():
                 # If form is valid, field may be optional
@@ -389,7 +391,7 @@ class TestOrganisorCreateForm(TestCase):
         data = self.valid_data.copy()
         data['email'] = 'existing_create@example.com'
         
-        form = OrganisorCreateForm(data=data)
+        form = OrganisorCreateForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         self.assertIn('already exists', str(form.errors['email']))
@@ -407,7 +409,7 @@ class TestOrganisorCreateForm(TestCase):
         data = self.valid_data.copy()
         data['username'] = 'existing_user_create2'
         
-        form = OrganisorCreateForm(data=data)
+        form = OrganisorCreateForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
         self.assertIn('already exists', str(form.errors['username']))
@@ -427,7 +429,7 @@ class TestOrganisorCreateForm(TestCase):
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5552222222'
         
-        form = OrganisorCreateForm(data=data)
+        form = OrganisorCreateForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
         self.assertIn('already exists', str(form.errors['phone_number']))
@@ -439,7 +441,7 @@ class TestOrganisorCreateForm(TestCase):
         data['password1'] = 'newpass123!'
         data['password2'] = 'differentpass123!'
         
-        form = OrganisorCreateForm(data=data)
+        form = OrganisorCreateForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('password2', form.errors)
     
@@ -450,15 +452,15 @@ class TestOrganisorCreateForm(TestCase):
         data['password1'] = ''
         data['password2'] = ''
         
-        form = OrganisorCreateForm(data=data)
+        form = OrganisorCreateForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('password1', form.errors)
         self.assertIn('password2', form.errors)
     
     def test_form_save_method(self):
         """Form save method test"""
-        form = OrganisorCreateForm(data=self.valid_data)
-        self.assertTrue(form.is_valid())
+        form = OrganisorCreateForm(data=self.valid_data, files=self.valid_data_files)
+        self.assertTrue(form.is_valid(), form.errors)
         
         user = form.save()
         
@@ -491,7 +493,7 @@ class TestOrganisorCreateForm(TestCase):
         form = OrganisorCreateForm()
         
         self.assertEqual(form.Meta.model, User)
-        expected_fields = ('email', 'username', 'first_name', 'last_name', 'phone_number', 'date_of_birth', 'gender')
+        expected_fields = ('email', 'username', 'first_name', 'last_name', 'phone_number', 'date_of_birth', 'gender', 'profile_image')
         self.assertEqual(form.Meta.fields, expected_fields)
 
 
@@ -535,9 +537,9 @@ class TestOrganisorFormIntegration(TestCase):
             'password1': 'newpass123!',
             'password2': 'newpass123!',
         }
-        
-        form = OrganisorModelForm(data=form_data, instance=user)
-        self.assertTrue(form.is_valid())
+        form_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        form = OrganisorModelForm(data=form_data, files=form_files, instance=user)
+        self.assertTrue(form.is_valid(), form.errors)
         
         updated_user = form.save()
         
@@ -563,9 +565,9 @@ class TestOrganisorFormIntegration(TestCase):
             'password1': 'createpass123!',
             'password2': 'createpass123!',
         }
-        
-        form = OrganisorCreateForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        form_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        form = OrganisorCreateForm(data=form_data, files=form_files)
+        self.assertTrue(form.is_valid(), form.errors)
         
         user = form.save()
         

@@ -8,6 +8,7 @@ import sys
 import django
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.utils import timezone
@@ -42,6 +43,7 @@ class TestSignupCompleteFlow(TestCase):
             'gender': 'M',
             'password1': 'completepass123!',
             'password2': 'completepass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
     
     @patch('leads.views.send_mail')
@@ -54,7 +56,7 @@ class TestSignupCompleteFlow(TestCase):
         self.assertContains(response, 'Sign Up')
         
         # 2. Submit signup form
-        response = self.client.post(reverse('signup'), self.valid_signup_data)
+        response = self.client.post(reverse('signup'), self.valid_signup_data, format='multipart')
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-sent'))
         
@@ -120,7 +122,7 @@ class TestSignupCompleteFlow(TestCase):
         invalid_data = self.valid_signup_data.copy()
         invalid_data['email'] = 'invalid-email-format'
         
-        response = self.client.post(reverse('signup'), invalid_data)
+        response = self.client.post(reverse('signup'), invalid_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='complete_flow_user').exists())
         
@@ -129,7 +131,7 @@ class TestSignupCompleteFlow(TestCase):
         invalid_data['password1'] = 'password123!'
         invalid_data['password2'] = 'differentpassword123!'
         
-        response = self.client.post(reverse('signup'), invalid_data)
+        response = self.client.post(reverse('signup'), invalid_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='complete_flow_user').exists())
         
@@ -140,7 +142,7 @@ class TestSignupCompleteFlow(TestCase):
             # Other fields missing
         }
         
-        response = self.client.post(reverse('signup'), incomplete_data)
+        response = self.client.post(reverse('signup'), incomplete_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='complete_flow_user').exists())
     
@@ -159,7 +161,7 @@ class TestSignupCompleteFlow(TestCase):
         duplicate_data = self.valid_signup_data.copy()
         duplicate_data['email'] = 'duplicate@example.com'
         
-        response = self.client.post(reverse('signup'), duplicate_data)
+        response = self.client.post(reverse('signup'), duplicate_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='complete_flow_user').exists())
         
@@ -168,7 +170,7 @@ class TestSignupCompleteFlow(TestCase):
         duplicate_data['phone_number_0'] = '+90'
         duplicate_data['phone_number_1'] = '5551111111'
         
-        response = self.client.post(reverse('signup'), duplicate_data)
+        response = self.client.post(reverse('signup'), duplicate_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='complete_flow_user').exists())
 
@@ -371,6 +373,8 @@ class TestSignupFormIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
         self.valid_data = {
             'username': 'form_integration_user',
             'email': 'form_integration@example.com',
@@ -389,9 +393,9 @@ class TestSignupFormIntegration(TestCase):
         
         from leads.forms import CustomUserCreationForm
         
-        # Create and save form
-        form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid())
+        # Create and save form (with profile_image file)
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
+        self.assertTrue(form.is_valid(), form.errors)
         
         user = form.save()
         
@@ -427,7 +431,7 @@ class TestSignupFormIntegration(TestCase):
         data['email'] = 'existing_form@example.com'
         data['username'] = 'different_username'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         
@@ -437,7 +441,7 @@ class TestSignupFormIntegration(TestCase):
         data['phone_number_1'] = '5552222222'
         data['username'] = 'different_username2'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
         
@@ -445,7 +449,7 @@ class TestSignupFormIntegration(TestCase):
         data = self.valid_data.copy()
         data['username'] = 'existing_form_user'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
 
@@ -457,6 +461,7 @@ class TestSignupViewFormIntegration(TestCase):
         """Set up test data"""
         self.client = Client()
         
+        from django.core.files.uploadedfile import SimpleUploadedFile
         self.valid_data = {
             'username': 'view_form_integration_user',
             'email': 'view_form_integration@example.com',
@@ -468,6 +473,7 @@ class TestSignupViewFormIntegration(TestCase):
             'gender': 'F',
             'password1': 'viewformpass123!',
             'password2': 'viewformpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
     
     @patch('leads.views.send_mail')
@@ -483,7 +489,7 @@ class TestSignupViewFormIntegration(TestCase):
         self.assertIsInstance(response.context['form'], CustomUserCreationForm)
         
         # 2. Submit form
-        response = self.client.post(reverse('signup'), self.valid_data)
+        response = self.client.post(reverse('signup'), self.valid_data, format='multipart')
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-sent'))
         
@@ -514,7 +520,7 @@ class TestSignupViewFormIntegration(TestCase):
         invalid_data = self.valid_data.copy()
         invalid_data['email'] = 'invalid-email-format'
         
-        response = self.client.post(reverse('signup'), invalid_data)
+        response = self.client.post(reverse('signup'), invalid_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         
         # User was not created

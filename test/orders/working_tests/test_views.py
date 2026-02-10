@@ -483,6 +483,20 @@ class TestOrderUpdateView(TestCase):
             organisation=self.user_profile
         )
         
+        # Create category and product
+        self.category = Category.objects.create(name="Electronics")
+        self.subcategory = SubCategory.objects.create(name="Smartphones", category=self.category)
+        self.product = ProductsAndStock.objects.create(
+            product_name="iPhone 15",
+            product_description="Latest iPhone",
+            product_price=999.99,
+            cost_price=800.00,
+            product_quantity=50,
+            minimum_stock_level=10,
+            category=self.category,
+            subcategory=self.subcategory,
+            organisation=self.user_profile
+        )
         # Create order
         self.order = orders.objects.create(
             order_day=timezone.now(),
@@ -491,7 +505,12 @@ class TestOrderUpdateView(TestCase):
             organisation=self.user_profile,
             lead=self.lead
         )
-        
+        self.order_product = OrderProduct.objects.create(
+            order=self.order,
+            product=self.product,
+            product_quantity=5,
+            total_price=4999.95
+        )
         # Create test client
         self.client = Client()
     
@@ -517,13 +536,30 @@ class TestOrderUpdateView(TestCase):
         """Order update view POST success test"""
         self.client.login(username='orderupdate_test_user', password='testpass123')
         
-        # Prepare form data
+        # Order has one OrderProduct (from setUp). Formset uses prefix orderproduct_set.
+        from orders.forms import OrderProductFormSet
+        formset = OrderProductFormSet(instance=self.order)
+        # Build POST: main form + formset management + formset forms
         form_data = {
-            'order_day': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'order_day': timezone.now().strftime('%Y-%m-%dT%H:%M'),
             'order_name': 'Updated Order Name',
             'order_description': 'Updated order description',
             'lead': self.lead.id,
         }
+        management = formset.management_form.initial
+        form_data.update({
+            'orderproduct_set-TOTAL_FORMS': management['TOTAL_FORMS'],
+            'orderproduct_set-INITIAL_FORMS': management['INITIAL_FORMS'],
+            'orderproduct_set-MIN_NUM_FORMS': management['MIN_NUM_FORMS'],
+            'orderproduct_set-MAX_NUM_FORMS': management['MAX_NUM_FORMS'],
+            'orderproduct_set-0-id': str(self.order_product.id),
+            'orderproduct_set-0-product': str(self.product.id),
+            'orderproduct_set-0-product_quantity': '5',
+            'orderproduct_set-0-DELETE': '',
+            'orderproduct_set-1-product': '',
+            'orderproduct_set-1-product_quantity': '',
+            'orderproduct_set-1-DELETE': '',
+        })
         
         response = self.client.post(
             reverse('orders:order-update', kwargs={'pk': self.order.pk}),
@@ -625,8 +661,9 @@ class TestOrderCancelView(TestCase):
             total_price=4999.95
         )
         
-        # Create test client
+        # Create test client and log in
         self.client = Client()
+        self.client.login(username='ordercancel_test_user', password='testpass123')
     
     def test_order_cancel_view_post_success(self):
         """Order cancel view POST success test"""
@@ -634,10 +671,8 @@ class TestOrderCancelView(TestCase):
         
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': self.order.pk}))
         
-        # Should redirect
-        self.assertEqual(response.status_code, 302)
-        # Check redirect URL (content check instead of exact match)
-        self.assertTrue(response.url.endswith('/orders/'))
+        # Should redirect to order list
+        self.assertRedirects(response, reverse('orders:order-list'))
         
         # Order should be cancelled
         self.order.refresh_from_db()
@@ -655,10 +690,8 @@ class TestOrderCancelView(TestCase):
         
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': self.order.pk}))
         
-        # Should redirect
-        self.assertEqual(response.status_code, 302)
-        # Check redirect URL (content check instead of exact match)
-        self.assertTrue(response.url.endswith('/orders/'))
+        # Should redirect to order list
+        self.assertRedirects(response, reverse('orders:order-list'))
         
         # Check session for message
         messages = list(get_messages(response.wsgi_request))
@@ -667,7 +700,6 @@ class TestOrderCancelView(TestCase):
     def test_order_cancel_view_nonexistent_order(self):
         """Order cancel view nonexistent order test"""
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': 99999}))
-        
         self.assertEqual(response.status_code, 404)
 
 

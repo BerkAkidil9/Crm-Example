@@ -193,8 +193,8 @@ class TestCustomLoginView(TestCase):
         # Go to login page
         response = self.client.get(reverse('login'))
         
-        # Should redirect or 200 (redirect_authenticated_user=False)
-        self.assertIn(response.status_code, [200, 302])
+        # Already authenticated user can still see login page (redirect_authenticated_user=False)
+        self.assertEqual(response.status_code, 200)
     
     def test_login_view_success_redirect(self):
         """Successful login redirect test"""
@@ -235,9 +235,8 @@ class TestCustomLoginView(TestCase):
             'password': 'testpass123'
         }, follow=False)
         
-        # CSRF protection may behave differently in test environment, test adjusted
-        # 403 Forbidden or 302 Redirect
-        self.assertIn(response.status_code, [403, 302])
+        # CSRF protection rejects the request
+        self.assertEqual(response.status_code, 403)
     
     def test_login_view_remember_me_functionality(self):
         """Remember me functionality test (if implemented)"""

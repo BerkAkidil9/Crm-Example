@@ -1,0 +1,1 @@
+# ProductsAndStock tests package
