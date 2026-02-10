@@ -8,6 +8,7 @@ import sys
 import django
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
@@ -25,6 +26,7 @@ class TestCustomUserCreationForm(TestCase):
     
     def setUp(self):
         """Set up test data"""
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
         self.valid_data = {
             'username': 'testuser_signup',
             'email': 'test_signup@example.com',
@@ -55,8 +57,8 @@ class TestCustomUserCreationForm(TestCase):
     
     def test_form_valid_data(self):
         """Form test with valid data"""
-        form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid())
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
+        self.assertTrue(form.is_valid(), form.errors)
     
     def test_form_required_fields(self):
         """Required fields test"""
@@ -69,7 +71,7 @@ class TestCustomUserCreationForm(TestCase):
             data = self.valid_data.copy()
             del data[field]
             
-            form = CustomUserCreationForm(data=data)
+            form = CustomUserCreationForm(data=data, files=self.valid_data_files)
             self.assertFalse(form.is_valid())
             self.assertIn(field, form.errors)
         
@@ -78,7 +80,7 @@ class TestCustomUserCreationForm(TestCase):
         del data['phone_number_0']
         del data['phone_number_1']
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
     
@@ -95,7 +97,7 @@ class TestCustomUserCreationForm(TestCase):
         data = self.valid_data.copy()
         data['email'] = 'existing@example.com'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         self.assertIn('already exists', str(form.errors['email']))
@@ -117,7 +119,7 @@ class TestCustomUserCreationForm(TestCase):
         data['username'] = 'different_username'
         data['email'] = 'different@example.com'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         # May be phone number validation error or uniqueness check
         self.assertIn('phone_number', form.errors)
@@ -135,7 +137,7 @@ class TestCustomUserCreationForm(TestCase):
         data = self.valid_data.copy()
         data['username'] = 'existing_user'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
         self.assertIn('already exists', str(form.errors['username']))
@@ -147,7 +149,7 @@ class TestCustomUserCreationForm(TestCase):
         data['password1'] = 'testpass123!'
         data['password2'] = 'differentpass123!'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('password2', form.errors)
     
@@ -186,7 +188,7 @@ class TestCustomUserCreationForm(TestCase):
     
     def test_form_save_method(self):
         """Form save method test"""
-        form = CustomUserCreationForm(data=self.valid_data)
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
         self.assertTrue(form.is_valid())
         
         user = form.save(commit=False)
@@ -203,19 +205,19 @@ class TestCustomUserCreationForm(TestCase):
     def test_form_clean_methods(self):
         """Form clean methods test"""
         # Email clean
-        form = CustomUserCreationForm(data=self.valid_data)
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
         if form.is_valid():
             cleaned_email = form.clean_email()
             self.assertEqual(cleaned_email, 'test_signup@example.com')
         
         # Phone number clean
-        form = CustomUserCreationForm(data=self.valid_data)
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
         if form.is_valid():
             cleaned_phone = form.clean_phone_number()
             self.assertEqual(str(cleaned_phone), '+905551234567')
         
         # Username clean
-        form = CustomUserCreationForm(data=self.valid_data)
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
         if form.is_valid():
             cleaned_username = form.clean_username()
             self.assertEqual(cleaned_username, 'testuser_signup')
@@ -225,26 +227,26 @@ class TestCustomUserCreationForm(TestCase):
         # Empty email
         data = self.valid_data.copy()
         data['email'] = ''
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         
         # Invalid email format
         data = self.valid_data.copy()
         data['email'] = 'invalid-email'
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         
         # Too short password
         data = self.valid_data.copy()
         data['password1'] = '123'
         data['password2'] = '123'
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         
         # Invalid date format
         data = self.valid_data.copy()
         data['date_of_birth'] = 'invalid-date'
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
     
     def test_form_field_help_texts(self):
@@ -297,6 +299,7 @@ class TestSignupFormIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
         self.valid_data = {
             'username': 'integration_test_user',
             'email': 'integration_test@example.com',
@@ -312,7 +315,7 @@ class TestSignupFormIntegration(TestCase):
     
     def test_form_save_and_user_creation(self):
         """Form user creation test"""
-        form = CustomUserCreationForm(data=self.valid_data)
+        form = CustomUserCreationForm(data=self.valid_data, files=self.valid_data_files)
         self.assertTrue(form.is_valid())
         
         user = form.save()
@@ -346,7 +349,7 @@ class TestSignupFormIntegration(TestCase):
         data['email'] = 'conflict@example.com'
         data['username'] = 'different_username'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
         
@@ -356,7 +359,7 @@ class TestSignupFormIntegration(TestCase):
         data['phone_number_1'] = '5551111111'
         data['username'] = 'different_username2'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('phone_number', form.errors)
         
@@ -364,7 +367,7 @@ class TestSignupFormIntegration(TestCase):
         data = self.valid_data.copy()
         data['username'] = 'conflict_user'
         
-        form = CustomUserCreationForm(data=data)
+        form = CustomUserCreationForm(data=data, files=self.valid_data_files)
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
 

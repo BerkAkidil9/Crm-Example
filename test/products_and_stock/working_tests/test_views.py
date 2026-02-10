@@ -961,6 +961,55 @@ class TestSalesDashboardView(TestCase):
         self.assertEqual(response.context['in_stock_products'], 1)
 
 
+class TestProductChartsView(TestCase):
+    """ProductChartsView tests"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.admin_user = User.objects.create_user(
+            username="admin_charts", email="admin_charts@example.com",
+            password="adminpass123", is_superuser=True,
+        )
+        self.organisor_user = User.objects.create_user(
+            username="organisor_charts", email="organisor_charts@example.com",
+            password="organisorpass123", is_organisor=True,
+        )
+        self.organisor_profile, _ = UserProfile.objects.get_or_create(user=self.organisor_user)
+        self.agent_user = User.objects.create_user(
+            username="agent_charts", email="agent_charts@example.com",
+            password="agentpass123", is_agent=True,
+        )
+        self.category = Category.objects.create(name="ChartCat")
+        self.subcategory = SubCategory.objects.create(name="ChartSub", category=self.category)
+        self.product = ProductsAndStock.objects.create(
+            product_name="Chart Product", product_description="Desc",
+            product_price=100.0, cost_price=50.0,
+            product_quantity=20, minimum_stock_level=5,
+            category=self.category, subcategory=self.subcategory,
+            organisation=self.organisor_profile,
+        )
+        self.url = reverse('ProductsAndStock:product-charts')
+
+    def test_anonymous_user_redirected(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_admin_can_access(self):
+        self.client.force_login(self.admin_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_organisor_can_access(self):
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_uses_correct_template(self):
+        self.client.force_login(self.admin_user)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, 'ProductsAndStock/product_charts.html')
+
+
 if __name__ == "__main__":
     print("Starting ProductsAndStock Views Tests...")
     print("=" * 60)

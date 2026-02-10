@@ -8,6 +8,7 @@ import sys
 import django
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.utils import timezone
@@ -224,6 +225,7 @@ class TestOrganisorCreateView(TestCase):
             'gender': 'M',
             'password1': 'newpass123!',
             'password2': 'newpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
     
     def test_organisor_create_view_admin_access(self):
@@ -275,7 +277,7 @@ class TestOrganisorCreateView(TestCase):
         """POST request with valid data test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
-        response = self.client.post(reverse('organisors:organisor-create'), self.valid_data)
+        response = self.client.post(reverse('organisors:organisor-create'), self.valid_data, format='multipart')
         
         # Should redirect
         self.assertEqual(response.status_code, 302)
@@ -304,7 +306,7 @@ class TestOrganisorCreateView(TestCase):
         invalid_data = self.valid_data.copy()
         invalid_data['email'] = 'invalid-email'  # Invalid email
         
-        response = self.client.post(reverse('organisors:organisor-create'), invalid_data)
+        response = self.client.post(reverse('organisors:organisor-create'), invalid_data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -322,7 +324,7 @@ class TestOrganisorCreateView(TestCase):
         duplicate_data = self.valid_data.copy()
         duplicate_data['email'] = 'admin_create_organisor_views@example.com'
         
-        response = self.client.post(reverse('organisors:organisor-create'), duplicate_data)
+        response = self.client.post(reverse('organisors:organisor-create'), duplicate_data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -339,7 +341,7 @@ class TestOrganisorCreateView(TestCase):
         duplicate_data = self.valid_data.copy()
         duplicate_data['username'] = 'admin_create_organisor_views'
         
-        response = self.client.post(reverse('organisors:organisor-create'), duplicate_data)
+        response = self.client.post(reverse('organisors:organisor-create'), duplicate_data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -356,7 +358,7 @@ class TestOrganisorCreateView(TestCase):
         password_mismatch_data = self.valid_data.copy()
         password_mismatch_data['password2'] = 'differentpass123!'
         
-        response = self.client.post(reverse('organisors:organisor-create'), password_mismatch_data)
+        response = self.client.post(reverse('organisors:organisor-create'), password_mismatch_data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -369,7 +371,7 @@ class TestOrganisorCreateView(TestCase):
         """Successful create redirect test"""
         self.client.login(username='admin_create_organisor_views', password='testpass123')
         
-        response = self.client.post(reverse('organisors:organisor-create'), self.valid_data)
+        response = self.client.post(reverse('organisors:organisor-create'), self.valid_data, format='multipart')
         
         # Should redirect to organisor list page
         self.assertEqual(response.status_code, 302)
@@ -583,6 +585,7 @@ class TestOrganisorUpdateView(TestCase):
             'gender': 'M',
             'password1': '',
             'password2': '',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
     
     def test_organisor_update_view_admin_access_own_profile(self):
@@ -644,7 +647,7 @@ class TestOrganisorUpdateView(TestCase):
         """POST request with valid data test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         
-        response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), self.valid_data)
+        response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), self.valid_data, format='multipart')
         
         # Should redirect
         self.assertEqual(response.status_code, 302)
@@ -664,7 +667,7 @@ class TestOrganisorUpdateView(TestCase):
         invalid_data = self.valid_data.copy()
         invalid_data['email'] = 'invalid-email'  # Invalid email
         
-        response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), invalid_data)
+        response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), invalid_data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -675,7 +678,7 @@ class TestOrganisorUpdateView(TestCase):
         """Successful update redirect test"""
         self.client.login(username='admin_update_organisor_views', password='testpass123')
         
-        response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), self.valid_data)
+        response = self.client.post(reverse('organisors:organisor-update', kwargs={'pk': self.admin_organisor.pk}), self.valid_data, format='multipart')
         
         # Should redirect to organisor detail page
         self.assertEqual(response.status_code, 302)
@@ -852,7 +855,7 @@ class TestOrganisorViewIntegration(TestCase):
         # 1. Go to organisor list page
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Admin')
+        self.assertContains(response, 'Create a new organisor')
         
         # 2. Create new organisor
         create_data = {
@@ -866,9 +869,10 @@ class TestOrganisorViewIntegration(TestCase):
             'gender': 'F',
             'password1': 'integrationpass123!',
             'password2': 'integrationpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
         
-        response = self.client.post(reverse('organisors:organisor-create'), create_data)
+        response = self.client.post(reverse('organisors:organisor-create'), create_data, format='multipart')
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('organisors:organisor-list'))
         

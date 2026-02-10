@@ -8,6 +8,7 @@ import sys
 import django
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.utils import timezone
@@ -99,8 +100,8 @@ class TestOrganisorCompleteIntegration(TestCase):
         # 1. Go to organisor list page
         response = self.client.get(reverse('organisors:organisor-list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Admin')
-        self.assertContains(response, 'Normal')
+        self.assertContains(response, 'Create a new organisor')
+        self.assertIn('organisors', response.context)
         
         # 2. Go to new organisor create page
         response = self.client.get(reverse('organisors:organisor-create'))
@@ -119,10 +120,11 @@ class TestOrganisorCompleteIntegration(TestCase):
             'gender': 'F',
             'password1': 'newpass123!',
             'password2': 'newpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
         
         with patch('organisors.views.send_mail') as mock_send_mail:
-            response = self.client.post(reverse('organisors:organisor-create'), create_data)
+            response = self.client.post(reverse('organisors:organisor-create'), create_data, format='multipart')
             self.assertEqual(response.status_code, 302)
             self.assertRedirects(response, reverse('organisors:organisor-list'))
             
@@ -378,8 +380,8 @@ class TestOrganisorCompleteIntegration(TestCase):
         
         with patch('organisors.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('organisors:organisor-create'), create_data)
-            # Check form success or error status
-            self.assertIn(response.status_code, [200, 302])
+            # Successful creation redirects
+            self.assertEqual(response.status_code, 302)
             
             # If successful, was email sent
             if response.status_code == 302:
@@ -413,13 +415,14 @@ class TestOrganisorCompleteIntegration(TestCase):
                 'gender': 'M',
                 'password1': 'bulkpass123!',
                 'password2': 'bulkpass123!',
+                'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
             }
             for i in range(1, 4)
         ]
         
         with patch('organisors.views.send_mail') as mock_send_mail:
             for data in organisors_data:
-                response = self.client.post(reverse('organisors:organisor-create'), data)
+                response = self.client.post(reverse('organisors:organisor-create'), data, format='multipart')
                 self.assertEqual(response.status_code, 302)
             
             # Were 3 emails sent

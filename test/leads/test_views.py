@@ -700,9 +700,8 @@ class TestLeadCreateView(TestCase):
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('leads:lead-create'))
         
-        # Agents cannot create leads - redirect or access denied
-        # Some systems return 302 (redirect), others 200 (show form but save forbidden)
-        self.assertIn(response.status_code, [200, 302])
+        # Agents cannot create leads - they are redirected
+        self.assertEqual(response.status_code, 302)
     
     def test_lead_create_view_unauthenticated(self):
         """Lead create view unauthenticated user test"""
@@ -821,9 +820,8 @@ class TestLeadUpdateView(TestCase):
         self.client.force_login(agent_user)
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
         
-        # Agent cannot update another agent's lead
-        # 404 (not found) or 302 (redirect)
-        self.assertIn(response.status_code, [302, 404])
+        # Agent cannot update another agent's lead - not found in their queryset
+        self.assertEqual(response.status_code, 404)
     
     def test_lead_update_view_unauthenticated(self):
         """Lead update view unauthenticated user test"""
@@ -916,9 +914,8 @@ class TestLeadDeleteView(TestCase):
         self.client.force_login(agent_user)
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
         
-        # Agent cannot delete another agent's lead
-        # 404 (not found) or 302 (redirect)
-        self.assertIn(response.status_code, [302, 404])
+        # Agent cannot delete another agent's lead - not found in their queryset
+        self.assertEqual(response.status_code, 404)
     
     def test_lead_delete_view_unauthenticated(self):
         """Lead delete view unauthenticated user test"""
@@ -1020,9 +1017,8 @@ class TestAssignAgentView(TestCase):
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
         
-        # Agent cannot assign agent to other leads
-        # 200 (show form), 302 (redirect) or 404
-        self.assertIn(response.status_code, [200, 302, 404])
+        # Agent cannot assign agent to other leads - not found in their queryset
+        self.assertEqual(response.status_code, 404)
     
     def test_assign_agent_view_unauthenticated(self):
         """Assign agent view unauthenticated user test"""

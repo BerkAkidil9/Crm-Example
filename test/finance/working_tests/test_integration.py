@@ -591,6 +591,7 @@ class TestFinanceViewsIntegration(TestCase):
         from django.test import Client
         
         client = Client()
+        client.login(username='finance_views_integration', password='testpass123')
         
         # Create Order and finance report
         order = orders.objects.create(
@@ -634,6 +635,7 @@ class TestFinanceViewsIntegration(TestCase):
         from django.test import Client
         
         client = Client()
+        client.login(username='finance_views_integration', password='testpass123')
         
         # GET request - form should be rendered
         response = client.get(reverse('finance:financial_report'))

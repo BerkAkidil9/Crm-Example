@@ -8,6 +8,7 @@ import sys
 import django
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.utils import timezone
@@ -42,6 +43,7 @@ class TestSignupView(TestCase):
             'gender': 'M',
             'password1': 'testpass123!',
             'password2': 'testpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
     
     def test_signup_view_get(self):
@@ -57,7 +59,7 @@ class TestSignupView(TestCase):
     @patch('leads.views.send_mail')
     def test_signup_view_post_valid_data(self, mock_send_mail):
         """Signup POST request valid data test"""
-        response = self.client.post(reverse('signup'), self.valid_data)
+        response = self.client.post(reverse('signup'), self.valid_data, format='multipart')
         
         # Should redirect
         self.assertEqual(response.status_code, 302)
@@ -96,7 +98,7 @@ class TestSignupView(TestCase):
         invalid_data = self.valid_data.copy()
         invalid_data['email'] = 'invalid-email'  # Invalid email
         
-        response = self.client.post(reverse('signup'), invalid_data)
+        response = self.client.post(reverse('signup'), invalid_data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -119,7 +121,7 @@ class TestSignupView(TestCase):
         data['email'] = 'existing@example.com'
         data['username'] = 'different_username'
         
-        response = self.client.post(reverse('signup'), data)
+        response = self.client.post(reverse('signup'), data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -142,7 +144,7 @@ class TestSignupView(TestCase):
         data['username'] = 'existing_user'
         data['email'] = 'different@example.com'
         
-        response = self.client.post(reverse('signup'), data)
+        response = self.client.post(reverse('signup'), data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -157,7 +159,7 @@ class TestSignupView(TestCase):
         data['password1'] = 'password123!'
         data['password2'] = 'differentpassword123!'
         
-        response = self.client.post(reverse('signup'), data)
+        response = self.client.post(reverse('signup'), data, format='multipart')
         
         # Returns with form errors
         self.assertEqual(response.status_code, 200)
@@ -169,7 +171,7 @@ class TestSignupView(TestCase):
     @patch('leads.views.send_mail')
     def test_signup_view_email_sending(self, mock_send_mail):
         """Email sending test"""
-        response = self.client.post(reverse('signup'), self.valid_data)
+        response = self.client.post(reverse('signup'), self.valid_data, format='multipart')
         
         # Was email sent
         mock_send_mail.assert_called_once()
@@ -202,7 +204,7 @@ class TestSignupView(TestCase):
     def test_signup_view_success_url(self):
         """Success URL test"""
         with patch('leads.views.send_mail'):
-            response = self.client.post(reverse('signup'), self.valid_data)
+            response = self.client.post(reverse('signup'), self.valid_data, format='multipart')
             self.assertRedirects(response, reverse('verify-email-sent'))
 
 
@@ -382,6 +384,7 @@ class TestSignupIntegration(TestCase):
             'gender': 'F',
             'password1': 'testpass123!',
             'password2': 'testpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
     
     @patch('leads.views.send_mail')
@@ -392,7 +395,7 @@ class TestSignupIntegration(TestCase):
         self.assertEqual(response.status_code, 200)
         
         # 2. Submit form
-        response = self.client.post(reverse('signup'), self.valid_data)
+        response = self.client.post(reverse('signup'), self.valid_data, format='multipart')
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('verify-email-sent'))
         
@@ -440,7 +443,7 @@ class TestSignupIntegration(TestCase):
         data = self.valid_data.copy()
         data['email'] = 'duplicate@example.com'
         
-        response = self.client.post(reverse('signup'), data)
+        response = self.client.post(reverse('signup'), data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
         
@@ -449,7 +452,7 @@ class TestSignupIntegration(TestCase):
         data['phone_number_0'] = '+90'
         data['phone_number_1'] = '5551111111'
         
-        response = self.client.post(reverse('signup'), data)
+        response = self.client.post(reverse('signup'), data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
     
@@ -462,7 +465,7 @@ class TestSignupIntegration(TestCase):
             # Other fields missing
         }
         
-        response = self.client.post(reverse('signup'), incomplete_data)
+        response = self.client.post(reverse('signup'), incomplete_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='test_user').exists())
         
@@ -470,7 +473,7 @@ class TestSignupIntegration(TestCase):
         invalid_email_data = self.valid_data.copy()
         invalid_email_data['email'] = 'invalid-email-format'
         
-        response = self.client.post(reverse('signup'), invalid_email_data)
+        response = self.client.post(reverse('signup'), invalid_email_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
         
@@ -479,9 +482,25 @@ class TestSignupIntegration(TestCase):
         password_mismatch_data['password1'] = 'password123!'
         password_mismatch_data['password2'] = 'differentpassword123!'
         
-        response = self.client.post(reverse('signup'), password_mismatch_data)
+        response = self.client.post(reverse('signup'), password_mismatch_data, format='multipart')
         self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(User.objects.filter(username='integration_test_user').exists())
+
+
+class TestEmailVerificationSuccessView(TestCase):
+    """EmailVerificationSuccessView tests"""
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('verify-email-success')
+
+    def test_get_returns_200(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_uses_correct_template(self):
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, 'registration/verify_email_success.html')
 
 
 if __name__ == "__main__":

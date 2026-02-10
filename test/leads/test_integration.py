@@ -421,24 +421,24 @@ class TestLeadPermissionIntegration(TestCase):
         # View lead detail (only own leads)
         # Lead is already assigned to agent in setUp
         response = self.client.get(reverse('leads:lead-detail', kwargs={'pk': self.lead.pk}))
-        # Agent view queryset may sometimes return 404 - acceptable
-        self.assertIn(response.status_code, [200, 404])
+        # Agent sees own assigned lead
+        self.assertEqual(response.status_code, 200)
         
-        # Create lead (forbidden - redirect or form)
+        # Create lead (agent redirected - organisor required)
         response = self.client.get(reverse('leads:lead-create'))
-        self.assertIn(response.status_code, [200, 302])
+        self.assertEqual(response.status_code, 302)
         
-        # Update lead (forbidden - redirect or 404)
+        # Update lead (agent redirected - organisor required)
         response = self.client.get(reverse('leads:lead-update', kwargs={'pk': self.lead.pk}))
-        self.assertIn(response.status_code, [200, 302, 404])
+        self.assertEqual(response.status_code, 302)
         
-        # Delete lead (forbidden - redirect or 404)
+        # Delete lead (agent redirected - organisor required)
         response = self.client.get(reverse('leads:lead-delete', kwargs={'pk': self.lead.pk}))
-        self.assertIn(response.status_code, [200, 302, 404])
+        self.assertEqual(response.status_code, 302)
         
-        # Assign agent (forbidden - redirect or form)
+        # Assign agent (agent redirected - organisor required)
         response = self.client.get(reverse('leads:assign-agent', kwargs={'pk': self.lead.pk}))
-        self.assertIn(response.status_code, [200, 302, 404])
+        self.assertEqual(response.status_code, 302)
     
     def test_unauthenticated_permissions(self):
         """Unauthenticated user permissions test"""
@@ -689,10 +689,8 @@ class TestEmailIntegration(TestCase):
         with patch('leads.views.send_mail') as mock_send_mail:
             response = self.client.post(reverse('signup'), data=registration_data)
             
-            # Email sending can be tested but mock may not always work
-            # In Django test environment email backend may differ
-            # Response should succeed (302 redirect or 200 success)
-            self.assertIn(response.status_code, [200, 302])
+            # Successful signup redirects to email verification sent page
+            self.assertEqual(response.status_code, 302)
             
             # User should have been created (if form valid)
             if response.status_code == 302:
