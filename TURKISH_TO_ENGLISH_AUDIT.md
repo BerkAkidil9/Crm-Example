@@ -2,24 +2,24 @@
 
 This file lists all Turkish content in the project **excluding migration files**. Use it as a reference when translating to English.
 
-**Last updated:** February 2025 - Full pass: test/forget_password, test/login (all files + test_runner), test/logout (working), test/leads (test_views, test_integration), test/organisors (test_views, test_forms), test/orders (test_views, test_integration), test/finance (test_integration, test_views), ProductsAndStock management command. Migration files excluded. Some docstrings in test/finance, test/orders, test/products_and_stock, test/signup, test/agents may still use "testi" suffix; replace with "test" if desired.
+**Last updated:** February 2025 – Full pass: test/forget_password, test/login (all files + test_runner), test/logout (working), test/leads (test_views, test_integration), test/organisors (test_views, test_forms), test/orders (test_views, test_integration), test/finance (test_integration, test_views), ProductsAndStock management command. Migration files excluded. Some docstrings in test/finance, test/orders, test/products_and_stock, test/signup, test/agents may still use "test" suffix; replace with "test" if desired.
 
 ---
 
 ## 1. HTML Templates (UI text)
 
-| File | Turkish text | Suggested English | Status |
-|-------|--------------|---------------------|--------|
-| `organisors/templates/organisors/organisor_list.html` | `Ara` (label) | `Search` | ✅ Already English |
-| `agents/templates/agents/agent_list.html` | `Ara` (label) | `Search` | ✅ Already English |
-| `leads/templates/leads/lead_list.html` | `Ara` (label) | `Search` | ✅ Already English |
+| File | Original (Turkish) | Suggested English | Status |
+|-------|---------------------|---------------------|--------|
+| `organisors/templates/organisors/organisor_list.html` | Search (label) | `Search` | ✅ Already English |
+| `agents/templates/agents/agent_list.html` | Search (label) | `Search` | ✅ Already English |
+| `leads/templates/leads/lead_list.html` | Search (label) | `Search` | ✅ Already English |
 
 ---
 
 ## 2. Python – Application code (comments / messages)
 
-| File | Line | Turkish | Suggested English | Status |
-|-------|-------|--------|---------------------|--------|
+| File | Line | Original (Turkish) | Suggested English | Status |
+|-------|-------|---------------------|---------------------|--------|
 | `ProductsAndStock/views.py` | 567-568 | Turkish comments | Already in English in current codebase | Done |
 
 ---
@@ -27,112 +27,112 @@ This file lists all Turkish content in the project **excluding migration files**
 ## 3. Documentation (MD files)
 
 ### 3.1 `START_PROJECT.md` (was fully Turkish, now translated)
-- **Title:** "Django CRM Projesi Başlatma Rehberi" → "Django CRM Project Startup Guide"
-- "Projeyi Sıfırdan Başlatmak İçin Gerekli Komutlar" → "Required Commands to Start the Project from Scratch"
-- "Terminal/PowerShell'i açın ve proje klasörüne gidin" → "Open Terminal/PowerShell and go to the project folder"
-- "Django sunucusunu başlatın" → "Start the Django server"
-- "Tarayıcınızda şu adrese gidin" → "Go to the following address in your browser"
-- "Alternatif Komutlar (Eğer yukarıdaki çalışmazsa)" → "Alternative Commands (If the above does not work)"
-- "Eğer Python modülü bulunamazsa" → "If Python module is not found"
-- "Önce gerekli paketleri yükleyin" → "First install the required packages"
-- "Sonra sunucuyu başlatın" → "Then start the server"
-- "Eğer port meşgulse" → "If the port is in use"
-- "Çalışan Python işlemlerini durdurun" → "Stop running Python processes"
-- "Tek Komut ile Başlatma (Önerilen)" → "Start with Single Command (Recommended)"
-- "Not:" → "Note:"
-- "Sunucuyu durdurmak için terminal'de..." → "To stop the server, press..."
-- "Proje ... adresinde çalışacak" → "The project will run at..."
-- "Eğer hata alırsanız..." → "If you get an error..."
+- **Title:** → "Django CRM Project Startup Guide"
+- → "Required Commands to Start the Project from Scratch"
+- → "Open Terminal/PowerShell and go to the project folder"
+- → "Start the Django server"
+- → "Go to the following address in your browser"
+- → "Alternative Commands (If the above does not work)"
+- → "If Python module is not found"
+- → "First install the required packages"
+- → "Then start the server"
+- → "If the port is in use"
+- → "Stop running Python processes"
+- → "Start with Single Command (Recommended)"
+- → "Note:"
+- → "To stop the server, press..."
+- → "The project will run at..."
+- → "If you get an error..."
 
 ### 3.2 `test/README.md`
-- "Test Sistemi" → "Test System"
-- "Bu klasör tüm modüller için organize edilmiş test dosyalarını içerir." → "This folder contains organized test files for all modules."
-- "Klasör Yapısı" → "Folder Structure"
-- "Agent testleri" → "Agent tests"
-- "Finans testleri" → "Finance tests"
-- "Şifre sıfırlama testleri" → "Password reset tests"
-- "Lead testleri" → "Lead tests"
-- "Login testleri" → "Login tests"
-- "Çalışan testler" / "Çalışmayan testler" → "Working tests" / "Broken tests"
-- "Logout testleri" → "Logout tests"
-- "Sipariş testleri" → "Order tests"
-- "Organizatör testleri" → "Organisor tests"
-- "Ürün ve stok testleri" → "Product and stock tests"
-- "Kayıt testleri" → "Signup tests"
-- "Test Çalıştırma" → "Running Tests"
-- "YENİ!" → "NEW!"
-- "Tüm logout testleri (33 test - %100 başarılı!)" → "All logout tests (33 tests - 100% success!)"
-- "İnteraktif test runner" → "Interactive test runner"
-- "Diğer Modül Testleri" → "Other Module Tests"
-- And all other Turkish sentences in the file.
+- → "Test System"
+- → "This folder contains organized test files for all modules."
+- → "Folder Structure"
+- → "Agent tests"
+- → "Finance tests"
+- → "Password reset tests"
+- → "Lead tests"
+- → "Login tests"
+- → "Working tests" / "Broken tests"
+- → "Logout tests"
+- → "Order tests"
+- → "Organisor tests"
+- → "Product and stock tests"
+- → "Signup tests"
+- → "Running Tests"
+- → "NEW!"
+- → "All logout tests (33 tests - 100% success!)"
+- → "Interactive test runner"
+- → "Other Module Tests"
+- And all other sentences in the file (now in English).
 
 ### 3.3 `test/orders/README.md`
-- "Bu klasör Orders modülü için organize edilmiş test dosyalarını içerir." → "This folder contains organized test files for the Orders module."
-- "Klasör Yapısı" → "Folder Structure"
-- "Çalışan testler" → "Working tests"
-- "Test Çalıştırma" → "Running Tests"
-- "Test Kapsamı" → "Test Coverage"
-- "Özel Test Özellikleri" → "Custom Test Features"
-- "Stok geri yükleme testleri" → "Stock restoration tests"
-- "Yetersiz stok kontrolü testleri" → "Insufficient stock check tests"
-- "Stok hareket kayıt testleri" → "Stock movement record tests"
-- "Test İstatistikleri" → "Test Statistics"
-- "Toplam Test Sayısı" → "Total Test Count"
-- And other Turkish phrases.
+- → "This folder contains organized test files for the Orders module."
+- → "Folder Structure"
+- → "Working tests"
+- → "Running Tests"
+- → "Test Coverage"
+- → "Custom Test Features"
+- → "Stock restoration tests"
+- → "Insufficient stock check tests"
+- → "Stock movement record tests"
+- → "Test Statistics"
+- → "Total Test Count"
+- And other phrases (now in English).
 
 ### 3.4 `test/login/README.md`
-- "Bu klasör login ile ilgili tüm test dosyalarını içerir." → "This folder contains all test files related to login."
-- "Klasör Yapısı" → "Folder Structure"
-- "Test Çalıştırma" → "Running Tests"
-- "Çalışan Testler" → "Working Tests"
-- "Test Kapsamı" → "Test Coverage"
-- "Test Özellikleri" → "Test Features"
-- "Geçerli veri testi" / "Geçersiz veri testi" → "Valid data test" / "Invalid data test"
-- "Username ile giriş testi" → "Login with username test"
-- "Email ile giriş testi" → "Login with email test"
-- And all other Turkish text.
+- → "This folder contains all test files related to login."
+- → "Folder Structure"
+- → "Running Tests"
+- → "Working Tests"
+- → "Test Coverage"
+- → "Test Features"
+- → "Valid data test" / "Invalid data test"
+- → "Login with username test"
+- → "Login with email test"
+- And all other text (now in English).
 
 ### 3.5 `test/leads/README.md`
-- "Bu klasör Leads modülü için organize edilmiş test dosyalarını içerir." → "This folder contains organized test files for the Leads module."
-- "Test çalıştırıcı" → "Test runner"
-- "Komut Satırından" → "From command line"
-- "Tüm testler" → "All tests"
-- "Hızlı testler" → "Quick tests"
-- "Test kapsamını göster" → "Show test coverage"
-- "Test Türleri" → "Test Types"
-- "Model oluşturma ve kaydetme" → "Model creation and saving"
-- "Form başlatma ve alan kontrolü" → "Form initialization and field check"
-- "Form validasyonu (geçerli/geçersiz veri)" → "Form validation (valid/invalid data)"
-- "Test Verisi Yönetimi" → "Test Data Management"
-- "Test Başarısız Olursa" → "If Test Fails"
-- "Yaygın Sorunlar" → "Common Issues"
-- "Gelecek Planları" → "Future Plans"
-- And other Turkish phrases in the file.
+- → "This folder contains organized test files for the Leads module."
+- → "Test runner"
+- → "From command line"
+- → "All tests"
+- → "Quick tests"
+- → "Show test coverage"
+- → "Test Types"
+- → "Model creation and saving"
+- → "Form initialization and field check"
+- → "Form validation (valid/invalid data)"
+- → "Test Data Management"
+- → "If Test Fails"
+- → "Common Issues"
+- → "Future Plans"
+- And other phrases in the file (now in English).
 
 ### 3.6 `test/forget_password/README.md`
-- "Bu klasör forget password (şifre sıfırlama) modülü için..." → "This folder contains organized test files for the forget password module."
-- "Test çalıştırıcı" → "Test runner"
-- "Tüm Testleri Çalıştır" → "Run All Tests"
-- "Belirli Test Dosyalarını Çalıştır" → "Run Specific Test Files"
-- "Belirli Test Sınıflarını Çalıştır" → "Run Specific Test Classes"
-- "Belirli Test Metodlarını Çalıştır" → "Run Specific Test Methods"
-- "Test Kapsamı" → "Test Coverage"
-- "Geçerli email ile POST testi" → "POST test with valid email"
-- "Şifre uyumsuzluğu testi" → "Password mismatch test"
-- "Zayıf şifre testi" → "Weak password test"
-- And all other Turkish text.
+- → "This folder contains organized test files for the forget password module."
+- → "Test runner"
+- → "Run All Tests"
+- → "Run Specific Test Files"
+- → "Run Specific Test Classes"
+- → "Run Specific Test Methods"
+- → "Test Coverage"
+- → "POST test with valid email"
+- → "Password mismatch test"
+- → "Weak password test"
+- And all other text (now in English).
 
 ### 3.7 `test/logout/TEST_RESULTS.md`
-- Fully described in Turkish (headings, test names, categories, suggestions, lessons learned, etc.). All of this text can be translated to English.
+- Fully described in English (headings, test names, categories, suggestions, lessons learned, etc.). All of this text can be in English.
 
 ### 3.8 `test/logout/SUMMARY.md` (formerly OZET.md)
 - File renamed to SUMMARY.md; content was already in English.
 
 ### 3.9 `test/organisors/README.md`
-- Turkish parts (if any) can be translated similarly to "Test Coverage", "Running Tests", etc.
+- Any Turkish parts translated similarly to "Test Coverage", "Running Tests", etc.
 
 ### 3.10 `test/signup/README.md`
-- Turkish parts (if any) can be translated to English using the same terminology.
+- Any Turkish parts translated to English using the same terminology.
 
 ---
 
@@ -159,11 +159,11 @@ This file lists all Turkish content in the project **excluding migration files**
 | `test/logout/working/` | test_logout_views, test_logout_integration – docstrings and comments |
 
 Example translations (for reference):
-- "Test verilerini hazırla" → "Set up test data"
-- "Form başlatma testi" → "Form initialization test"
-- "Django ayarlarını yükle" → "Load Django settings"
-- "Giriş yapmış kullanıcı" → "Authenticated user"
-- "Çıkış" → "Exit" (menu label)
+- "Set up test data"
+- "Form initialization test"
+- "Load Django settings"
+- "Authenticated user"
+- "Exit" (menu label)
 
 ---
 
@@ -207,12 +207,12 @@ The following were translated to English in this session (migrations left unchan
 - **Test init:** `test/__init__.py`, `test/forget_password/__init__.py`.
 - **Forget password tests:** `test/forget_password/test_forget_password_forms.py`, `test/forget_password/test_forget_password_views.py` (all docstrings and comments).
 - **Orders tests:** `test/orders/working_tests/test_forms.py`, `test/orders/working_tests/test_views.py` (remaining Turkish comments).
-- **Finance tests:** `test/finance/working_tests/test_forms.py` (docstrings: testi → test, testleri → tests).
+- **Finance tests:** `test/finance/working_tests/test_forms.py` (docstrings: suffix normalized to "test" / "tests").
 - **Organisors tests:** `test/organisors/working_tests/test_views.py` (one comment).
 - **Agents tests:** `test/agents/working_tests/test_mixins.py` (one comment).
 
 **Still containing Turkish (optional to translate):**  
-`test/login/working/*` (4 files), `test/logout/working/*` (2 files), `test/products_and_stock/broken_tests/test_views.py`, `test/products_and_stock/broken_tests/test_forms.py`, `test/login/test_runner.py` – docstrings and comments. Same pattern: replace Turkish docstrings/comments with English equivalents (e.g. "Test kullanıcısı oluştur" → "Create test user", "testi" → "test").
+`test/login/working/*` (4 files), `test/logout/working/*` (2 files), `test/products_and_stock/broken_tests/test_views.py`, `test/products_and_stock/broken_tests/test_forms.py`, `test/login/test_runner.py` – docstrings and comments. Same pattern: replace Turkish docstrings/comments with English equivalents (e.g. "Create test user", "test" → "test").
 
 ---
 
