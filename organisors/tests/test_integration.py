@@ -360,26 +360,26 @@ class TestOrganisorCompleteIntegration(TestCase):
         """Organisor email verification integration test"""
         self.client.login(username='admin_integration_test', password='testpass123')
         
-        # Create new organisor (file must be sent via files= for multipart)
+        # Create new organisor (profile_image must be in data dict with format='multipart')
         create_data = {
             'email': 'email_verification_test@example.com',
             'username': 'email_verification_test',
             'first_name': 'Email',
             'last_name': 'Verification',
             'phone_number_0': '+90',
-            'phone_number_1': '5551111111',
+            'phone_number_1': '5551111999',  # Must be unique (admin has 5551111111)
             'date_of_birth': '1988-08-08',
             'gender': 'M',
             'password1': 'emailpass123!',
             'password2': 'emailpass123!',
+            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
         }
-        profile_image = SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")
         
         with patch('organisors.views.send_mail') as mock_send_mail:
             response = self.client.post(
                 reverse('organisors:organisor-create'),
                 create_data,
-                files={'profile_image': profile_image},
+                format='multipart',
             )
             # Successful creation redirects
             self.assertEqual(response.status_code, 302)
