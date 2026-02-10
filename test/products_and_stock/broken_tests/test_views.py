@@ -22,7 +22,7 @@ from ProductsAndStock.models import (
     PriceHistory, SalesStatistics, StockAlert, StockRecommendation
 )
 from leads.models import UserProfile
-# from agents.models import Agent  # Agent modeli yok
+# from agents.models import Agent  # Agent model not available
 
 User = get_user_model()
 
@@ -65,7 +65,7 @@ class TestProductAndStockListView(TestCase):
         )
         if created:
             self.agent_profile.save()  # Ensure pk is assigned
-        # Agent modeli yok, sadece user kullan
+        # Agent model not available, use user only
         # self.agent = Agent.objects.create(
         #     user=self.agent_user,
         #     organisation=self.organisor_profile
@@ -667,7 +667,7 @@ class TestGetSubcategoriesView(TestCase):
         self.assertIn('error', data)
     
     def test_get_subcategories_no_category(self):
-        """Kategori ID olmadan test"""
+        """Test without category ID"""
         response = self.client.get(reverse('ProductsAndStock:get-subcategories'))
         self.assertEqual(response.status_code, 200)
         

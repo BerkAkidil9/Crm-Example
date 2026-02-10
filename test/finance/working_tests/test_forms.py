@@ -205,7 +205,7 @@ class TestDateRangeForm(TestCase):
         """DateRangeForm field types test"""
         form = DateRangeForm()
         
-        # Field tiplerini kontrol et
+        # Check field types
         self.assertEqual(form.fields['start_date'].__class__.__name__, 'DateField')
         self.assertEqual(form.fields['end_date'].__class__.__name__, 'DateField')
     

@@ -229,7 +229,7 @@ class TestOrganisorModelForm(TestCase):
             self.assertIn(expected_value, choice_values)
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         data = self.valid_data.copy()
         data['password1'] = 'newpass123!'
         data['password2'] = 'newpass123!'
@@ -456,7 +456,7 @@ class TestOrganisorCreateForm(TestCase):
         self.assertIn('password2', form.errors)
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         form = OrganisorCreateForm(data=self.valid_data)
         self.assertTrue(form.is_valid())
         

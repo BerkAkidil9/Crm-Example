@@ -217,7 +217,7 @@ class TestAgentModelForm(TestCase):
         self.assertIn('placeholder="Last Name"', str(form['last_name'].as_widget()))
     
     def test_form_save_method(self):
-        """Form save metodu testi"""
+        """Form save method test"""
         data = self.valid_data.copy()
         data['password1'] = 'newpassword123!'
         data['password2'] = 'newpassword123!'
@@ -523,7 +523,7 @@ class TestAdminAgentCreateForm(TestCase):
         # Does organisation field have correct queryset
         self.assertIn(self.organisor_profile, form.fields['organisation'].queryset)
         
-        # Empty label kontrol et
+        # Check empty label
         self.assertEqual(form.fields['organisation'].empty_label, "Select Organisation")
     
     def test_form_organisation_queryset(self):

@@ -363,7 +363,7 @@ class TestLoginIntegration(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         
-        # Session bilgilerini kontrol et
+        # Check session info
         session = self.client.session
         self.assertTrue(session.get('_auth_user_id'))
         self.assertTrue(session.get('_auth_user_backend'))

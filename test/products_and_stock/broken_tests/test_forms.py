@@ -629,7 +629,7 @@ class TestBulkPriceUpdateForm(TestCase):
         self.assertIn('min="0"', str(form['fixed_amount_decrease'].as_widget()))
         self.assertIn('min="0"', str(form['new_price'].as_widget()))
         
-        # Max kontrol et
+        # Check max
         self.assertIn('max="1000"', str(form['percentage_increase'].as_widget()))
         self.assertIn('max="100"', str(form['percentage_decrease'].as_widget()))
 

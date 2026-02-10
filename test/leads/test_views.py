@@ -391,7 +391,7 @@ class TestLeadListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_list.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('leads', response.context)
         self.assertIn('unassigned_leads', response.context)
         
@@ -413,7 +413,7 @@ class TestLeadListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_list.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('leads', response.context)
         
         # Lead should now be in agent's list (if view queryset works)
@@ -441,7 +441,7 @@ class TestLeadListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_list.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('leads', response.context)
         self.assertIn('unassigned_leads', response.context)
         
@@ -532,7 +532,7 @@ class TestLeadDetailView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_detail.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('lead', response.context)
         self.assertEqual(response.context['lead'], self.lead)
     
@@ -556,7 +556,7 @@ class TestLeadDetailView(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, 'leads/lead_detail.html')
             
-            # Context kontrol et
+            # Check context
             self.assertIn('lead', response.context)
             self.assertEqual(response.context['lead'], self.lead)
     
@@ -574,7 +574,7 @@ class TestLeadDetailView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/lead_detail.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('lead', response.context)
         self.assertEqual(response.context['lead'], self.lead)
     
@@ -1076,7 +1076,7 @@ class TestCategoryListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/category_list.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('source_categories', response.context)
         self.assertIn('value_categories', response.context)
         self.assertIn('is_admin_view', response.context)
@@ -1098,7 +1098,7 @@ class TestCategoryListView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'leads/category_list.html')
         
-        # Context kontrol et
+        # Check context
         self.assertIn('source_categories', response.context)
         self.assertIn('value_categories', response.context)
         self.assertIn('is_admin_view', response.context)
@@ -1181,13 +1181,13 @@ class TestGetAgentsByOrgView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         
-        # JSON response kontrol et
+        # Check JSON response
         data = response.json()
         self.assertIn('agents', data)
         self.assertIn('source_categories', data)
         self.assertIn('value_categories', data)
         
-        # Agent verisi kontrol et
+        # Check agent data
         self.assertEqual(len(data['agents']), 1)
         self.assertEqual(data['agents'][0]['id'], self.agent.id)
         self.assertIn('name', data['agents'][0])

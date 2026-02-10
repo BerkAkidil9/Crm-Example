@@ -46,7 +46,7 @@ class TestAdminOnlyMixin(TestCase):
         )
     
     def test_is_admin_user_method(self):
-        """is_admin_user metodu testi"""
+        """is_admin_user method test"""
         # Admin user should be organisor (admin criteria)
         self.assertTrue(self.admin_user.is_organisor)
         
@@ -104,7 +104,7 @@ class TestOrganisorAndAdminMixin(TestCase):
         )
     
     def test_is_admin_user_method(self):
-        """is_admin_user metodu testi"""
+        """is_admin_user method test"""
         # Organisor user should be organisor (admin criteria)
         self.assertTrue(self.organisor_user.is_organisor)
         
@@ -180,7 +180,7 @@ class TestSelfProfileOnlyMixin(TestCase):
         )
     
     def test_is_admin_user_method(self):
-        """is_admin_user metodu testi"""
+        """is_admin_user method test"""
         # Admin user should be organisor (admin criteria)
         self.assertTrue(self.admin_user.is_organisor)
         

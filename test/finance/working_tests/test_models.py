@@ -96,7 +96,7 @@ class TestOrderFinanceReportModel(TestCase):
         self.assertIsNotNone(finance_report.report_date)
     
     def test_order_finance_report_str_representation(self):
-        """OrderFinanceReport __str__ metodu testi"""
+        """OrderFinanceReport __str__ method test"""
         finance_report = OrderFinanceReport.objects.create(
             order=self.order,
             earned_amount=1999.98
@@ -106,7 +106,7 @@ class TestOrderFinanceReportModel(TestCase):
         self.assertEqual(str(finance_report), expected_str)
     
     def test_order_finance_report_default_report_date(self):
-        """OrderFinanceReport default report_date testi"""
+        """OrderFinanceReport default report_date test"""
         finance_report = OrderFinanceReport.objects.create(
             order=self.order,
             earned_amount=1999.98
@@ -120,7 +120,7 @@ class TestOrderFinanceReportModel(TestCase):
         self.assertLess(time_diff.total_seconds(), 5)
     
     def test_order_finance_report_manual_report_date(self):
-        """OrderFinanceReport manuel report_date testi"""
+        """OrderFinanceReport manual report_date test"""
         custom_date = timezone.now() - timedelta(days=1)
         
         finance_report = OrderFinanceReport.objects.create(
@@ -165,14 +165,14 @@ class TestOrderFinanceReportModel(TestCase):
             earned_amount=1999.98
         )
         
-        # OneToOneField testi
+        # OneToOneField test
         self.assertEqual(finance_report.order, self.order)
         
         # Access finance report from order
         self.assertEqual(self.order.orderfinancereport, finance_report)
     
     def test_order_finance_report_unique_order_constraint(self):
-        """OrderFinanceReport unique order constraint testi"""
+        """OrderFinanceReport unique order constraint test"""
         # Create first finance report
         OrderFinanceReport.objects.create(
             order=self.order,
@@ -187,7 +187,7 @@ class TestOrderFinanceReportModel(TestCase):
             )
     
     def test_order_finance_report_cascade_delete_order(self):
-        """OrderFinanceReport cascade delete order testi"""
+        """OrderFinanceReport cascade delete order test"""
         finance_report = OrderFinanceReport.objects.create(
             order=self.order,
             earned_amount=1999.98
@@ -204,7 +204,7 @@ class TestOrderFinanceReportModel(TestCase):
         self.assertFalse(orders.objects.filter(id=order_id).exists())
     
     def test_order_finance_report_float_precision(self):
-        """OrderFinanceReport float precision testi"""
+        """OrderFinanceReport float precision test"""
         finance_report = OrderFinanceReport.objects.create(
             order=self.order,
             earned_amount=123.456789
@@ -290,7 +290,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
         )
     
     def test_order_finance_report_with_order_products(self):
-        """OrderFinanceReport ile OrderProduct entegrasyon testi"""
+        """OrderFinanceReport and OrderProduct integration test"""
         # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
@@ -467,7 +467,7 @@ class TestOrderFinanceReportModelIntegration(TestCase):
         self.assertEqual(total_earned, expected_total)
     
     def test_order_finance_report_organisation_filtering(self):
-        """OrderFinanceReport organizasyon filtreleme testi"""
+        """OrderFinanceReport organisation filtering test"""
         # Create different organisations
         org2_user = User.objects.create_user(
             username='org2_finance_test',

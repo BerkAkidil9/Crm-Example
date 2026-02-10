@@ -318,7 +318,7 @@ class TestOrderStockManagementIntegration(TransactionTestCase):
         )
     
     def test_order_stock_reduction_signal_integration(self):
-        """Order stok azaltma signal entegrasyon testi"""
+        """Order stock reduction signal integration test"""
         initial_stock = self.product.product_quantity
         
         # Create Order
@@ -561,12 +561,12 @@ class TestOrderFinanceIntegration(TestCase):
         # Access finance report from order test
         self.assertEqual(order.orderfinancereport, finance_report)
         
-        # Finance report string representation testi
+        # Finance report string representation test
         expected_str = f"Report for {order.order_name} - {finance_report.report_date.strftime('%Y-%m-%d')}"
         self.assertEqual(str(finance_report), expected_str)
     
     def test_order_total_price_calculation_integration(self):
-        """Order toplam fiyat hesaplama entegrasyon testi"""
+        """Order total price calculation integration test"""
         # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),
@@ -691,7 +691,7 @@ class TestOrderMultiUserIntegration(TestCase):
         self.client = Client()
     
     def test_order_organisation_isolation(self):
-        """Order organisation izolasyon testi"""
+        """Order organisation isolation test"""
         # Create order for User1
         order1 = orders.objects.create(
             order_day=timezone.now(),
@@ -744,7 +744,7 @@ class TestOrderMultiUserIntegration(TestCase):
         self.assertEqual(response.status_code, 404)
     
     def test_order_product_organisation_isolation(self):
-        """Order product organisation izolasyon testi"""
+        """Order product organisation isolation test"""
         # Create order for User1
         order1 = orders.objects.create(
             order_day=timezone.now(),

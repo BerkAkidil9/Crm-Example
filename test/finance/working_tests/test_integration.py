@@ -587,7 +587,7 @@ class TestFinanceViewsIntegration(TestCase):
         ))
     
     def test_financial_report_view_full_workflow(self):
-        """FinancialReportView tam workflow testi"""
+        """FinancialReportView full workflow test"""
         from django.test import Client
         
         client = Client()
@@ -753,7 +753,7 @@ class TestFinanceDataConsistency(TransactionTestCase):
         self.assertEqual(order_product.product, self.product)
     
     def test_finance_report_unique_constraint(self):
-        """Finance report unique constraint testi"""
+        """Finance report unique constraint test"""
         # Create Order
         order = orders.objects.create(
             order_day=timezone.now(),

@@ -139,7 +139,7 @@ class TestFinancialReportView(TestCase):
         self.client.login(username='finance_view_organisor', password='testpass123')
     
     def test_financial_report_view_get(self):
-        """FinancialReportView GET request testi"""
+        """FinancialReportView GET request test"""
         response = self.client.get(reverse('finance:financial_report'))
         
         self.assertEqual(response.status_code, 200)
@@ -150,7 +150,7 @@ class TestFinancialReportView(TestCase):
         self.assertContains(response, 'Filter')
     
     def test_financial_report_view_get_context(self):
-        """FinancialReportView GET context testi"""
+        """FinancialReportView GET context test"""
         response = self.client.get(reverse('finance:financial_report'))
         
         self.assertEqual(response.status_code, 200)
@@ -162,7 +162,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn('order_count', response.context)
     
     def test_financial_report_view_post_valid_dates(self):
-        """FinancialReportView POST valid dates testi"""
+        """FinancialReportView POST valid dates test"""
         start_date = self.today.date()
         end_date = self.today.date()
         
@@ -182,7 +182,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn(self.finance_report2, response.context['reports'])
     
     def test_financial_report_view_post_date_range(self):
-        """FinancialReportView POST date range testi"""
+        """FinancialReportView POST date range test"""
         start_date = self.yesterday.date()
         end_date = self.today.date()
         
@@ -200,7 +200,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn(self.finance_report2, response.context['reports'])
     
     def test_financial_report_view_post_all_dates(self):
-        """FinancialReportView POST all dates testi"""
+        """FinancialReportView POST all dates test"""
         start_date = self.yesterday.date()
         end_date = self.tomorrow.date()
         
@@ -219,7 +219,7 @@ class TestFinancialReportView(TestCase):
         self.assertIn(self.finance_report3, response.context['reports'])
     
     def test_financial_report_view_post_no_results(self):
-        """FinancialReportView POST no results testi"""
+        """FinancialReportView POST no results test"""
         start_date = (self.today + timedelta(days=10)).date()
         end_date = (self.today + timedelta(days=20)).date()
         
@@ -235,7 +235,7 @@ class TestFinancialReportView(TestCase):
         self.assertEqual(len(response.context['reports']), 0)
     
     def test_financial_report_view_post_invalid_form(self):
-        """FinancialReportView POST invalid form testi"""
+        """FinancialReportView POST invalid form test"""
         response = self.client.post(reverse('finance:financial_report'), {
             'start_date': 'invalid_date',
             'end_date': 'invalid_date'
@@ -248,7 +248,7 @@ class TestFinancialReportView(TestCase):
         self.assertEqual(len(response.context['reports']), 0)
     
     def test_financial_report_view_post_end_date_before_start_date(self):
-        """FinancialReportView POST end_date before start_date testi"""
+        """FinancialReportView POST end_date before start_date test"""
         start_date = self.today.date()
         end_date = self.yesterday.date()
         
@@ -264,14 +264,14 @@ class TestFinancialReportView(TestCase):
         self.assertEqual(len(response.context['reports']), 0)
     
     def test_financial_report_view_template_rendering(self):
-        """FinancialReportView template rendering testi"""
+        """FinancialReportView template rendering test"""
         response = self.client.get(reverse('finance:financial_report'))
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'finance/financial_report.html')
     
     def test_financial_report_view_with_reports_template(self):
-        """FinancialReportView with reports template testi"""
+        """FinancialReportView with reports template test"""
         start_date = self.today.date()
         end_date = self.today.date()
         
@@ -286,7 +286,7 @@ class TestFinancialReportView(TestCase):
         self.assertContains(response, 'reportTable')
     
     def test_financial_report_view_empty_results_template(self):
-        """FinancialReportView empty results template testi"""
+        """FinancialReportView empty results template test"""
         start_date = (self.today + timedelta(days=10)).date()
         end_date = (self.today + timedelta(days=20)).date()
         
@@ -300,7 +300,7 @@ class TestFinancialReportView(TestCase):
         self.assertContains(response, 'No orders found')
     
     def test_financial_report_view_date_filtering_logic(self):
-        """FinancialReportView date filtering logic testi"""
+        """FinancialReportView date filtering logic test"""
         # Create custom date range
         custom_start = self.today.replace(hour=0, minute=0, second=0, microsecond=0)
         custom_end = self.today.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -320,7 +320,7 @@ class TestFinancialReportView(TestCase):
         self.assertEqual(len(response.context['reports']), 1)
     
     def test_financial_report_view_aggregation(self):
-        """FinancialReportView aggregation testi"""
+        """FinancialReportView aggregation test"""
         # Create multiple same-day orders
         same_day_order = orders.objects.create(
             order_day=self.today,
@@ -466,7 +466,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
         self.client.login(username='edge_case_organisor', password='testpass123')
     
     def test_financial_report_view_no_orders(self):
-        """FinancialReportView no orders testi"""
+        """FinancialReportView no orders test"""
         start_date = timezone.now().date()
         end_date = timezone.now().date()
         
@@ -480,7 +480,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
         self.assertEqual(len(response.context['reports']), 0)
     
     def test_financial_report_view_orders_without_finance_reports(self):
-        """FinancialReportView orders without finance reports testi"""
+        """FinancialReportView orders without finance reports test"""
         # Create order but do not create finance report
         order = orders.objects.create(
             order_day=timezone.now(),
@@ -504,7 +504,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
         self.assertEqual(len(response.context['reports']), 0)
     
     def test_financial_report_view_zero_earned_amount(self):
-        """FinancialReportView zero earned amount testi"""
+        """FinancialReportView zero earned amount test"""
         # Create order and finance report (earned_amount = 0)
         order = orders.objects.create(
             order_day=self.today,
@@ -533,7 +533,7 @@ class TestFinancialReportViewEdgeCases(TestCase):
         self.assertEqual(len(response.context['reports']), 1)
     
     def test_financial_report_view_negative_earned_amount(self):
-        """FinancialReportView negative earned amount testi"""
+        """FinancialReportView negative earned amount test"""
         # Create order and finance report (earned_amount < 0)
         order = orders.objects.create(
             order_day=self.today,

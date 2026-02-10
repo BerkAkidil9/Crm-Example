@@ -328,14 +328,14 @@ class TestLoginFormIntegration(TestCase):
     
     def test_form_authentication_with_different_credentials(self):
         """Authentication test with different credential formats"""
-        # Username ile
+        # With username
         form = CustomAuthenticationForm(data={
             'username': 'integration_form_user',
             'password': 'testpass123'
         })
         self.assertTrue(form.is_valid())
         
-        # Email ile
+        # With email
         form = CustomAuthenticationForm(data={
             'username': 'integration_form@example.com',
             'password': 'testpass123'
@@ -366,7 +366,7 @@ class TestLoginFormIntegration(TestCase):
         self.assertFalse(form.is_valid())
     
     def test_form_with_mock_authentication_backend(self):
-        """Mock authentication backend ile form testi"""
+        """Form test with mock authentication backend"""
         with patch('leads.authentication.EmailOrUsernameModelBackend.authenticate') as mock_authenticate:
             # Mock authentication successful
             mock_authenticate.return_value = self.user

@@ -105,7 +105,7 @@ class TestLogoutView(TestCase):
         # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # Logout yap
+        # Perform logout
         response = self.client.post(reverse('logout'))
         
         # Should redirect to LOGOUT_REDIRECT_URL (defined as '/' in settings.py)
@@ -123,10 +123,10 @@ class TestLogoutView(TestCase):
         self.assertTrue(session.get('_auth_user_backend'))
         self.assertTrue(session.get('_auth_user_hash'))
         
-        # Logout yap
+        # Perform logout
         response = self.client.post(reverse('logout'))
         
-        # Session temizlenmeli
+        # Session should be cleared
         session = self.client.session
         self.assertFalse(session.get('_auth_user_id'))
         self.assertFalse(session.get('_auth_user_backend'))
@@ -173,11 +173,11 @@ class TestLogoutView(TestCase):
         # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # CSRF token ile logout yap (normal)
+        # Logout with CSRF token (normal)
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         
-        # Django test client otomatik CSRF token ekler
+        # Django test client adds CSRF token automatically
         # A different approach is needed for manual CSRF token test
     
     def test_logout_view_next_parameter(self):
@@ -242,7 +242,7 @@ class TestLogoutView(TestCase):
         self.client.login(username='superuser_logout', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Logout yap
+        # Perform logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
@@ -344,10 +344,10 @@ class TestLogoutViewSecurity(TestCase):
         # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
-        # Session ID'yi kaydet
+        # Save session ID
         old_session_key = self.client.session.session_key
         
-        # Logout yap
+        # Perform logout
         self.client.post(reverse('logout'))
         
         # New session should be created (session key should change)
@@ -363,10 +363,10 @@ class TestLogoutViewSecurity(TestCase):
         # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
-        # Session bilgilerini kaydet
+        # Save session info
         user_id = self.client.session.get('_auth_user_id')
         
-        # Logout yap
+        # Perform logout
         self.client.post(reverse('logout'))
         
         # Attempt to access protected page with old session
@@ -384,7 +384,7 @@ class TestLogoutViewSecurity(TestCase):
         session_hash = self.client.session.get('_auth_user_hash')
         self.assertIsNotNone(session_hash)
         
-        # Logout yap
+        # Perform logout
         self.client.post(reverse('logout'))
         
         # Session hash should be cleared
@@ -395,7 +395,7 @@ class TestLogoutViewSecurity(TestCase):
         # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
-        # Logout yap
+        # Perform logout
         response = self.client.post(reverse('logout'))
         
         # Check Cache-Control headers

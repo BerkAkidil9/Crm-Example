@@ -137,7 +137,7 @@ class TestLogoutIntegration(TestCase):
     
     def test_logout_with_active_session_data(self):
         """Logout with active session data test"""
-        # Login yap
+        # Log in
         self.client.login(username='integration_logout_user', password='testpass123')
         
         # Add custom data to session
@@ -191,7 +191,7 @@ class TestLogoutIntegration(TestCase):
     
     def test_logout_redirect_behavior(self):
         """Logout redirect behavior test"""
-        # Login yap
+        # Log in
         self.client.login(username='integration_logout_user', password='testpass123')
         
         # Logout
@@ -248,7 +248,7 @@ class TestLogoutIntegration(TestCase):
         self.client.login(username='integration_logout_user', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Logout yap
+        # Perform logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
@@ -257,7 +257,7 @@ class TestLogoutIntegration(TestCase):
         """Logout performance test"""
         import time
         
-        # Performance test - 10 kez logout
+        # Performance test - logout 10 times
         times = []
         for i in range(10):
             # Login
@@ -385,20 +385,20 @@ class TestLogoutSecurityIntegration(TestCase):
     
     def test_logout_csrf_protection_integration(self):
         """CSRF protection integration test"""
-        # Login yap
+        # Log in
         self.client.login(username='security_integration_logout', password='testpass123')
         
-        # CSRF token ile logout (normal)
+        # Logout with CSRF token (normal)
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Django test client otomatik CSRF token ekler
+        # Django test client adds CSRF token automatically
         # A different approach is needed for manual CSRF test
     
     def test_logout_no_information_leakage(self):
         """Information leakage after logout test"""
-        # Login yap
+        # Log in
         self.client.login(username='security_integration_logout', password='testpass123')
         
         # Add sensitive data to session

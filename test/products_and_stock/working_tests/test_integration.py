@@ -314,7 +314,7 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertTrue(product.is_discount_active)
     
     def test_profit_calculation_system(self):
-        """Kar hesaplama sistemi testi"""
+        """Profit calculation system test"""
         product = ProductsAndStock.objects.create(
             product_name='Profit Test Product',
             product_description='Product for profit testing',

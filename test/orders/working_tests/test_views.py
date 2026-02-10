@@ -764,7 +764,7 @@ class TestOrderDeleteView(TestCase):
         self.assertEqual(response.status_code, 404)  # Not found (access denied)
     
     def test_order_delete_view_cancel_order_action(self):
-        """Order delete view cancel order action testi"""
+        """Order delete view cancel order action test"""
         self.client.login(username='orderdelete_test_user', password='testpass123')
         
         # POST with cancel order action

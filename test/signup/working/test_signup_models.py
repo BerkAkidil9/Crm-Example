@@ -100,19 +100,19 @@ class TestUserModel(TestCase):
         self.assertEqual(User.GENDER_CHOICES, expected_choices)
     
     def test_user_str_method(self):
-        """User __str__ metodu testi"""
+        """User __str__ method test"""
         user = User.objects.create_user(**self.user_data)
         
         self.assertEqual(str(user), 'testuser_model')
     
     def test_user_get_full_name(self):
-        """User get_full_name metodu testi"""
+        """User get_full_name method test"""
         user = User.objects.create_user(**self.user_data)
         
         self.assertEqual(user.get_full_name(), 'Test User')
     
     def test_user_get_short_name(self):
-        """User get_short_name metodu testi"""
+        """User get_short_name method test"""
         user = User.objects.create_user(**self.user_data)
         
         self.assertEqual(user.get_short_name(), 'Test')
