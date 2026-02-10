@@ -13,7 +13,7 @@ from django.contrib.messages import get_messages
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -47,16 +47,16 @@ class TestLogoutIntegration(TestCase):
         # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_complete_logout_flow(self):
         """Full logout flow test"""
-        # 1. Login sayfasına git
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Login form gönder
+        # 2. Submit login form
         response = self.client.post(reverse('login'), {
             'username': 'integration_logout_user',
             'password': 'testpass123'
@@ -64,28 +64,28 @@ class TestLogoutIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # 3. Kullanıcı giriş yapmış mı kontrol et
+        # 3. Check if user is logged in
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # 4. Korumalı sayfaya erişim testi
+        # 4. Protected page access test
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # 5. Logout yap
+        # 5. Logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # 6. Session temizlenmeli
+        # 6. Session should be cleared
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # 7. Logout sonrası korumalı sayfaya erişim engellenmeli
+        # 7. Access to protected page after logout should be denied
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_login_logout_login_cycle(self):
         """Login-logout-login cycle test"""
-        # 1. İlk login
+        # 1. First login
         response = self.client.post(reverse('login'), {
             'username': 'integration_logout_user',
             'password': 'testpass123'
@@ -98,7 +98,7 @@ class TestLogoutIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # 3. Tekrar login
+        # 3. Login again
         response = self.client.post(reverse('login'), {
             'username': 'integration_logout_user',
             'password': 'testpass123'
@@ -106,30 +106,30 @@ class TestLogoutIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # 4. Korumalı sayfaya erişim
+        # 4. Protected page access
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # 5. Tekrar logout
+        # 5. Logout again
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_from_different_pages(self):
         """Logout from different pages test"""
-        # Login yap
+        # Log in
         self.client.login(username='integration_logout_user', password='testpass123')
         
-        # Landing page'den logout
+        # Logout from landing page
         self.client.get(reverse('landing-page'))
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Tekrar login
+        # Log in again
         self.client.login(username='integration_logout_user', password='testpass123')
         
-        # Lead list page'den logout
+        # Logout from lead list page
         self.client.get(reverse('leads:lead-list'))
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
@@ -140,52 +140,52 @@ class TestLogoutIntegration(TestCase):
         # Login yap
         self.client.login(username='integration_logout_user', password='testpass123')
         
-        # Session'a özel veriler ekle
+        # Add custom data to session
         session = self.client.session
         session['user_preferences'] = {'theme': 'dark', 'language': 'en'}
         session['cart_items'] = [1, 2, 3, 4, 5]
         session.save()
         
-        # Session verilerini kontrol et
+        # Check session data
         self.assertEqual(self.client.session.get('user_preferences')['theme'], 'dark')
         self.assertEqual(len(self.client.session.get('cart_items')), 5)
         
-        # Logout yap
+        # Logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         
-        # Tüm session verileri temizlenmeli
+        # All session data should be cleared
         self.assertIsNone(self.client.session.get('user_preferences'))
         self.assertIsNone(self.client.session.get('cart_items'))
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_with_multiple_browser_sessions(self):
         """Logout with multiple browser sessions test"""
-        # İki farklı client (farklı tarayıcıları simüle eder)
+        # Two different clients (simulate different browsers)
         client1 = Client()
         client2 = Client()
         
-        # Her iki client ile login yap
+        # Log in with both clients
         client1.login(username='integration_logout_user', password='testpass123')
         client2.login(username='integration_logout_user', password='testpass123')
         
-        # Her iki client giriş yapmış olmalı
+        # Both clients should be logged in
         self.assertTrue(client1.session.get('_auth_user_id'))
         self.assertTrue(client2.session.get('_auth_user_id'))
         
-        # Client1 ile logout yap
+        # Logout with Client1
         response = client1.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(client1.session.get('_auth_user_id'))
         
-        # Client2 hala giriş yapmış olmalı (farklı session)
+        # Client2 should still be logged in (different session)
         self.assertTrue(client2.session.get('_auth_user_id'))
         
-        # Client2 korumalı sayfaya erişebilmeli
+        # Client2 should be able to access protected page
         response = client2.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Client1 korumalı sayfaya erişememeli
+        # Client1 should not access protected page
         response = client1.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
@@ -194,10 +194,10 @@ class TestLogoutIntegration(TestCase):
         # Login yap
         self.client.login(username='integration_logout_user', password='testpass123')
         
-        # Logout yap
+        # Logout
         response = self.client.post(reverse('logout'))
         
-        # Landing page'e redirect olmalı
+        # Should redirect to landing page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
@@ -205,33 +205,33 @@ class TestLogoutIntegration(TestCase):
         response = self.client.post(reverse('logout'), follow=True)
         self.assertEqual(response.status_code, 200)
         
-        # Landing page template kullanılmalı
+        # Landing page template should be used
         self.assertTemplateUsed(response, 'landing.html')
     
     def test_logout_after_password_change(self):
         """Logout after password change test"""
-        # Login yap
+        # Log in
         self.client.login(username='integration_logout_user', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Şifre değiştir (password change view yerine direkt değiştir)
+        # Change password (change directly instead of password change view)
         self.user.set_password('newpassword123')
         self.user.save()
         
-        # Logout yap
+        # Logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Eski şifre ile login denemesi başarısız olmalı
+        # Login attempt with old password should fail
         response = self.client.post(reverse('login'), {
             'username': 'integration_logout_user',
             'password': 'testpass123'
         })
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Yeni şifre ile login başarılı olmalı
+        # Login with new password should succeed
         response = self.client.post(reverse('login'), {
             'username': 'integration_logout_user',
             'password': 'newpassword123'
@@ -241,10 +241,10 @@ class TestLogoutIntegration(TestCase):
     
     def test_logout_with_remember_me(self):
         """Logout with remember me feature test"""
-        # Bu test, eğer remember me özelliği eklenirse güncellenebilir
-        # Şu anda remember me özelliği olmadığı için basit test
+        # This test can be updated if remember me feature is added
+        # Simple test since there is no remember me feature currently
         
-        # Login yap
+        # Log in
         self.client.login(username='integration_logout_user', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
@@ -270,17 +270,17 @@ class TestLogoutIntegration(TestCase):
             
             times.append(end_time - start_time)
             
-            # Logout başarılı olmalı
+            # Logout should succeed
             self.assertEqual(response.status_code, 302)
             self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Ortalama logout süresi 0.5 saniyeden az olmalı
+        # Average logout time should be less than 0.5 seconds
         avg_time = sum(times) / len(times)
         self.assertLess(avg_time, 0.5)
     
     def test_logout_with_different_user_types(self):
         """Logout integration test with different user types"""
-        # Organizer ile tam akış
+        # Full flow with organiser
         self.client.login(username='integration_logout_user', password='testpass123')
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
@@ -304,7 +304,7 @@ class TestLogoutIntegration(TestCase):
         # Create UserProfile
         agent_user_profile, created = UserProfile.objects.get_or_create(user=agent_user)
         
-        # Agent ile tam akış
+        # Full flow with agent
         self.client.login(username='agent_integration_logout', password='testpass123')
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
@@ -324,7 +324,7 @@ class TestLogoutIntegration(TestCase):
             email_verified=True
         )
         
-        # Superuser ile tam akış
+        # Full flow with superuser
         self.client.login(username='superuser_integration_logout', password='testpass123')
         response = self.client.get('/admin/')
         self.assertEqual(response.status_code, 200)
@@ -356,30 +356,30 @@ class TestLogoutSecurityIntegration(TestCase):
         # Create UserProfile
         self.user_profile, created = UserProfile.objects.get_or_create(user=self.user)
         
-        # Organisor oluştur
+        # Create Organisor
         Organisor.objects.create(user=self.user, organisation=self.user_profile)
     
     def test_logout_session_hijacking_protection(self):
         """Session hijacking attack protection integration test"""
-        # Login yap
+        # Log in
         self.client.login(username='security_integration_logout', password='testpass123')
         
-        # Session bilgilerini kaydet
+        # Save session info
         old_session_key = self.client.session.session_key
         old_auth_hash = self.client.session.get('_auth_user_hash')
         
-        # Korumalı sayfaya erişim (başarılı)
+        # Protected page access (success)
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Logout yap
+        # Logout
         self.client.post(reverse('logout'))
         
-        # Eski session bilgileri ile korumalı sayfaya erişim denemesi
+        # Attempt to access protected page with old session data
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
         
-        # Session temizlenmiş olmalı
+        # Session should be cleared
         self.assertFalse(self.client.session.get('_auth_user_id'))
         self.assertIsNone(self.client.session.get('_auth_user_hash'))
     
@@ -401,15 +401,15 @@ class TestLogoutSecurityIntegration(TestCase):
         # Login yap
         self.client.login(username='security_integration_logout', password='testpass123')
         
-        # Session'a hassas bilgi ekle
+        # Add sensitive data to session
         session = self.client.session
         session['sensitive_data'] = {'ssn': '123-45-6789', 'credit_card': '1234-5678-9012-3456'}
         session.save()
         
-        # Logout yap
+        # Logout
         self.client.post(reverse('logout'))
         
-        # Tüm hassas veriler temizlenmeli
+        # All sensitive data should be cleared
         self.assertIsNone(self.client.session.get('sensitive_data'))
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
@@ -419,28 +419,28 @@ class TestLogoutSecurityIntegration(TestCase):
         self.client.get(reverse('landing-page'))
         old_session_key = self.client.session.session_key
         
-        # Login yap (session yenilenmeli)
+        # Log in (session should be renewed)
         self.client.login(username='security_integration_logout', password='testpass123')
         login_session_key = self.client.session.session_key
         
-        # Login sonrası session key değişmeli (Django otomatik yapar)
-        # Bu test session fixation saldırısına karşı koruma sağlar
+        # Session key should change after login (Django does this automatically)
+        # This test ensures protection against session fixation attack
         
-        # Logout yap
+        # Logout
         self.client.post(reverse('logout'))
         logout_session_key = self.client.session.session_key
         
         # Session key should be different or refreshed at each step
-        # Django logout sonrası session flush eder
+        # Django flushes session after logout
         self.assertIsNotNone(old_session_key)
         self.assertIsNotNone(login_session_key)
 
 
 if __name__ == "__main__":
-    print("Logout Entegrasyon Testleri Başlatılıyor...")
+    print("Starting Logout Integration Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()
 

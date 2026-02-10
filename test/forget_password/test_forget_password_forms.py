@@ -499,7 +499,7 @@ class TestCustomSetPasswordForm(TestCase):
         self.assertEqual(form.cleaned_data['new_password2'], 'a' * 200 + '123!')
     
     def test_form_save_functionality(self):
-        """Form save fonksiyonalitesi testi"""
+        """Form save functionality test"""
         data = {
             'new_password1': 'newpassword123!',
             'new_password2': 'newpassword123!'

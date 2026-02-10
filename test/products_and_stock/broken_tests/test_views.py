@@ -1,6 +1,6 @@
 """
-ProductsAndStock Viewları Test Dosyası
-Bu dosya ProductsAndStock modülündeki tüm viewları test eder.
+ProductsAndStock Views Test File
+This file tests all views in the ProductsAndStock module.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from decimal import Decimal
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -34,7 +34,7 @@ class TestProductAndStockListView(TestCase):
         """Set up test data"""
         self.client = Client()
         
-        # Kullanıcılar oluştur
+        # Create users
         self.admin_user = User.objects.create_user(
             username="admin_views_main",
             email="admin_views_main@example.com",
@@ -71,14 +71,14 @@ class TestProductAndStockListView(TestCase):
         #     organisation=self.organisor_profile
         # )
         
-        # Kategori ve alt kategori oluştur
+        # Create category and subcategory
         self.category = Category.objects.create(name="Electronics")
         self.subcategory = SubCategory.objects.create(
             name="Smartphones",
             category=self.category
         )
         
-        # Ürünler oluştur
+        # Create products
         self.product1 = ProductsAndStock.objects.create(
             product_name="iPhone 15",
             product_description="Latest iPhone model",
@@ -103,7 +103,7 @@ class TestProductAndStockListView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Agent için aynı organisation'dan ürün
+        # Product from same organisation for agent
         self.agent_product = ProductsAndStock.objects.create(
             product_name="Agent Product",
             product_description="Agent's product",
@@ -117,12 +117,12 @@ class TestProductAndStockListView(TestCase):
         )
     
     def test_list_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_list_view_admin_user(self):
-        """Admin kullanıcı erişim testi"""
+        """Admin user access test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
@@ -130,7 +130,7 @@ class TestProductAndStockListView(TestCase):
         self.assertContains(response, "Samsung Galaxy")
     
     def test_list_view_organisor_user(self):
-        """Organisor kullanıcı erişim testi"""
+        """Organisor user access test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
@@ -138,14 +138,14 @@ class TestProductAndStockListView(TestCase):
         self.assertContains(response, "Samsung Galaxy")
     
     def test_list_view_agent_user(self):
-        """Agent kullanıcı erişim testi"""
+        """Agent user access test"""
         self.client.force_login(self.agent_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Agent Product")  # Agent'ın kendi ürünü
+        self.assertContains(response, "Agent Product")  # Agent's own product
     
     def test_list_view_category_filter(self):
-        """Kategori filtresi testi"""
+        """Category filter test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-list'),
@@ -156,7 +156,7 @@ class TestProductAndStockListView(TestCase):
         self.assertContains(response, "Samsung Galaxy")
     
     def test_list_view_subcategory_filter(self):
-        """Alt kategori filtresi testi"""
+        """Subcategory filter test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-list'),
@@ -167,7 +167,7 @@ class TestProductAndStockListView(TestCase):
         self.assertContains(response, "Samsung Galaxy")
     
     def test_list_view_context_data(self):
-        """Context data testi"""
+        """Context data test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-list'))
         
@@ -177,9 +177,9 @@ class TestProductAndStockListView(TestCase):
         self.assertIn('total_value', response.context)
         self.assertIn('categories', response.context)
         
-        self.assertEqual(response.context['total_products'], 3)  # 3 ürün var
+        self.assertEqual(response.context['total_products'], 3)  # 3 products
         self.assertEqual(response.context['total_quantity'], 100)  # 50+30+20
-        self.assertEqual(response.context['total_value'], 49999.5 + 23999.7 + 11999.8)  # Doğru hesaplama
+        self.assertEqual(response.context['total_value'], 49999.5 + 23999.7 + 11999.8)  # Correct calculation
 
 
 class TestProductAndStockDetailView(TestCase):
@@ -226,7 +226,7 @@ class TestProductAndStockDetailView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Stok hareketi ve fiyat geçmişi oluştur
+        # Create stock movement and price history
         StockMovement.objects.create(
             product=self.product,
             movement_type='IN',
@@ -248,14 +248,14 @@ class TestProductAndStockDetailView(TestCase):
         )
     
     def test_detail_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.product.pk})
         )
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_detail_view_admin_user(self):
-        """Admin kullanıcı erişim testi"""
+        """Admin user access test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.product.pk})
@@ -265,7 +265,7 @@ class TestProductAndStockDetailView(TestCase):
         self.assertContains(response, "Latest iPhone model")
     
     def test_detail_view_organisor_user(self):
-        """Organisor kullanıcı erişim testi"""
+        """Organisor user access test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.product.pk})
@@ -274,7 +274,7 @@ class TestProductAndStockDetailView(TestCase):
         self.assertContains(response, "iPhone 15")
     
     def test_detail_view_context_data(self):
-        """Detail view context data testi"""
+        """Detail view context data test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-detail', kwargs={'pk': self.product.pk})
@@ -284,7 +284,7 @@ class TestProductAndStockDetailView(TestCase):
         self.assertIn('stock_movements', response.context)
         self.assertIn('price_history', response.context)
         
-        # Stok hareketleri ve fiyat geçmişi kontrolü
+        # Stock movements and price history check
         self.assertEqual(len(response.context['stock_movements']), 2)  # 2 movement var
         self.assertEqual(len(response.context['price_history']), 1)
 
@@ -322,26 +322,26 @@ class TestProductAndStockCreateView(TestCase):
         )
     
     def test_create_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_create_view_get_admin(self):
-        """Admin kullanıcı GET isteği testi"""
+        """Admin user GET request test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "form")
     
     def test_create_view_get_organisor(self):
-        """Organisor kullanıcı GET isteği testi"""
+        """Organisor user GET request test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:ProductAndStock-create'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "form")
     
     def test_create_view_post_admin(self):
-        """Admin kullanıcı POST isteği testi"""
+        """Admin user POST request test"""
         self.client.force_login(self.admin_user)
         
         data = {
@@ -361,11 +361,11 @@ class TestProductAndStockCreateView(TestCase):
         response = self.client.post(reverse('ProductsAndStock:ProductAndStock-create'), data)
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Ürün oluşturuldu mu kontrol et
+        # Check if product was created
         self.assertTrue(ProductsAndStock.objects.filter(product_name='Test Product').exists())
     
     def test_create_view_post_organisor(self):
-        """Organisor kullanıcı POST isteği testi"""
+        """Organisor user POST request test"""
         self.client.force_login(self.organisor_user)
         
         data = {
@@ -384,16 +384,16 @@ class TestProductAndStockCreateView(TestCase):
         response = self.client.post(reverse('ProductsAndStock:ProductAndStock-create'), data)
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Ürün oluşturuldu mu kontrol et
+        # Check if product was created
         product = ProductsAndStock.objects.get(product_name='Test Product 2')
         self.assertEqual(product.organisation, self.organisor_profile)
     
     def test_create_view_invalid_data(self):
-        """Geçersiz veri ile POST isteği testi"""
+        """POST request with invalid data test"""
         self.client.force_login(self.organisor_user)
         
         data = {
-            'product_name': '',  # Boş isim
+            'product_name': '',  # Empty name
             'product_description': 'Test Description',
             'product_price': -10,  # Negatif fiyat
             'cost_price': 80.00,
@@ -404,9 +404,9 @@ class TestProductAndStockCreateView(TestCase):
         }
         
         response = self.client.post(reverse('ProductsAndStock:ProductAndStock-create'), data)
-        self.assertEqual(response.status_code, 200)  # Form hataları ile geri döner
+        self.assertEqual(response.status_code, 200)  # Returns with form errors
         
-        # Ürün oluşturulmadı mı kontrol et
+        # Check that product was not created
         self.assertFalse(ProductsAndStock.objects.filter(product_description='Test Description').exists())
 
 
@@ -455,14 +455,14 @@ class TestProductAndStockUpdateView(TestCase):
         )
     
     def test_update_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-update', kwargs={'pk': self.product.pk})
         )
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_update_view_get_admin(self):
-        """Admin kullanıcı GET isteği testi"""
+        """Admin user GET request test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-update', kwargs={'pk': self.product.pk})
@@ -471,7 +471,7 @@ class TestProductAndStockUpdateView(TestCase):
         self.assertContains(response, "iPhone 15")
     
     def test_update_view_get_organisor(self):
-        """Organisor kullanıcı GET isteği testi"""
+        """Organisor user GET request test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-update', kwargs={'pk': self.product.pk})
@@ -480,7 +480,7 @@ class TestProductAndStockUpdateView(TestCase):
         self.assertContains(response, "iPhone 15")
     
     def test_update_view_post_admin(self):
-        """Admin kullanıcı POST isteği testi"""
+        """Admin user POST request test"""
         self.client.force_login(self.admin_user)
         
         data = {
@@ -503,13 +503,13 @@ class TestProductAndStockUpdateView(TestCase):
         )
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Ürün güncellendi mi kontrol et
+        # Check if product was updated
         updated_product = ProductsAndStock.objects.get(pk=self.product.pk)
         self.assertEqual(updated_product.product_name, 'iPhone 15 Pro')
         self.assertEqual(updated_product.product_price, 1099.99)
     
     def test_update_view_post_organisor(self):
-        """Organisor kullanıcı POST isteği testi"""
+        """Organisor user POST request test"""
         self.client.force_login(self.organisor_user)
         
         data = {
@@ -531,7 +531,7 @@ class TestProductAndStockUpdateView(TestCase):
         )
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Ürün güncellendi mi kontrol et
+        # Check if product was updated
         updated_product = ProductsAndStock.objects.get(pk=self.product.pk)
         self.assertEqual(updated_product.product_name, 'iPhone 15 Plus')
         self.assertEqual(updated_product.product_price, 1199.99)
@@ -582,14 +582,14 @@ class TestProductAndStockDeleteView(TestCase):
         )
     
     def test_delete_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-delete', kwargs={'pk': self.product.pk})
         )
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_delete_view_get_admin(self):
-        """Admin kullanıcı GET isteği testi"""
+        """Admin user GET request test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(
             reverse('ProductsAndStock:ProductAndStock-delete', kwargs={'pk': self.product.pk})
@@ -598,7 +598,7 @@ class TestProductAndStockDeleteView(TestCase):
         self.assertContains(response, "iPhone 15")
     
     def test_delete_view_post_admin(self):
-        """Admin kullanıcı POST isteği testi"""
+        """Admin user POST request test"""
         self.client.force_login(self.admin_user)
         
         response = self.client.post(
@@ -606,11 +606,11 @@ class TestProductAndStockDeleteView(TestCase):
         )
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Ürün silindi mi kontrol et
+        # Check if product was deleted
         self.assertFalse(ProductsAndStock.objects.filter(pk=self.product.pk).exists())
     
     def test_delete_view_post_organisor(self):
-        """Organisor kullanıcı POST isteği testi"""
+        """Organisor user POST request test"""
         self.client.force_login(self.organisor_user)
         
         response = self.client.post(
@@ -618,7 +618,7 @@ class TestProductAndStockDeleteView(TestCase):
         )
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Ürün silindi mi kontrol et
+        # Check if product was deleted
         self.assertFalse(ProductsAndStock.objects.filter(pk=self.product.pk).exists())
 
 
@@ -640,7 +640,7 @@ class TestGetSubcategoriesView(TestCase):
         )
     
     def test_get_subcategories_valid_category(self):
-        """Geçerli kategori ID ile test"""
+        """Test with valid category ID"""
         response = self.client.get(
             reverse('ProductsAndStock:get-subcategories'),
             {'category_id': self.category.id}
@@ -656,7 +656,7 @@ class TestGetSubcategoriesView(TestCase):
         self.assertIn('Laptops', subcategory_names)
     
     def test_get_subcategories_invalid_category(self):
-        """Geçersiz kategori ID ile test"""
+        """Test with invalid category ID"""
         response = self.client.get(
             reverse('ProductsAndStock:get-subcategories'),
             {'category_id': 'invalid'}
@@ -708,7 +708,7 @@ class TestBulkPriceUpdateView(TestCase):
             category=self.category
         )
         
-        # Test ürünleri oluştur
+        # Create test products
         self.product1 = ProductsAndStock.objects.create(
             product_name="iPhone 15",
             product_description="Latest iPhone model",
@@ -734,19 +734,19 @@ class TestBulkPriceUpdateView(TestCase):
         )
     
     def test_bulk_price_update_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(reverse('ProductsAndStock:bulk-price-update'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_bulk_price_update_view_get_admin(self):
-        """Admin kullanıcı GET isteği testi"""
+        """Admin user GET request test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:bulk-price-update'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "form")
     
     def test_bulk_price_update_percentage_increase(self):
-        """Yüzde artış ile toplu fiyat güncelleme testi"""
+        """Bulk price update test with percentage increase"""
         self.client.force_login(self.admin_user)
         
         data = {
@@ -759,7 +759,7 @@ class TestBulkPriceUpdateView(TestCase):
         response = self.client.post(reverse('ProductsAndStock:bulk-price-update'), data)
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Fiyatlar güncellendi mi kontrol et
+        # Check if prices were updated
         updated_product1 = ProductsAndStock.objects.get(pk=self.product1.pk)
         updated_product2 = ProductsAndStock.objects.get(pk=self.product2.pk)
         
@@ -769,12 +769,12 @@ class TestBulkPriceUpdateView(TestCase):
         self.assertAlmostEqual(updated_product1.product_price, expected_price1, places=2)
         self.assertAlmostEqual(updated_product2.product_price, expected_price2, places=2)
         
-        # Fiyat geçmişi oluşturuldu mu kontrol et
+        # Check if price history was created
         self.assertTrue(PriceHistory.objects.filter(product=self.product1).exists())
         self.assertTrue(PriceHistory.objects.filter(product=self.product2).exists())
     
     def test_bulk_price_update_fixed_amount_increase(self):
-        """Sabit miktar artış ile toplu fiyat güncelleme testi"""
+        """Bulk price update test with fixed amount increase"""
         self.client.force_login(self.admin_user)
         
         data = {
@@ -787,7 +787,7 @@ class TestBulkPriceUpdateView(TestCase):
         response = self.client.post(reverse('ProductsAndStock:bulk-price-update'), data)
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Fiyatlar güncellendi mi kontrol et
+        # Check if prices were updated
         updated_product1 = ProductsAndStock.objects.get(pk=self.product1.pk)
         updated_product2 = ProductsAndStock.objects.get(pk=self.product2.pk)
         
@@ -795,7 +795,7 @@ class TestBulkPriceUpdateView(TestCase):
         self.assertEqual(updated_product2.product_price, 849.99)
     
     def test_bulk_price_update_set_price(self):
-        """Yeni fiyat belirleme ile toplu fiyat güncelleme testi"""
+        """Bulk price update test with new price setting"""
         self.client.force_login(self.admin_user)
         
         data = {
@@ -808,7 +808,7 @@ class TestBulkPriceUpdateView(TestCase):
         response = self.client.post(reverse('ProductsAndStock:bulk-price-update'), data)
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Fiyatlar güncellendi mi kontrol et
+        # Check if prices were updated
         updated_product1 = ProductsAndStock.objects.get(pk=self.product1.pk)
         updated_product2 = ProductsAndStock.objects.get(pk=self.product2.pk)
         
@@ -816,7 +816,7 @@ class TestBulkPriceUpdateView(TestCase):
         self.assertEqual(updated_product2.product_price, 500.0)
     
     def test_bulk_price_update_category_filter(self):
-        """Kategori filtresi ile toplu fiyat güncelleme testi"""
+        """Bulk price update test with category filter"""
         self.client.force_login(self.admin_user)
         
         data = {
@@ -830,7 +830,7 @@ class TestBulkPriceUpdateView(TestCase):
         response = self.client.post(reverse('ProductsAndStock:bulk-price-update'), data)
         self.assertEqual(response.status_code, 302)  # Redirect after success
         
-        # Sadece seçili kategorideki ürünler güncellendi mi kontrol et
+        # Check that only products in selected category were updated
         updated_product1 = ProductsAndStock.objects.get(pk=self.product1.pk)
         updated_product2 = ProductsAndStock.objects.get(pk=self.product2.pk)
         
@@ -873,7 +873,7 @@ class TestSalesDashboardView(TestCase):
             category=self.category
         )
         
-        # Test ürünleri oluştur
+        # Create test products
         self.product1 = ProductsAndStock.objects.create(
             product_name="iPhone 15",
             product_description="Latest iPhone model",
@@ -898,7 +898,7 @@ class TestSalesDashboardView(TestCase):
             organisation=self.organisor_profile
         )
         
-        # Stok uyarısı oluştur
+        # Create stock alert
         StockAlert.objects.create(
             product=self.product2,
             alert_type='LOW_STOCK',
@@ -907,7 +907,7 @@ class TestSalesDashboardView(TestCase):
             is_resolved=False
         )
         
-        # Stok önerisi oluştur
+        # Create stock recommendation
         StockRecommendation.objects.create(
             product=self.product2,
             recommendation_type='RESTOCK',
@@ -918,26 +918,26 @@ class TestSalesDashboardView(TestCase):
         )
     
     def test_sales_dashboard_view_anonymous_user(self):
-        """Anonim kullanıcı erişim testi"""
+        """Anonymous user access test"""
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_sales_dashboard_view_admin_user(self):
-        """Admin kullanıcı erişim testi"""
+        """Admin user access test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Dashboard")
     
     def test_sales_dashboard_view_organisor_user(self):
-        """Organisor kullanıcı erişim testi"""
+        """Organisor user access test"""
         self.client.force_login(self.organisor_user)
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Dashboard")
     
     def test_sales_dashboard_context_data(self):
-        """Dashboard context data testi"""
+        """Dashboard context data test"""
         self.client.force_login(self.admin_user)
         response = self.client.get(reverse('ProductsAndStock:sales-dashboard'))
         
@@ -954,7 +954,7 @@ class TestSalesDashboardView(TestCase):
         self.assertIn('critical_alerts_count', response.context)
         self.assertIn('products_with_alerts', response.context)
         
-        # Değerleri kontrol et
+        # Check values
         self.assertEqual(response.context['total_products'], 2)
         self.assertEqual(response.context['low_stock_products'], 1)
         self.assertEqual(response.context['out_of_stock_products'], 0)
@@ -962,9 +962,9 @@ class TestSalesDashboardView(TestCase):
 
 
 if __name__ == "__main__":
-    print("ProductsAndStock Viewları Testleri Başlatılıyor...")
+    print("Starting ProductsAndStock View Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()

@@ -100,14 +100,14 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
         
-        # Password eksik
+        # Password missing
         form = CustomAuthenticationForm(data={
             'username': 'testuser_login_forms'
         })
         self.assertFalse(form.is_valid())
         self.assertIn('password', form.errors)
         
-        # Her ikisi de eksik
+        # Both missing
         form = CustomAuthenticationForm(data={})
         self.assertFalse(form.is_valid())
         self.assertIn('username', form.errors)
@@ -115,7 +115,7 @@ class TestCustomAuthenticationForm(TestCase):
     
     def test_form_invalid_credentials(self):
         """Form test with invalid credentials"""
-        # Yanlış password
+        # Wrong password
         form = CustomAuthenticationForm(data={
             'username': 'testuser_login_forms',
             'password': 'wrongpassword'
@@ -156,7 +156,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"', password_widget)
     
     def test_form_field_labels(self):
-        """Form alan etiketleri testi"""
+        """Form field labels test"""
         form = CustomAuthenticationForm()
         
         self.assertEqual(form.fields['username'].label, 'Username or Email')
@@ -214,23 +214,23 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertFalse(form.is_valid())
     
     def test_form_case_insensitive_username(self):
-        """Case insensitive username testi"""
+        """Case insensitive username test"""
         form = CustomAuthenticationForm(data={
-            'username': 'TESTUSER_LOGIN_FORMS',  # Büyük harflerle
+            'username': 'TESTUSER_LOGIN_FORMS',  # Uppercase
             'password': 'testpass123'
         })
         self.assertTrue(form.is_valid())
     
     def test_form_case_insensitive_email(self):
-        """Case insensitive email testi"""
+        """Case insensitive email test"""
         form = CustomAuthenticationForm(data={
-            'username': 'TEST_LOGIN_FORMS@EXAMPLE.COM',  # Büyük harflerle
+            'username': 'TEST_LOGIN_FORMS@EXAMPLE.COM',  # Uppercase
             'password': 'testpass123'
         })
         self.assertTrue(form.is_valid())
     
     def test_form_whitespace_handling(self):
-        """Whitespace handling testi"""
+        """Whitespace handling test"""
         form = CustomAuthenticationForm(data={
             'username': '  testuser_login_forms  ',  # Leading and trailing whitespace
             'password': 'testpass123'
@@ -238,7 +238,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertTrue(form.is_valid())
     
     def test_form_error_messages(self):
-        """Form hata mesajları testi"""
+        """Form error messages test"""
         form = CustomAuthenticationForm()
         
         # Check if error messages are removed
@@ -269,7 +269,7 @@ class TestCustomAuthenticationForm(TestCase):
         self.assertIn('placeholder="Username or Email"', username_widget)
     
     def test_form_with_request_context(self):
-        """Request context ile form testi"""
+        """Form test with request context"""
         from django.test import RequestFactory
         
         factory = RequestFactory()
@@ -292,7 +292,7 @@ class TestCustomAuthenticationForm(TestCase):
     
     def test_form_validation_with_unicode(self):
         """Validation test with Unicode characters"""
-        # Unicode karakterler içeren username
+        # Username containing Unicode characters
         form = CustomAuthenticationForm(data={
             'username': 'tëstüsér',
             'password': 'testpass123'

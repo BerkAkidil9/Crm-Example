@@ -117,7 +117,7 @@ class TestProductAndStockModelForm(TestCase):
     
     def test_form_subcategory_validation(self):
         """Subcategory validation test"""
-        # Farklı kategoride alt kategori oluştur
+        # Create subcategory in different category
         other_category = Category.objects.create(name="Books")
         other_subcategory = SubCategory.objects.create(
             name="Fiction",
@@ -303,7 +303,7 @@ class TestAdminProductAndStockModelForm(TestCase):
     
     def test_form_subcategory_validation(self):
         """Subcategory validation test"""
-        # Farklı kategoride alt kategori oluştur
+        # Create subcategory in different category
         other_category = Category.objects.create(name="Books")
         other_subcategory = SubCategory.objects.create(
             name="Fiction",

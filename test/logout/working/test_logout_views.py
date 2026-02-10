@@ -1,6 +1,6 @@
 """
-Logout Viewları Test Dosyası
-Bu dosya logout ile ilgili tüm viewları test eder.
+Logout Views Test File
+This file tests all views related to logout.
 """
 
 import os
@@ -13,7 +13,7 @@ from django.contrib.messages import get_messages
 from django.utils import timezone
 from unittest.mock import patch, MagicMock
 
-# Django ayarlarını yükle
+# Load Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djcrm.settings')
 django.setup()
 
@@ -52,72 +52,72 @@ class TestLogoutView(TestCase):
     
     def test_logout_view_post_authenticated_user(self):
         """Logout POST request test with authenticated user"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # Session kontrolü - giriş yapmış olmalı
+        # Session check - should be logged in
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Logout yap
+        # Logout
         response = self.client.post(reverse('logout'))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # Session temizlenmeli
+        # Session should be cleared
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_get_authenticated_user(self):
         """Logout GET request test with authenticated user"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # Session kontrolü - giriş yapmış olmalı
+        # Session check - should be logged in
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # GET ile logout yap (Django LogoutView GET'i desteklemez, 405 döner)
+        # Logout via GET (Django LogoutView does not support GET, returns 405)
         response = self.client.get(reverse('logout'))
         
-        # Method not allowed olmalı (Django LogoutView sadece POST destekler)
+        # Should be method not allowed (Django LogoutView only supports POST)
         self.assertEqual(response.status_code, 405)
         
-        # Session hala aktif olmalı (logout olmadı)
+        # Session should still be active (did not logout)
         self.assertTrue(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_unauthenticated_user(self):
         """Logout test with unauthenticated user"""
-        # Session kontrolü - giriş yapmamış olmalı
+        # Session check - should not be logged in
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Logout yap (giriş yapmamış olsa bile)
+        # Logout (even if not logged in)
         response = self.client.post(reverse('logout'))
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # Session hala boş olmalı
+        # Session should still be empty
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_redirect_url(self):
         """Redirect URL after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
         # Logout yap
         response = self.client.post(reverse('logout'))
         
-        # LOGOUT_REDIRECT_URL'ye redirect olmalı (settings.py'de '/' olarak tanımlı)
+        # Should redirect to LOGOUT_REDIRECT_URL (defined as '/' in settings.py)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
     
     def test_logout_view_session_cleanup(self):
         """Session cleanup after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # Session bilgilerini kontrol et
+        # Check session info
         session = self.client.session
         self.assertTrue(session.get('_auth_user_id'))
         self.assertTrue(session.get('_auth_user_backend'))
@@ -134,43 +134,43 @@ class TestLogoutView(TestCase):
     
     def test_logout_view_protected_page_access_after_logout(self):
         """Protected page access after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # Korumalı sayfaya erişim (giriş yapmış)
+        # Protected page access (logged in)
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 200)
         
-        # Logout yap
+        # Logout
         self.client.post(reverse('logout'))
         
-        # Logout sonrası korumalı sayfaya erişim engellenmeli
+        # Access to protected page after logout should be denied
         response = self.client.get(reverse('leads:lead-list'))
         self.assertEqual(response.status_code, 302)  # Redirect to login
     
     def test_logout_view_multiple_logout_calls(self):
         """Multiple logout calls test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # İlk logout
+        # First logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # İkinci logout (zaten logout olmuş)
+        # Second logout (already logged out)
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Üçüncü logout (hala logout)
+        # Third logout (still logged out)
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_logout_view_csrf_protection(self):
         """CSRF protection test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
         # CSRF token ile logout yap (normal)
@@ -182,25 +182,25 @@ class TestLogoutView(TestCase):
     
     def test_logout_view_next_parameter(self):
         """Redirect with next parameter after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # next parametresi ile logout yap
+        # Logout with next parameter
         response = self.client.post(reverse('logout') + '?next=/login/')
         
-        # Django LogoutView next parametresini destekler
-        # Redirect URL next parametresine göre değişebilir
+        # Django LogoutView supports next parameter
+        # Redirect URL may vary by next parameter
         self.assertEqual(response.status_code, 302)
     
     def test_logout_view_with_different_user_types(self):
         """Logout test with different user types"""
-        # Organizer ile logout
+        # Logout with organiser
         self.client.login(username='testuser_logout_views', password='testpass123')
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Agent kullanıcı oluştur
+        # Create agent user
         agent_user = User.objects.create_user(
             username='agent_logout_test',
             email='agent_logout@example.com',
@@ -217,7 +217,7 @@ class TestLogoutView(TestCase):
         # Create UserProfile
         agent_user_profile, created = UserProfile.objects.get_or_create(user=agent_user)
         
-        # Agent ile logout
+        # Logout with agent
         self.client.login(username='agent_logout_test', password='testpass123')
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
@@ -238,7 +238,7 @@ class TestLogoutView(TestCase):
             email_verified=True
         )
         
-        # Superuser ile giriş yap
+        # Log in as superuser
         self.client.login(username='superuser_logout', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
@@ -249,21 +249,21 @@ class TestLogoutView(TestCase):
     
     def test_logout_view_session_data_cleanup(self):
         """Custom session data cleanup after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # Session'a özel veri ekle
+        # Add custom data to session
         session = self.client.session
         session['custom_data'] = 'test_value'
         session.save()
         
-        # Session verilerini kontrol et
+        # Check session data
         self.assertEqual(self.client.session.get('custom_data'), 'test_value')
         
-        # Logout yap
+        # Logout
         response = self.client.post(reverse('logout'))
         
-        # Session flush edilir, tüm veriler temizlenir
+        # Session is flushed, all data is cleared
         # New session is created
         session = self.client.session
         self.assertIsNone(session.get('custom_data'))
@@ -274,40 +274,40 @@ class TestLogoutView(TestCase):
         client1 = Client()
         client2 = Client()
         
-        # Her iki client ile giriş yap
+        # Log in with both clients
         client1.login(username='testuser_logout_views', password='testpass123')
         client2.login(username='testuser_logout_views', password='testpass123')
         
-        # Her iki client giriş yapmış olmalı
+        # Both clients should be logged in
         self.assertTrue(client1.session.get('_auth_user_id'))
         self.assertTrue(client2.session.get('_auth_user_id'))
         
-        # Client1 ile logout yap
+        # Logout with Client1
         response = client1.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(client1.session.get('_auth_user_id'))
         
-        # Client2 hala giriş yapmış olmalı (farklı session)
+        # Client2 should still be logged in (different session)
         self.assertTrue(client2.session.get('_auth_user_id'))
     
     def test_logout_view_url_pattern(self):
         """Logout URL pattern test"""
-        # Logout URL'i doğru mu
+        # Is logout URL correct
         logout_url = reverse('logout')
         self.assertEqual(logout_url, '/logout/')
     
     def test_logout_view_with_ajax_request(self):
         """Logout test with AJAX request"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_logout_views', password='testpass123')
         
-        # AJAX isteği ile logout
+        # Logout via AJAX request
         response = self.client.post(
             reverse('logout'),
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         
-        # Redirect olmalı
+        # Should redirect
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
 
@@ -350,8 +350,8 @@ class TestLogoutViewSecurity(TestCase):
         # Logout yap
         self.client.post(reverse('logout'))
         
-        # Yeni session oluşturulmalı (session key değişmeli)
-        # Django logout sonrası session flush eder
+        # New session should be created (session key should change)
+        # Django flushes session after logout
         new_session_key = self.client.session.session_key
         
         # Session keys should be different (or None)
@@ -360,7 +360,7 @@ class TestLogoutViewSecurity(TestCase):
     
     def test_logout_view_no_session_hijacking(self):
         """Session hijacking attack protection test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
         # Session bilgilerini kaydet
@@ -369,46 +369,46 @@ class TestLogoutViewSecurity(TestCase):
         # Logout yap
         self.client.post(reverse('logout'))
         
-        # Eski session ile korumalı sayfaya erişim denemesi
+        # Attempt to access protected page with old session
         response = self.client.get(reverse('leads:lead-list'))
         
-        # Erişim engellenmeli (redirect to login)
+        # Access should be denied (redirect to login)
         self.assertEqual(response.status_code, 302)
     
     def test_logout_view_token_invalidation(self):
         """Token invalidation after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
-        # Session hash'i kaydet
+        # Save session hash
         session_hash = self.client.session.get('_auth_user_hash')
         self.assertIsNotNone(session_hash)
         
         # Logout yap
         self.client.post(reverse('logout'))
         
-        # Session hash temizlenmeli
+        # Session hash should be cleared
         self.assertIsNone(self.client.session.get('_auth_user_hash'))
     
     def test_logout_view_no_caching(self):
         """Cache control after logout test"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='security_logout_user', password='testpass123')
         
         # Logout yap
         response = self.client.post(reverse('logout'))
         
-        # Cache-Control header'ları kontrol et
-        # Django LogoutView otomatik cache kontrolü eklemez
-        # Ancak logout sonrası sayfalar cache'lenmemeli
+        # Check Cache-Control headers
+        # Django LogoutView does not add cache control automatically
+        # But pages should not be cached after logout
         self.assertEqual(response.status_code, 302)
 
 
 if __name__ == "__main__":
-    print("Logout View Testleri Başlatılıyor...")
+    print("Starting Logout View Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()
 

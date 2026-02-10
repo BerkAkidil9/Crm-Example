@@ -292,7 +292,7 @@ class TestEmailOrUsernameModelBackend(TestCase):
         # Normal user
         self.assertTrue(self.backend.user_can_authenticate(self.user))
         
-        # Inactive kullanıcı
+        # Inactive user
         self.user.is_active = False
         self.user.save()
         self.assertFalse(self.backend.user_can_authenticate(self.user))

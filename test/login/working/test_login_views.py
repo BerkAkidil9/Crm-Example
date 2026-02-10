@@ -120,7 +120,7 @@ class TestCustomLoginView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Kullanıcı giriş yapmamış mı
+        # User should not be logged in
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_unverified_email(self):
@@ -134,7 +134,7 @@ class TestCustomLoginView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Kullanıcı giriş yapmamış mı
+        # User should not be logged in
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_nonexistent_user(self):
@@ -148,7 +148,7 @@ class TestCustomLoginView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Kullanıcı giriş yapmamış mı
+        # User should not be logged in
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_post_empty_credentials(self):
@@ -162,7 +162,7 @@ class TestCustomLoginView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Kullanıcı giriş yapmamış mı
+        # User should not be logged in
         self.assertFalse(self.client.session.get('_auth_user_id'))
     
     def test_login_view_template(self):
@@ -187,10 +187,10 @@ class TestCustomLoginView(TestCase):
     
     def test_login_view_redirect_authenticated_user(self):
         """Redirect test for logged-in user"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='testuser_login_views', password='testpass123')
         
-        # Login sayfasına git
+        # Go to login page
         response = self.client.get(reverse('login'))
         
         # Should redirect or 200 (redirect_authenticated_user=False)
@@ -203,13 +203,13 @@ class TestCustomLoginView(TestCase):
             'password': 'testpass123'
         })
         
-        # Landing page'e redirect olmalı
+        # Should redirect to landing page
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
     
     def test_login_view_form_validation(self):
         """Form validation test"""
-        # Geçersiz email formatı
+        # Invalid email format
         response = self.client.post(reverse('login'), {
             'username': 'invalid-email-format',
             'password': 'testpass123'
@@ -218,9 +218,9 @@ class TestCustomLoginView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'form')
         
-        # Çok uzun username
+        # Username too long
         response = self.client.post(reverse('login'), {
-            'username': 'a' * 300,  # Çok uzun username
+            'username': 'a' * 300,  # Username too long
             'password': 'testpass123'
         })
         
@@ -229,7 +229,7 @@ class TestCustomLoginView(TestCase):
     
     def test_login_view_csrf_protection(self):
         """CSRF protection test"""
-        # CSRF token olmadan POST isteği
+        # POST request without CSRF token
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'testpass123'
@@ -241,7 +241,7 @@ class TestCustomLoginView(TestCase):
     
     def test_login_view_remember_me_functionality(self):
         """Remember me functionality test (if implemented)"""
-        # Bu test, eğer remember me özelliği eklenirse güncellenebilir
+        # This test can be updated if remember me feature is added
         response = self.client.post(reverse('login'), {
             'username': 'testuser_login_views',
             'password': 'testpass123'
@@ -254,7 +254,7 @@ class TestCustomLoginView(TestCase):
     def test_login_view_case_insensitive_username(self):
         """Case insensitive username test"""
         response = self.client.post(reverse('login'), {
-            'username': 'TESTUSER_LOGIN_VIEWS',  # Büyük harflerle
+            'username': 'TESTUSER_LOGIN_VIEWS',  # Uppercase
             'password': 'testpass123'
         })
         
@@ -314,11 +314,11 @@ class TestLoginViewIntegration(TestCase):
     
     def test_complete_login_flow(self):
         """Complete login flow test"""
-        # 1. Login sayfasına git
+        # 1. Go to login page
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         
-        # 2. Login form gönder
+        # 2. Submit login form
         response = self.client.post(reverse('login'), {
             'username': 'integration_test_user',
             'password': 'testpass123'
@@ -326,7 +326,7 @@ class TestLoginViewIntegration(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('landing-page'))
         
-        # 3. Kullanıcı giriş yapmış mı kontrol et
+        # 3. Check if user is logged in
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
         # 4. Protected page access test
@@ -353,16 +353,16 @@ class TestLoginViewIntegration(TestCase):
     
     def test_login_after_logout(self):
         """Login test after logout"""
-        # Önce giriş yap
+        # Log in first
         self.client.login(username='integration_test_user', password='testpass123')
         self.assertTrue(self.client.session.get('_auth_user_id'))
         
-        # Logout yap
+        # Logout
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self.client.session.get('_auth_user_id'))
         
-        # Tekrar giriş yap
+        # Log in again
         response = self.client.post(reverse('login'), {
             'username': 'integration_test_user',
             'password': 'testpass123'
@@ -372,9 +372,9 @@ class TestLoginViewIntegration(TestCase):
 
 
 if __name__ == "__main__":
-    print("Login View Testleri Başlatılıyor...")
+    print("Starting Login View Tests...")
     print("=" * 60)
     
-    # Test çalıştırma
+    # Run tests
     import unittest
     unittest.main()
