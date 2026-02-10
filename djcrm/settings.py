@@ -246,6 +246,10 @@ CONN_MAX_AGE = 600 if not DEBUG else 0
 
 # Security settings for production
 if not DEBUG:
+    # Render.com uses a reverse proxy – tell Django the original request was HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SESSION_COOKIE_SECURE = True
