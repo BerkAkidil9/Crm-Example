@@ -1,3 +1,0 @@
-"""
-ProductsAndStock module tests
-"""
