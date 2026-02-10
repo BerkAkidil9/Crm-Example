@@ -335,7 +335,7 @@ class TestProductsAndStockWorkflow(TestCase):
         expected_profit_percentage = (50.0 / 100.0) * 100
         self.assertEqual(product.profit_margin_percentage, expected_profit_percentage)
         
-        # Toplam kar
+        # Total profit
         expected_total_profit = 50.0 * 20
         self.assertEqual(product.total_profit, expected_total_profit)
         

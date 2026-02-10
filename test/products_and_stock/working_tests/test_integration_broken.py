@@ -290,7 +290,7 @@ class TestProductsAndStockWorkflow(TestCase):
         )
         
         # Discounted price calculation test
-        expected_discounted_price = (100.0 * 0.8) - 10.0  # %20 indirim + 10 TL indirim
+        expected_discounted_price = (100.0 * 0.8) - 10.0  # 20% discount + 10 currency units discount
         self.assertEqual(product.discounted_price, expected_discounted_price)
         
         # Check if discount is active
@@ -305,12 +305,12 @@ class TestProductsAndStockWorkflow(TestCase):
         # Future discount is not active
         self.assertFalse(product.is_discount_active)
         
-        # Aktif tarihli indirim
+        # Discount with active date range
         product.discount_start_date = now - timezone.timedelta(hours=1)
         product.discount_end_date = now + timezone.timedelta(hours=1)
         product.save()
         
-        # Aktif tarihli indirim
+        # Discount with active date range
         self.assertTrue(product.is_discount_active)
     
     def test_profit_calculation_system(self):
@@ -335,7 +335,7 @@ class TestProductsAndStockWorkflow(TestCase):
         expected_profit_percentage = (50.0 / 100.0) * 100
         self.assertEqual(product.profit_margin_percentage, expected_profit_percentage)
         
-        # Toplam kar
+        # Total profit
         expected_total_profit = 50.0 * 20
         self.assertEqual(product.total_profit, expected_total_profit)
         

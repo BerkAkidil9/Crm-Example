@@ -8,7 +8,7 @@ class OrganisorListFilter(admin.SimpleListFilter):
 	parameter_name = 'organisation'
 
 	def lookups(self, request, model_admin):
-		# Organisor olan ve en az bir urunu olan UserProfile'lar (admin'de urun olan tum org'lar)
+		# UserProfiles that are organisors and have at least one product (all orgs with products in admin)
 		org_ids = ProductsAndStock.objects.values_list('organisation_id', flat=True).distinct()
 		for profile in UserProfile.objects.filter(pk__in=org_ids).select_related('user').order_by('user__username'):
 			label = f"{profile.user.username}"

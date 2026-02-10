@@ -226,7 +226,7 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
             try:
                 form.user_organisation = user.userprofile
             except Exception:
-                pass  # Update'de organisation zaten mevcut
+                pass  # Organisation already set on update
 
         response = super().form_valid(form)
         product.refresh_from_db()
@@ -529,7 +529,7 @@ class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
             reverse=True
         )[:5]
         
-        # Recent Alerts: kritiklik yuksekten dusuge (CRITICAL -> HIGH -> MEDIUM -> LOW), sonra en yeni tarih
+        # Recent Alerts: by severity high to low (CRITICAL -> HIGH -> MEDIUM -> LOW), then by newest date
         severity_order = Case(
             When(severity='CRITICAL', then=Value(0)),
             When(severity='HIGH', then=Value(1)),
@@ -543,8 +543,8 @@ class SalesDashboardView(OrganisorAndLoginRequiredMixin, generic.TemplateView):
             is_resolved=False
         ).annotate(severity_order=severity_order).order_by('severity_order', '-created_at')[:20]
         
-        # Stock Recommendations: sadece sorun hala gecerliyse goster, urun basina tek oneri (en onemli)
-        # Ayni urunde hem DISCOUNT hem REDUCE_STOCK olmasin; confidence_score ile sirali, urun basina ilk gelen
+        # Stock Recommendations: show only if issue still valid, one recommendation per product (most important)
+        # Do not show both DISCOUNT and REDUCE_STOCK for same product; ordered by confidence_score, first per product
         recs_qs = StockRecommendation.objects.filter(
             product__in=products,
             is_applied=False

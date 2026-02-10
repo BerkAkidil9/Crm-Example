@@ -589,7 +589,7 @@ class TestOrderFinanceIntegration(TestCase):
             product_quantity=3
         )
         
-        # Toplam fiyat hesapla
+        # Calculate total price
         order_items = OrderProduct.objects.filter(order=order)
         calculated_total = sum(item.total_price for item in order_items)
         

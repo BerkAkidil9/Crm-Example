@@ -27,7 +27,7 @@ This file lists all Turkish content in the project **excluding migration files**
 ## 3. Documentation (MD files)
 
 ### 3.1 `START_PROJECT.md` (was fully Turkish, now translated)
-- **Başlık:** "Django CRM Projesi Başlatma Rehberi" → "Django CRM Project Startup Guide"
+- **Title:** "Django CRM Projesi Başlatma Rehberi" → "Django CRM Project Startup Guide"
 - "Projeyi Sıfırdan Başlatmak İçin Gerekli Komutlar" → "Required Commands to Start the Project from Scratch"
 - "Terminal/PowerShell'i açın ve proje klasörüne gidin" → "Open Terminal/PowerShell and go to the project folder"
 - "Django sunucusunu başlatın" → "Start the Django server"
@@ -64,7 +64,7 @@ This file lists all Turkish content in the project **excluding migration files**
 - "Tüm logout testleri (33 test - %100 başarılı!)" → "All logout tests (33 tests - 100% success!)"
 - "İnteraktif test runner" → "Interactive test runner"
 - "Diğer Modül Testleri" → "Other Module Tests"
-- Ve dosyadaki diğer tüm Türkçe cümleler.
+- And all other Turkish sentences in the file.
 
 ### 3.3 `test/orders/README.md`
 - "Bu klasör Orders modülü için organize edilmiş test dosyalarını içerir." → "This folder contains organized test files for the Orders module."
@@ -78,7 +78,7 @@ This file lists all Turkish content in the project **excluding migration files**
 - "Stok hareket kayıt testleri" → "Stock movement record tests"
 - "Test İstatistikleri" → "Test Statistics"
 - "Toplam Test Sayısı" → "Total Test Count"
-- Ve diğer Türkçe ifadeler.
+- And other Turkish phrases.
 
 ### 3.4 `test/login/README.md`
 - "Bu klasör login ile ilgili tüm test dosyalarını içerir." → "This folder contains all test files related to login."
@@ -90,7 +90,7 @@ This file lists all Turkish content in the project **excluding migration files**
 - "Geçerli veri testi" / "Geçersiz veri testi" → "Valid data test" / "Invalid data test"
 - "Username ile giriş testi" → "Login with username test"
 - "Email ile giriş testi" → "Login with email test"
-- Ve diğer tüm Türkçe metinler.
+- And all other Turkish text.
 
 ### 3.5 `test/leads/README.md`
 - "Bu klasör Leads modülü için organize edilmiş test dosyalarını içerir." → "This folder contains organized test files for the Leads module."
@@ -107,7 +107,7 @@ This file lists all Turkish content in the project **excluding migration files**
 - "Test Başarısız Olursa" → "If Test Fails"
 - "Yaygın Sorunlar" → "Common Issues"
 - "Gelecek Planları" → "Future Plans"
-- Ve dosyadaki diğer Türkçe ifadeler.
+- And other Turkish phrases in the file.
 
 ### 3.6 `test/forget_password/README.md`
 - "Bu klasör forget password (şifre sıfırlama) modülü için..." → "This folder contains organized test files for the forget password module."
@@ -120,19 +120,19 @@ This file lists all Turkish content in the project **excluding migration files**
 - "Geçerli email ile POST testi" → "POST test with valid email"
 - "Şifre uyumsuzluğu testi" → "Password mismatch test"
 - "Zayıf şifre testi" → "Weak password test"
-- Ve diğer tüm Türkçe metinler.
+- And all other Turkish text.
 
 ### 3.7 `test/logout/TEST_RESULTS.md`
-- Tamamı Türkçe açıklamalı (başlıklar, test isimleri, kategoriler, öneriler, öğrenilen dersler vb.). Tüm bu metinler İngilizceye çevrilebilir.
+- Fully described in Turkish (headings, test names, categories, suggestions, lessons learned, etc.). All of this text can be translated to English.
 
 ### 3.8 `test/logout/SUMMARY.md` (formerly OZET.md)
 - File renamed to SUMMARY.md; content was already in English.
 
 ### 3.9 `test/organisors/README.md`
-- Türkçe kısımlar (varsa) benzer şekilde "Test Coverage", "Running Tests" vb. İngilizce karşılıklara çevrilebilir.
+- Turkish parts (if any) can be translated similarly to "Test Coverage", "Running Tests", etc.
 
 ### 3.10 `test/signup/README.md`
-- Türkçe kısımlar (varsa) aynı terminoloji ile İngilizceye çevrilebilir.
+- Turkish parts (if any) can be translated to English using the same terminology.
 
 ---
 
@@ -153,7 +153,7 @@ This file lists all Turkish content in the project **excluding migration files**
 | `test/products_and_stock/working_tests/` | test_forms, test_integration, simple_test, __init__.py |
 | `test/products_and_stock/test_runner.py` | Menu and messages |
 | `test/products_and_stock/broken_tests/` | test_forms, test_views, test_views_simple |
-| `test/forget_password/test_forget_password_forms.py` | Docstrings (e.g. "Form şifre uyumsuzluğu testi"), comments |
+| `test/forget_password/test_forget_password_forms.py` | Docstrings (e.g. "Form password mismatch test"), comments |
 | `test/forget_password/test_forget_password_views.py` | Docstrings and comments |
 | `test/login/working/` | test_login_views, test_login_integration, test_login_authentication – comments/docstrings |
 | `test/logout/working/` | test_logout_views, test_logout_integration – docstrings and comments |
@@ -163,7 +163,7 @@ Example translations (for reference):
 - "Form başlatma testi" → "Form initialization test"
 - "Django ayarlarını yükle" → "Load Django settings"
 - "Giriş yapmış kullanıcı" → "Authenticated user"
-- "Çıkış" → "Exit"
+- "Çıkış" → "Exit" (menu label)
 
 ---
 

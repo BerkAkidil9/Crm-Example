@@ -395,7 +395,7 @@ class TestProductAndStockCreateView(TestCase):
         data = {
             'product_name': '',  # Empty name
             'product_description': 'Test Description',
-            'product_price': -10,  # Negatif fiyat
+            'product_price': -10,  # Negative price
             'cost_price': 80.00,
             'product_quantity': 10,
             'minimum_stock_level': 2,

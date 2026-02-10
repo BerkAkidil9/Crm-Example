@@ -571,7 +571,7 @@ class TestBulkPriceUpdateForm(TestCase):
         }
         
         form = BulkPriceUpdateForm(data=data)
-        # Subcategory queryset'ini manuel olarak ayarla (AJAX olmadan)
+        # Set subcategory queryset manually (without AJAX)
         form.fields['subcategory'].queryset = SubCategory.objects.all()
         if not form.is_valid():
             print(f"Form errors: {form.errors}")

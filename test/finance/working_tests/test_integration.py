@@ -264,7 +264,7 @@ class TestFinanceOrdersIntegration(TestCase):
                 order_description=f'{order_name} description',
                 organisation=self.organisor_profile,
                 lead=self.lead,
-                creation_date=order_date  # creation_date manuel set et
+                creation_date=order_date  # set creation_date manually
             )
             
             OrderFinanceReport.objects.create(
@@ -281,7 +281,7 @@ class TestFinanceOrdersIntegration(TestCase):
         self.assertIn('Today Order', [report.order.order_name for report in today_reports])
     
     def test_finance_report_organisation_filtering(self):
-        """Finance report organizasyon filtreleme"""
+        """Finance report organisation filtering"""
         # Create different organisation
         org2_user = User.objects.create_user(
             username='org2_finance_integration',
@@ -430,7 +430,7 @@ class TestFinanceProductsIntegration(TestCase):
             earned_amount=order_product.total_price
         )
         
-        # Kar hesaplama
+        # Profit calculation
         total_revenue = order_product.total_price
         total_cost = order_product.product_quantity * order_product.product.cost_price
         profit = total_revenue - total_cost
@@ -630,12 +630,12 @@ class TestFinanceViewsIntegration(TestCase):
         self.assertContains(response, 'Full Workflow Order')
     
     def test_financial_report_view_form_integration(self):
-        """FinancialReportView form entegrasyonu"""
+        """FinancialReportView form integration"""
         from django.test import Client
         
         client = Client()
         
-        # GET request - form render edilmeli
+        # GET request - form should be rendered
         response = client.get(reverse('finance:financial_report'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
