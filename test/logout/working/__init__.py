@@ -1,2 +1,0 @@
-# Logout working tests package
-

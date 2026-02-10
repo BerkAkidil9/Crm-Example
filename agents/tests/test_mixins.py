@@ -1,0 +1,374 @@
+"""
+Agent Mixin Test File
+This file contains mixin tests for the Agent module.
+"""
+
+from django.test import TestCase, RequestFactory
+from django.contrib.auth import get_user_model
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
+from unittest.mock import patch, MagicMock
+
+from agents.mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin, ProductsAndStockAccessMixin
+from django.views.generic import View
+from leads.models import User, UserProfile, Agent
+from organisors.models import Organisor
+
+User = get_user_model()
+
+
+class MockView(View):
+    """Mock view for mixin tests"""
+    def dispatch(self, request, *args, **kwargs):
+        return HttpResponse("Mock response")
+
+
+class TestOrganisorAndLoginRequiredMixin(TestCase):
+    """OrganisorAndLoginRequiredMixin tests"""
+    
+    def setUp(self):
+        """Set up test data"""
+        self.factory = RequestFactory()
+        
+        # Normal user
+        self.normal_user = User.objects.create_user(
+            username='normal_user',
+            email='normal@example.com',
+            password='testpass123',
+            first_name='Normal',
+            last_name='User',
+            phone_number='+905551234567',
+            date_of_birth='1990-01-01',
+            gender='M',
+            is_organisor=False,
+            is_agent=False,
+            email_verified=True
+        )
+        
+        # Organisor user
+        self.organisor_user = User.objects.create_user(
+            username='organisor_user',
+            email='organisor@example.com',
+            password='testpass123',
+            first_name='Organisor',
+            last_name='User',
+            phone_number='+905551234568',
+            date_of_birth='1980-01-01',
+            gender='M',
+            is_organisor=True,
+            is_agent=False,
+            is_superuser=False,
+            email_verified=True
+        )
+        
+        # Superuser
+        self.superuser = User.objects.create_superuser(
+            username='superuser',
+            email='superuser@example.com',
+            password='testpass123',
+            first_name='Super',
+            last_name='User'
+        )
+        
+        # Create UserProfile
+        user_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
+        Organisor.objects.create(user=self.organisor_user, organisation=user_profile)
+    
+    def test_organisor_access(self):
+        """Organisor access test"""
+        request = self.factory.get('/test/')
+        request.user = self.organisor_user
+        
+        class TestView(OrganisorAndLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_superuser_access(self):
+        """Superuser access test"""
+        request = self.factory.get('/test/')
+        request.user = self.superuser
+        
+        class TestView(OrganisorAndLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_normal_user_access_denied(self):
+        """Normal user access denied test"""
+        request = self.factory.get('/test/')
+        request.user = self.normal_user
+        
+        class TestView(OrganisorAndLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        # Mixin should redirect normal users (neither organisor nor admin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/leads/')
+    
+    def test_anonymous_user_access_denied(self):
+        """Anonymous user access denied test"""
+        request = self.factory.get('/test/')
+        request.user = User()  # Anonymous user
+        
+        class TestView(OrganisorAndLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        # Mixin does not redirect anonymous users, returns normal response
+        self.assertEqual(response.status_code, 200)
+
+
+class TestAgentAndOrganisorLoginRequiredMixin(TestCase):
+    """AgentAndOrganisorLoginRequiredMixin tests"""
+    
+    def setUp(self):
+        """Set up test data"""
+        self.factory = RequestFactory()
+        
+        # Normal user
+        self.normal_user = User.objects.create_user(
+            username='normal_user2',
+            email='normal2@example.com',
+            password='testpass123',
+            first_name='Normal',
+            last_name='User2',
+            phone_number='+905551234569',
+            date_of_birth='1990-01-01',
+            gender='M',
+            is_organisor=False,
+            is_agent=False,
+            email_verified=True
+        )
+        
+        # Organisor user
+        self.organisor_user = User.objects.create_user(
+            username='organisor_user2',
+            email='organisor2@example.com',
+            password='testpass123',
+            first_name='Organisor',
+            last_name='User2',
+            phone_number='+905551234570',
+            date_of_birth='1980-01-01',
+            gender='M',
+            is_organisor=True,
+            is_agent=False,
+            is_superuser=False,
+            email_verified=True
+        )
+        
+        # Agent user
+        self.agent_user = User.objects.create_user(
+            username='agent_user',
+            email='agent@example.com',
+            password='testpass123',
+            first_name='Agent',
+            last_name='User',
+            phone_number='+905551234571',
+            date_of_birth='1990-01-01',
+            gender='M',
+            is_organisor=False,
+            is_agent=True,
+            email_verified=True
+        )
+        
+        # Superuser
+        self.superuser = User.objects.create_superuser(
+            username='superuser2',
+            email='superuser2@example.com',
+            password='testpass123',
+            first_name='Super',
+            last_name='User2'
+        )
+        
+        # Create UserProfile and Agent
+        organisor_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
+        agent_profile, created = UserProfile.objects.get_or_create(user=self.agent_user)
+        Organisor.objects.create(user=self.organisor_user, organisation=organisor_profile)
+        Agent.objects.create(user=self.agent_user, organisation=organisor_profile)
+    
+    def test_organisor_access(self):
+        """Organisor access test"""
+        request = self.factory.get('/test/')
+        request.user = self.organisor_user
+        
+        class TestView(AgentAndOrganisorLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_agent_access(self):
+        """Agent access test"""
+        request = self.factory.get('/test/')
+        request.user = self.agent_user
+        
+        class TestView(AgentAndOrganisorLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_superuser_access(self):
+        """Superuser access test"""
+        request = self.factory.get('/test/')
+        request.user = self.superuser
+        
+        class TestView(AgentAndOrganisorLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_normal_user_access_denied(self):
+        """Normal user access denied test"""
+        request = self.factory.get('/test/')
+        request.user = self.normal_user
+        
+        class TestView(AgentAndOrganisorLoginRequiredMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        # Mixin should redirect normal users (not agent, organisor or admin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/leads/')
+
+
+class TestProductsAndStockAccessMixin(TestCase):
+    """ProductsAndStockAccessMixin tests"""
+    
+    def setUp(self):
+        """Set up test data"""
+        self.factory = RequestFactory()
+        
+        # Normal user
+        self.normal_user = User.objects.create_user(
+            username='normal_user3',
+            email='normal3@example.com',
+            password='testpass123',
+            first_name='Normal',
+            last_name='User3',
+            phone_number='+905551234572',
+            date_of_birth='1990-01-01',
+            gender='M',
+            is_organisor=False,
+            is_agent=False,
+            email_verified=True
+        )
+        
+        # Organisor user
+        self.organisor_user = User.objects.create_user(
+            username='organisor_user3',
+            email='organisor3@example.com',
+            password='testpass123',
+            first_name='Organisor',
+            last_name='User3',
+            phone_number='+905551234573',
+            date_of_birth='1980-01-01',
+            gender='M',
+            is_organisor=True,
+            is_agent=False,
+            is_superuser=False,
+            email_verified=True
+        )
+        
+        # Agent user
+        self.agent_user = User.objects.create_user(
+            username='agent_user2',
+            email='agent2@example.com',
+            password='testpass123',
+            first_name='Agent',
+            last_name='User2',
+            phone_number='+905551234574',
+            date_of_birth='1990-01-01',
+            gender='M',
+            is_organisor=False,
+            is_agent=True,
+            email_verified=True
+        )
+        
+        # Superuser
+        self.superuser = User.objects.create_superuser(
+            username='superuser3',
+            email='superuser3@example.com',
+            password='testpass123',
+            first_name='Super',
+            last_name='User3'
+        )
+        
+        # Create UserProfile and Agent
+        organisor_profile, created = UserProfile.objects.get_or_create(user=self.organisor_user)
+        agent_profile, created = UserProfile.objects.get_or_create(user=self.agent_user)
+        Organisor.objects.create(user=self.organisor_user, organisation=organisor_profile)
+        Agent.objects.create(user=self.agent_user, organisation=organisor_profile)
+    
+    def test_organisor_access(self):
+        """Organisor access test"""
+        request = self.factory.get('/test/')
+        request.user = self.organisor_user
+        
+        class TestView(ProductsAndStockAccessMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_agent_access(self):
+        """Agent access test"""
+        request = self.factory.get('/test/')
+        request.user = self.agent_user
+        
+        class TestView(ProductsAndStockAccessMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_superuser_access(self):
+        """Superuser access test"""
+        request = self.factory.get('/test/')
+        request.user = self.superuser
+        
+        class TestView(ProductsAndStockAccessMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_normal_user_access_denied(self):
+        """Normal user access denied test"""
+        request = self.factory.get('/test/')
+        request.user = self.normal_user
+        
+        class TestView(ProductsAndStockAccessMixin, MockView):
+            pass
+        
+        view = TestView()
+        response = view.dispatch(request)
+        # Mixin should redirect normal users (not agent, organisor or admin)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/leads/')
+
+
+if __name__ == "__main__":
+    print("Starting Agent Mixin Tests...")
+    print("=" * 60)
+    
+    # Run tests
+    import unittest
+    unittest.main()
