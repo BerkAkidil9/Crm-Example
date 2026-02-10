@@ -6,11 +6,14 @@ A Django-based CRM system with email verification and authentication features.
 
 - ✅ User authentication (username/email login)
 - ✅ Email verification system
-- ✅ Lead management
-- ✅ Agent management
-- ✅ Product and stock management
-- ✅ Order management
-- ✅ Financial reporting
+- ✅ Role-based access: **Administrator**, **Organisor**, **Agent**
+- ✅ Lead management (agent assignment, source & value categories)
+- ✅ Organisor and Agent management
+- ✅ Product and stock management (bulk price, sales dashboard, charts)
+- ✅ Order management (create, update, cancel, delete)
+- ✅ Financial reporting (by date range, organisation/agent filters)
+- ✅ Tasks and notifications (assign tasks, order/task/lead reminders)
+- ✅ Activity log (audit trail of actions)
 
 ## Setup Instructions
 
@@ -81,17 +84,21 @@ To enable email verification:
 ## Project Structure
 
 ```
-env/
-├── agents/          # Agent management
-├── djcrm/          # Main Django project
-├── finance/        # Financial reporting
-├── leads/          # Lead management & authentication
-├── orders/         # Order management
-├── ProductsAndStock/ # Product management
-├── static/         # Static files
-├── templates/      # HTML templates
-└── manage.py       # Django management script
+├── agents/           # Agent management (CRUD, profile)
+├── organisors/       # Organisor (organisation) management
+├── djcrm/            # Main Django project (settings, urls)
+├── finance/          # Financial reporting (date range, earnings, profit)
+├── leads/            # Lead management, categories, authentication
+├── orders/           # Order management (products, leads)
+├── ProductsAndStock/ # Product catalog, stock, bulk price, dashboard, charts
+├── tasks/            # Tasks and notifications
+├── activity_log/     # Audit log of user actions
+├── static/           # Static files
+├── templates/        # HTML templates (base, landing, registration)
+└── manage.py         # Django management script
 ```
+
+See the **landing page** (System Overview and role cards) for a summary of what Administrator, Organisor, and Agent can do.
 
 ## Security Notes
 

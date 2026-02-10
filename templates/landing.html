@@ -46,31 +46,35 @@
 				<ul class="space-y-2 text-gray-600 text-sm">
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>List, create, update and delete organisations</span>
+						<span>List, create, update and delete organisors (organisations)</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>Manage agents across all organisations</span>
+						<span>Manage agents across all organisations (filter by organisation)</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>View and edit all leads across the system</span>
+						<span>View and edit all leads; assign agents; filter by organisation and agent</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>Manage all products, stock and pricing</span>
+						<span>Manage all products, stock, pricing; bulk price update; sales dashboard and charts</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>Monitor all orders with organisation and agent filters</span>
+						<span>Monitor all orders; create, update, cancel, delete; filter by organisation and agent</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>Run financial reports for any date range (earnings, order totals)</span>
+						<span>Financial reports for any date range and organisation (earnings, order totals, profit)</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-purple-500 mr-2">✓</span>
-						<span>View and filter lead categories (where leads came from, their value) across all organisations</span>
+						<span>Tasks: create and assign to any organisation/agent; filter by organisation and agent</span>
+					</li>
+					<li class="flex items-start">
+						<span class="text-purple-500 mr-2">✓</span>
+						<span>Activity log: view all actions; filter by user and organisation</span>
 					</li>
 				</ul>
 			</div>
@@ -91,15 +95,15 @@
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
-						<span>Create, update and delete agents in your team</span>
+						<span>Create, update and delete agents in your organisation</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
-						<span>Create, edit, delete leads and assign agents</span>
+						<span>Create, edit, delete leads and assign agents; filter by agent</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
-						<span>Classify leads by source (where they came from) and value (potential worth); browse category list</span>
+						<span>Classify leads by source and value; browse category list</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
@@ -107,15 +111,23 @@
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
-						<span>Sales dashboard (performance overview) and product charts (sales, stock, trends)</span>
+						<span>Sales dashboard and product charts (sales, stock, trends)</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
-						<span>Order management: create, update, cancel, delete; filter by agent</span>
+						<span>Orders: create, update, cancel, delete; filter by agent</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-blue-500 mr-2">✓</span>
-						<span>Financial reports: earnings by date range for your organisation</span>
+						<span>Financial reports: earnings by date range for your organisation (optional agent filter)</span>
+					</li>
+					<li class="flex items-start">
+						<span class="text-blue-500 mr-2">✓</span>
+						<span>Tasks: create and assign to your agents; filter by agent; view all organisation tasks</span>
+					</li>
+					<li class="flex items-start">
+						<span class="text-blue-500 mr-2">✓</span>
+						<span>Activity log: your actions and all activities in your organisation</span>
 					</li>
 				</ul>
 			</div>
@@ -132,11 +144,11 @@
 				<ul class="space-y-2 text-gray-600 text-sm">
 					<li class="flex items-start">
 						<span class="text-green-500 mr-2">✓</span>
-						<span>View only your assigned leads</span>
+						<span>View only your assigned leads; lead detail and activity</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-green-500 mr-2">✓</span>
-						<span>Categorise leads by source and value</span>
+						<span>Categorise your leads by source and value</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-green-500 mr-2">✓</span>
@@ -144,11 +156,23 @@
 					</li>
 					<li class="flex items-start">
 						<span class="text-green-500 mr-2">✓</span>
-						<span>Create and update orders for your leads</span>
+						<span>Create, update, cancel and delete orders for your leads</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-green-500 mr-2">✓</span>
-						<span>Cancel orders; view order list and details</span>
+						<span>View financial report for your own orders (earnings by date range)</span>
+					</li>
+					<li class="flex items-start">
+						<span class="text-green-500 mr-2">✓</span>
+						<span>Tasks: view tasks assigned to you; create personal tasks</span>
+					</li>
+					<li class="flex items-start">
+						<span class="text-green-500 mr-2">✓</span>
+						<span>Notifications: order created, task assigned, lead assigned, reminders</span>
+					</li>
+					<li class="flex items-start">
+						<span class="text-green-500 mr-2">✓</span>
+						<span>Activity log: your actions and activities that affect you</span>
 					</li>
 					<li class="flex items-start">
 						<span class="text-green-500 mr-2">✓</span>
@@ -158,11 +182,14 @@
 			</div>
 		</div>
 
-		<!-- System Features -->
+		<!-- System Overview -->
 		<div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-8 mb-12">
-			<h2 class="text-3xl font-bold text-center text-gray-900 mb-8">
-				Core System Features
+			<h2 class="text-3xl font-bold text-center text-gray-900 mb-2">
+				System Overview
 			</h2>
+			<p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+				Darkenyas CRM is built around organisations (Organisors), agents, and leads. Access to each module depends on your role (Administrator, Organisor, or Agent).
+			</p>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div class="flex items-start">
 					<svg class="w-6 h-6 text-indigo-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +197,7 @@
 					</svg>
 					<div>
 						<h4 class="font-semibold text-gray-900 mb-1">Lead Management</h4>
-						<p class="text-gray-600">Lead CRUD, agent assignment, Source & Value categories, category list and filtering</p>
+						<p class="text-gray-600">Leads with agent assignment, source & value categories, and activity history. Filter by organisation and agent (Admin/Organisor).</p>
 					</div>
 				</div>
 				<div class="flex items-start">
@@ -179,7 +206,7 @@
 					</svg>
 					<div>
 						<h4 class="font-semibold text-gray-900 mb-1">Team Management</h4>
-						<p class="text-gray-600">Organisor and Agent management; role-based access (Admin, Organisor, Agent)</p>
+						<p class="text-gray-600">Organisors (organisations) and Agents. Role-based access: Admin manages all; Organisor manages own organisation and agents.</p>
 					</div>
 				</div>
 				<div class="flex items-start">
@@ -188,7 +215,7 @@
 					</svg>
 					<div>
 						<h4 class="font-semibold text-gray-900 mb-1">Products & Stock</h4>
-						<p class="text-gray-600">Product catalog (category/subcategory), stock levels, bulk price update, sales dashboard and charts</p>
+						<p class="text-gray-600">Product catalog (category/subcategory), stock levels, bulk price update. Sales dashboard and product charts (Organisor/Admin).</p>
 					</div>
 				</div>
 				<div class="flex items-start">
@@ -197,7 +224,7 @@
 					</svg>
 					<div>
 						<h4 class="font-semibold text-gray-900 mb-1">Order Management</h4>
-						<p class="text-gray-600">Order create, update, cancel and delete; organisation and agent filters</p>
+						<p class="text-gray-600">Orders linked to leads and products. Create, update, cancel, delete. Active/completed/cancelled views; filters by organisation and agent.</p>
 					</div>
 				</div>
 				<div class="flex items-start">
@@ -206,7 +233,25 @@
 					</svg>
 					<div>
 						<h4 class="font-semibold text-gray-900 mb-1">Finance</h4>
-						<p class="text-gray-600">Financial report and earnings summary by date range (Admin & Organisor)</p>
+						<p class="text-gray-600">Financial reports by date range: earnings, order totals, cost and profit. Filter by organisation and agent (Admin/Organisor); Agent sees own orders only.</p>
+					</div>
+				</div>
+				<div class="flex items-start">
+					<svg class="w-6 h-6 text-indigo-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+					</svg>
+					<div>
+						<h4 class="font-semibold text-gray-900 mb-1">Tasks & Notifications</h4>
+						<p class="text-gray-600">Tasks with assignee, due date and priority. Notifications for new orders, task assignments, lead assignments, and scheduled reminders.</p>
+					</div>
+				</div>
+				<div class="flex items-start">
+					<svg class="w-6 h-6 text-indigo-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+					<div>
+						<h4 class="font-semibold text-gray-900 mb-1">Activity Log</h4>
+						<p class="text-gray-600">Audit trail of actions (leads, orders, tasks, organisors, agents). Admin sees all; Organisor sees organisation; Agent sees own and affecting them.</p>
 					</div>
 				</div>
 				<div class="flex items-start">
@@ -215,7 +260,7 @@
 					</svg>
 					<div>
 						<h4 class="font-semibold text-gray-900 mb-1">Authentication & Security</h4>
-						<p class="text-gray-600">Signup, email verification, login, password reset and logout</p>
+						<p class="text-gray-600">Signup, email verification, login, password reset and logout. Role-based permissions throughout the system.</p>
 					</div>
 				</div>
 			</div>
