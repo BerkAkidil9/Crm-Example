@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,6 +36,11 @@ ALLOWED_HOSTS = [
     for h in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
     if h.strip()
 ]
+
+# Render.com: automatically allow the .onrender.com domain
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # Application definition
@@ -101,9 +107,21 @@ WSGI_APPLICATION = 'djcrm.wsgi.application'
 # Set DB_ENGINE to django.db.backends.postgresql (and DB_* vars) to use PostgreSQL.
 # Leave unset for SQLite (development default).
 
+# Database configuration
+# Priority: DATABASE_URL > DB_ENGINE/DB_* env vars > SQLite (default)
+_database_url = os.getenv('DATABASE_URL')
 _db_engine = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
 
-if _db_engine == 'django.db.backends.sqlite3':
+if _database_url:
+    # Render.com and other PaaS providers set DATABASE_URL automatically
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=_database_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+elif _db_engine == 'django.db.backends.sqlite3':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

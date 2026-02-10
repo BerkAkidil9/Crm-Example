@@ -1,0 +1,26 @@
+databases:
+  - name: djcrm-db
+    plan: free
+    databaseName: djcrm
+    ipAllowList: []  # only allow internal connections
+
+services:
+  - type: web
+    name: djcrm
+    plan: free
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn djcrm.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: djcrm-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: WEB_CONCURRENCY
+        value: "2"
