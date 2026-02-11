@@ -9,9 +9,13 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 ## Tech Stack
 
-Django 5.0 · Python 3.12 · Tailwind CSS · Crispy Forms · WhiteNoise · Gunicorn · django-phonenumber-field
+**Backend:** Django 5.0 · Python 3.12 · Crispy Forms · django-phonenumber-field · python-dotenv
 
-**Database:** SQLite (default, development) / PostgreSQL (production)
+**Frontend:** Tailwind CSS · Chart.js · Flatpickr
+
+**Database:** SQLite (development) / PostgreSQL (production)
+
+**Email:** SMTP (Gmail) — signup verification, password reset
 
 ---
 
@@ -21,21 +25,21 @@ Django 5.0 · Python 3.12 · Tailwind CSS · Crispy Forms · WhiteNoise · Gunic
 
 | Role | Access |
 |------|--------|
-| **Administrator** | Full system: all organisors, agents, leads, products, orders, finance, tasks, activity log |
-| **Organisor** | Own organisation: profile, agents, leads, products, orders, finance, tasks, activity within org |
-| **Agent** | Assigned leads, own orders, personal tasks, notifications, activity affecting them |
+| **Administrator** | Full system: all organisors, agents, leads, products, orders, finance, tasks, notifications, activity log |
+| **Organisor** | Own organisation: profile, agents, leads, products, orders, finance, tasks, notifications, activity within org |
+| **Agent** | Assigned leads, own orders, products (view only), personal tasks, notifications, activity affecting them |
 
 ### Modules
 
 | Module | Features |
 |--------|----------|
-| **Leads** | CRUD, agent assignment; source & value categories; profile photo, phone; activity history; org/agent filters |
-| **Agents** | CRUD, profile (photo, phone); list by organisation |
+| **Leads** | CRUD, agent assignment; source & value categories; personal info (profile photo, phone); activity history; org/agent filters |
+| **Agents** | CRUD, personal info (profile photo, phone); list by organisation |
 | **Organisors** | Organisation CRUD; Admin manages all, Organisor manages own profile |
 | **Products & Stock** | Category/subcategory; stock levels, minimum threshold; discounts (%, fixed, date range); bulk price update; sales dashboard; charts; stock movements; price history; stock alerts (low/out/overstock); stock recommendations |
 | **Orders** | Orders linked to leads; product line items; auto stock reduce on order; stock restore on cancel; org/agent filters |
-| **Finance** | Date range reports; filter by `creation_date` or `order_day`; org/agent filters; earnings, cost, profit |
-| **Tasks** | Status, priority; assign to agents; org/agent filters; notifications: task assigned, order created, lead assigned, deadline reminders |
+| **Finance** | Date range reports; filter by order creation date or order delivery date; org/agent filters; earnings, cost, profit |
+| **Tasks** | Status, priority; assign to agents; org/agent filters; notifications: task assigned to you, order created, lead assigned to you, deadline reminders (1 or 3 days before) |
 | **Activity Log** | Audit trail for leads, orders, tasks, agents, organisors, products; org/agent filters |
 
 ### Authentication
@@ -91,6 +95,8 @@ For signup verification and password reset:
 
 ## Deploy on Render
 
+Uses Gunicorn (WSGI server) and WhiteNoise (static file serving) on Render.
+
 Use the included `render.yaml` Blueprint:
 
 - **Database:** PostgreSQL (from Render) → `DATABASE_URL` auto-set
@@ -123,22 +129,31 @@ Use the included `render.yaml` Blueprint:
 
 ## Management Commands
 
-**Reminders / Notifications** (run via cron for scheduled notifications):
+**Scheduled Notifications** (run via cron in production):
 
-- `check_task_deadlines` — Create notifications for upcoming task deadlines
-- `check_order_day` — Create reminders for order dates
-- `check_lead_no_order` — Remind agents about leads with no orders
+- `check_task_deadlines` — Create notifications for upcoming task deadlines (1 or 3 days before)
+- `check_order_day` — Create reminders when order delivery date is today
+- `check_lead_no_order` — Remind agents about leads with no orders in last 30 days
 
-**Products:**
+**Setup / Sample Data**
 
 - `create_categories` — Create product categories and subcategories
 - `create_sample_products` — Create sample product data
 - `update_products_for_dashboard` — Update product data for dashboard
-
-**Leads:**
-
 - `create_default_categories` — Create default lead categories (e.g. Unassigned)
+
+**Maintenance / Migration**
+
 - `clean_duplicate_categories` — Remove duplicate lead categories
+- `update_product_descriptions_english` — Update sample product descriptions to English
+- `reassign_products_to_organisor` — Move products from one organisation to another
+
+**Development / Test** (dev/test environments only)
+
+- `create_test_data` — Create test data for leads
+- `create_fake_notifications` — Create fake notifications for testing
+- `final_cleanup` — Lead data cleanup
+- `force_clean_duplicates` — Force clean duplicate lead categories
 
 ---
 
