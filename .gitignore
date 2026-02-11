@@ -41,3 +41,35 @@ staticfiles/
 # Migration files (optional - uncomment if you want to ignore migrations)
 # */migrations/*.py
 # !*/migrations/__init__.py
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Python build
+*.egg-info/
+*.egg
+dist/
+*.pyo
+*.pyd
+
+# Internal / personal docs
+TURKCE_BULUNAN_YERLER.md
+TURKCE_INGILIZCE_CEVIRI_LISTESI.md
+TURKISH_TO_ENGLISH_AUDIT.md
+docs/
+START_PROJECT.md
+
+# Personal / local utility scripts
+check_db_connection.py
+check_duplicates.py
+check_organisors.py
+create_test_data.py
+test_price_history.py
+migrate_and_loaddata.ps1
+run_tests.ps1
+
+# Redundant
+requirements.py
