@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% load tailwind_filters %}
 {% load crispy_forms_tags %}
 
@@ -48,11 +49,12 @@
                         {% if field.name == 'profile_image' %}
                     <div id="profile-preview-container" class="mt-2 mb-3">
                         <p class="text-sm text-gray-600 mb-2">Profile Photo Preview:</p>
-                        {% if organisor.user.profile_image %}
-                        <img id="profile-preview" src="{{ organisor.user.profile_image.url }}" alt="Preview" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
-                        {% else %}
-                        <img id="profile-preview" src="" alt="Preview" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 hidden">
-                        {% endif %}
+                        <div class="w-24 h-24 rounded-full border-2 border-gray-200 overflow-hidden relative">
+                            {% if organisor.user.profile_image %}
+                            <img id="profile-preview" src="{{ organisor.user.profile_image.url }}" alt="Preview" class="w-full h-full object-cover absolute inset-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            {% endif %}
+                            <img src="{% static 'images/crm-logo.png' %}" alt="Darkenyas CRM" class="w-full h-full object-cover" id="profile-preview-fallback" style="{% if organisor.user.profile_image %}display:none;{% endif %}">
+                        </div>
                     </div>
                         {% endif %}
                     {% endfor %}

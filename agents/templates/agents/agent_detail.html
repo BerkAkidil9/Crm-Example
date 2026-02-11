@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <section class="text-gray-600 body-font overflow-hidden">
@@ -8,13 +9,12 @@
 		<div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
 		  <h2 class="text-sm title-font text-gray-500 tracking-widest">AGENT</h2>
 		  <div class="flex items-center gap-4 mb-4">
+		    <div class="w-20 h-20 rounded-full relative flex items-center justify-center flex-shrink-0">
 		    {% if agent.user.profile_image %}
-		    <img src="{{ agent.user.profile_image.url }}" alt="Profile" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
-		    {% else %}
-		    <div class="w-20 h-20 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center flex-shrink-0">
-		      <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-10 h-10" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM5 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"></path></svg>
-		    </div>
+		    <img src="{{ agent.user.profile_image.url }}" alt="Profile" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 absolute inset-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
 		    {% endif %}
+		    <img src="{% static 'images/crm-logo.png' %}" alt="Darkenyas CRM" class="profile-img-fallback w-20 h-20 rounded-full object-cover" style="{% if agent.user.profile_image %}display:none;{% endif %}">
+		    </div>
 		    <h1 class="text-gray-900 text-3xl title-font font-medium">{{ agent.user.username }}</h1>
 		  </div>
 		  <div class="flex mb-4">

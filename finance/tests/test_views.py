@@ -295,6 +295,58 @@ class TestFinancialReportView(TestCase):
         self.assertContains(response, '0.00')
         self.assertContains(response, 'No orders found')
     
+    def test_financial_report_view_date_filter_order_day(self):
+        """FinancialReportView filters by order_day when date_filter=order_day (not creation_date)."""
+        # Use a future date so setUp orders don't affect the result
+        future = timezone.make_aware(datetime.combine(
+            (timezone.now() + timedelta(days=10)).date(), datetime.min.time()
+        ))
+        # Order A: order_day=future, creation_date=today -> only in order_day filter for future
+        # Order B: order_day=today, creation_date=future -> only in creation_date filter for future
+        order_a = orders.objects.create(
+            order_day=future,
+            order_name='Order Day Future',
+            order_description='order_day is future',
+            organisation=self.organisor_profile,
+            lead=self.lead,
+            creation_date=self.today,
+        )
+        order_b = orders.objects.create(
+            order_day=self.today,
+            order_name='Created Future',
+            order_description='creation_date is future',
+            organisation=self.organisor_profile,
+            lead=self.lead,
+            creation_date=future,
+        )
+        OrderFinanceReport.objects.create(order=order_a, earned_amount=1000.0)
+        OrderFinanceReport.objects.create(order=order_b, earned_amount=2000.0)
+
+        start_date = future.date()
+        end_date = future.date()
+
+        # Filter by creation_date for future: only order_b (creation_date=future)
+        response_creation = self.client.post(reverse('finance:financial_report'), {
+            'start_date': start_date,
+            'end_date': end_date,
+            'date_filter': 'creation_date',
+        })
+        self.assertEqual(response_creation.status_code, 200)
+        self.assertEqual(response_creation.context['total_earned'], 2000.0)
+        self.assertEqual(len(response_creation.context['reports']), 1)
+        self.assertEqual(response_creation.context['reports'][0].order, order_b)
+
+        # Filter by order_day for future: only order_a (order_day=future)
+        response_order_day = self.client.post(reverse('finance:financial_report'), {
+            'start_date': start_date,
+            'end_date': end_date,
+            'date_filter': 'order_day',
+        })
+        self.assertEqual(response_order_day.status_code, 200)
+        self.assertEqual(response_order_day.context['total_earned'], 1000.0)
+        self.assertEqual(len(response_order_day.context['reports']), 1)
+        self.assertEqual(response_order_day.context['reports'][0].order, order_a)
+
     def test_financial_report_view_date_filtering_logic(self):
         """FinancialReportView date filtering logic test"""
         # Create custom date range
@@ -415,6 +467,236 @@ class TestFinancialReportView(TestCase):
         # Today's orders should be filtered (from both organisations)
         self.assertEqual(response.context['total_earned'], 7000.0)  # order2 (2000) + org2_order (5000)
         self.assertEqual(len(response.context['reports']), 2)
+
+    def test_financial_report_view_superuser_filter_by_organisation(self):
+        """Superuser can filter report by organisation."""
+        self.client.logout()
+        superuser = User.objects.create_superuser(
+            username='finance_filter_superuser',
+            email='finance_filter_superuser@example.com',
+            password='testpass123'
+        )
+        self.client.login(username='finance_filter_superuser', password='testpass123')
+
+        # Create second organisation with order
+        org2_user = User.objects.create_user(
+            username='org2_filter',
+            email='org2_filter@example.com',
+            password='testpass123',
+            is_organisor=True,
+            email_verified=True
+        )
+        org2_profile, _ = UserProfile.objects.get_or_create(user=org2_user)
+        org2_lead = Lead.objects.create(
+            first_name='Org2',
+            last_name='Lead',
+            email='org2lead@example.com',
+            phone_number='+905556666666',
+            organisation=org2_profile
+        )
+        org2_order = orders.objects.create(
+            order_day=self.today,
+            order_name='Org2 Order',
+            order_description='Org2',
+            organisation=org2_profile,
+            lead=org2_lead,
+            creation_date=self.today
+        )
+        OrderFinanceReport.objects.create(order=org2_order, earned_amount=5000.0)
+
+        start_date = self.today.date()
+        end_date = self.today.date()
+
+        # Filter by org1 - only org1's order (order2: 2000)
+        response = self.client.post(
+            reverse('finance:financial_report'),
+            {
+                'start_date': start_date,
+                'end_date': end_date,
+                'organisation': str(self.organisor_profile.pk),
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_earned'], 2000.0)
+        self.assertEqual(len(response.context['reports']), 1)
+
+        # Filter by org2 - only org2's order (5000)
+        response = self.client.post(
+            reverse('finance:financial_report'),
+            {
+                'start_date': start_date,
+                'end_date': end_date,
+                'organisation': str(org2_profile.pk),
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_earned'], 5000.0)
+        self.assertEqual(len(response.context['reports']), 1)
+
+    def test_financial_report_view_superuser_filter_by_agent(self):
+        """Superuser can filter report by agent."""
+        from leads.models import Agent
+
+        self.client.logout()
+        superuser = User.objects.create_superuser(
+            username='finance_agent_filter_superuser',
+            email='finance_agent_filter_superuser@example.com',
+            password='testpass123'
+        )
+        self.client.login(username='finance_agent_filter_superuser', password='testpass123')
+
+        # Create two agents in same org, each with a lead and order
+        agent1_user = User.objects.create_user(
+            username='agent1_fin',
+            email='agent1_fin@example.com',
+            password='testpass123',
+            is_agent=True,
+            email_verified=True
+        )
+        agent2_user = User.objects.create_user(
+            username='agent2_fin',
+            email='agent2_fin@example.com',
+            password='testpass123',
+            is_agent=True,
+            email_verified=True
+        )
+        agent1 = Agent.objects.create(user=agent1_user, organisation=self.organisor_profile)
+        agent2 = Agent.objects.create(user=agent2_user, organisation=self.organisor_profile)
+
+        lead1 = Lead.objects.create(
+            first_name='Agent1',
+            last_name='Lead',
+            email='agent1lead@example.com',
+            phone_number='+905551111111',
+            organisation=self.organisor_profile,
+            agent=agent1
+        )
+        lead2 = Lead.objects.create(
+            first_name='Agent2',
+            last_name='Lead',
+            email='agent2lead@example.com',
+            phone_number='+905552222222',
+            organisation=self.organisor_profile,
+            agent=agent2
+        )
+
+        order1 = orders.objects.create(
+            order_day=self.today,
+            order_name='Agent1 Order',
+            organisation=self.organisor_profile,
+            lead=lead1,
+            creation_date=self.today
+        )
+        order2 = orders.objects.create(
+            order_day=self.today,
+            order_name='Agent2 Order',
+            organisation=self.organisor_profile,
+            lead=lead2,
+            creation_date=self.today
+        )
+        OrderFinanceReport.objects.create(order=order1, earned_amount=1000.0)
+        OrderFinanceReport.objects.create(order=order2, earned_amount=3000.0)
+
+        start_date = self.today.date()
+        end_date = self.today.date()
+
+        # Filter by agent1 - only agent1's order (1000)
+        response = self.client.post(
+            reverse('finance:financial_report'),
+            {
+                'start_date': start_date,
+                'end_date': end_date,
+                'agent': str(agent1.pk),
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_earned'], 1000.0)
+        self.assertEqual(len(response.context['reports']), 1)
+
+        # Filter by agent2 - only agent2's order (3000)
+        response = self.client.post(
+            reverse('finance:financial_report'),
+            {
+                'start_date': start_date,
+                'end_date': end_date,
+                'agent': str(agent2.pk),
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_earned'], 3000.0)
+        self.assertEqual(len(response.context['reports']), 1)
+
+    def test_financial_report_view_organisor_filter_by_agent(self):
+        """Organisor can filter report by agent within their organisation."""
+        from leads.models import Agent
+
+        agent1_user = User.objects.create_user(
+            username='org_agent1_fin',
+            email='org_agent1_fin@example.com',
+            password='testpass123',
+            is_agent=True,
+            email_verified=True
+        )
+        agent2_user = User.objects.create_user(
+            username='org_agent2_fin',
+            email='org_agent2_fin@example.com',
+            password='testpass123',
+            is_agent=True,
+            email_verified=True
+        )
+        agent1 = Agent.objects.create(user=agent1_user, organisation=self.organisor_profile)
+        agent2 = Agent.objects.create(user=agent2_user, organisation=self.organisor_profile)
+
+        lead1 = Lead.objects.create(
+            first_name='OrgAgent1',
+            last_name='Lead',
+            email='orgagent1lead@example.com',
+            phone_number='+905553333333',
+            organisation=self.organisor_profile,
+            agent=agent1
+        )
+        lead2 = Lead.objects.create(
+            first_name='OrgAgent2',
+            last_name='Lead',
+            email='orgagent2lead@example.com',
+            phone_number='+905554444444',
+            organisation=self.organisor_profile,
+            agent=agent2
+        )
+
+        order1 = orders.objects.create(
+            order_day=self.today,
+            order_name='Org Agent1 Order',
+            organisation=self.organisor_profile,
+            lead=lead1,
+            creation_date=self.today
+        )
+        order2 = orders.objects.create(
+            order_day=self.today,
+            order_name='Org Agent2 Order',
+            organisation=self.organisor_profile,
+            lead=lead2,
+            creation_date=self.today
+        )
+        OrderFinanceReport.objects.create(order=order1, earned_amount=1500.0)
+        OrderFinanceReport.objects.create(order=order2, earned_amount=2500.0)
+
+        self.client.login(username='finance_view_organisor', password='testpass123')
+        start_date = self.today.date()
+        end_date = self.today.date()
+
+        # Filter by agent1 - organisor sees only agent1's order
+        response = self.client.post(
+            reverse('finance:financial_report'),
+            {
+                'start_date': start_date,
+                'end_date': end_date,
+                'agent': str(agent1.pk),
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_earned'], 1500.0)
+        self.assertEqual(len(response.context['reports']), 1)
 
 
 @override_settings(**SIMPLE_STATIC)
