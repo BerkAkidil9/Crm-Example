@@ -1211,3 +1211,373 @@ class TestGetAgentsByOrgView(TestCase):
         
         # Should be 404
         self.assertEqual(response.status_code, 404)
+
+
+@override_settings(**SIMPLE_STATIC)
+class TestLeadActivityView(TestCase):
+    """LeadActivityView tests - lists activities for a lead."""
+
+    def setUp(self):
+        self.client = Client()
+
+        # Create organisor
+        self.organisor_user = User.objects.create_user(
+            username='lead_activity_organisor',
+            email='lead_activity_organisor@example.com',
+            password='testpass123',
+            first_name='Lead',
+            last_name='Organisor',
+            phone_number='+905551234567',
+            date_of_birth='1980-01-01',
+            gender='M',
+            is_organisor=True,
+            email_verified=True
+        )
+
+        self.organisor_profile, _ = UserProfile.objects.get_or_create(user=self.organisor_user)
+
+        # Create agent
+        self.agent_user = User.objects.create_user(
+            username='lead_activity_agent',
+            email='lead_activity_agent@example.com',
+            password='testpass123',
+            first_name='Lead',
+            last_name='Agent',
+            phone_number='+905559876543',
+            date_of_birth='1990-01-01',
+            gender='F',
+            is_agent=True,
+            is_organisor=False,
+            email_verified=True
+        )
+
+        self.agent = Agent.objects.create(
+            user=self.agent_user,
+            organisation=self.organisor_profile
+        )
+
+        # Create lead assigned to agent
+        self.lead = Lead.objects.create(
+            first_name='Test',
+            last_name='Lead',
+            age=30,
+            organisation=self.organisor_profile,
+            agent=self.agent,
+            description='Test lead description',
+            phone_number='+905551111111',
+            email='test.lead.activity@example.com',
+            address='123 Test Street'
+        )
+
+    def test_lead_activity_view_unauthenticated(self):
+        """Lead activity view requires login."""
+        response = self.client.get(reverse('leads:lead-activity', kwargs={'pk': self.lead.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.url)
+
+    def test_lead_activity_view_organisor(self):
+        """Organisor can see lead activity page."""
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:lead-activity', kwargs={'pk': self.lead.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'leads/lead_activity.html')
+        self.assertIn('lead', response.context)
+        self.assertEqual(response.context['lead'], self.lead)
+        self.assertIn('lead_activities', response.context)
+
+    def test_lead_activity_view_agent_own_lead(self):
+        """Agent can see activity for their own assigned lead."""
+        self.client.force_login(self.agent_user)
+        response = self.client.get(reverse('leads:lead-activity', kwargs={'pk': self.lead.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'leads/lead_activity.html')
+        self.assertEqual(response.context['lead'], self.lead)
+        self.assertIn('lead_activities', response.context)
+
+    def test_lead_activity_view_agent_other_lead_404(self):
+        """Agent cannot see activity for another agent's lead."""
+        other_agent_user = User.objects.create_user(
+            username='other_activity_agent',
+            email='other_activity_agent@example.com',
+            password='testpass123',
+            is_agent=True,
+            is_organisor=False,
+            email_verified=True
+        )
+        other_profile, _ = UserProfile.objects.get_or_create(user=other_agent_user)
+        other_agent = Agent.objects.create(user=other_agent_user, organisation=other_profile)
+
+        other_lead = Lead.objects.create(
+            first_name='Other',
+            last_name='Lead',
+            age=25,
+            organisation=other_profile,
+            agent=other_agent,
+            description='Other lead',
+            phone_number='+905553333333',
+            email='other.lead@example.com',
+            address='456 Other Street'
+        )
+
+        self.client.force_login(self.agent_user)
+        response = self.client.get(reverse('leads:lead-activity', kwargs={'pk': other_lead.pk}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_lead_activity_view_superuser(self):
+        """Superuser can see any lead's activity."""
+        superuser = User.objects.create_superuser(
+            username='activity_superuser',
+            email='activity_superuser@example.com',
+            password='testpass123'
+        )
+        self.client.force_login(superuser)
+        response = self.client.get(reverse('leads:lead-activity', kwargs={'pk': self.lead.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['lead'], self.lead)
+
+    def test_lead_activity_view_nonexistent_lead(self):
+        """Lead activity for non-existent lead returns 404."""
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:lead-activity', kwargs={'pk': 99999}))
+        self.assertEqual(response.status_code, 404)
+
+
+@override_settings(**SIMPLE_STATIC)
+class TestCategoryDetailView(TestCase):
+    """CategoryDetailView tests - shows leads in a category."""
+
+    def setUp(self):
+        self.client = Client()
+
+        self.organisor_user = User.objects.create_user(
+            username='cat_detail_organisor',
+            email='cat_detail_organisor@example.com',
+            password='testpass123',
+            is_organisor=True,
+            email_verified=True
+        )
+
+        self.organisor_profile, _ = UserProfile.objects.get_or_create(user=self.organisor_user)
+
+        self.category = Category.objects.create(
+            name='Converted',
+            organisation=self.organisor_profile
+        )
+
+        self.lead = Lead.objects.create(
+            first_name='Cat',
+            last_name='Lead',
+            age=30,
+            organisation=self.organisor_profile,
+            category=self.category,
+            description='Lead in category',
+            phone_number='+905551111111',
+            email='cat.lead@example.com',
+            address='123 Test'
+        )
+
+    def test_category_detail_view_unauthenticated(self):
+        """Category detail requires login."""
+        response = self.client.get(reverse('leads:category-detail', kwargs={'pk': self.category.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.url)
+
+    def test_category_detail_view_organisor(self):
+        """Organisor can see category detail with leads."""
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:category-detail', kwargs={'pk': self.category.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'leads/category_detail.html')
+        self.assertIn('category', response.context)
+        self.assertEqual(response.context['category'], self.category)
+        self.assertIn('leads', response.context)
+        self.assertIn(self.lead, response.context['leads'])
+
+    def test_category_detail_view_superuser(self):
+        """Superuser can see any category."""
+        superuser = User.objects.create_superuser(
+            username='cat_superuser',
+            email='cat_superuser@example.com',
+            password='testpass123'
+        )
+        self.client.force_login(superuser)
+        response = self.client.get(reverse('leads:category-detail', kwargs={'pk': self.category.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['category'], self.category)
+
+    def test_category_detail_view_other_org_category_404(self):
+        """Organisor cannot see another org's category."""
+        other_user = User.objects.create_user(
+            username='other_cat_org',
+            email='other_cat_org@example.com',
+            password='testpass123',
+            is_organisor=True,
+            email_verified=True
+        )
+        other_profile, _ = UserProfile.objects.get_or_create(user=other_user)
+        other_category = Category.objects.create(name='OtherCat', organisation=other_profile)
+
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:category-detail', kwargs={'pk': other_category.pk}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_category_detail_view_nonexistent(self):
+        """Non-existent category returns 404."""
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:category-detail', kwargs={'pk': 99999}))
+        self.assertEqual(response.status_code, 404)
+
+
+@override_settings(**SIMPLE_STATIC)
+class TestLeadCategoryUpdateView(TestCase):
+    """LeadCategoryUpdateView tests - update lead source/value categories."""
+
+    def setUp(self):
+        self.client = Client()
+
+        self.organisor_user = User.objects.create_user(
+            username='lead_cat_update_organisor',
+            email='lead_cat_update_organisor@example.com',
+            password='testpass123',
+            is_organisor=True,
+            email_verified=True
+        )
+
+        self.organisor_profile, _ = UserProfile.objects.get_or_create(user=self.organisor_user)
+
+        self.agent_user = User.objects.create_user(
+            username='lead_cat_update_agent',
+            email='lead_cat_update_agent@example.com',
+            password='testpass123',
+            is_agent=True,
+            is_organisor=False,
+            email_verified=True
+        )
+
+        self.agent = Agent.objects.create(
+            user=self.agent_user,
+            organisation=self.organisor_profile
+        )
+
+        self.source_cat = SourceCategory.objects.create(
+            name='Website',
+            organisation=self.organisor_profile
+        )
+        self.value_cat = ValueCategory.objects.create(
+            name='High Value',
+            organisation=self.organisor_profile
+        )
+
+        self.lead = Lead.objects.create(
+            first_name='Test',
+            last_name='Lead',
+            age=30,
+            organisation=self.organisor_profile,
+            agent=self.agent,
+            source_category=self.source_cat,
+            value_category=self.value_cat,
+            description='Test lead',
+            phone_number='+905551111111',
+            email='lead.cat.update@example.com',
+            address='123 Test'
+        )
+
+    def test_lead_category_update_view_unauthenticated(self):
+        """Lead category update requires login."""
+        response = self.client.get(reverse('leads:lead-category-update', kwargs={'pk': self.lead.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.url)
+
+    def test_lead_category_update_view_organisor_get(self):
+        """Organisor can GET the category update form."""
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:lead-category-update', kwargs={'pk': self.lead.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'leads/lead_category_update.html')
+        self.assertIn('form', response.context)
+        self.assertEqual(response.context['object'], self.lead)
+
+    def test_lead_category_update_view_organisor_post(self):
+        """Organisor can POST to update lead categories."""
+        new_source = SourceCategory.objects.create(
+            name='Social Media',
+            organisation=self.organisor_profile
+        )
+        new_value = ValueCategory.objects.create(
+            name='Medium Value',
+            organisation=self.organisor_profile
+        )
+
+        self.client.force_login(self.organisor_user)
+        response = self.client.post(
+            reverse('leads:lead-category-update', kwargs={'pk': self.lead.pk}),
+            {'source_category': new_source.id, 'value_category': new_value.id}
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.lead.refresh_from_db()
+        self.assertEqual(self.lead.source_category, new_source)
+        self.assertEqual(self.lead.value_category, new_value)
+
+    def test_lead_category_update_view_agent_own_lead(self):
+        """Agent can update category for their own lead."""
+        self.client.force_login(self.agent_user)
+        response = self.client.get(reverse('leads:lead-category-update', kwargs={'pk': self.lead.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'leads/lead_category_update.html')
+
+    def test_lead_category_update_view_agent_other_lead_404(self):
+        """Agent cannot update another agent's lead categories."""
+        other_agent_user = User.objects.create_user(
+            username='other_cat_agent',
+            email='other_cat_agent@example.com',
+            password='testpass123',
+            is_agent=True,
+            is_organisor=False,
+            email_verified=True
+        )
+        other_profile, _ = UserProfile.objects.get_or_create(user=other_agent_user)
+        other_agent = Agent.objects.create(user=other_agent_user, organisation=other_profile)
+        other_lead = Lead.objects.create(
+            first_name='Other',
+            last_name='Lead',
+            age=25,
+            organisation=other_profile,
+            agent=other_agent,
+            source_category=SourceCategory.objects.create(name='Unassigned', organisation=other_profile),
+            value_category=ValueCategory.objects.create(name='Unassigned', organisation=other_profile),
+            description='Other',
+            phone_number='+905553333333',
+            email='other.cat.lead@example.com',
+            address='456 Other'
+        )
+
+        self.client.force_login(self.agent_user)
+        response = self.client.get(reverse('leads:lead-category-update', kwargs={'pk': other_lead.pk}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_lead_category_update_view_superuser(self):
+        """Superuser can update any lead's categories."""
+        superuser = User.objects.create_superuser(
+            username='cat_update_superuser',
+            email='cat_update_superuser@example.com',
+            password='testpass123'
+        )
+        self.client.force_login(superuser)
+        response = self.client.get(reverse('leads:lead-category-update', kwargs={'pk': self.lead.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'leads/lead_category_update.html')
+
+    def test_lead_category_update_view_nonexistent_lead(self):
+        """Non-existent lead returns 404."""
+        self.client.force_login(self.organisor_user)
+        response = self.client.get(reverse('leads:lead-category-update', kwargs={'pk': 99999}))
+        self.assertEqual(response.status_code, 404)

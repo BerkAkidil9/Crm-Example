@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
@@ -45,15 +46,12 @@
                  {% for agent in object_list %}
                  <div class="p-4 w-full">
                      <div class="flex border-2 {% if agent.user == request.user %}border-blue-500 bg-blue-50{% else %}border-gray-600{% endif %} p-8 sm:flex-row flex-col">
+                           <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 rounded-full flex-shrink-0 relative flex items-center justify-center">
                            {% if agent.user.profile_image %}
-                           <img src="{{ agent.user.profile_image.url }}" alt="Profile" class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 rounded-full object-cover flex-shrink-0 border-2 border-gray-200">
-                           {% else %}
-                           <div class="w-16 h-16 sm:mr-8 sm:mb-0 mb-4 inline-flex items-center justify-center rounded-full bg-indigo-100 text-indigo-500 flex-shrink-0">
-                                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-8 h-8" viewBox="0 0 24 24">
-                                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                                </svg>
-                           </div>
+                           <img src="{{ agent.user.profile_image.url }}" alt="Profile" class="w-16 h-16 rounded-full object-cover absolute inset-0 border-2 border-gray-200" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                            {% endif %}
+                           <img src="{% static 'images/crm-logo.png' %}" alt="Darkenyas CRM" class="profile-img-fallback w-16 h-16 rounded-full object-cover" style="{% if agent.user.profile_image %}display:none;{% endif %}">
+                           </div>
                            <div class="flex-grow">
                                <h2 class="text-gray-900 text-lg title-font font-medium mb-3">
                                 {{ agent.user.username }} {% if agent.user == request.user %}<span class="text-blue-600 text-sm">(You)</span>{% endif %}</h2>
