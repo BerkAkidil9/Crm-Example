@@ -73,3 +73,19 @@ run_tests.ps1
 
 # Redundant
 requirements.py
+
+# Certificates / keys
+*.pem
+*.key
+*.crt
+
+# Secret config files
+secrets.json
+credentials.json
+
+# IDE
+.cursor/
+
+# Merge / patch
+*.orig
+*.rej
