@@ -7,20 +7,26 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 *.sqlite3
+*.sqlite
 media/
 
-# Environment variables
-.env
-.env.local
-.env.production
-.env.development
-.env.staging
-.env.test
-.env.debug
+# Environment variables - catch-all (keep .env.example in repo)
+.env*
+!.env.example
 
 # Data backups (may contain sensitive data)
 backup.json
 *.backup.json
+*.dump
+*.backup
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+*.pid
 
 # Virtual environment
 venv/
@@ -50,8 +56,12 @@ staticfiles/
 # Test / coverage
 .coverage
 htmlcov/
+coverage.xml
+*.lcov
 .pytest_cache/
 .mypy_cache/
+.tox/
+ruff_cache/
 
 # Python build
 *.egg-info/
@@ -59,6 +69,12 @@ htmlcov/
 dist/
 *.pyo
 *.pyd
+*.py[cod]
+*$py.class
+pip-log.txt
+pip-delete-this-directory.txt
+.Python
+*.manifest
 
 # Internal / personal docs
 TURKCE_BULUNAN_YERLER.md
