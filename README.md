@@ -1,5 +1,7 @@
 # Darkenyas CRM
 
+**Live demo:** [https://darkenyas-crm.onrender.com/](https://darkenyas-crm.onrender.com/)
+
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.0-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 
