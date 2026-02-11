@@ -33,13 +33,13 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 | Module | Features |
 |--------|----------|
-| **Leads** | CRUD, agent assignment; source & value categories; personal info (profile photo, phone); activity history; org/agent filters |
-| **Agents** | CRUD, personal info (profile photo, phone); list by organisation |
+| **Leads** | CRUD, agent assignment; source & value categories; personal info (first name, last name, age, email, address, phone, profile photo); activity history; org/agent filters |
+| **Agents** | CRUD, personal info (first name, last name, email, username, phone, date of birth, gender, profile photo); list by organisation |
 | **Organisors** | Organisation CRUD; Admin manages all, Organisor manages own profile |
 | **Products & Stock** | Category/subcategory; stock levels, minimum threshold; discounts (%, fixed, date range); bulk price update; sales dashboard; charts; stock movements; price history; stock alerts (low/out/overstock); stock recommendations |
 | **Orders** | Orders linked to leads; product line items; auto stock reduce on order; stock restore on cancel; org/agent filters |
 | **Finance** | Date range reports; filter by order creation date or order delivery date; org/agent filters; earnings, cost, profit |
-| **Tasks** | Status, priority; assign to agents; org/agent filters; notifications: task assigned to you, order created, lead assigned to you, deadline reminders (1 or 3 days before) |
+| **Tasks** | Status, priority; assign to agents; org/agent filters; notifications — **Organisor:** order created, sale completed today, stock alert; **Agent:** task assigned, lead assigned, order created (for their leads), sale completed today, deadline reminders (1 or 3 days before), lead no order in 30 days |
 | **Activity Log** | Audit trail for leads, orders, tasks, agents, organisors, products; org/agent filters |
 
 ### Authentication
@@ -62,24 +62,30 @@ python -m venv venv
 # Windows: venv\Scripts\activate
 # Mac/Linux: source venv/bin/activate
 
-# 3. Install
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Environment
-cp .env.example .env
-# Edit .env: SECRET_KEY, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+# 4. Environment — copy .env.example to .env
+# Mac/Linux: cp .env.example .env
+# Windows: copy .env.example .env
+```
 
-# 5. Database
+Edit `.env` and set `SECRET_KEY` (generate a random string). For signup verification and password reset, also add `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` (see [Email Configuration](#email-configuration)). These are optional for basic local use — the app runs with SQLite and default settings if `.env` is minimal.
+
+```bash
+# 5. Database — creates tables (SQLite by default)
 python manage.py migrate
+
+# 6. Create admin account (email, username, password)
 python manage.py createsuperuser
 
-# 6. Run
+# 7. Run the development server
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/`
+Open `http://127.0.0.1:8000/` in your browser. Log in via the landing page or `/login/` using the superuser credentials from step 6. The app uses SQLite by default; no PostgreSQL setup is required for local development.
 
-**PostgreSQL:** Set `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` in `.env`.
+**PostgreSQL (production):** Set `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` in `.env`.
 
 ---
 
