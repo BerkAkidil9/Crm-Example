@@ -189,4 +189,4 @@ URL: `http://127.0.0.1:8000/admin/` — Login with superuser credentials.
 
 ## License
 
-Educational / personal use.
+MIT License — see [LICENSE](LICENSE) for details.
