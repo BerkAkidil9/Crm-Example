@@ -34,7 +34,7 @@ OrderProductFormSet = inlineformset_factory(
 class OrderModelForm(forms.ModelForm):
     class Meta:
         model = orders
-        fields = [
+        fields = [ 
             'order_day',
             'order_name',
             'order_description',
