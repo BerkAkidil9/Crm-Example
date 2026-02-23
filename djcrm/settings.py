@@ -124,18 +124,21 @@ _database_url = os.getenv('DATABASE_URL')
 _db_engine = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
 
 if _database_url:
+    # Neon pooled connection: add search_path to URL (fixes "no schema selected" with PgBouncer)
+    if 'options=' not in _database_url.lower():
+        _sep = '&' if '?' in _database_url else '?'
+        _database_url = f"{_database_url}{_sep}options=-c%20search_path%3Dpublic"
     # DATABASE_URL: Render, Neon, or other PaaS providers
     _db_config = dj_database_url.config(
         default=_database_url,
         conn_max_age=600,
         conn_health_checks=True,
     )
-    # Neon serverless compatibility (pooled connection needs explicit search_path)
+    # Neon serverless compatibility
     _db_config['DISABLE_SERVER_SIDE_CURSORS'] = True
     if 'OPTIONS' not in _db_config:
         _db_config['OPTIONS'] = {}
     _db_config['OPTIONS'].setdefault('sslmode', 'require')
-    _db_config['OPTIONS']['options'] = '-c search_path=public'
     DATABASES = {'default': _db_config}
 elif _db_engine == 'django.db.backends.sqlite3':
     DATABASES = {
