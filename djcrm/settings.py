@@ -124,14 +124,18 @@ _database_url = os.getenv('DATABASE_URL')
 _db_engine = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
 
 if _database_url:
-    # Render.com and other PaaS providers set DATABASE_URL automatically
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=_database_url,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
+    # DATABASE_URL: Render, Neon, or other PaaS providers
+    _db_config = dj_database_url.config(
+        default=_database_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    # Neon serverless compatibility
+    _db_config['DISABLE_SERVER_SIDE_CURSORS'] = True
+    if 'OPTIONS' not in _db_config:
+        _db_config['OPTIONS'] = {}
+    _db_config['OPTIONS'].setdefault('sslmode', 'require')
+    DATABASES = {'default': _db_config}
 elif _db_engine == 'django.db.backends.sqlite3':
     DATABASES = {
         'default': {

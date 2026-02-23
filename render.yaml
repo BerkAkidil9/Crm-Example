@@ -1,9 +1,3 @@
-databases:
-  - name: darkenyas_crm-db
-    plan: free
-    databaseName: darkenyas_crm
-    ipAllowList: []  # only allow internal connections
-
 services:
   - type: web
     name: darkenyas_crm
@@ -13,9 +7,7 @@ services:
     startCommand: "gunicorn djcrm.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: darkenyas_crm-db
-          property: connectionString
+        sync: false  # Set manually in Dashboard with Neon pooled connection string
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG

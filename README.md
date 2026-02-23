@@ -87,7 +87,7 @@ python manage.py runserver
 
 Open `http://127.0.0.1:8000/` in your browser. Log in via the landing page or `/login/` using the superuser credentials from step 6. The app uses SQLite by default; no PostgreSQL setup is required for local development.
 
-**PostgreSQL (production):** Set `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` in `.env`.
+**PostgreSQL (production):** Use `DATABASE_URL` (Neon, Render, etc.) or set `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` in `.env`.
 
 ---
 
@@ -107,9 +107,9 @@ Uses Gunicorn (WSGI server) and WhiteNoise (static file serving) on Render.
 
 Use the included `render.yaml` Blueprint:
 
-- **Database:** PostgreSQL (from Render) → `DATABASE_URL` auto-set
+- **Database:** [Neon PostgreSQL](https://neon.tech/) (recommended) or any PostgreSQL. Set `DATABASE_URL` manually in Render Dashboard with your connection string.
 - **Web:** Build runs `build.sh` (install, collectstatic, migrate, optional createsuperuser)
-- **Env:** Set `SECRET_KEY` (generate), `DEBUG=False`; `RENDER_EXTERNAL_HOSTNAME` is automatic
+- **Env:** Set `SECRET_KEY` (generate), `DATABASE_URL` (Neon pooled connection string), `DEBUG=False`; `RENDER_EXTERNAL_HOSTNAME` is automatic
 
 ---
 
