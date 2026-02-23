@@ -130,11 +130,12 @@ if _database_url:
         conn_max_age=600,
         conn_health_checks=True,
     )
-    # Neon serverless compatibility
+    # Neon serverless compatibility (pooled connection needs explicit search_path)
     _db_config['DISABLE_SERVER_SIDE_CURSORS'] = True
     if 'OPTIONS' not in _db_config:
         _db_config['OPTIONS'] = {}
     _db_config['OPTIONS'].setdefault('sslmode', 'require')
+    _db_config['OPTIONS']['options'] = '-c search_path=public'
     DATABASES = {'default': _db_config}
 elif _db_engine == 'django.db.backends.sqlite3':
     DATABASES = {
