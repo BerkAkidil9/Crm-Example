@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     "crispy_tailwind",
     'phonenumber_field',
+    'gmailapi_backend',
 
     # Local apps
     'leads',
@@ -233,13 +234,20 @@ AUTHENTICATION_BACKENDS = [
     'leads.authentication.EmailOrUsernameModelBackend',
 ]
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'your-email@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'your-app-password-here')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@djcrm.com')
+# Email: Gmail API (Render blocks SMTP ports) or SMTP for local dev
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'your-email@gmail.com')
+if os.getenv('USE_GMAIL_API', '').lower() in ('true', '1', 'yes'):
+    EMAIL_BACKEND = 'gmailapi_backend.mail.GmailBackend'
+    GMAIL_API_CLIENT_ID = os.getenv('GMAIL_API_CLIENT_ID')
+    GMAIL_API_CLIENT_SECRET = os.getenv('GMAIL_API_CLIENT_SECRET')
+    GMAIL_API_REFRESH_TOKEN = os.getenv('GMAIL_API_REFRESH_TOKEN')
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'your-email@gmail.com')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'your-app-password-here')
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
 LOGOUT_REDIRECT_URL = '/'

@@ -15,3 +15,6 @@ dj-database-url==2.3.0
 # Production
 gunicorn==23.0.0
 whitenoise==6.8.2
+
+# Email - Gmail API (Render blocks SMTP ports 25, 465, 587)
+django-gmailapi-backend
