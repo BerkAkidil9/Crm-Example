@@ -74,6 +74,16 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
     template_name = 'registration/password_reset_confirm.html'
 
+
+class CustomPasswordResetDoneView(generic.TemplateView):
+    """Show different message when no user was found (email not in DB)."""
+    template_name = 'registration/password_reset_done.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email_sent'] = self.request.session.pop('password_reset_email_sent', None)
+        return context
+
     def form_valid(self, form):
         response = super().form_valid(form)
         user = form.user
