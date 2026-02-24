@@ -9,6 +9,19 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 ---
 
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Local Setup](#local-setup)
+- [Email Configuration](#email-configuration)
+- [Deploy on Render](#deploy-on-render)
+- [Project Structure](#project-structure)
+- [Management Commands](#management-commands)
+- [Testing](#testing)
+
+---
+
 ## Tech Stack
 
 **Backend:** Django 5.0 · Python 3.12 · Crispy Forms · django-phonenumber-field · python-dotenv
@@ -50,44 +63,72 @@ Signup · Email verification · Login (email or username) · Password reset · P
 
 ---
 
-## Quick Start
+## Local Setup
 
 **Prerequisites:** Python 3.12+
 
+### 1. Clone and enter project
+
 ```bash
-# 1. Clone
-git clone <your-repo-url>
+git clone https://github.com/YOUR_USERNAME/Crm-Example.git
 cd Crm-Example
-
-# 2. Virtual environment
-python -m venv venv
-# Windows: venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Environment — copy .env.example to .env
-# Mac/Linux: cp .env.example .env
-# Windows: copy .env.example .env
 ```
 
-Edit `.env` and set `SECRET_KEY` (generate a random string). For signup verification and password reset, also add `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` (see [Email Configuration](#email-configuration)). These are optional for basic local use — the app runs with SQLite and default settings if `.env` is minimal.
+### 2. Create virtual environment
 
 ```bash
-# 5. Database — creates tables (SQLite by default)
+python -m venv venv
+```
+
+Activate it:
+
+- **Windows:** `venv\Scripts\activate`
+- **Mac/Linux:** `source venv/bin/activate`
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Environment variables
+
+Copy the example file and edit it:
+
+- **Windows:** `copy .env.example .env`
+- **Mac/Linux:** `cp .env.example .env`
+
+Minimum for local development:
+
+- `SECRET_KEY` — generate a random string (e.g. `python -c "import secrets; print(secrets.token_urlsafe(50))"`)
+- `DEBUG=True` — leave as is for development
+
+Optional (for signup verification & password reset): `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` — see [Email Configuration](#email-configuration).
+
+The app uses **SQLite** by default; no database setup needed for local use.
+
+### 5. Database and run
+
+```bash
 python manage.py migrate
-
-# 6. Create admin account (email, username, password)
-python manage.py createsuperuser
-
-# 7. Run the development server
+python manage.py createsuperuser   # Create admin (email, username, password)
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/` in your browser. Log in via the landing page or `/login/` using the superuser credentials from step 6. The app uses SQLite by default; no PostgreSQL setup is required for local development.
+Open **http://127.0.0.1:8000/** and log in with your superuser credentials.
 
-**PostgreSQL (production):** Use `DATABASE_URL` (Neon, Render, etc.) or set `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` in `.env`.
+### Local PostgreSQL (optional)
+
+To use PostgreSQL locally instead of SQLite, set in `.env`:
+
+```
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=your_db_name
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
+```
 
 ---
 
@@ -103,13 +144,37 @@ For signup verification and password reset:
 
 ## Deploy on Render
 
-Uses Gunicorn (WSGI server) and WhiteNoise (static file serving) on Render.
+The project uses Gunicorn and WhiteNoise. Deploy via the included `render.yaml` Blueprint.
 
-Use the included `render.yaml` Blueprint:
+### 1. Create a PostgreSQL database
 
-- **Database:** [Neon PostgreSQL](https://neon.tech/) (recommended) or any PostgreSQL. Set `DATABASE_URL` manually in Render Dashboard with your connection string.
-- **Web:** Build runs `build.sh` (install, collectstatic, migrate, optional createsuperuser)
-- **Env:** Set `SECRET_KEY` (generate), `DATABASE_URL` (Neon pooled connection string), `DEBUG=False`; `RENDER_EXTERNAL_HOSTNAME` is automatic
+Use [Neon](https://neon.tech/) (recommended) or any PostgreSQL provider. Copy the **pooled connection string** (Neon: Connection Details → Pooled connection).
+
+### 2. Create a new Web Service on Render
+
+1. Connect your GitHub repo
+2. Render will detect `render.yaml` — use **Apply** to create the service
+3. In **Environment** → **Environment Variables**, add the variables below
+
+### 3. Environment variables (Render Dashboard)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ Yes | PostgreSQL connection string (e.g. Neon pooled URL with `?sslmode=require`) |
+| `SECRET_KEY` | ✅ Yes | Random string (Render can auto-generate) |
+| `DEBUG` | ✅ Yes | Set to `False` for production |
+| `EMAIL_HOST_USER` | ✅ Yes | Gmail address for sending emails |
+| `EMAIL_HOST_PASSWORD` | ✅ Yes | Gmail App Password (see [Email Configuration](#email-configuration)) |
+| `DEFAULT_FROM_EMAIL` | Optional | Sender email (default: `noreply@djcrm.com`) |
+| `DJANGO_SUPERUSER_EMAIL` | Optional | Email for first admin (created on first deploy) |
+| `DJANGO_SUPERUSER_USERNAME` | Optional | Username for first admin |
+| `DJANGO_SUPERUSER_PASSWORD` | Optional | Password for first admin |
+
+`PYTHON_VERSION`, `WEB_CONCURRENCY`, and `RENDER_EXTERNAL_HOSTNAME` are set automatically by `render.yaml` or Render.
+
+### 4. Deploy
+
+After saving env vars, Render will build and deploy. The first deploy runs migrations and creates a superuser if `DJANGO_SUPERUSER_*` vars are set.
 
 ---
 
