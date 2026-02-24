@@ -13,6 +13,7 @@ from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.http import Http404, HttpResponseRedirect
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -127,6 +128,7 @@ class AgentCreateView(LoginRequiredMixin, generic.CreateView):
                 
                 # Send email
                 self.send_verification_email(user, verification_token.token)
+                messages.success(self.request, "Agent created successfully.")
             return super().form_valid(form)
         except IntegrityError as e:
             logger.error(f"IntegrityError while creating agent: {e}", exc_info=True)
@@ -306,6 +308,7 @@ class AgentUpdateView(AgentAndOrganisorLoginRequiredMixin, generic.UpdateView):
             if self.request.user.is_superuser and hasattr(form, 'cleaned_data') and 'organisation' in form.cleaned_data:
                 agent.organisation = form.cleaned_data['organisation']
                 agent.save()
+            messages.success(self.request, "Agent updated successfully.")
             log_activity(
                 self.request.user,
                 ACTION_AGENT_UPDATED,
@@ -367,7 +370,8 @@ class AgentDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
                 # Then delete the related User
                 user.delete()
                 
-            logger.info(f"Agent and User {username} deleted successfully")
+                logger.info(f"Agent and User {username} deleted successfully")
+                messages.success(self.request, "Agent deleted successfully.")
             
         except Exception as e:
             logger.error(f"Error deleting agent and user {username}: {e}")

@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.views.generic.base import View
+from django.contrib import messages
 
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from leads.models import Agent, UserProfile
@@ -189,6 +190,7 @@ class TaskCreateView(LoginRequiredMixin, generic.CreateView):
                     'action_label': 'View Task',
                 },
             )
+        messages.success(self.request, "Task created successfully.")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -244,6 +246,7 @@ class TaskUpdateView(TaskAccessMixin, generic.UpdateView):
                 action_label='View Task',
             )
         assigned_agent = Agent.objects.filter(user=self.object.assigned_to).first()
+        messages.success(self.request, "Task updated successfully.")
         log_activity(
             self.request.user,
             ACTION_TASK_UPDATED,
@@ -279,6 +282,7 @@ class TaskDeleteView(TaskAccessMixin, generic.DeleteView):
             organisation=task.organisation,
             affected_agent=assigned_agent,
         )
+        messages.success(self.request, "Task deleted successfully.")
         return super().form_valid(form)
 
 
