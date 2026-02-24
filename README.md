@@ -28,7 +28,7 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 **Frontend:** Tailwind CSS · Chart.js · Flatpickr
 
-**Database:** SQLite (development) / PostgreSQL (production)
+**Database:** PostgreSQL (development & production)
 
 **Email:** SMTP (Gmail) — signup verification, password reset
 
@@ -98,18 +98,22 @@ Copy the example file and edit it:
 - **Windows:** `copy .env.example .env`
 - **Mac/Linux:** `cp .env.example .env`
 
-Minimum for local development:
+For local development:
 
-- `SECRET_KEY` — generate a random string (e.g. `python -c "import secrets; print(secrets.token_urlsafe(50))"`)
+- `SECRET_KEY` — generate: `python -c "import secrets; print(secrets.token_urlsafe(50))"`
 - `DEBUG=True` — leave as is for development
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD` — PostgreSQL credentials (create DB: `createdb djcrm`)
 
-Optional (for signup verification & password reset): `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` — see [Email Configuration](#email-configuration).
+Optional (for signup & password reset): `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` — see [Email Configuration](#email-configuration).
 
-The app uses **SQLite** by default; no database setup needed for local use.
+The app uses **PostgreSQL** by default (matches production).
 
 ### 5. Database and run
 
+Create the PostgreSQL database (if not exists), then migrate:
+
 ```bash
+createdb djcrm   # or create via pgAdmin
 python manage.py migrate
 python manage.py createsuperuser   # Create admin (email, username, password)
 python manage.py runserver
@@ -117,18 +121,9 @@ python manage.py runserver
 
 Open **http://127.0.0.1:8000/** and log in with your superuser credentials.
 
-### Local PostgreSQL (optional)
+### Local SQLite (optional)
 
-To use PostgreSQL locally instead of SQLite, set in `.env`:
-
-```
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=your_db_name
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_HOST=localhost
-DB_PORT=5432
-```
+To use SQLite instead of PostgreSQL, comment out `DB_ENGINE` and `DB_*` in `.env`. The app will fall back to SQLite.
 
 ---
 
