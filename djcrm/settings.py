@@ -226,37 +226,54 @@ _r2_endpoint = os.getenv('R2_ENDPOINT_URL') or (
     if os.getenv('R2_ACCOUNT_ID') else None
 )
 _r2_public_domain = os.getenv('R2_PUBLIC_DOMAIN', '').strip()
+USE_R2_MEDIA_PROXY = os.getenv('USE_R2_MEDIA_PROXY', 'true').lower() in ('true', '1', 'yes')
 
 if USE_R2 and _r2_bucket and _r2_endpoint and os.getenv('R2_ACCESS_KEY_ID') and os.getenv('R2_SECRET_ACCESS_KEY'):
-    if not _r2_public_domain and not os.getenv('R2_PUBLIC_URL'):
+    if not _r2_public_domain and not os.getenv('R2_PUBLIC_URL') and not USE_R2_MEDIA_PROXY:
         import warnings
         warnings.warn(
-            "R2 is enabled but R2_PUBLIC_DOMAIN and R2_PUBLIC_URL are unset; "
-            "media URLs may not be publicly viewable. Set R2_PUBLIC_DOMAIN (e.g. pub-xxx.r2.dev) in Render.",
+            "R2 is enabled but R2_PUBLIC_DOMAIN and R2_PUBLIC_URL are unset and USE_R2_MEDIA_PROXY is false; "
+            "media URLs may not be publicly viewable.",
             UserWarning,
         )
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "bucket_name": _r2_bucket,
-                "endpoint_url": _r2_endpoint,
-                "access_key": os.getenv('R2_ACCESS_KEY_ID'),
-                "secret_key": os.getenv('R2_SECRET_ACCESS_KEY'),
-                "region_name": os.getenv('R2_REGION_NAME', 'auto'),
-                "querystring_auth": False,
-                "custom_domain": _r2_public_domain or None,
-                "file_overwrite": True,
-            },
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
+    _r2_options = {
+        "bucket_name": _r2_bucket,
+        "endpoint_url": _r2_endpoint,
+        "access_key": os.getenv('R2_ACCESS_KEY_ID'),
+        "secret_key": os.getenv('R2_SECRET_ACCESS_KEY'),
+        "region_name": os.getenv('R2_REGION_NAME', 'auto'),
+        "querystring_auth": False,
+        "custom_domain": _r2_public_domain or None,
+        "file_overwrite": True,
     }
-    MEDIA_URL = (
-        f"https://{_r2_public_domain}/" if _r2_public_domain
-        else os.getenv('R2_PUBLIC_URL', '').rstrip('/') + '/' if os.getenv('R2_PUBLIC_URL') else f"{_r2_endpoint.rstrip('/')}/{_r2_bucket}/"
-    )
+    if USE_R2_MEDIA_PROXY:
+        STORAGES = {
+            "default": {
+                "BACKEND": "djcrm.storage.R2ProxyStorage",
+                "OPTIONS": _r2_options,
+            },
+            "staticfiles": {
+                "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            },
+        }
+        _site = (os.getenv('SITE_URL') or '').rstrip('/') or (
+            f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', '')}" if os.getenv('RENDER_EXTERNAL_HOSTNAME') else ""
+        )
+        MEDIA_URL = f"{_site}/media-proxy/" if _site else "/media-proxy/"
+    else:
+        STORAGES = {
+            "default": {
+                "BACKEND": "storages.backends.s3.S3Storage",
+                "OPTIONS": _r2_options,
+            },
+            "staticfiles": {
+                "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            },
+        }
+        MEDIA_URL = (
+            f"https://{_r2_public_domain}/" if _r2_public_domain
+            else os.getenv('R2_PUBLIC_URL', '').rstrip('/') + '/' if os.getenv('R2_PUBLIC_URL') else f"{_r2_endpoint.rstrip('/')}/{_r2_bucket}/"
+        )
     MEDIA_ROOT = BASE_DIR / 'media'  # unused when serving from R2; keep for compatibility
 else:
     STORAGES = {
