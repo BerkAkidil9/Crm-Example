@@ -286,6 +286,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'ERROR',
         },
+        'leads': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
     },
 }
 

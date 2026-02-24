@@ -663,6 +663,48 @@ class CustomPasswordResetForm(PasswordResetForm):
         })
     )
 
+    def send_mail(self, subject_template_name, email_template_name, context,
+                  from_email, to_email, html_email_template_name=None):
+        """Override: don't swallow exceptions so real send failures surface (Render logs)."""
+        from django.core.mail import EmailMultiAlternatives
+        from django.template import loader
+
+        subject = loader.render_to_string(subject_template_name, context)
+        subject = "".join(subject.splitlines())
+        body = loader.render_to_string(email_template_name, context)
+        email_message = EmailMultiAlternatives(subject, body, from_email, [to_email])
+        if html_email_template_name:
+            html_email = loader.render_to_string(html_email_template_name, context)
+            email_message.attach_alternative(html_email, "text/html")
+        email_message.send()
+
+    def save(self, domain_override=None, subject_template_name="registration/password_reset_subject.txt",
+             email_template_name="registration/password_reset_email.html", use_https=False,
+             token_generator=None, from_email=None, request=None, html_email_template_name=None,
+             extra_email_context=None):
+        """Override: log when no users found (helps debug deploy)."""
+        import logging
+        from django.contrib.auth.tokens import default_token_generator
+
+        logger = logging.getLogger(__name__)
+        token_generator = token_generator or default_token_generator
+        email = self.cleaned_data["email"]
+        users = list(self.get_users(email))
+        if not users:
+            logger.warning("Password reset: no active user with usable password for email=%s", email)
+        return super().save(
+            domain_override=domain_override,
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name,
+            use_https=use_https,
+            token_generator=token_generator,
+            from_email=from_email,
+            request=request,
+            html_email_template_name=html_email_template_name,
+            extra_email_context=extra_email_context,
+        )
+
+
 class CustomSetPasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
         label='New password',
