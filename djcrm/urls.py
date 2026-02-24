@@ -29,10 +29,10 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
 ]
 
-# Always serve media files (static files are handled by WhiteNoise)
-# In production on Render, uploaded files are stored on ephemeral filesystem
-# and will be lost on redeploy. Consider using cloud storage (S3/Cloudinary) for persistent media.
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media from app only when MEDIA_URL is relative (local filesystem).
+# When using R2, MEDIA_URL is absolute and files are served from Cloudflare.
+if not settings.MEDIA_URL.startswith('http'):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
