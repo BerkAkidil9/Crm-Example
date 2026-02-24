@@ -182,6 +182,13 @@ class OrganisorUpdateView(SelfProfileOnlyMixin, generic.UpdateView):
         return reverse("organisors:organisor-detail", kwargs={"pk": self.kwargs['pk']})
 
     def form_valid(self, form):
+        has_file = 'profile_image' in (self.request.FILES or {})
+        default_storage = settings.STORAGES.get('default', {})
+        storage_backend = (default_storage.get('BACKEND') or '').split('.')[-1]
+        logger.warning(
+            "Organisor update: profile_image in FILES=%s, storage=%s, MEDIA_URL=%s",
+            has_file, storage_backend, (getattr(settings, 'MEDIA_URL', '') or '')[:60],
+        )
         response = super().form_valid(form)
         organisor = Organisor.objects.get(pk=self.kwargs['pk'])
         messages.success(self.request, "Organisor updated successfully.")

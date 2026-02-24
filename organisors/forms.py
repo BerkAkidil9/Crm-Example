@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
 from phonenumber_field.formfields import PhoneNumberField
 from leads.forms import PhoneNumberWidget
 
@@ -45,9 +46,15 @@ class OrganisorModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user_instance = kwargs.get('instance')
         super().__init__(*args, **kwargs)
-        for field_name in ('username', 'first_name', 'last_name', 'date_of_birth', 'gender', 'profile_image'):
+        for field_name in ('username', 'first_name', 'last_name', 'date_of_birth', 'gender'):
             if field_name in self.fields:
                 self.fields[field_name].required = True
+        if self.fields.get('profile_image'):
+            if self.user_instance and self.user_instance.pk and getattr(self.user_instance, 'profile_image', None) and self.user_instance.profile_image:
+                self.fields['profile_image'].required = False
+                self.fields['profile_image'].help_text = 'Upload a new photo to change, or leave empty to keep current. JPG, PNG, GIF, WebP. Max 5 MB.'
+            else:
+                self.fields['profile_image'].required = True
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -107,8 +114,21 @@ class OrganisorModelForm(forms.ModelForm):
         
         return password2
 
+    def clean_profile_image(self):
+        upload = self.cleaned_data.get('profile_image')
+        if upload and isinstance(upload, UploadedFile):
+            allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
+            if getattr(upload, 'content_type', None) not in allowed:
+                raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
+            if upload.size > 5 * 1024 * 1024:
+                raise forms.ValidationError('File size must be less than 5 MB.')
+        return upload
+
     def save(self, commit=True):
         user = super().save(commit=False)
+        new_image = self.cleaned_data.get('profile_image')
+        if new_image and isinstance(new_image, UploadedFile):
+            user.profile_image = new_image
         password = self.cleaned_data.get('password1')
         if password:
             user.set_password(password)
