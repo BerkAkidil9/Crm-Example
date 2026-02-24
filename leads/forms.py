@@ -692,6 +692,8 @@ class CustomPasswordResetForm(PasswordResetForm):
         users = list(self.get_users(email))
         if not users:
             logger.warning("Password reset: no active user with usable password for email=%s", email)
+        if request is not None:
+            request.session["password_reset_email_sent"] = bool(users)
         return super().save(
             domain_override=domain_override,
             subject_template_name=subject_template_name,
