@@ -272,6 +272,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Database connection age (seconds) - keeps connections open for reuse
 CONN_MAX_AGE = 600 if not DEBUG else 0
 
+# Logging: surface email send failures in Render/production logs
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.contrib.auth': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+        },
+    },
+}
+
 # Security settings for production
 if not DEBUG:
     # Render.com uses a reverse proxy – tell Django the original request was HTTPS

@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import path, include
-from leads.views import landing_page, LandingPageView, SignupView, CustomLoginView, CustomPasswordResetView, CustomPasswordResetConfirmView, EmailVerificationSentView, EmailVerificationView, EmailVerificationSuccessView, EmailVerificationFailedView
+from leads.views import landing_page, LandingPageView, SignupView, CustomLoginView, CustomPasswordResetView, CustomPasswordResetConfirmView, EmailVerificationSentView, EmailVerificationView, EmailVerificationSuccessView, EmailVerificationFailedView, debug_email_test
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +27,7 @@ urlpatterns = [
     path('password-reset-complete/', PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('debug/email-test/', debug_email_test, name='debug-email-test'),
 ]
 
 # Always serve media files (static files are handled by WhiteNoise)
