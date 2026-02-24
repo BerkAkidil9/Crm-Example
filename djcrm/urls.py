@@ -4,9 +4,11 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import path, include
 from leads.views import landing_page, LandingPageView, SignupView, CustomLoginView, CustomPasswordResetView, CustomPasswordResetConfirmView, CustomPasswordResetDoneView, EmailVerificationSentView, EmailVerificationView, EmailVerificationSuccessView, EmailVerificationFailedView
+from djcrm.views import media_proxy
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('media-proxy/<path:path>', media_proxy, name='media-proxy'),
     path('', LandingPageView.as_view(), name='landing-page'),
     path('leads/', include('leads.urls', namespace='leads')),
     path('agents/', include('agents.urls', namespace='agents')),
