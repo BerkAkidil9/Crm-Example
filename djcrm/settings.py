@@ -236,7 +236,9 @@ AUTHENTICATION_BACKENDS = [
 
 # Email: Gmail API (Render blocks SMTP ports) or SMTP for local dev
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'your-email@gmail.com')
-if os.getenv('USE_GMAIL_API', '').lower() in ('true', '1', 'yes'):
+_use_gmail_api = os.getenv('USE_GMAIL_API', '').lower() in ('true', '1', 'yes')
+# Auto-enable Gmail API on Render (RENDER_EXTERNAL_HOSTNAME is set by Render)
+if _use_gmail_api or os.getenv('RENDER_EXTERNAL_HOSTNAME'):
     EMAIL_BACKEND = 'gmailapi_backend.mail.GmailBackend'
     GMAIL_API_CLIENT_ID = os.getenv('GMAIL_API_CLIENT_ID')
     GMAIL_API_CLIENT_SECRET = os.getenv('GMAIL_API_CLIENT_SECRET')
