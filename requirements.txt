@@ -18,3 +18,7 @@ whitenoise==6.8.2
 
 # Email - Gmail API (Render blocks SMTP ports 25, 465, 587)
 django-gmailapi-backend
+
+# Media storage - Cloudflare R2 (S3-compatible) for production
+django-storages[s3]
+boto3

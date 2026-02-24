@@ -19,3 +19,6 @@ services:
       # Gmail API required on Render (SMTP ports 25/465/587 are blocked)
       - key: USE_GMAIL_API
         value: "true"
+      # Media: set USE_R2=true and add R2_* env vars in Dashboard for persistent uploads
+      - key: USE_R2
+        sync: false

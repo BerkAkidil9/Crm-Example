@@ -214,18 +214,55 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
 STATIC_ROOT = BASE_DIR / 'static_root'
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Media files: use Cloudflare R2 in production when configured; else local filesystem
+USE_R2 = (
+    os.getenv('USE_R2', '').lower() in ('true', '1', 'yes')
+    and 'test' not in sys.argv
+)
+_r2_bucket = os.getenv('R2_BUCKET_NAME')
+_r2_endpoint = os.getenv('R2_ENDPOINT_URL') or (
+    f"https://{os.getenv('R2_ACCOUNT_ID', '')}.r2.cloudflarestorage.com"
+    if os.getenv('R2_ACCOUNT_ID') else None
+)
+_r2_public_domain = os.getenv('R2_PUBLIC_DOMAIN', '').strip()
+
+if USE_R2 and _r2_bucket and _r2_endpoint and os.getenv('R2_ACCESS_KEY_ID') and os.getenv('R2_SECRET_ACCESS_KEY'):
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": _r2_bucket,
+                "endpoint_url": _r2_endpoint,
+                "access_key": os.getenv('R2_ACCESS_KEY_ID'),
+                "secret_key": os.getenv('R2_SECRET_ACCESS_KEY'),
+                "region_name": os.getenv('R2_REGION_NAME', 'auto'),
+                "default_acl": "public-read",
+                "querystring_auth": False,
+                "custom_domain": _r2_public_domain or None,
+                "file_overwrite": True,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = (
+        f"https://{_r2_public_domain}/" if _r2_public_domain
+        else os.getenv('R2_PUBLIC_URL', '').rstrip('/') + '/' if os.getenv('R2_PUBLIC_URL') else f"{_r2_endpoint.rstrip('/')}/{_r2_bucket}/"
+    )
+    MEDIA_ROOT = BASE_DIR / 'media'  # unused when serving from R2; keep for compatibility
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'leads.User'
 
