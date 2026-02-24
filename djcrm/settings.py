@@ -228,6 +228,13 @@ _r2_endpoint = os.getenv('R2_ENDPOINT_URL') or (
 _r2_public_domain = os.getenv('R2_PUBLIC_DOMAIN', '').strip()
 
 if USE_R2 and _r2_bucket and _r2_endpoint and os.getenv('R2_ACCESS_KEY_ID') and os.getenv('R2_SECRET_ACCESS_KEY'):
+    if not _r2_public_domain and not os.getenv('R2_PUBLIC_URL'):
+        import warnings
+        warnings.warn(
+            "R2 is enabled but R2_PUBLIC_DOMAIN and R2_PUBLIC_URL are unset; "
+            "media URLs may not be publicly viewable. Set R2_PUBLIC_DOMAIN (e.g. pub-xxx.r2.dev) in Render.",
+            UserWarning,
+        )
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
@@ -237,7 +244,6 @@ if USE_R2 and _r2_bucket and _r2_endpoint and os.getenv('R2_ACCESS_KEY_ID') and 
                 "access_key": os.getenv('R2_ACCESS_KEY_ID'),
                 "secret_key": os.getenv('R2_SECRET_ACCESS_KEY'),
                 "region_name": os.getenv('R2_REGION_NAME', 'auto'),
-                "default_acl": "public-read",
                 "querystring_auth": False,
                 "custom_domain": _r2_public_domain or None,
                 "file_overwrite": True,
