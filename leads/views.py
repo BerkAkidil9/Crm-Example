@@ -410,6 +410,7 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 			lead.organisation = user.userprofile
 			
 		lead.save()
+		messages.success(self.request, "Lead created successfully.")
 		log_activity(
 			user,
 			ACTION_LEAD_CREATED,
@@ -440,6 +441,7 @@ def lead_create(request):
 		form = LeadModelForm(request.POST)
 		if form.is_valid():
 			form.save()
+			messages.success(request, "Lead created successfully.")
 			return redirect("/leads")
 	context = {
 		"form": form
@@ -477,6 +479,7 @@ class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 	def form_valid(self, form):
 		previous_agent_id = self.object.agent_id if self.object.pk else None
 		response = super().form_valid(form)
+		messages.success(self.request, "Lead updated successfully.")
 		log_activity(
 			self.request.user,
 			ACTION_LEAD_UPDATED,
@@ -509,6 +512,7 @@ def lead_update(request, pk):
 		form = LeadModelForm(request.POST, instance=lead)
 		if form.is_valid():
 			form.save()
+			messages.success(request, "Lead updated successfully.")
 			return redirect("/leads")
 	context = {
 		"form": form,
@@ -542,11 +546,13 @@ class LeadDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 			organisation=lead.organisation,
 			affected_agent=lead.agent if getattr(lead, 'agent_id', None) else None,
 		)
+		messages.success(self.request, "Lead deleted successfully.")
 		return super().form_valid(form)
 
 def lead_delete(request, pk):
 	lead = Lead.objects.get(id=pk)
 	lead.delete()
+	messages.success(request, "Lead deleted successfully.")
 	return redirect("/leads")
 
 class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
@@ -570,6 +576,7 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 		lead = Lead.objects.get(id=self.kwargs["pk"])
 		lead.agent = agent
 		lead.save()
+		messages.success(self.request, "Agent assigned successfully.")
 		log_activity(
 			self.request.user,
 			ACTION_LEAD_UPDATED,

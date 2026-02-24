@@ -14,6 +14,7 @@ from activity_log.models import log_activity, ACTION_ORGANISOR_CREATED, ACTION_O
 from .models import Organisor
 from .forms import OrganisorModelForm, OrganisorCreateForm
 from .mixins import AdminOnlyMixin, SelfProfileOnlyMixin
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -82,6 +83,7 @@ class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):
                 # Email verification token
                 verification_token = EmailVerificationToken.objects.create(user=user)
                 self.send_verification_email(user, verification_token.token)
+                messages.success(self.request, "Organisor created successfully.")
                 
             return super().form_valid(form)
         except IntegrityError as e:
@@ -182,6 +184,7 @@ class OrganisorUpdateView(SelfProfileOnlyMixin, generic.UpdateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         organisor = Organisor.objects.get(pk=self.kwargs['pk'])
+        messages.success(self.request, "Organisor updated successfully.")
         log_activity(
             self.request.user,
             ACTION_ORGANISOR_UPDATED,
@@ -229,6 +232,7 @@ class OrganisorDeleteView(AdminOnlyMixin, generic.DeleteView):
                 user.delete()
                 
             logger.info(f"Organisor and User {username} deleted successfully")
+            messages.success(self.request, "Organisor deleted successfully.")
             
         except Exception as e:
             logger.error(f"Error deleting organisor and user {username}: {e}")

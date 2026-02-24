@@ -181,6 +181,7 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
         # For admin, organisation is already set by the form
             
         product.save()
+        messages.success(self.request, "Product created successfully.")
         log_activity(
             user,
             ACTION_PRODUCT_CREATED,
@@ -230,6 +231,7 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
 
         response = super().form_valid(form)
         product.refresh_from_db()
+        messages.success(self.request, "Product updated successfully.")
         log_activity(
             user,
             ACTION_PRODUCT_UPDATED,
@@ -267,6 +269,7 @@ class ProductAndStockDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteVi
             object_repr=f"Product: {product.product_name}",
             organisation=product.organisation,
         )
+        messages.success(self.request, "Product deleted successfully.")
         return super().form_valid(form)
     
     def get_queryset(self):

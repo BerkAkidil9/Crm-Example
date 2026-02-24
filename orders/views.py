@@ -309,6 +309,7 @@ class OrderCreateView(LoginRequiredMixin, generic.CreateView):
                     organisation=order.organisation,
                     affected_agent=affected_agent,
                 )
+                messages.success(self.request, "Order created successfully.")
 
             return super().form_valid(form)
         else:
@@ -536,7 +537,7 @@ class OrderCancelView(LoginRequiredMixin, View):
             messages.error(self.request, 'An error occurred while canceling the order.')
             return HttpResponseRedirect(self.success_url)
         
-        messages.success(self.request, 'The order was successfully canceled.')
+        messages.success(self.request, 'Order cancelled successfully.')
         return HttpResponseRedirect(self.success_url)
 
 class OrderDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -594,5 +595,5 @@ class OrderDeleteView(LoginRequiredMixin, generic.DeleteView):
         # Stock will be automatically restored by signal when is_cancelled is set to True
         order.is_cancelled = True
         order.save()
-        messages.success(self.request, 'The order was successfully canceled.')
+        messages.success(self.request, 'Order cancelled successfully.')
         return HttpResponseRedirect(self.get_success_url())
