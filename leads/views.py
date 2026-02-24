@@ -17,7 +17,33 @@ from orders.models import orders as Order
 from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, OrganisorLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
 
 
-
+def debug_email_test(request):
+    """
+    Test email sending on deploy (no Shell needed).
+    Add DEBUG_EMAIL_SECRET to Render env, then visit:
+    /debug/email-test/?secret=YOUR_SECRET&to=your@email.com
+    """
+    import os
+    secret = os.getenv('DEBUG_EMAIL_SECRET')
+    if not secret:
+        return HttpResponse('Endpoint disabled (DEBUG_EMAIL_SECRET not set)', status=404)
+    if request.GET.get('secret') != secret:
+        return HttpResponse('Invalid secret', status=403)
+    to_email = request.GET.get('to', '').strip()
+    if not to_email or '@' not in to_email:
+        return HttpResponse('Add ?to=your@email.com to the URL', status=400)
+    backend = getattr(settings, 'EMAIL_BACKEND', 'unknown')
+    try:
+        send_mail(
+            subject='CRM Test Email',
+            message='Test email from your CRM. If you receive this, email is working.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[to_email],
+            fail_silently=False,
+        )
+        return HttpResponse(f'OK: Email sent to {to_email}. Backend: {backend}')
+    except Exception as e:
+        return HttpResponse(f'FAIL: {e}\n\nBackend: {backend}', status=500)
 
 
 class CustomLoginView(LoginView):
