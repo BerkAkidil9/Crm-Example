@@ -30,7 +30,7 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 **Database:** PostgreSQL (development & production)
 
-**Email:** SMTP (Gmail) — signup verification, password reset
+**Email:** Gmail API (Render) or SMTP (local) — signup verification, password reset
 
 ---
 
@@ -104,7 +104,7 @@ For local development:
 - `DEBUG=True` — leave as is for development
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD` — PostgreSQL credentials (create DB: `createdb djcrm`)
 
-Optional (for signup & password reset): `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` — see [Email Configuration](#email-configuration).
+For signup & password reset: either SMTP (`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`) or Gmail API (`USE_GMAIL_API=true` + Gmail API vars) — see [Email Configuration](#email-configuration).
 
 The app uses **PostgreSQL** by default (matches production).
 
@@ -129,11 +129,18 @@ To use SQLite instead of PostgreSQL, comment out `DB_ENGINE` and `DB_*` in `.env
 
 ## Email Configuration
 
-For signup verification and password reset:
+For signup verification and password reset you can use either option.
 
+**Option A – Local (SMTP)**  
 1. Enable **2-Step Verification** in your Gmail account  
 2. Create an **App Password**: Google Account → Security → App passwords → Mail → Other  
-3. Add to `.env`: `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`
+3. In `.env`: set `USE_GMAIL_API=false` (or leave unset) and add `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`
+
+**Option B – Gmail API (needed on Render; SMTP ports are blocked)**  
+1. In [Google Cloud Console](https://console.cloud.google.com/): create a project, enable **Gmail API**, configure OAuth consent screen, create **OAuth 2.0 Client ID** (Desktop app)  
+2. Get a refresh token: `pip install django-gmailapi-backend` then  
+   `gmail_oauth2 --generate_oauth2_token --client_id="..." --client_secret="..." --scope="https://www.googleapis.com/auth/gmail.send"`  
+3. In `.env`: set `USE_GMAIL_API=true` and add `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN`, `DEFAULT_FROM_EMAIL` (the Gmail address you used in step 2)
 
 ---
 
@@ -158,14 +165,15 @@ Use [Neon](https://neon.tech/) (recommended) or any PostgreSQL provider. Copy th
 | `DATABASE_URL` | ✅ Yes | PostgreSQL connection string (e.g. Neon pooled URL with `?sslmode=require`) |
 | `SECRET_KEY` | ✅ Yes | Random string (Render can auto-generate) |
 | `DEBUG` | ✅ Yes | Set to `False` for production |
-| `EMAIL_HOST_USER` | ✅ Yes | Gmail address for sending emails |
-| `EMAIL_HOST_PASSWORD` | ✅ Yes | Gmail App Password (see [Email Configuration](#email-configuration)) |
-| `DEFAULT_FROM_EMAIL` | Optional | Sender email (default: `noreply@djcrm.com`) |
+| `GMAIL_API_CLIENT_ID` | ✅ Yes | From Google Cloud Console (OAuth 2.0 Client ID) |
+| `GMAIL_API_CLIENT_SECRET` | ✅ Yes | From Google Cloud Console |
+| `GMAIL_API_REFRESH_TOKEN` | ✅ Yes | From `gmail_oauth2 --generate_oauth2_token` (see [Email Configuration](#email-configuration)) |
+| `DEFAULT_FROM_EMAIL` | ✅ Yes | Gmail address that sends mail (same as the account used for the refresh token) |
 | `DJANGO_SUPERUSER_EMAIL` | Optional | Email for first admin (created on first deploy) |
 | `DJANGO_SUPERUSER_USERNAME` | Optional | Username for first admin |
 | `DJANGO_SUPERUSER_PASSWORD` | Optional | Password for first admin |
 
-`PYTHON_VERSION`, `WEB_CONCURRENCY`, and `RENDER_EXTERNAL_HOSTNAME` are set automatically by `render.yaml` or Render.
+`USE_GMAIL_API`, `PYTHON_VERSION`, `WEB_CONCURRENCY`, and `RENDER_EXTERNAL_HOSTNAME` are set automatically by `render.yaml` or Render.
 
 ### 4. Deploy
 
