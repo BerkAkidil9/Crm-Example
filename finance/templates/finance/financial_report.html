@@ -62,6 +62,9 @@
                 <button type="submit" class="px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium transition-colors">
                     Filter
                 </button>
+                <a href="{% url 'finance:financial_report' %}" class="px-5 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 font-medium transition-colors">
+                    Clear filter
+                </a>
             </div>
 
             {% if show_organisation_filter or agents %}
