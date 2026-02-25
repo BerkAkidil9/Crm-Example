@@ -50,9 +50,7 @@
                     <div id="profile-preview-container" class="mt-2 mb-3">
                         <p class="text-sm text-gray-600 mb-2">Profile Photo Preview:</p>
                         <div class="w-24 h-24 rounded-full border-2 border-gray-200 overflow-hidden relative">
-                            {% if organisor.user.profile_image %}
-                            <img id="profile-preview" src="{{ organisor.user.profile_image.url }}" alt="Preview" class="w-full h-full object-cover absolute inset-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                            {% endif %}
+                            <img id="profile-preview" src="{% if organisor.user.profile_image %}{{ organisor.user.profile_image.url }}{% endif %}" alt="Preview" class="w-full h-full object-cover absolute inset-0" style="{% if not organisor.user.profile_image %}display:none;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <img src="{% static 'images/crm-logo.png' %}" alt="Darkenyas CRM" class="w-full h-full object-cover" id="profile-preview-fallback" style="{% if organisor.user.profile_image %}display:none;{% endif %}">
                         </div>
                     </div>
@@ -87,7 +85,7 @@
         }
         var profileInput = document.getElementById('id_profile_image') || document.querySelector('input[name="profile_image"]');
         var preview = document.getElementById('profile-preview');
-        var container = document.getElementById('profile-preview-container');
+        var fallback = document.getElementById('profile-preview-fallback');
         if (profileInput && preview) {
             profileInput.addEventListener('change', function(e) {
                 var file = e.target.files[0];
@@ -95,12 +93,15 @@
                     var reader = new FileReader();
                     reader.onload = function(ev) {
                         preview.src = ev.target.result;
+                        preview.style.display = '';
                         preview.classList.remove('hidden');
+                        if (fallback) fallback.style.display = 'none';
                     };
                     reader.readAsDataURL(file);
                 } else {
                     preview.src = '';
-                    preview.classList.add('hidden');
+                    preview.style.display = 'none';
+                    if (fallback) fallback.style.display = '';
                 }
             });
         }

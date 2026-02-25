@@ -48,9 +48,7 @@
                     <div class="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                         <div class="flex items-center gap-4 flex-wrap">
                             <div class="w-24 h-24 rounded-full border-2 border-gray-300 bg-gray-200 overflow-hidden shrink-0 relative">
-                                {% if agent.user.profile_image %}
-                                <img id="profile-image-preview" src="{{ agent.user.profile_image.url }}" alt="Preview" class="w-full h-full object-cover absolute inset-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                {% endif %}
+                                <img id="profile-image-preview" src="{% if agent.user.profile_image %}{{ agent.user.profile_image.url }}{% endif %}" alt="Preview" class="w-full h-full object-cover absolute inset-0" style="{% if not agent.user.profile_image %}display:none;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                                 <img src="{% static 'images/crm-logo.png' %}" alt="Darkenyas CRM" class="w-full h-full object-cover" id="profile-image-placeholder" style="{% if agent.user.profile_image %}display:none;{% endif %}">
                             </div>
                             <div class="flex-1 min-w-0">
@@ -102,14 +100,16 @@
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
+                    preview.style.display = '';
                     preview.classList.remove('hidden');
-                    if (placeholder) placeholder.classList.add('hidden');
+                    if (placeholder) placeholder.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             } else if (preview && !file) {
                 preview.src = '';
+                preview.style.display = 'none';
                 preview.classList.add('hidden');
-                if (placeholder) placeholder.classList.remove('hidden');
+                if (placeholder) placeholder.style.display = '';
             }
         });
     }

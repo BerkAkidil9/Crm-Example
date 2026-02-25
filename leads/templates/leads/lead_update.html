@@ -58,9 +58,7 @@
 					<label class="block text-sm font-medium text-gray-700 mb-2">Profile photo {% if form.profile_image.field.required %}*{% endif %}</label>
 					<div class="flex items-center gap-4 flex-wrap">
 						<div class="w-24 h-24 rounded-full border-2 border-gray-300 bg-gray-200 overflow-hidden flex items-center justify-center shrink-0 relative">
-							{% if lead.profile_image %}
-							<img id="lead-profile-preview" src="{{ lead.profile_image.url }}" alt="Preview" class="w-full h-full object-cover absolute inset-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-							{% endif %}
+							<img id="lead-profile-preview" src="{% if lead.profile_image %}{{ lead.profile_image.url }}{% endif %}" alt="Preview" class="w-full h-full object-cover absolute inset-0" style="{% if not lead.profile_image %}display:none;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
 							<img id="lead-profile-placeholder" src="{% static 'images/crm-logo.png' %}" alt="Darkenyas CRM" class="w-full h-full object-cover" style="{% if lead.profile_image %}display:none;{% endif %}">
 						</div>
 						<div class="flex-1 min-w-0">
@@ -98,7 +96,7 @@
   </section>
 <script>
 (function() {
-    var profileInput = document.getElementById('id_lead_profile_image');
+    var profileInput = document.getElementById('id_profile_image') || document.getElementById('id_lead_profile_image');
     if (profileInput) {
         var preview = document.getElementById('lead-profile-preview');
         var placeholder = document.getElementById('lead-profile-placeholder');
@@ -107,15 +105,19 @@
             if (file && file.type.indexOf('image/') === 0) {
                 var reader = new FileReader();
                 reader.onload = function(ev) {
-                    preview.src = ev.target.result;
-                    if (preview) preview.classList.remove('hidden');
-                    if (placeholder) placeholder.classList.add('hidden');
+                    if (preview) {
+                        preview.src = ev.target.result;
+                        preview.style.display = '';
+                        preview.classList.remove('hidden');
+                    }
+                    if (placeholder) placeholder.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             } else if (!file && preview) {
                 preview.src = '';
+                preview.style.display = 'none';
                 preview.classList.add('hidden');
-                if (placeholder) placeholder.classList.remove('hidden');
+                if (placeholder) placeholder.style.display = '';
             }
         });
     }
