@@ -19,28 +19,33 @@
         <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
             <p class="text-sm text-gray-500">Total Products</p>
             <p class="text-2xl font-bold text-blue-600">{{ total_products }}</p>
+            <p class="text-xs text-gray-400 mt-1">Count of all products in scope (your organisation or all for admin).</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
             <p class="text-sm text-gray-500">Total Value</p>
             <p class="text-2xl font-bold text-green-600">${{ total_value|floatformat:2 }}</p>
+            <p class="text-xs text-gray-400 mt-1">Sum of (unit price × quantity) for every product.</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
             <p class="text-sm text-gray-500">Total Profit</p>
             <p class="text-2xl font-bold text-purple-600">${{ total_profit|floatformat:2 }}</p>
+            <p class="text-xs text-gray-400 mt-1">Sum of (price − cost) × quantity for products with cost price set.</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Stock status pie -->
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Products by Stock Status</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Products by Stock Status</h2>
+            <p class="text-sm text-gray-500 mb-3">Out of Stock: quantity ≤ 0. Low Stock: quantity ≤ minimum level (and &gt; 0). Overstock: quantity &gt; minimum × 10. In Stock: all others.</p>
             <div class="relative" style="height: 280px;">
                 <canvas id="chartStock"></canvas>
             </div>
         </div>
         <!-- Products by category (count) -->
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Products by Category (Count)</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Products by Category (Count)</h2>
+            <p class="text-sm text-gray-500 mb-3">Number of products per category (by product’s category).</p>
             <div class="relative" style="height: 280px;">
                 <canvas id="chartCategory"></canvas>
             </div>
@@ -50,14 +55,16 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Total value by category -->
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Total Value by Category ($)</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Total Value by Category ($)</h2>
+            <p class="text-sm text-gray-500 mb-3">Per category: sum of (unit price × quantity) for all products in that category.</p>
             <div class="relative" style="height: 280px;">
                 <canvas id="chartCategoryValue"></canvas>
             </div>
         </div>
         <!-- Top products by value -->
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Top Products by Value</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Top Products by Value</h2>
+            <p class="text-sm text-gray-500 mb-3">Top 10 products by stock value (unit price × quantity).</p>
             <div class="relative" style="height: 280px;">
                 <canvas id="chartTopProducts"></canvas>
             </div>
@@ -67,7 +74,8 @@
     <!-- Sales charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Top Selling Products (Units Sold)</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Top Selling Products (Units Sold)</h2>
+            <p class="text-sm text-gray-500 mb-3">Top 10 by total units sold from non-cancelled orders.</p>
             {% if chart_has_sales %}
             <div class="relative" style="height: 280px;">
                 <canvas id="chartSales"></canvas>
@@ -77,7 +85,8 @@
             {% endif %}
         </div>
         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Revenue by Product ($)</h2>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Revenue by Product ($)</h2>
+            <p class="text-sm text-gray-500 mb-3">Total revenue from non-cancelled orders (same top 10 products as units sold).</p>
             {% if chart_has_sales %}
             <div class="relative" style="height: 280px;">
                 <canvas id="chartSalesRevenue"></canvas>
