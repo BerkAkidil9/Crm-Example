@@ -69,6 +69,8 @@ Signup · Email verification · Login (email or username) · Password reset · P
 
 ### 1. Clone and enter project
 
+Replace `YOUR_USERNAME` with your GitHub username:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/Crm-Example.git
 cd Crm-Example
@@ -106,6 +108,8 @@ For local development:
 
 For signup & password reset: either SMTP (`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`) or Gmail API (`USE_GMAIL_API=true` + Gmail API vars) — see [Email Configuration](#email-configuration).
 
+For persistent profile/media uploads in production (e.g. Render), see [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) (Cloudflare R2 setup).
+
 The app uses **PostgreSQL** by default (matches production).
 
 ### 5. Database and run
@@ -137,10 +141,8 @@ For signup verification and password reset you can use either option.
 3. In `.env`: set `USE_GMAIL_API=false` (or leave unset) and add `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`
 
 **Option B – Gmail API (needed on Render; SMTP ports are blocked)**  
-1. In [Google Cloud Console](https://console.cloud.google.com/): create a project, enable **Gmail API**, configure OAuth consent screen, create **OAuth 2.0 Client ID** (Desktop app)  
-2. Get a refresh token: `pip install django-gmailapi-backend` then  
-   `gmail_oauth2 --generate_oauth2_token --client_id="..." --client_secret="..." --scope="https://www.googleapis.com/auth/gmail.send"`  
-3. In `.env`: set `USE_GMAIL_API=true` and add `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN`, `DEFAULT_FROM_EMAIL` (the Gmail address you used in step 2)
+For step-by-step setup (Google Cloud project, Gmail API, OAuth consent screen, OAuth 2.0 Client ID, refresh token), see **[docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md)**.  
+Then in `.env`: set `USE_GMAIL_API=true` and add `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN`, `DEFAULT_FROM_EMAIL` (the Gmail address used for the refresh token).
 
 ---
 
@@ -165,13 +167,14 @@ Use [Neon](https://neon.tech/) (recommended) or any PostgreSQL provider. Copy th
 | `DATABASE_URL` | ✅ Yes | PostgreSQL connection string (e.g. Neon pooled URL with `?sslmode=require`) |
 | `SECRET_KEY` | ✅ Yes | Random string (Render can auto-generate) |
 | `DEBUG` | ✅ Yes | Set to `False` for production |
-| `GMAIL_API_CLIENT_ID` | ✅ Yes | From Google Cloud Console (OAuth 2.0 Client ID) |
-| `GMAIL_API_CLIENT_SECRET` | ✅ Yes | From Google Cloud Console |
-| `GMAIL_API_REFRESH_TOKEN` | ✅ Yes | From `gmail_oauth2 --generate_oauth2_token` (see [Email Configuration](#email-configuration)) |
+| `GMAIL_API_CLIENT_ID` | ✅ Yes | From Google Cloud Console (OAuth 2.0 Client ID). See [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) |
+| `GMAIL_API_CLIENT_SECRET` | ✅ Yes | From Google Cloud Console. See [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) |
+| `GMAIL_API_REFRESH_TOKEN` | ✅ Yes | From `gmail_oauth2 --generate_oauth2_token`. See [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) |
 | `DEFAULT_FROM_EMAIL` | ✅ Yes | Gmail address that sends mail (same as the account used for the refresh token) |
 | `DJANGO_SUPERUSER_EMAIL` | Optional | Email for first admin (created on first deploy) |
 | `DJANGO_SUPERUSER_USERNAME` | Optional | Username for first admin |
 | `DJANGO_SUPERUSER_PASSWORD` | Optional | Password for first admin |
+| R2 (media) | Optional | For persistent uploads: `USE_R2`, `R2_ACCOUNT_ID`, `R2_BUCKET_NAME`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_DOMAIN`. See [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) |
 
 `USE_GMAIL_API`, `PYTHON_VERSION`, `WEB_CONCURRENCY`, and `RENDER_EXTERNAL_HOSTNAME` are set automatically by `render.yaml` or Render.
 
@@ -249,7 +252,7 @@ URL: `http://127.0.0.1:8000/admin/` — Login with superuser credentials.
 
 ## Security
 
-- Never commit `.env` or secrets
+- Never commit `.env` or secrets. Only `.env.example` is committed; copy it to `.env` and fill in your values locally.
 - Use environment variables for production
 - Enable HTTPS in production
 
