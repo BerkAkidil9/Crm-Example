@@ -80,7 +80,8 @@ pip-delete-this-directory.txt
 TURKCE_BULUNAN_YERLER.md
 TURKCE_INGILIZCE_CEVIRI_LISTESI.md
 TURKISH_TO_ENGLISH_AUDIT.md
-docs/
+# docs: ignore all; only the two below are tracked (add !docs/NAME.md to track more)
+docs/*
 !docs/CLOUDFLARE_R2.md
 !docs/GMAIL_API_SETUP.md
 START_PROJECT.md

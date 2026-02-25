@@ -174,8 +174,7 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
                 product.organisation = user.userprofile
                 # Set user_organisation on the form (for use in clean method)
                 form.user_organisation = user.userprofile
-            except:
-                from django.contrib import messages
+            except Exception:
                 messages.error(self.request, "User profile not found. Please contact administrator.")
                 return self.form_invalid(form)
         # For admin, organisation is already set by the form

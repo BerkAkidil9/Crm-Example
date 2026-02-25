@@ -30,7 +30,7 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 **Database:** PostgreSQL (development & production)
 
-**Email:** Gmail API (Render) or SMTP (local) — signup verification, password reset
+**Email:** Gmail API (Render) or SMTP (local)
 
 ---
 
@@ -65,7 +65,11 @@ Signup · Email verification · Login (email or username) · Password reset · P
 
 ## Local Setup
 
-**Prerequisites:** Python 3.12+
+**Prerequisites:**
+
+- **Python** 3.12+
+- **Git** — for cloning the repo
+- **PostgreSQL** 12+ (default DB; or use [SQLite](#local-sqlite-optional) by commenting out `DB_ENGINE` and `DB_*` in `.env`)
 
 ### 1. Clone and enter project
 
@@ -133,7 +137,7 @@ To use SQLite instead of PostgreSQL, comment out `DB_ENGINE` and `DB_*` in `.env
 
 ## Email Configuration
 
-For signup verification and password reset you can use either option.
+Email is used for: signup verification, password reset, organisor/agent invitation (verification), and task deadline reminders (cron). For all of these you can use either option below.
 
 **Option A – Local (SMTP)**  
 1. Enable **2-Step Verification** in your Gmail account  
@@ -196,12 +200,17 @@ After saving env vars, Render will build and deploy. The first deploy runs migra
 ├── ProductsAndStock/  # Products, stock, dashboard, charts, alerts
 ├── tasks/             # Tasks and notifications
 ├── activity_log/      # Audit log of user actions
+├── docs/              # GMAIL_API_SETUP.md, CLOUDFLARE_R2.md (see Email / Deploy sections)
 ├── static/            # Static files
 ├── templates/         # Base, landing, registration templates
+├── .env.example       # Environment variables template (copy to .env and fill in)
+├── .gitignore         # Files and folders excluded from version control
 ├── build.sh           # Render build script
+├── LICENSE            # MIT license terms
+├── manage.py          # Django CLI entry point (runserver, migrate, test, etc.)
+├── README.md          # Project overview, setup, features, deployment
 ├── render.yaml        # Render deployment config
-├── .env.example       # Environment variables template
-└── requirements.txt
+└── requirements.txt  # Python dependencies (pip install -r requirements.txt)
 ```
 
 ---
@@ -223,20 +232,18 @@ After saving env vars, Render will build and deploy. The first deploy runs migra
 
 **Maintenance / Migration**
 
-- `clean_duplicate_categories` — Remove duplicate lead categories
 - `update_product_descriptions_english` — Update sample product descriptions to English
 - `reassign_products_to_organisor` — Move products from one organisation to another
 
 **Development / Test** (dev/test environments only)
 
-- `create_test_data` — Create test data for leads
 - `create_fake_notifications` — Create fake notifications for testing
-- `final_cleanup` — Lead data cleanup
-- `force_clean_duplicates` — Force clean duplicate lead categories
 
 ---
 
 ## Testing
+
+Tests run **locally** only (not during production deploy). From the project root:
 
 ```bash
 python manage.py test
@@ -246,7 +253,7 @@ python manage.py test
 
 ## Admin
 
-URL: `http://127.0.0.1:8000/admin/` — Login with superuser credentials.
+**Local:** `http://127.0.0.1:8000/admin/` — **Production:** `<your-app-url>/admin/` (e.g. https://darkenyas-crm.onrender.com/admin/). Login with superuser credentials.
 
 ---
 
