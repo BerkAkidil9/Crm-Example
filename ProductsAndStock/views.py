@@ -1,5 +1,7 @@
+import logging
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.http import JsonResponse
 from django.contrib import messages
@@ -19,6 +21,9 @@ from activity_log.models import (
 from agents.mixins import OrganisorAndLoginRequiredMixin, AgentAndOrganisorLoginRequiredMixin, ProductsAndStockAccessMixin
 from .forms import ProductAndStockModelForm, AdminProductAndStockModelForm
 from .bulk_price_form import BulkPriceUpdateForm
+
+logger = logging.getLogger(__name__)
+
 
 class ProductAndStockListView(ProductsAndStockAccessMixin, generic.ListView):
 	template_name = "ProductsAndStock/ProductAndStock_list.html"
@@ -127,11 +132,12 @@ class ProductAndStockDetailView(ProductsAndStockAccessMixin, generic.DetailView)
                 # Agent sees products from their organisation
                 agent_organisation = self.request.user.agent.organisation
                 return ProductsAndStock.objects.filter(organisation=agent_organisation)
-            except Exception as e:
-                # If agent doesn't exist, return empty queryset
-                print(f"Agent access error: {e}")
-                print(f"User: {self.request.user.username}")
-                print(f"Is agent: {self.request.user.is_agent}")
+            except Exception:
+                logger.exception(
+                    "ProductAndStockDetailView agent access error for user=%s is_agent=%s",
+                    self.request.user.username,
+                    self.request.user.is_agent,
+                )
                 return ProductsAndStock.objects.none()
         else:
             return ProductsAndStock.objects.none()
@@ -168,7 +174,7 @@ class ProductAndStockCreateView(OrganisorAndLoginRequiredMixin,generic.CreateVie
         user = self.request.user
         
         # Admin uses the form's organisation field, organisors use their own
-        if not (user.is_superuser or user.id == 1 or user.username == 'berk'):
+        if not user.is_superuser:
             # Organisors use their own organisation
             try:
                 product.organisation = user.userprofile
@@ -222,7 +228,7 @@ class ProductAndStockUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateVi
         old_price = getattr(product, 'product_price', None)
 
         # Set user_organisation for organisors (for use in clean method)
-        if not (user.is_superuser or user.id == 1 or user.username == 'berk'):
+        if not user.is_superuser:
             try:
                 form.user_organisation = user.userprofile
             except Exception:
@@ -283,20 +289,18 @@ class ProductAndStockDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteVi
         else:
             return ProductsAndStock.objects.none()
 
+@login_required
 def get_subcategories(request):
-    """AJAX endpoint to get subcategories for a given category"""
+    """AJAX endpoint to get subcategories for a given category. category_id is validated as integer."""
     category_id = request.GET.get('category_id')
-    
-    if category_id:
-        try:
-            subcategories = SubCategory.objects.filter(category_id=category_id).values('id', 'name')
-            return JsonResponse({
-                'subcategories': list(subcategories)
-            })
-        except ValueError:
-            return JsonResponse({'error': 'Invalid category ID'}, status=400)
-    
-    return JsonResponse({'subcategories': []})
+    if not category_id:
+        return JsonResponse({'subcategories': []})
+    try:
+        category_id = int(category_id)
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'Invalid category ID'}, status=400)
+    subcategories = SubCategory.objects.filter(category_id=category_id).values('id', 'name')
+    return JsonResponse({'subcategories': list(subcategories)})
 
 class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
     template_name = "ProductsAndStock/bulk_price_update.html"
@@ -417,10 +421,11 @@ class BulkPriceUpdateView(OrganisorAndLoginRequiredMixin, generic.FormView):
                     f'Successfully updated prices for {updated_count} products.'
                 )
                 
-        except Exception as e:
+        except Exception:
+            logger.exception("Bulk price update failed")
             messages.error(
-                self.request, 
-                f'Error updating prices: {str(e)}'
+                self.request,
+                'An error occurred while updating prices. Please try again.'
             )
         
         return super().form_valid(form)

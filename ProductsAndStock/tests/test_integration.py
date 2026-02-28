@@ -408,7 +408,8 @@ class TestProductsAndStockWorkflow(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def test_ajax_subcategory_loading(self):
-        """AJAX subcategory loading test"""
+        """AJAX subcategory loading test (get_subcategories requires login)"""
+        self.client.force_login(self.organisor_user)
         # Load subcategories with category selection
         response = self.client.get(
             reverse('ProductsAndStock:get-subcategories'),

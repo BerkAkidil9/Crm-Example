@@ -4,7 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from phonenumber_field.formfields import PhoneNumberField
-from leads.forms import PhoneNumberWidget
+from leads.forms import PhoneNumberWidget, validate_image_upload
 
 User = get_user_model()
 
@@ -117,11 +117,7 @@ class OrganisorModelForm(forms.ModelForm):
     def clean_profile_image(self):
         upload = self.cleaned_data.get('profile_image')
         if upload and isinstance(upload, UploadedFile):
-            allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-            if getattr(upload, 'content_type', None) not in allowed:
-                raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-            if upload.size > 5 * 1024 * 1024:
-                raise forms.ValidationError('File size must be less than 5 MB.')
+            validate_image_upload(upload)
         return upload
 
     def save(self, commit=True):
@@ -214,8 +210,17 @@ class OrganisorCreateForm(forms.ModelForm):
         
         return password2
 
+    def clean_profile_image(self):
+        upload = self.cleaned_data.get('profile_image')
+        if upload and isinstance(upload, UploadedFile):
+            validate_image_upload(upload)
+        return upload
+
     def save(self, commit=True):
         user = super().save(commit=False)
+        new_image = self.cleaned_data.get('profile_image')
+        if new_image and isinstance(new_image, UploadedFile):
+            user.profile_image = new_image
         password = self.cleaned_data.get('password1')
         user.set_password(password)
         

@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 from leads.models import User, UserProfile  # Import User and UserProfile from leads app
 
 class Category(models.Model):
@@ -153,7 +154,7 @@ class ProductsAndStock(models.Model):
 		try:
 			today_stats = self.sales_stats.get(date=today)
 			return today_stats.total_sales
-		except:
+		except ObjectDoesNotExist:
 			return 0
 	
 	@property
@@ -164,7 +165,7 @@ class ProductsAndStock(models.Model):
 		try:
 			today_stats = self.sales_stats.get(date=today)
 			return today_stats.total_revenue
-		except:
+		except ObjectDoesNotExist:
 			return 0
 	
 	@property
@@ -198,7 +199,7 @@ class ProductsAndStock(models.Model):
 				delta = timezone.now() - latest_stats.last_sale_date
 				return delta.days
 			return None
-		except:
+		except (ObjectDoesNotExist, TypeError, ValueError):
 			return None
 	
 	@property
@@ -213,7 +214,7 @@ class ProductsAndStock(models.Model):
 				total=models.Sum('product_quantity')
 			)['total']
 			return total_sold if total_sold else 0
-		except:
+		except (TypeError, KeyError):
 			return 0
 	
 	@property
@@ -228,7 +229,7 @@ class ProductsAndStock(models.Model):
 				total=models.Sum('total_price')
 			)['total']
 			return total_revenue if total_revenue else 0
-		except:
+		except (TypeError, KeyError):
 			return 0
 	
 	@property
@@ -246,7 +247,7 @@ class ProductsAndStock(models.Model):
 				total=models.Sum('product_quantity')
 			)['total']
 			return today_sales if today_sales else 0
-		except:
+		except (TypeError, KeyError):
 			return 0
 	
 	@property
@@ -259,7 +260,7 @@ class ProductsAndStock(models.Model):
 				order__is_cancelled=False
 			).order_by('-order__creation_date').first()
 			return last_order.order.creation_date if last_order else None
-		except:
+		except (TypeError, AttributeError):
 			return None
 
 # Store previous data for tracking

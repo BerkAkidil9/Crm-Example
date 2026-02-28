@@ -1,6 +1,9 @@
+import logging
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+
+logger = logging.getLogger(__name__)
 
 
 # Human-readable action constants
@@ -160,13 +163,20 @@ def log_activity(user, action, object_type=None, object_id=None, object_repr='',
     """
     if not user or not user.is_authenticated:
         return None
-    return ActivityLog.objects.create(
-        user=user,
-        action=action,
-        object_type=object_type or '',
-        object_id=object_id,
-        object_repr=(object_repr or '')[:255],
-        details=details or {},
-        organisation=organisation,
-        affected_agent=affected_agent,
-    )
+    try:
+        return ActivityLog.objects.create(
+            user=user,
+            action=action,
+            object_type=object_type or '',
+            object_id=object_id,
+            object_repr=(object_repr or '')[:255],
+            details=details or {},
+            organisation=organisation,
+            affected_agent=affected_agent,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to create activity log: action=%s object_type=%s object_id=%s",
+            action, object_type, object_id,
+        )
+        return None

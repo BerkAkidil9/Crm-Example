@@ -55,7 +55,7 @@ class AgentListView(OrganisorAndLoginRequiredMixin, generic.ListView):
         context["search_query"] = self.request.GET.get("q") or ""
         return context
     
-class AgentCreateView(LoginRequiredMixin, generic.CreateView):
+class AgentCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
     template_name = "agents/agent_create.html"
     
     def get_form_class(self):

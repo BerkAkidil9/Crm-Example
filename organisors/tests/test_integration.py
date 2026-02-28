@@ -18,6 +18,9 @@ from organisors.mixins import AdminOnlyMixin, OrganisorAndAdminMixin, SelfProfil
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -116,7 +119,7 @@ class TestOrganisorCompleteIntegration(TestCase):
             'gender': 'F',
             'password1': 'newpass123!',
             'password2': 'newpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
         
         with patch('organisors.views.send_mail') as mock_send_mail:
@@ -372,7 +375,7 @@ class TestOrganisorCompleteIntegration(TestCase):
             'gender': 'M',
             'password1': 'emailpass123!',
             'password2': 'emailpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
         
         with patch('organisors.views.send_mail') as mock_send_mail:
@@ -416,7 +419,7 @@ class TestOrganisorCompleteIntegration(TestCase):
                 'gender': 'M',
                 'password1': 'bulkpass123!',
                 'password2': 'bulkpass123!',
-                'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+                'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
             }
             for i in range(1, 4)
         ]

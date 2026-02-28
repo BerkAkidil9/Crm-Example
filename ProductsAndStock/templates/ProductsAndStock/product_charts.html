@@ -99,22 +99,33 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{{ chart_stock_labels|json_script:"chart-stock-labels" }}
+{{ chart_stock_data|json_script:"chart-stock-data" }}
+{{ chart_stock_colors|json_script:"chart-stock-colors" }}
+{{ chart_category_labels|json_script:"chart-category-labels" }}
+{{ chart_category_counts|json_script:"chart-category-counts" }}
+{{ chart_category_values|json_script:"chart-category-values" }}
+{{ chart_top_labels|json_script:"chart-top-labels" }}
+{{ chart_top_data|json_script:"chart-top-data" }}
+{{ chart_sales_labels|json_script:"chart-sales-labels" }}
+{{ chart_sales_data|json_script:"chart-sales-data" }}
+{{ chart_sales_revenue_data|json_script:"chart-sales-revenue-data" }}
 <script>
 (function() {
-    const stockLabels = {{ chart_stock_labels_json|safe }};
-    const stockData = {{ chart_stock_data_json|safe }};
-    const stockColors = {{ chart_stock_colors_json|safe }};
+    const stockLabels = JSON.parse(document.getElementById('chart-stock-labels').textContent);
+    const stockData = JSON.parse(document.getElementById('chart-stock-data').textContent);
+    const stockColors = JSON.parse(document.getElementById('chart-stock-colors').textContent);
 
-    const categoryLabels = {{ chart_category_labels_json|safe }};
-    const categoryCounts = {{ chart_category_counts_json|safe }};
-    const categoryValues = {{ chart_category_values_json|safe }};
+    const categoryLabels = JSON.parse(document.getElementById('chart-category-labels').textContent);
+    const categoryCounts = JSON.parse(document.getElementById('chart-category-counts').textContent);
+    const categoryValues = JSON.parse(document.getElementById('chart-category-values').textContent);
 
-    const topLabels = {{ chart_top_labels_json|safe }};
-    const topData = {{ chart_top_data_json|safe }};
+    const topLabels = JSON.parse(document.getElementById('chart-top-labels').textContent);
+    const topData = JSON.parse(document.getElementById('chart-top-data').textContent);
 
-    const salesLabels = {{ chart_sales_labels_json|safe }};
-    const salesData = {{ chart_sales_data_json|safe }};
-    const salesRevenueData = {{ chart_sales_revenue_data_json|safe }};
+    const salesLabels = JSON.parse(document.getElementById('chart-sales-labels').textContent);
+    const salesData = JSON.parse(document.getElementById('chart-sales-data').textContent);
+    const salesRevenueData = JSON.parse(document.getElementById('chart-sales-revenue-data').textContent);
 
     const defaultColors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
