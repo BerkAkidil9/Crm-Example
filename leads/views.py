@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,10 +12,12 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from agents.mixins import OrganisorAndLoginRequiredMixin
-from .models import Lead, Agent, Category, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
+from .models import Lead, Agent, Category, User, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
 from activity_log.models import ActivityLog, log_activity, ACTION_LEAD_CREATED, ACTION_LEAD_UPDATED, ACTION_LEAD_DELETED
 from orders.models import orders as Order
 from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, CustomAuthenticationForm, AdminLeadModelForm, OrganisorLeadModelForm, CustomPasswordResetForm, CustomSetPasswordForm
+
+logger = logging.getLogger(__name__)
 
 
 class CustomLoginView(LoginView):
@@ -86,7 +89,6 @@ Darkenyas CRM Team
             if username:
                 try:
                     from django.db import models
-                    from .models import User
                     user = User.objects.filter(
                         models.Q(username__iexact=username) | models.Q(email__iexact=username)
                     ).first()
@@ -94,7 +96,7 @@ Darkenyas CRM Team
                     if user and not user.email_verified:
                         messages.error(self.request, "Please verify your account by clicking the verification link sent to your email address.")
                         return super().form_invalid(form)
-                except:
+                except (User.DoesNotExist, ValueError):
                     pass
             
             # Only show error message when both username and password are filled
@@ -237,18 +239,36 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 				Q(phone_number__icontains=search)
 			)
 
-		# Admin-only filters
+		# Admin-only filters (validate GET params to avoid 500 / info disclosure)
 		if user.is_superuser:
-			org_id = self.request.GET.get("organisation")
-			if org_id:
+			org_id = None
+			org_id_raw = self.request.GET.get("organisation")
+			if org_id_raw is not None and org_id_raw != "":
+				try:
+					org_id = int(org_id_raw)
+				except (TypeError, ValueError):
+					org_id = None
+			agent_id = None
+			agent_id_raw = self.request.GET.get("agent")
+			if agent_id_raw is not None and agent_id_raw != "":
+				try:
+					agent_id = int(agent_id_raw)
+				except (TypeError, ValueError):
+					agent_id = None
+			if org_id is not None:
 				queryset = queryset.filter(organisation_id=org_id)
-			agent_id = self.request.GET.get("agent")
-			if agent_id:
+			if agent_id is not None:
 				queryset = queryset.filter(agent_id=agent_id)
 		# Organisor: filter by own agents
 		elif user.is_organisor:
-			agent_id = self.request.GET.get("agent")
-			if agent_id:
+			agent_id = None
+			agent_id_raw = self.request.GET.get("agent")
+			if agent_id_raw is not None and agent_id_raw != "":
+				try:
+					agent_id = int(agent_id_raw)
+				except (TypeError, ValueError):
+					agent_id = None
+			if agent_id is not None:
 				queryset = queryset.filter(agent_id=agent_id, agent__organisation=user.userprofile)
 
 		return queryset
@@ -274,11 +294,23 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 				Q(phone_number__icontains=search)
 			)
 		if user.is_superuser:
-			org_id = self.request.GET.get("organisation")
-			if org_id:
+			org_id = None
+			org_id_raw = self.request.GET.get("organisation")
+			if org_id_raw is not None and org_id_raw != "":
+				try:
+					org_id = int(org_id_raw)
+				except (TypeError, ValueError):
+					org_id = None
+			agent_id = None
+			agent_id_raw = self.request.GET.get("agent")
+			if agent_id_raw is not None and agent_id_raw != "":
+				try:
+					agent_id = int(agent_id_raw)
+				except (TypeError, ValueError):
+					agent_id = None
+			if org_id is not None:
 				unassigned = unassigned.filter(organisation_id=org_id)
-			agent_id = self.request.GET.get("agent")
-			if agent_id:
+			if agent_id is not None:
 				unassigned = unassigned.filter(agent_id=agent_id)
 
 		context["unassigned_leads"] = unassigned
@@ -287,26 +319,38 @@ class LeadListView(LoginRequiredMixin, generic.ListView):
 		if user.is_superuser:
 			context["filter_organisations"] = UserProfile.objects.filter(user__is_organisor=True, user__is_superuser=False).order_by("user__username")
 			context["filter_agents"] = Agent.objects.all().select_related("user", "organisation").order_by("user__username")
-			org_id = self.request.GET.get("organisation") or ""
-			agent_id = self.request.GET.get("agent") or ""
-			if org_id and agent_id and not Agent.objects.filter(pk=agent_id, organisation_id=org_id).exists():
-				agent_id = ""
-			context["current_organisation_id"] = org_id
-			context["current_agent_id"] = agent_id
+			org_id_ctx = None
+			org_id_raw = self.request.GET.get("organisation")
+			if org_id_raw is not None and org_id_raw != "":
+				try:
+					org_id_ctx = int(org_id_raw)
+				except (TypeError, ValueError):
+					pass
+			agent_id_ctx = None
+			agent_id_raw = self.request.GET.get("agent")
+			if agent_id_raw is not None and agent_id_raw != "":
+				try:
+					agent_id_ctx = int(agent_id_raw)
+				except (TypeError, ValueError):
+					pass
+			if org_id_ctx is not None and agent_id_ctx is not None and not Agent.objects.filter(pk=agent_id_ctx, organisation_id=org_id_ctx).exists():
+				agent_id_ctx = None
+			context["current_organisation_id"] = org_id_ctx if org_id_ctx is not None else ""
+			context["current_agent_id"] = agent_id_ctx if agent_id_ctx is not None else ""
 		# Organisor: filter by own organisation's agents
 		elif user.is_organisor:
 			context["filter_agents"] = Agent.objects.filter(organisation=user.userprofile).select_related("user", "organisation").order_by("user__username")
-			context["current_agent_id"] = self.request.GET.get("agent") or ""
+			agent_id_ctx = None
+			agent_id_raw = self.request.GET.get("agent")
+			if agent_id_raw is not None and agent_id_raw != "":
+				try:
+					agent_id_ctx = int(agent_id_raw)
+				except (TypeError, ValueError):
+					pass
+			context["current_agent_id"] = agent_id_ctx if agent_id_ctx is not None else ""
 		context["search_query"] = self.request.GET.get("q") or ""
 
 		return context
-
-def lead_list(request):
-   leads = Lead.objects.all()
-   context = {
-	  "lead": leads
-   }
-   return render(request, "leads/lead_list.html", context)
 
 class LeadDetailView(LoginRequiredMixin, generic.DetailView):
 	template_name = "leads/lead_detail.html"
@@ -352,14 +396,6 @@ class LeadActivityView(LoginRequiredMixin, generic.DetailView):
 		).order_by("-created_at")[:100]
 		context["lead_activities"] = lead_activities
 		return context
-
-
-def lead_detail(request, pk):
-	lead = Lead.objects.get(id=pk)
-	context = {
-		"lead": lead
-	}
-	return render(request, "leads/lead_detail.html", context)
 
 class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 	template_name = "leads/lead_create.html"
@@ -435,19 +471,6 @@ class LeadCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
 			)
 		return super(LeadCreateView, self).form_valid(form)
 
-def lead_create(request):
-	form = LeadModelForm()
-	if request.method == "POST":
-		form = LeadModelForm(request.POST)
-		if form.is_valid():
-			form.save()
-			messages.success(request, "Lead created successfully.")
-			return redirect("/leads")
-	context = {
-		"form": form
-	}
-	return render(request, "leads/lead_create.html", context)
-
 class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 	template_name = "leads/lead_update.html"
 	
@@ -505,21 +528,6 @@ class LeadUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
 			)
 		return response
 
-def lead_update(request, pk):
-	lead = Lead.objects.get(id=pk)
-	form = LeadModelForm(instance=lead)
-	if request.method == "POST":
-		form = LeadModelForm(request.POST, instance=lead)
-		if form.is_valid():
-			form.save()
-			messages.success(request, "Lead updated successfully.")
-			return redirect("/leads")
-	context = {
-		"form": form,
-		"lead": lead
-	}
-	return render(request, "leads/lead_update.html", context)
-
 class LeadDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 	template_name = "leads/lead_delete.html"
 	
@@ -549,19 +557,20 @@ class LeadDeleteView(OrganisorAndLoginRequiredMixin, generic.DeleteView):
 		messages.success(self.request, "Lead deleted successfully.")
 		return super().form_valid(form)
 
-def lead_delete(request, pk):
-	lead = Lead.objects.get(id=pk)
-	lead.delete()
-	messages.success(request, "Lead deleted successfully.")
-	return redirect("/leads")
-
 class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 	template_name = "leads/assign_agent.html"
 	form_class = AssignAgentForm
 
+	def _get_lead(self):
+		"""Return lead scoped to current user's organisation (prevents IDOR)."""
+		user = self.request.user
+		if user.is_superuser:
+			return get_object_or_404(Lead, pk=self.kwargs["pk"])
+		return get_object_or_404(Lead, pk=self.kwargs["pk"], organisation=user.userprofile)
+
 	def get_form_kwargs(self, **kwargs):
 		kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
-		lead = get_object_or_404(Lead, pk=self.kwargs["pk"])
+		lead = self._get_lead()
 		kwargs.update({
 			"request": self.request,
 			"lead": lead,
@@ -573,7 +582,7 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 	
 	def form_valid(self, form):
 		agent = form.cleaned_data["agent"]
-		lead = Lead.objects.get(id=self.kwargs["pk"])
+		lead = self._get_lead()
 		lead.agent = agent
 		lead.save()
 		messages.success(self.request, "Agent assigned successfully.")
@@ -602,7 +611,7 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, generic.FormView):
 					action_label="View Lead",
 				)
 			except Exception:
-				pass  # Don't break assign flow if notification fails
+				logger.warning("Notification create failed for lead pk=%s", lead.pk, exc_info=True)
 		return super(AssignAgentView, self).form_valid(form)
 	
 from django.db.models import Count
@@ -617,18 +626,30 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
 
         # Get Categories with filtering for admin
         if user.is_superuser:
-            # Get filter parameters
-            selected_org_id = self.request.GET.get('organization')
-            selected_agent_id = self.request.GET.get('agent')
+            # Get filter parameters (validate as int to avoid 500 / info disclosure)
+            selected_org_id = None
+            org_raw = self.request.GET.get('organization')
+            if org_raw is not None and org_raw != "":
+                try:
+                    selected_org_id = int(org_raw)
+                except (TypeError, ValueError):
+                    selected_org_id = None
+            selected_agent_id = None
+            agent_raw = self.request.GET.get('agent')
+            if agent_raw is not None and agent_raw != "":
+                try:
+                    selected_agent_id = int(agent_raw)
+                except (TypeError, ValueError):
+                    selected_agent_id = None
             
-            # Get all organizations for dropdown (only real organisors, exclude admin)
+            # Get all organizations for dropdown (only real organisors, exclude superuser)
             all_organizations = UserProfile.objects.filter(
-                user__is_organisor=True, 
+                user__is_organisor=True,
                 user__is_superuser=False
-            ).exclude(user__id=1).exclude(user__username='berk')
+            )
             
             # Get agents based on selected organization
-            if selected_org_id:
+            if selected_org_id is not None:
                 try:
                     selected_org = UserProfile.objects.get(id=selected_org_id)
                     agents = Agent.objects.filter(organisation=selected_org)
@@ -641,7 +662,7 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
             
             # Get selected agent
             selected_agent = None
-            if selected_agent_id:
+            if selected_agent_id is not None:
                 try:
                     selected_agent = Agent.objects.get(id=selected_agent_id)
                 except Agent.DoesNotExist:
@@ -719,9 +740,15 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
             if user.is_organisor:
                 organisation = user.userprofile
                 filter_agents = Agent.objects.filter(organisation=organisation).select_related("user", "organisation").order_by("user__username")
-                selected_agent_id = self.request.GET.get('agent')
+                selected_agent_id = None
+                agent_raw = self.request.GET.get('agent')
+                if agent_raw is not None and agent_raw != "":
+                    try:
+                        selected_agent_id = int(agent_raw)
+                    except (TypeError, ValueError):
+                        selected_agent_id = None
                 selected_agent = None
-                if selected_agent_id:
+                if selected_agent_id is not None:
                     try:
                         selected_agent = Agent.objects.filter(pk=selected_agent_id, organisation=organisation).select_related("user").first()
                     except (ValueError, Agent.DoesNotExist):
@@ -874,6 +901,17 @@ def get_agents_by_org(request, org_id):
 	try:
 		# Organisation dropdown only lists organisors, so this is always an organisor org
 		organisation = UserProfile.objects.get(id=org_id, user__is_organisor=True, user__is_superuser=False)
+		user = request.user
+		# Role-based access: superuser all orgs, organisor only own org, agent no access
+		if not user.is_superuser:
+			if user.is_organisor:
+				try:
+					if user.userprofile.id != organisation.id:
+						return JsonResponse({'error': 'Forbidden'}, status=403)
+				except UserProfile.DoesNotExist:
+					return JsonResponse({'error': 'Forbidden'}, status=403)
+			else:
+				return JsonResponse({'error': 'Forbidden'}, status=403)
 		# Create default categories for selected org if missing (so org 2, 3... also get pre-filled when selected)
 		_default_source = [
 			"Website", "Social Media", "Email Campaign", "Cold Call", "Referral",
@@ -910,5 +948,6 @@ def get_agents_by_org(request, org_id):
 		
 	except UserProfile.DoesNotExist:
 		return JsonResponse({'error': 'Organisation not found'}, status=404)
-	except Exception as e:
-		return JsonResponse({'error': str(e)}, status=500)
+	except Exception:
+		logger.exception("get_agents_by_org error for org_id=%s", org_id)
+		return JsonResponse({'error': 'An error occurred. Please try again.'}, status=500)

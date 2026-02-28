@@ -35,14 +35,26 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         user = self.request.user
-        org_id = self.request.GET.get("organisation")
-        agent_id = self.request.GET.get("agent")
+        org_id = None
+        org_id_raw = self.request.GET.get("organisation")
+        if org_id_raw is not None and org_id_raw != "":
+            try:
+                org_id = int(org_id_raw)
+            except (TypeError, ValueError):
+                org_id = None
+        agent_id = None
+        agent_id_raw = self.request.GET.get("agent")
+        if agent_id_raw is not None and agent_id_raw != "":
+            try:
+                agent_id = int(agent_id_raw)
+            except (TypeError, ValueError):
+                agent_id = None
         base = orders.objects.select_related("organisation", "organisation__user", "lead", "lead__agent", "lead__agent__user")
         if user.is_superuser:
             qs = base
-            if org_id:
+            if org_id is not None:
                 qs = qs.filter(organisation_id=org_id)
-            if agent_id:
+            if agent_id is not None:
                 qs = qs.filter(lead__agent_id=agent_id)
             return qs.order_by("-creation_date")
         org = get_organisation_for_user(user)
@@ -56,7 +68,7 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
                 qs = qs.filter(lead__agent=agent_obj)
             except Agent.DoesNotExist:
                 qs = qs.none()
-        elif agent_id and (user.is_superuser or user.is_organisor):
+        elif agent_id is not None and (user.is_superuser or user.is_organisor):
             qs = qs.filter(lead__agent_id=agent_id)
         return qs.order_by("-creation_date")
 
@@ -84,10 +96,22 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
         context["show_cancelled"] = get.get("show_cancelled", "1") == "1"
         if self.request.user.is_superuser or self.request.user.is_organisor:
             from leads.models import UserProfile
-            selected_org_id = self.request.GET.get("organisation", "")
-            selected_agent_id = self.request.GET.get("agent", "")
-            context["selected_organisation_id"] = selected_org_id
-            context["selected_agent_id"] = selected_agent_id
+            selected_org_id = None
+            org_raw = self.request.GET.get("organisation", "")
+            if org_raw is not None and org_raw != "":
+                try:
+                    selected_org_id = int(org_raw)
+                except (TypeError, ValueError):
+                    selected_org_id = None
+            selected_agent_id = None
+            agent_raw = self.request.GET.get("agent", "")
+            if agent_raw is not None and agent_raw != "":
+                try:
+                    selected_agent_id = int(agent_raw)
+                except (TypeError, ValueError):
+                    selected_agent_id = None
+            context["selected_organisation_id"] = selected_org_id if selected_org_id is not None else ""
+            context["selected_agent_id"] = selected_agent_id if selected_agent_id is not None else ""
             if self.request.user.is_superuser:
                 # Organisations: all organisors except admin (so admin doesn't see themselves)
                 org_qs = UserProfile.objects.filter(user__is_organisor=True).select_related("user").order_by("user__username")
@@ -97,7 +121,7 @@ class OrderListView(LoginRequiredMixin, generic.ListView):
                 context["organisations"] = org_qs
                 context["show_organisation_filter"] = True
                 # Agents: only for the selected organisation (so admin sees that org's agents)
-                if selected_org_id:
+                if selected_org_id is not None:
                     context["agents"] = Agent.objects.filter(organisation_id=selected_org_id).select_related("user").order_by("user__username")
                 else:
                     context["agents"] = []

@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from leads.models import UserProfile
 from phonenumber_field.formfields import PhoneNumberField
-from leads.forms import PhoneNumberWidget
+from leads.forms import PhoneNumberWidget, validate_image_upload
 
 User = get_user_model()
 
@@ -122,11 +122,7 @@ class AgentModelForm(forms.ModelForm):
 	def clean_profile_image(self):
 		upload = self.cleaned_data.get('profile_image')
 		if upload and isinstance(upload, UploadedFile):
-			allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-			if getattr(upload, 'content_type', None) not in allowed:
-				raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-			if upload.size > 5 * 1024 * 1024:
-				raise forms.ValidationError('File size must be less than 5 MB.')
+			validate_image_upload(upload)
 		return upload
 
 	def save(self, commit=True):
@@ -207,13 +203,8 @@ class AdminAgentModelForm(forms.ModelForm):
 
 	def clean_profile_image(self):
 		upload = self.cleaned_data.get('profile_image')
-		# Only validate when user uploaded a NEW file; skip validation for existing image (leave empty to keep)
 		if upload and isinstance(upload, UploadedFile):
-			allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-			if getattr(upload, 'content_type', None) not in allowed:
-				raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-			if upload.size > 5 * 1024 * 1024:
-				raise forms.ValidationError('File size must be less than 5 MB.')
+			validate_image_upload(upload)
 		return upload
 
 	def save(self, commit=True):
@@ -320,11 +311,7 @@ class OrganisorAgentModelForm(forms.ModelForm):
 	def clean_profile_image(self):
 		upload = self.cleaned_data.get('profile_image')
 		if upload and isinstance(upload, UploadedFile):
-			allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-			if getattr(upload, 'content_type', None) not in allowed:
-				raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-			if upload.size > 5 * 1024 * 1024:
-				raise forms.ValidationError('File size must be less than 5 MB.')
+			validate_image_upload(upload)
 		return upload
 
 	def save(self, commit=True):
@@ -509,12 +496,8 @@ class OrganisorAgentCreateForm(forms.ModelForm):
 
 	def clean_profile_image(self):
 		upload = self.cleaned_data.get('profile_image')
-		if upload:
-			allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-			if getattr(upload, 'content_type', None) not in allowed:
-				raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-			if upload.size > 5 * 1024 * 1024:
-				raise forms.ValidationError('File size must be less than 5 MB.')
+		if upload and isinstance(upload, UploadedFile):
+			validate_image_upload(upload)
 		return upload
 
 	def clean_email(self):
@@ -593,12 +576,8 @@ class AdminAgentCreateForm(forms.ModelForm):
 
 	def clean_profile_image(self):
 		upload = self.cleaned_data.get('profile_image')
-		if upload:
-			allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-			if getattr(upload, 'content_type', None) not in allowed:
-				raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-			if upload.size > 5 * 1024 * 1024:  # 5 MB
-				raise forms.ValidationError('File size must be less than 5 MB.')
+		if upload and isinstance(upload, UploadedFile):
+			validate_image_upload(upload)
 		return upload
 	password1 = forms.CharField(
 		label='Password',

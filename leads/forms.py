@@ -1,9 +1,43 @@
+import imghdr
+import logging
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UsernameField, AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.core.files.uploadedfile import UploadedFile
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Lead, Agent, SourceCategory, ValueCategory, UserProfile
 from phonenumber_field.formfields import PhoneNumberField
+
+logger = logging.getLogger(__name__)
+
+# Allowed image types for server-side magic-byte validation (CWE-434)
+ALLOWED_IMAGE_CONTENT_TYPES = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
+MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+def validate_image_upload(upload):
+    """
+    Validate uploaded file is a real image by content (magic bytes), not just Content-Type.
+    Raises forms.ValidationError if invalid. Content-Type check is still recommended first.
+    """
+    if not upload or not isinstance(upload, UploadedFile):
+        return
+    if getattr(upload, 'content_type', None) not in ALLOWED_IMAGE_CONTENT_TYPES:
+        raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
+    if upload.size > MAX_IMAGE_SIZE_BYTES:
+        raise forms.ValidationError('File size must be less than 5 MB.')
+    upload.seek(0)
+    try:
+        kind = imghdr.what(upload)
+        if kind not in ('jpeg', 'png', 'gif'):
+            # imghdr does not support webp; check magic bytes (RIFF....WEBP)
+            head = upload.read(12)
+            upload.seek(0)
+            if len(head) >= 12 and head.startswith(b'RIFF') and head[8:12] == b'WEBP':
+                return
+            raise forms.ValidationError('File content does not match a valid image type (JPG, PNG, GIF or WebP).')
+    finally:
+        upload.seek(0)
 
 class PhoneNumberWidget(forms.MultiWidget):
     """Custom widget for phone number with country code dropdown"""
@@ -154,11 +188,11 @@ class LeadModelForm(forms.ModelForm):
                     self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
                     self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
                     self.fields["agent"].queryset = Agent.objects.filter(organisation=organisation)
-                except Exception as e:
-                    # Fallback to all categories and agents if error
-                    self.fields["source_category"].queryset = SourceCategory.objects.all()
-                    self.fields["value_category"].queryset = ValueCategory.objects.all()
-                    self.fields["agent"].queryset = Agent.objects.all()
+                except (ObjectDoesNotExist, AttributeError) as e:
+                    logger.warning("LeadModelForm queryset fallback: user=%s reason=%s", user, e)
+                    self.fields["source_category"].queryset = SourceCategory.objects.none()
+                    self.fields["value_category"].queryset = ValueCategory.objects.none()
+                    self.fields["agent"].queryset = Agent.objects.none()
             elif user.is_agent:
                 # Filter categories and agents for agent's organisation
                 try:
@@ -166,11 +200,11 @@ class LeadModelForm(forms.ModelForm):
                     self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
                     self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
                     self.fields["agent"].queryset = Agent.objects.filter(organisation=organisation)
-                except Exception as e:
-                    # Fallback to all categories and agents if error
-                    self.fields["source_category"].queryset = SourceCategory.objects.all()
-                    self.fields["value_category"].queryset = ValueCategory.objects.all()
-                    self.fields["agent"].queryset = Agent.objects.all()
+                except (ObjectDoesNotExist, AttributeError) as e:
+                    logger.warning("LeadModelForm queryset fallback: user=%s reason=%s", user, e)
+                    self.fields["source_category"].queryset = SourceCategory.objects.none()
+                    self.fields["value_category"].queryset = ValueCategory.objects.none()
+                    self.fields["agent"].queryset = Agent.objects.none()
             elif user.is_superuser:
                 # Admin sees all categories and agents
                 self.fields["source_category"].queryset = SourceCategory.objects.all()
@@ -259,10 +293,11 @@ class OrganisorLeadModelForm(forms.ModelForm):
                 self.fields["source_category"].queryset = SourceCategory.objects.filter(organisation=organisation)
                 self.fields["value_category"].queryset = ValueCategory.objects.filter(organisation=organisation)
                 self.fields["agent"].queryset = Agent.objects.filter(organisation=organisation)
-            except Exception:
-                self.fields["source_category"].queryset = SourceCategory.objects.all()
-                self.fields["value_category"].queryset = ValueCategory.objects.all()
-                self.fields["agent"].queryset = Agent.objects.all()
+            except (ObjectDoesNotExist, AttributeError) as e:
+                logger.warning("OrganisorLeadModelForm queryset fallback: user=%s reason=%s", request.user, e)
+                self.fields["source_category"].queryset = SourceCategory.objects.none()
+                self.fields["value_category"].queryset = ValueCategory.objects.none()
+                self.fields["agent"].queryset = Agent.objects.none()
         else:
             self.fields["source_category"].queryset = SourceCategory.objects.all()
             self.fields["value_category"].queryset = ValueCategory.objects.all()
@@ -274,11 +309,7 @@ class OrganisorLeadModelForm(forms.ModelForm):
     def clean_profile_image(self):
         upload = self.cleaned_data.get('profile_image')
         if upload and isinstance(upload, UploadedFile):
-            allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-            if getattr(upload, 'content_type', None) not in allowed:
-                raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-            if upload.size > 5 * 1024 * 1024:
-                raise forms.ValidationError('File size must be less than 5 MB.')
+            validate_image_upload(upload)
         elif not upload and (not self.instance or not self.instance.pk or not getattr(self.instance, 'profile_image', None) or not self.instance.profile_image):
             raise forms.ValidationError('Profile photo is required.')
         return upload
@@ -422,15 +453,11 @@ class AdminLeadModelForm(forms.ModelForm):
     def clean_profile_image(self):
         upload = self.cleaned_data.get('profile_image')
         if upload and isinstance(upload, UploadedFile):
-            allowed = ('image/jpeg', 'image/png', 'image/gif', 'image/webp')
-            if getattr(upload, 'content_type', None) not in allowed:
-                raise forms.ValidationError('Please upload a valid image (JPG, PNG, GIF or WebP).')
-            if upload.size > 5 * 1024 * 1024:
-                raise forms.ValidationError('File size must be less than 5 MB.')
+            validate_image_upload(upload)
         elif not upload and (not self.instance or not self.instance.pk or not getattr(self.instance, 'profile_image', None) or not self.instance.profile_image):
             raise forms.ValidationError('Profile photo is required.')
         return upload
-    
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
@@ -562,6 +589,11 @@ class CustomUserCreationForm(UserCreationForm):
             raise forms.ValidationError("A user with this username already exists.")
         return username
 
+    def clean_profile_image(self):
+        upload = self.cleaned_data.get('profile_image')
+        if upload and isinstance(upload, UploadedFile):
+            validate_image_upload(upload)
+        return upload
 
 
 class AssignAgentForm(forms.Form):
@@ -592,12 +624,12 @@ class LeadCategoryUpdateForm(forms.ModelForm):
             elif user.is_organisor:
                 try:
                     organisation = user.userprofile
-                except Exception:
+                except (UserProfile.DoesNotExist, AttributeError):
                     pass
             elif user.is_agent:
                 try:
                     organisation = user.agent.organisation
-                except Exception:
+                except (Agent.DoesNotExist, AttributeError):
                     pass
         if organisation:
             _default_source = [
@@ -693,7 +725,7 @@ class CustomPasswordResetForm(PasswordResetForm):
         if not users:
             logger.warning("Password reset: no active user with usable password for email=%s", email)
         if request is not None:
-            request.session["password_reset_email_sent"] = bool(users)
+            request.session["password_reset_email_sent"] = True  # Never reveal whether email exists (prevent user enumeration)
         return super().save(
             domain_override=domain_override,
             subject_template_name=subject_template_name,

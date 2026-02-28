@@ -10,6 +10,9 @@ from django.contrib.auth import get_user_model
 from unittest.mock import patch, MagicMock
 
 from organisors.forms import OrganisorModelForm, OrganisorCreateForm
+
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
 from leads.models import User, UserProfile
 from organisors.models import Organisor
 
@@ -44,7 +47,7 @@ class TestOrganisorModelForm(TestCase):
             organisation=self.user_profile
         )
         
-        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         self.valid_data = {
             'email': 'updated_organisor_forms@example.com',
             'username': 'updated_organisor_forms',
@@ -317,7 +320,7 @@ class TestOrganisorCreateForm(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         self.valid_data = {
             'email': 'new_organisor_create@example.com',
             'username': 'new_organisor_create',
@@ -530,7 +533,7 @@ class TestOrganisorFormIntegration(TestCase):
             'password1': 'newpass123!',
             'password2': 'newpass123!',
         }
-        form_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        form_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         form = OrganisorModelForm(data=form_data, files=form_files, instance=user)
         self.assertTrue(form.is_valid(), form.errors)
         
@@ -558,7 +561,7 @@ class TestOrganisorFormIntegration(TestCase):
             'password1': 'createpass123!',
             'password2': 'createpass123!',
         }
-        form_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        form_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         form = OrganisorCreateForm(data=form_data, files=form_files)
         self.assertTrue(form.is_valid(), form.errors)
         

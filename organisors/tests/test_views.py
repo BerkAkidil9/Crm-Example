@@ -16,6 +16,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -222,7 +225,7 @@ class TestOrganisorCreateView(TestCase):
             'gender': 'M',
             'password1': 'newpass123!',
             'password2': 'newpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
     
     def test_organisor_create_view_admin_access(self):
@@ -584,7 +587,7 @@ class TestOrganisorUpdateView(TestCase):
             'gender': 'M',
             'password1': '',
             'password2': '',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
     
     def test_organisor_update_view_admin_access_own_profile(self):
@@ -870,7 +873,7 @@ class TestOrganisorViewIntegration(TestCase):
             'gender': 'F',
             'password1': 'integrationpass123!',
             'password2': 'integrationpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
         
         response = self.client.post(reverse('organisors:organisor-create'), create_data, format='multipart')

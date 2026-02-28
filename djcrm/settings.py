@@ -30,7 +30,7 @@ load_dotenv(BASE_DIR / '.env', override=True)
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 # In production, SECRET_KEY must be set in the environment (no default/placeholder).
 if not DEBUG and (not SECRET_KEY or SECRET_KEY == 'your-secret-key-here'):

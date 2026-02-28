@@ -624,11 +624,20 @@ class TestProductAndStockDeleteView(TestCase):
 
 @override_settings(**SIMPLE_STATIC)
 class TestGetSubcategoriesView(TestCase):
-    """get_subcategories view tests"""
+    """get_subcategories view tests (view requires login)"""
     
     def setUp(self):
         """Set up test data"""
         self.client = Client()
+        self.user = User.objects.create_user(
+            username='subcat_test_user',
+            email='subcat@example.com',
+            password='testpass123',
+            is_organisor=True,
+            email_verified=True,
+        )
+        UserProfile.objects.get_or_create(user=self.user)
+        self.client.force_login(self.user)
         
         self.category = Category.objects.create(name="Electronics")
         self.subcategory1 = SubCategory.objects.create(

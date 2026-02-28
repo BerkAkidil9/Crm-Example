@@ -18,8 +18,7 @@ from leads.views import (
     AssignAgentView, CategoryListView, CategoryDetailView, LeadCategoryUpdateView,
     CustomLoginView, CustomPasswordResetView, CustomPasswordResetConfirmView,
     SignupView, EmailVerificationSentView, EmailVerificationView, EmailVerificationFailedView,
-    LandingPageView, landing_page, lead_list, lead_detail, lead_create, lead_update, lead_delete,
-    get_agents_by_org
+    LandingPageView, landing_page, get_agents_by_org
 )
 from organisors.models import Organisor
 
