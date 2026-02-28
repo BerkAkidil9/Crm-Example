@@ -15,6 +15,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -127,7 +130,7 @@ class TestAgentViewsSimple(TestCase):
         self.client.login(username='organisor_simple', password='testpass123')
         profile_image = SimpleUploadedFile(
             "agent_photo.jpg",
-            b"fake_jpeg_content",
+            VALID_JPEG_BYTES,
             content_type="image/jpeg"
         )
         agent_data = {
