@@ -17,6 +17,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 
 class TestAgentModelForm(TestCase):
     """AgentModelForm tests"""
@@ -508,7 +511,7 @@ class TestAdminAgentCreateForm(TestCase):
     
     def test_form_valid_data(self):
         """Form test with valid data"""
-        profile_image = SimpleUploadedFile("test.jpg", b"fake_image_content", content_type="image/jpeg")
+        profile_image = SimpleUploadedFile("test.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")
         form = AdminAgentCreateForm(data=self.valid_data, files={'profile_image': profile_image})
         self.assertTrue(form.is_valid())
     
@@ -555,7 +558,7 @@ class TestAdminAgentCreateForm(TestCase):
     
     def test_form_save_method(self):
         """Form save method test"""
-        profile_image = SimpleUploadedFile("test.jpg", b"fake_image_content", content_type="image/jpeg")
+        profile_image = SimpleUploadedFile("test.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")
         form = AdminAgentCreateForm(data=self.valid_data, files={'profile_image': profile_image})
         self.assertTrue(form.is_valid())
         
@@ -686,7 +689,7 @@ class TestAgentFormIntegration(TestCase):
             'password2': 'testpass123!'
         }
         
-        profile_image = SimpleUploadedFile("test.jpg", b"fake_image_content", content_type="image/jpeg")
+        profile_image = SimpleUploadedFile("test.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")
         form = AdminAgentCreateForm(data=data, files={'profile_image': profile_image})
         self.assertTrue(form.is_valid())
         

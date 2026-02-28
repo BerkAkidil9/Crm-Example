@@ -20,6 +20,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 
 class TestPhoneNumberWidget(TestCase):
     """PhoneNumberWidget tests"""
@@ -515,7 +518,7 @@ class TestAdminLeadModelForm(TestCase):
     def test_form_valid_data(self):
         """Form test with valid data"""
         from django.core.files.uploadedfile import SimpleUploadedFile
-        profile_image = SimpleUploadedFile("test.jpg", b"fake_image_content", content_type="image/jpeg")
+        profile_image = SimpleUploadedFile("test.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")
         # AdminLeadModelForm resolves organisation from POST data and populates querysets
         form = AdminLeadModelForm(data=self.valid_data, files={'profile_image': profile_image})
         self.assertTrue(form.is_valid(), form.errors)
@@ -652,7 +655,7 @@ class TestCustomUserCreationForm(TestCase):
     def setUp(self):
         """Set up test data"""
         from django.core.files.uploadedfile import SimpleUploadedFile
-        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         self.valid_data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
@@ -696,7 +699,7 @@ class TestCustomUserCreationForm(TestCase):
         
         for field in required_fields:
             data = self.valid_data.copy()
-            files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+            files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
             if field == 'phone_number':
                 del data['phone_number_0']
                 del data['phone_number_1']

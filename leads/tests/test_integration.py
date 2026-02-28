@@ -17,6 +17,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -90,7 +93,7 @@ class TestLeadWorkflowIntegration(TestCase):
             'phone_number': '+905551111111',
             'email': 'john.doe@example.com',
             'address': '123 Main Street',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
         }
         
         self.client.force_login(self.organisor_user)
@@ -120,7 +123,7 @@ class TestLeadWorkflowIntegration(TestCase):
             'phone_number': '+905551111111',
             'email': 'john.doe@example.com',
             'address': '456 Updated Street',
-            'profile_image': SimpleUploadedFile('test2.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test2.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
         }
         
         response = self.client.post(reverse('leads:lead-update', kwargs={'pk': lead.pk}), data=update_data)
@@ -220,7 +223,7 @@ class TestUserRegistrationWorkflow(TestCase):
             'phone_number_1': '5551234567',
             'date_of_birth': '1990-01-01',
             'gender': 'M',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
             'password1': 'testpass123!',
             'password2': 'testpass123!'
         }
@@ -532,7 +535,7 @@ class TestLeadFormIntegration(TestCase):
             'phone_number': '+905551111111',
             'email': 'john.doe@example.com',
             'address': '123 Valid Street',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
         }
         
         with patch('leads.views.send_mail'):
@@ -659,7 +662,7 @@ class TestEmailIntegration(TestCase):
             'phone_number': '+905551111111',
             'email': 'john.doe@example.com',
             'address': '123 Email Street',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
         }
         
         response = self.client.post(reverse('leads:lead-create'), data=lead_data)
@@ -679,7 +682,7 @@ class TestEmailIntegration(TestCase):
             'phone_number_1': '5559999888',
             'date_of_birth': '1990-01-01',
             'gender': 'M',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
             'password1': 'testpass123!',
             'password2': 'testpass123!'
         }

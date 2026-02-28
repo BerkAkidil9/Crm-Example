@@ -17,6 +17,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -39,7 +42,7 @@ class TestSignupCompleteFlow(TestCase):
             'gender': 'M',
             'password1': 'completepass123!',
             'password2': 'completepass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
     
     @patch('leads.views.send_mail')
@@ -370,7 +373,7 @@ class TestSignupFormIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         self.valid_data = {
             'username': 'form_integration_user',
             'email': 'form_integration@example.com',
@@ -469,7 +472,7 @@ class TestSignupViewFormIntegration(TestCase):
             'gender': 'F',
             'password1': 'viewformpass123!',
             'password2': 'viewformpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
     
     @patch('leads.views.send_mail')

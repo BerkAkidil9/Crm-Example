@@ -24,6 +24,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -64,7 +67,7 @@ class TestSignupView(TestCase):
             'phone_number_1': '5551234567',
             'date_of_birth': '1990-01-01',
             'gender': 'M',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
             'password1': 'testpass123!',
             'password2': 'testpass123!'
         }
@@ -671,7 +674,7 @@ class TestLeadCreateView(TestCase):
             'phone_number': '+905553333333',
             'email': 'new.lead@example.com',
             'address': '789 New Street',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
         }
     
     def test_lead_create_view_organisor_get(self):
@@ -779,7 +782,7 @@ class TestLeadUpdateView(TestCase):
             'phone_number': '+905551111111',
             'email': 'updated.lead@example.com',
             'address': '456 Updated Street',
-            'profile_image': SimpleUploadedFile('test.jpg', b'fake_image_content', content_type='image/jpeg'),
+            'profile_image': SimpleUploadedFile('test.jpg', VALID_JPEG_BYTES, content_type='image/jpeg'),
         }
     
     def test_lead_update_view_organisor_get(self):

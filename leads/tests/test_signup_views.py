@@ -17,6 +17,9 @@ from organisors.models import Organisor
 
 User = get_user_model()
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 SIMPLE_STATIC = {'STATICFILES_STORAGE': 'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
 
@@ -39,7 +42,7 @@ class TestSignupView(TestCase):
             'gender': 'M',
             'password1': 'testpass123!',
             'password2': 'testpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
     
     def test_signup_view_get(self):
@@ -384,7 +387,7 @@ class TestSignupIntegration(TestCase):
             'gender': 'F',
             'password1': 'testpass123!',
             'password2': 'testpass123!',
-            'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg"),
+            'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg"),
         }
     
     @patch('leads.views.send_mail')

@@ -14,13 +14,16 @@ from leads.forms import CustomUserCreationForm
 from leads.models import User, UserProfile, EmailVerificationToken
 from organisors.models import Organisor
 
+# Minimal valid JPEG bytes for magic-byte validation (imghdr.what)
+VALID_JPEG_BYTES = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
+
 
 class TestCustomUserCreationForm(TestCase):
     """CustomUserCreationForm tests"""
     
     def setUp(self):
         """Set up test data"""
-        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         self.valid_data = {
             'username': 'testuser_signup',
             'email': 'test_signup@example.com',
@@ -290,7 +293,7 @@ class TestSignupFormIntegration(TestCase):
     
     def setUp(self):
         """Set up test data"""
-        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", b"fake_image_content", content_type="image/jpeg")}
+        self.valid_data_files = {'profile_image': SimpleUploadedFile("profile.jpg", VALID_JPEG_BYTES, content_type="image/jpeg")}
         self.valid_data = {
             'username': 'integration_test_user',
             'email': 'integration_test@example.com',
