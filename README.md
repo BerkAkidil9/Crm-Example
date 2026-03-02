@@ -14,8 +14,10 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 - [Tech Stack](#tech-stack)
 - [Features](#features)
 - [Local Setup](#local-setup)
+- [Quick Start](#quick-start)
 - [Email Configuration](#email-configuration)
 - [Deploy on Render](#deploy-on-render)
+- [Cron Jobs (Render)](#cron-jobs-optional)
 - [Project Structure](#project-structure)
 - [Management Commands](#management-commands)
 - [Testing](#testing)
@@ -24,7 +26,7 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 
 ## Tech Stack
 
-**Backend:** Django 5.0 · Python 3.12 · Crispy Forms · django-phonenumber-field · python-dotenv
+**Backend:** Django 5.0 · Python 3.12 · Crispy Forms · crispy-tailwind · django-phonenumber-field · django-ratelimit · django-storages · boto3 · python-dotenv
 
 **Frontend:** Tailwind CSS · Chart.js · Flatpickr
 
@@ -109,10 +111,11 @@ For local development:
 - `SECRET_KEY` — generate: `python -c "import secrets; print(secrets.token_urlsafe(50))"`
 - `DEBUG=True` — leave as is for development
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD` — PostgreSQL credentials (create DB: `createdb djcrm`)
+- `DB_HOST`, `DB_PORT`, `DB_SSL` — optional; defaults: `localhost`, `5432`, `false`. Set for remote PostgreSQL (e.g. Neon).
 
 For signup & password reset: either SMTP (`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`) or Gmail API (`USE_GMAIL_API=true` + Gmail API vars) — see [Email Configuration](#email-configuration).
 
-For persistent profile/media uploads in production (e.g. Render), see [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) (Cloudflare R2 setup).
+For persistent profile/media uploads in production (e.g. Render), see [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) (Cloudflare R2 setup). When R2 is enabled with `USE_R2_MEDIA_PROXY=true` (default), media files are served through `/media-proxy/` on your app.
 
 The app uses **PostgreSQL** by default (matches production).
 
@@ -131,7 +134,19 @@ Open **http://127.0.0.1:8000/** and log in with your superuser credentials.
 
 ### Local SQLite (optional)
 
-To use SQLite instead of PostgreSQL, comment out `DB_ENGINE` and `DB_*` in `.env`. The app will fall back to SQLite.
+To use SQLite instead of PostgreSQL, comment out `DB_ENGINE` and all `DB_*` lines in `.env` (e.g. `# DB_ENGINE=...`, `# DB_NAME=...`, `# DB_USER=...`). The app will fall back to SQLite.
+
+---
+
+## Quick Start
+
+After setting up locally and running the app:
+
+1. Open **http://127.0.0.1:8000/** and log in with your superuser credentials
+2. Create an **Organisor** (Admin → Organisors or via the app)
+3. Create an **Agent** and assign it to an organisation
+4. Create a **Lead** and assign it to an agent
+5. Add sample products: `python manage.py create_sample_products`
 
 ---
 
@@ -186,6 +201,31 @@ Use [Neon](https://neon.tech/) (recommended) or any PostgreSQL provider. Copy th
 
 After saving env vars, Render will build and deploy. The first deploy runs migrations and creates a superuser if `DJANGO_SUPERUSER_*` vars are set.
 
+### Cron Jobs (optional)
+
+Scheduled notifications (task deadlines, order-day reminders, lead-no-order alerts) require Cron Jobs. Configure a Cron Job on Render using either method below.
+
+**Method A – Manual (Dashboard):**
+
+1. Render Dashboard → **New** → **Cron Job**
+2. Connect the same GitHub repo
+3. **Build Command:** `pip install -r requirements.txt`
+4. **Start Command:** `python manage.py check_task_deadlines` (or a script that runs all three commands)
+5. **Schedule:** `0 9 * * *` (daily at 09:00 UTC). For `check_lead_no_order`, use weekly: `0 9 * * 1`
+6. **Environment Variables:** Same as Web Service (`DATABASE_URL`, `SECRET_KEY`, Gmail API vars, etc.)
+
+**Method B – Blueprint (render.yaml):**
+
+Add a `type: cron` service to `render.yaml` with `schedule`, `buildCommand`, `startCommand`, and `envVars`. After push, sync and apply the Blueprint in Render; Render will create the Cron Job service.
+
+**Commands to run:**
+
+| Command | Purpose | Suggested schedule |
+|---------|---------|--------------------|
+| `check_task_deadlines` | Task deadline reminders (1 and 3 days before) | Daily |
+| `check_order_day` | Order delivery-day notifications | Daily |
+| `check_lead_no_order` | Remind agents about leads with no orders in 30 days | Weekly |
+
 ---
 
 ## Project Structure
@@ -217,7 +257,7 @@ After saving env vars, Render will build and deploy. The first deploy runs migra
 
 ## Management Commands
 
-**Scheduled Notifications** (run via cron in production):
+**Scheduled Notifications** (configure a Cron Job on Render — see [Deploy on Render](#deploy-on-render)):
 
 - `check_task_deadlines` — Create notifications for upcoming task deadlines (1 or 3 days before)
 - `check_order_day` — Create reminders when order delivery date is today
