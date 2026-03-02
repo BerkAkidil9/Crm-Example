@@ -22,6 +22,7 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 - [Management Commands](#management-commands)
 - [Testing](#testing)
 - [Admin](#admin)
+- [Documentation](#documentation)
 - [Security](#security)
 - [License](#license)
 
@@ -297,6 +298,15 @@ python manage.py test
 ## Admin
 
 **Local:** `http://127.0.0.1:8000/admin/` — **Production:** `<your-app-url>/admin/` (e.g. https://darkenyas-crm.onrender.com/admin/). Login with superuser credentials.
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) | Gmail API setup (OAuth 2.0, refresh token) — required for email on Render |
+| [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) | Cloudflare R2 media storage — persistent uploads in production |
 
 ---
 
