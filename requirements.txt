@@ -22,3 +22,6 @@ django-gmailapi-backend
 # Media storage - Cloudflare R2 (S3-compatible) for production
 django-storages[s3]
 boto3
+
+# Security - rate limiting for login, signup, password reset
+django-ratelimit>=4.1.0

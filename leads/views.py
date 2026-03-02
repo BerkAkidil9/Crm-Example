@@ -3,6 +3,7 @@ from typing import Any
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView
 from django.http import HttpResponse, JsonResponse
@@ -11,6 +12,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django_ratelimit.decorators import ratelimit
 from agents.mixins import OrganisorAndLoginRequiredMixin
 from .models import Lead, Agent, Category, User, UserProfile, EmailVerificationToken, SourceCategory, ValueCategory
 from activity_log.models import ActivityLog, log_activity, ACTION_LEAD_CREATED, ACTION_LEAD_UPDATED, ACTION_LEAD_DELETED
@@ -20,13 +22,13 @@ from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentF
 logger = logging.getLogger(__name__)
 
 
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='post')
 class CustomLoginView(LoginView):
     form_class = CustomAuthenticationForm
     template_name = 'registration/login.html'
     redirect_authenticated_user = True
 
     def form_invalid(self, form):
-        # Show specific message if email is not verified
         error_reason = self.request.session.pop('login_error_reason', None)
         if error_reason == 'email_not_verified':
             form._errors = {'__all__': form.error_class([
@@ -34,12 +36,12 @@ class CustomLoginView(LoginView):
             ])}
         return super().form_invalid(form)
 
+@method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='post')
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
     template_name = 'registration/password_reset_form.html'
     
     def dispatch(self, request, *args, **kwargs):
-        # Redirect authenticated users to landing page
         if request.user.is_authenticated:
             return redirect('landing-page')
         return super().dispatch(request, *args, **kwargs)
@@ -105,12 +107,12 @@ Darkenyas CRM Team
         
         return super().form_invalid(form)
 
+@method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='post')
 class SignupView(generic.CreateView):
     template_name = "registration/signup.html"
     form_class = CustomUserCreationForm
 
     def dispatch(self, request, *args, **kwargs):
-        # Redirect authenticated users to landing page
         if request.user.is_authenticated:
             return redirect('landing-page')
         return super().dispatch(request, *args, **kwargs)
