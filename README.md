@@ -21,6 +21,9 @@ A multi-tenant Django CRM with role-based access for organisations and agents.
 - [Project Structure](#project-structure)
 - [Management Commands](#management-commands)
 - [Testing](#testing)
+- [Admin](#admin)
+- [Security](#security)
+- [License](#license)
 
 ---
 
