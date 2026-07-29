@@ -4,7 +4,7 @@ services:
     plan: free
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn djcrm.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    startCommand: "gunicorn djcrm.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 60 --access-logfile - --error-logfile -"
     envVars:
       - key: DATABASE_URL
         sync: false  # Set manually in Dashboard with Neon pooled connection string

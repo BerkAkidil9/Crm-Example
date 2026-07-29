@@ -6,13 +6,17 @@ to have permission to the owning lead or user (IDOR prevention).
 """
 import logging
 import mimetypes
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 
 logger = logging.getLogger(__name__)
+
+
+def healthz(request):
+    return HttpResponse("ok", content_type="text/plain")
 
 
 def _user_can_access_media_path(user, path):

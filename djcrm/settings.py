@@ -147,6 +147,7 @@ if _database_url:
     if 'OPTIONS' not in _db_config:
         _db_config['OPTIONS'] = {}
     _db_config['OPTIONS'].setdefault('sslmode', 'require')
+    _db_config['OPTIONS'].setdefault('connect_timeout', 5)
     DATABASES = {'default': _db_config}
 elif _db_engine == 'django.db.backends.sqlite3':
     DATABASES = {
@@ -159,6 +160,7 @@ else:
     _db_options = {}
     if os.getenv('DB_SSL', '').lower() in ('1', 'true', 'yes'):
         _db_options['sslmode'] = 'require'
+    _db_options.setdefault('connect_timeout', 5)
     DATABASES = {
         'default': {
             'ENGINE': _db_engine,
