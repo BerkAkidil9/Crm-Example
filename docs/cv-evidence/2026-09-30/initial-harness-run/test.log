@@ -1,0 +1,1422 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Found 1197 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: crispy_forms, crispy_tailwind, gmailapi_backend, messages, phonenumber_field, staticfiles
+  Apply all migrations: ProductsAndStock, activity_log, admin, auth, contenttypes, finance, leads, orders, organisors, sessions, tasks
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying leads.0001_initial... OK
+  Applying leads.0002_userprofile_agent_organisation... OK
+  Applying leads.0003_user_is_agent_user_is_organiser... OK
+  Applying leads.0004_rename_is_organiser_user_is_organisor... OK
+  Applying leads.0005_alter_lead_agent... OK
+  Applying leads.0006_lead_organisation... OK
+  Applying leads.0007_category_lead_category... OK
+  Applying leads.0008_category_organisation... OK
+  Applying leads.0009_alter_category_organisation... OK
+  Applying leads.0010_alter_lead_category... OK
+  Applying leads.0011_lead_date_added_lead_description_lead_email_and_more... OK
+  Applying leads.0012_lead_address... OK
+  Applying leads.0013_user_address_user_age_user_description_and_more... OK
+  Applying leads.0014_remove_user_address_remove_user_age_and_more... OK
+  Applying leads.0015_alter_userprofile_user... OK
+  Applying leads.0016_alter_userprofile_unique_together... OK
+  Applying leads.0017_user_email_verified_emailverificationtoken... OK
+  Applying leads.0018_sourcecategory_lead_source_category_valuecategory_and_more... OK
+  Applying leads.0019_user_phone_number... OK
+  Applying leads.0020_user_age_user_gender... OK
+  Applying leads.0021_remove_user_age_user_date_of_birth_alter_user_gender... OK
+  Applying leads.0022_alter_user_phone_number... OK
+  Applying ProductsAndStock.0001_initial... OK
+  Applying ProductsAndStock.0002_productsandstock_organisation... OK
+  Applying ProductsAndStock.0003_alter_productsandstock_unique_together... OK
+  Applying ProductsAndStock.0004_productsandstock_minimum_stock_level... OK
+  Applying ProductsAndStock.0005_stockmovement... OK
+  Applying ProductsAndStock.0006_category_productsandstock_category_subcategory_and_more... OK
+  Applying ProductsAndStock.0007_make_category_required... OK
+  Applying ProductsAndStock.0008_productsandstock_cost_price_and_more... OK
+  Applying ProductsAndStock.0009_stockalert_stockrecommendation_salesstatistics... OK
+  Applying leads.0023_alter_lead_email_alter_lead_phone_number_and_more... OK
+  Applying leads.0024_user_profile_image... OK
+  Applying leads.0025_add_lead_profile_image... OK
+  Applying activity_log.0001_initial... OK
+  Applying activity_log.0002_add_affected_agent... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying orders.0001_initial... OK
+  Applying orders.0002_rename_orderday_orders_order_day_and_more... OK
+  Applying orders.0003_orders_lead... OK
+  Applying orders.0004_orders_product... OK
+  Applying orders.0005_orders_product_quantity... OK
+  Applying orders.0006_orders_order_amount... OK
+  Applying orders.0007_remove_orders_order_amount... OK
+  Applying orders.0008_orders_is_cancelled... OK
+  Applying orders.0009_remove_orders_product_remove_orders_product_quantity_and_more... OK
+  Applying orders.0010_orderproduct_total_price... OK
+  Applying finance.0001_initial... OK
+  Applying orders.0011_orders_creation_date.../private/tmp/crm-cv-venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1659: RuntimeWarning: DateTimeField orders.creation_date received a naive datetime (2024-08-02 09:05:47.064014) while time zone support is active.
+  warnings.warn(
+ OK
+  Applying orders.0012_alter_orders_creation_date... OK
+  Applying organisors.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying tasks.0001_initial... OK
+  Applying tasks.0002_add_task_priority... OK
+  Applying tasks.0003_add_notification_model... OK
+  Applying tasks.0004_add_notification_action_link... OK
+  Applying tasks.0005_backfill_notification_action_url... OK
+System check identified no issues (0 silenced).
+test_creates_categories_and_subcategories (ProductsAndStock.tests.test_commands.CreateCategoriesCommandTests.test_creates_categories_and_subcategories) ... ok
+test_idempotent_run (ProductsAndStock.tests.test_commands.CreateCategoriesCommandTests.test_idempotent_run)
+Running the command twice should not duplicate categories. ... ok
+test_replace_removes_old_categories (ProductsAndStock.tests.test_commands.CreateCategoriesCommandTests.test_replace_removes_old_categories)
+--replace should remove categories not in the standard set. ... ok
+test_creates_products_for_organisor (ProductsAndStock.tests.test_commands.CreateSampleProductsCommandTests.test_creates_products_for_organisor) ... ok
+test_nonexistent_user_shows_error (ProductsAndStock.tests.test_commands.CreateSampleProductsCommandTests.test_nonexistent_user_shows_error) ... ok
+test_form_dynamic_subcategory_queryset (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_dynamic_subcategory_queryset)
+Dynamic subcategory queryset test ... ok
+test_form_initialization (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_initialization)
+Form initialization test ... ok
+test_form_instance_with_category (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_instance_with_category)
+Category test with existing instance ... ok
+test_form_organisation_queryset (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_organisation_queryset)
+Organisation queryset test ... ok
+test_form_product_name_validation (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_product_name_validation)
+Product name validation test ... ok
+test_form_subcategory_validation (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_subcategory_validation)
+Subcategory validation test ... ok
+test_form_valid_data (ProductsAndStock.tests.test_forms.TestAdminProductAndStockModelForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_category_filter_category (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_category_filter_category)
+Form test with category filter ... ok
+test_form_category_filter_choices (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_category_filter_choices)
+Category filter options test ... ok
+test_form_category_filter_subcategory (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_category_filter_subcategory)
+Form test with subcategory filter ... ok
+test_form_fixed_amount_decrease_valid (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_fixed_amount_decrease_valid)
+Fixed amount decrease valid data test ... ok
+test_form_fixed_amount_decrease_validation (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_fixed_amount_decrease_validation)
+Fixed amount decrease validation test ... ok
+test_form_fixed_amount_increase_valid (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_fixed_amount_increase_valid)
+Fixed amount increase valid data test ... ok
+test_form_fixed_amount_increase_validation (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_fixed_amount_increase_validation)
+Fixed amount increase validation test ... ok
+test_form_initialization (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_initialization)
+Form initialization test ... ok
+test_form_min_max_attributes (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_min_max_attributes)
+Min/Max features test ... ok
+test_form_percentage_decrease_valid (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_percentage_decrease_valid)
+Percentage decrease valid data test ... ok
+test_form_percentage_decrease_validation (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_percentage_decrease_validation)
+Percentage decrease validation test ... ok
+test_form_percentage_increase_valid (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_percentage_increase_valid)
+Percentage increase valid data test ... ok
+test_form_percentage_increase_validation (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_percentage_increase_validation)
+Percentage increase validation test ... ok
+test_form_placeholder_attributes (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_placeholder_attributes)
+Placeholder features test ... ok
+test_form_set_price_valid (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_set_price_valid)
+New price setting valid data test ... ok
+test_form_set_price_validation (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_set_price_validation)
+New price setting validation test ... ok
+test_form_step_attributes (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_step_attributes)
+Step features test ... ok
+test_form_update_type_choices (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_update_type_choices)
+Update type options test ... ok
+test_form_valid_data (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_widget_attributes (ProductsAndStock.tests.test_forms.TestBulkPriceUpdateForm.test_form_widget_attributes)
+Widget features test ... ok
+test_form_discount_validation (ProductsAndStock.tests.test_forms.TestFormIntegration.test_form_discount_validation)
+Discount validation test ... ok
+test_form_save_product (ProductsAndStock.tests.test_forms.TestFormIntegration.test_form_save_product)
+Form product save test ... ok
+test_form_update_product (ProductsAndStock.tests.test_forms.TestFormIntegration.test_form_update_product)
+Form product update test ... ok
+test_form_validation_edge_cases (ProductsAndStock.tests.test_forms.TestFormIntegration.test_form_validation_edge_cases)
+Form validation edge cases test ... ok
+test_form_dynamic_subcategory_queryset (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_dynamic_subcategory_queryset)
+Dynamic subcategory queryset test ... ok
+test_form_initialization (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_initialization)
+Form initialization test ... ok
+test_form_instance_with_category (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_instance_with_category)
+Category test with existing instance ... ok
+test_form_max_attributes (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_max_attributes)
+Max features test ... ok
+test_form_placeholder_attributes (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_placeholder_attributes)
+Placeholder features test ... ok
+test_form_product_name_validation (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_product_name_validation)
+Product name validation test ... ok
+test_form_required_fields (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_required_fields)
+Required fields test ... ok
+test_form_step_attributes (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_step_attributes)
+Step features test ... ok
+test_form_subcategory_validation (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_subcategory_validation)
+Subcategory validation test ... ok
+test_form_valid_data (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_widget_attributes (ProductsAndStock.tests.test_forms.TestProductAndStockModelForm.test_form_widget_attributes)
+Widget features test ... ok
+test_ajax_subcategory_loading (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_ajax_subcategory_loading)
+AJAX subcategory loading test (get_subcategories requires login) ... /private/tmp/crm-cv-venv/lib/python3.12/site-packages/django/core/handlers/base.py:61: UserWarning: No directory at: /private/tmp/crm-cv-audit/static/
+  mw_instance = middleware(adapted_handler)
+ok
+test_bulk_price_update_workflow (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_bulk_price_update_workflow)
+Bulk price update workflow test ... ok
+test_category_subcategory_workflow (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_category_subcategory_workflow)
+Category-subcategory workflow test ... ok
+test_complete_product_lifecycle (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_complete_product_lifecycle)
+Full product lifecycle test ... ok
+test_database_transactions (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_database_transactions)
+Database operations test ... ok
+test_discount_system (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_discount_system)
+Discount system test ... ok
+test_form_validation_integration (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_form_validation_integration)
+Form validation integration test ... ok
+test_performance_with_multiple_products (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_performance_with_multiple_products)
+Multiple product performance test ... ok
+test_profit_calculation_system (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_profit_calculation_system)
+Profit calculation system test ... ok
+test_stock_alert_system (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_stock_alert_system)
+Stock alert system test ... ok
+test_user_permissions_workflow (ProductsAndStock.tests.test_integration.TestProductsAndStockWorkflow.test_user_permissions_workflow)
+User permissions workflow test ... ok
+test_category_creation (ProductsAndStock.tests.test_models.TestCategoryModel.test_category_creation)
+Category creation test ... ok
+test_category_ordering (ProductsAndStock.tests.test_models.TestCategoryModel.test_category_ordering)
+Category ordering test ... ok
+test_category_str_representation (ProductsAndStock.tests.test_models.TestCategoryModel.test_category_str_representation)
+Category __str__ method test ... ok
+test_category_unique_name (ProductsAndStock.tests.test_models.TestCategoryModel.test_category_unique_name)
+Category name uniqueness test ... ok
+test_cascade_deletion (ProductsAndStock.tests.test_models.TestModelRelationships.test_cascade_deletion)
+Cascade deletion tests ... ok
+test_category_subcategory_relationship (ProductsAndStock.tests.test_models.TestModelRelationships.test_category_subcategory_relationship)
+Category-subcategory relationship test ... ok
+test_product_category_relationship (ProductsAndStock.tests.test_models.TestModelRelationships.test_product_category_relationship)
+Product-category relationship test ... ok
+test_product_organisation_relationship (ProductsAndStock.tests.test_models.TestModelRelationships.test_product_organisation_relationship)
+Product-organisation relationship test ... ok
+test_change_percentage_property (ProductsAndStock.tests.test_models.TestPriceHistoryModel.test_change_percentage_property)
+Change percentage property test ... ok
+test_price_history_creation (ProductsAndStock.tests.test_models.TestPriceHistoryModel.test_price_history_creation)
+Price history creation test ... ok
+test_price_history_str_representation (ProductsAndStock.tests.test_models.TestPriceHistoryModel.test_price_history_str_representation)
+PriceHistory __str__ method test ... ok
+test_clean_method (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_clean_method)
+Clean method test ... ok
+test_discounted_price_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_discounted_price_property)
+Discounted price property test ... ok
+test_is_discount_active_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_is_discount_active_property)
+Discount active property test ... ok
+test_is_low_stock_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_is_low_stock_property)
+Low stock property test ... ok
+test_product_creation (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_product_creation)
+Product creation test ... ok
+test_product_str_representation (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_product_str_representation)
+ProductsAndStock __str__ method test ... ok
+test_product_unique_together (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_product_unique_together)
+Product uniqueness test (product_name + organisation) ... ok
+test_profit_margin_amount_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_profit_margin_amount_property)
+Profit margin amount property test ... ok
+test_profit_margin_percentage_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_profit_margin_percentage_property)
+Profit margin percentage property test ... ok
+test_send_low_stock_alert (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_send_low_stock_alert)
+Low stock alert sending test ... ok
+test_stock_status_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_stock_status_property)
+Stock status property test ... ok
+test_total_profit_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_total_profit_property)
+Total profit property test ... ok
+test_total_value_property (ProductsAndStock.tests.test_models.TestProductsAndStockModel.test_total_value_property)
+Total value property test ... ok
+test_sales_statistics_creation (ProductsAndStock.tests.test_models.TestSalesStatisticsModel.test_sales_statistics_creation)
+Sales statistics creation test ... ok
+test_sales_statistics_str_representation (ProductsAndStock.tests.test_models.TestSalesStatisticsModel.test_sales_statistics_str_representation)
+SalesStatistics __str__ method test ... ok
+test_stock_alert_creation (ProductsAndStock.tests.test_models.TestStockAlertModel.test_stock_alert_creation)
+Stock alert creation test ... ok
+test_stock_alert_str_representation (ProductsAndStock.tests.test_models.TestStockAlertModel.test_stock_alert_str_representation)
+StockAlert __str__ method test ... ok
+test_movement_direction_property (ProductsAndStock.tests.test_models.TestStockMovementModel.test_movement_direction_property)
+Movement direction property test ... ok
+test_stock_movement_creation (ProductsAndStock.tests.test_models.TestStockMovementModel.test_stock_movement_creation)
+Stock movement creation test ... ok
+test_stock_movement_str_representation (ProductsAndStock.tests.test_models.TestStockMovementModel.test_stock_movement_str_representation)
+StockMovement __str__ method test ... ok
+test_stock_recommendation_creation (ProductsAndStock.tests.test_models.TestStockRecommendationModel.test_stock_recommendation_creation)
+Stock recommendation creation test ... ok
+test_stock_recommendation_str_representation (ProductsAndStock.tests.test_models.TestStockRecommendationModel.test_stock_recommendation_str_representation)
+StockRecommendation __str__ method test ... ok
+test_subcategory_creation (ProductsAndStock.tests.test_models.TestSubCategoryModel.test_subcategory_creation)
+Subcategory creation test ... ok
+test_subcategory_ordering (ProductsAndStock.tests.test_models.TestSubCategoryModel.test_subcategory_ordering)
+SubCategory ordering test ... ok
+test_subcategory_str_representation (ProductsAndStock.tests.test_models.TestSubCategoryModel.test_subcategory_str_representation)
+SubCategory __str__ method test ... ok
+test_subcategory_unique_together (ProductsAndStock.tests.test_models.TestSubCategoryModel.test_subcategory_unique_together)
+Subcategory uniqueness test (name + category) ... ok
+test_no_notification_on_alert_update (ProductsAndStock.tests.test_signals.NotifyOrganisorOnStockAlertTests.test_no_notification_on_alert_update)
+Updating an existing StockAlert should NOT create a new notification. ... ok
+test_notification_content_includes_product_name (ProductsAndStock.tests.test_signals.NotifyOrganisorOnStockAlertTests.test_notification_content_includes_product_name)
+The notification message should reference the product name. ... ok
+test_notification_created_on_new_stock_alert (ProductsAndStock.tests.test_signals.NotifyOrganisorOnStockAlertTests.test_notification_created_on_new_stock_alert)
+Creating a StockAlert should create a Notification for the organisor. ... ok
+test_notification_has_action_url (ProductsAndStock.tests.test_signals.NotifyOrganisorOnStockAlertTests.test_notification_has_action_url)
+The notification should link to the product detail page. ... ok
+test_bulk_price_update_category_filter (ProductsAndStock.tests.test_views.TestBulkPriceUpdateView.test_bulk_price_update_category_filter)
+Bulk price update with category filter test ... ok
+test_bulk_price_update_fixed_amount_increase (ProductsAndStock.tests.test_views.TestBulkPriceUpdateView.test_bulk_price_update_fixed_amount_increase)
+Bulk price update with fixed amount increase test ... ok
+test_bulk_price_update_percentage_increase (ProductsAndStock.tests.test_views.TestBulkPriceUpdateView.test_bulk_price_update_percentage_increase)
+Bulk price update with percentage increase test ... ok
+test_bulk_price_update_set_price (ProductsAndStock.tests.test_views.TestBulkPriceUpdateView.test_bulk_price_update_set_price)
+Bulk price update with new price test ... ok
+test_bulk_price_update_view_anonymous_user (ProductsAndStock.tests.test_views.TestBulkPriceUpdateView.test_bulk_price_update_view_anonymous_user)
+Anonymous user access test ... ok
+test_bulk_price_update_view_get_admin (ProductsAndStock.tests.test_views.TestBulkPriceUpdateView.test_bulk_price_update_view_get_admin)
+Admin user GET request test ... ok
+test_get_subcategories_invalid_category (ProductsAndStock.tests.test_views.TestGetSubcategoriesView.test_get_subcategories_invalid_category)
+Test with invalid category ID ... ok
+test_get_subcategories_no_category (ProductsAndStock.tests.test_views.TestGetSubcategoriesView.test_get_subcategories_no_category)
+Test without category ID ... ok
+test_get_subcategories_valid_category (ProductsAndStock.tests.test_views.TestGetSubcategoriesView.test_get_subcategories_valid_category)
+Test with valid category ID ... ok
+test_create_view_anonymous_user (ProductsAndStock.tests.test_views.TestProductAndStockCreateView.test_create_view_anonymous_user)
+Anonymous user access test ... ok
+test_create_view_get_admin (ProductsAndStock.tests.test_views.TestProductAndStockCreateView.test_create_view_get_admin)
+Admin user GET request test ... ok
+test_create_view_get_organisor (ProductsAndStock.tests.test_views.TestProductAndStockCreateView.test_create_view_get_organisor)
+Organisor user GET request test ... ok
+test_create_view_invalid_data (ProductsAndStock.tests.test_views.TestProductAndStockCreateView.test_create_view_invalid_data)
+POST request with invalid data test ... ok
+test_create_view_post_admin (ProductsAndStock.tests.test_views.TestProductAndStockCreateView.test_create_view_post_admin)
+Admin user POST request test ... ok
+test_create_view_post_organisor (ProductsAndStock.tests.test_views.TestProductAndStockCreateView.test_create_view_post_organisor)
+Organisor user POST request test ... ok
+test_delete_view_anonymous_user (ProductsAndStock.tests.test_views.TestProductAndStockDeleteView.test_delete_view_anonymous_user)
+Anonymous user access test ... ok
+test_delete_view_get_admin (ProductsAndStock.tests.test_views.TestProductAndStockDeleteView.test_delete_view_get_admin)
+Admin user GET request test ... ok
+test_delete_view_post_admin (ProductsAndStock.tests.test_views.TestProductAndStockDeleteView.test_delete_view_post_admin)
+Admin user POST request test ... ok
+test_delete_view_post_organisor (ProductsAndStock.tests.test_views.TestProductAndStockDeleteView.test_delete_view_post_organisor)
+Organisor user POST request test ... ok
+test_detail_view_admin_user (ProductsAndStock.tests.test_views.TestProductAndStockDetailView.test_detail_view_admin_user)
+Admin user access test ... ok
+test_detail_view_anonymous_user (ProductsAndStock.tests.test_views.TestProductAndStockDetailView.test_detail_view_anonymous_user)
+Anonymous user access test ... ok
+test_detail_view_context_data (ProductsAndStock.tests.test_views.TestProductAndStockDetailView.test_detail_view_context_data)
+Detail view context data test ... ok
+test_detail_view_organisor_user (ProductsAndStock.tests.test_views.TestProductAndStockDetailView.test_detail_view_organisor_user)
+Organisor user access test ... ok
+test_list_view_admin_user (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_admin_user)
+Admin user access test ... ok
+test_list_view_agent_user (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_agent_user)
+Agent user access test ... ok
+test_list_view_anonymous_user (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_anonymous_user)
+Anonymous user access test ... ok
+test_list_view_category_filter (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_category_filter)
+Category filter test ... ok
+test_list_view_context_data (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_context_data)
+Context data test ... ok
+test_list_view_organisor_user (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_organisor_user)
+Organisor user access test ... ok
+test_list_view_subcategory_filter (ProductsAndStock.tests.test_views.TestProductAndStockListView.test_list_view_subcategory_filter)
+Subcategory filter test ... ok
+test_update_view_anonymous_user (ProductsAndStock.tests.test_views.TestProductAndStockUpdateView.test_update_view_anonymous_user)
+Anonymous user access test ... ok
+test_update_view_get_admin (ProductsAndStock.tests.test_views.TestProductAndStockUpdateView.test_update_view_get_admin)
+Admin user GET request test ... ok
+test_update_view_get_organisor (ProductsAndStock.tests.test_views.TestProductAndStockUpdateView.test_update_view_get_organisor)
+Organisor user GET request test ... ok
+test_update_view_post_admin (ProductsAndStock.tests.test_views.TestProductAndStockUpdateView.test_update_view_post_admin)
+Admin user POST request test ... ok
+test_update_view_post_organisor (ProductsAndStock.tests.test_views.TestProductAndStockUpdateView.test_update_view_post_organisor)
+Organisor user POST request test ... ok
+test_admin_can_access (ProductsAndStock.tests.test_views.TestProductChartsView.test_admin_can_access) ... ok
+test_anonymous_user_redirected (ProductsAndStock.tests.test_views.TestProductChartsView.test_anonymous_user_redirected) ... ok
+test_organisor_can_access (ProductsAndStock.tests.test_views.TestProductChartsView.test_organisor_can_access) ... ok
+test_uses_correct_template (ProductsAndStock.tests.test_views.TestProductChartsView.test_uses_correct_template) ... ok
+test_sales_dashboard_context_data (ProductsAndStock.tests.test_views.TestSalesDashboardView.test_sales_dashboard_context_data)
+Dashboard context data test ... ok
+test_sales_dashboard_view_admin_user (ProductsAndStock.tests.test_views.TestSalesDashboardView.test_sales_dashboard_view_admin_user)
+Admin user access test ... ok
+test_sales_dashboard_view_anonymous_user (ProductsAndStock.tests.test_views.TestSalesDashboardView.test_sales_dashboard_view_anonymous_user)
+Anonymous user access test ... ok
+test_sales_dashboard_view_organisor_user (ProductsAndStock.tests.test_views.TestSalesDashboardView.test_sales_dashboard_view_organisor_user)
+Organisor user access test ... ok
+test_create_view_admin_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_create_view_admin_access)
+Admin user create view access ... ok
+test_create_view_agent_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_create_view_agent_access)
+Agent user create view access ... ok
+test_create_view_organisor_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_create_view_organisor_access)
+Organisor user create view access ... ok
+test_delete_view_admin_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_delete_view_admin_access)
+Admin user delete view access ... ok
+test_delete_view_agent_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_delete_view_agent_access)
+Agent user delete view access ... ok
+test_delete_view_organisor_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_delete_view_organisor_access)
+Organisor user delete view access ... ok
+test_detail_view_admin_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_detail_view_admin_access)
+Admin user detail view access ... ok
+test_detail_view_agent_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_detail_view_agent_access)
+Agent user detail view access ... ok
+test_detail_view_organisor_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_detail_view_organisor_access)
+Organisor user detail view access ... ok
+test_list_view_admin_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_list_view_admin_access)
+Admin user list view access ... ok
+test_list_view_agent_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_list_view_agent_access)
+Agent user list view access ... ok
+test_list_view_anonymous_redirect (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_list_view_anonymous_redirect)
+Anonymous user redirect ... ok
+test_list_view_organisor_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_list_view_organisor_access)
+Organisor user list view access ... ok
+test_sales_dashboard_admin_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_sales_dashboard_admin_access)
+Admin user sales dashboard access ... ok
+test_sales_dashboard_agent_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_sales_dashboard_agent_access)
+Agent user sales dashboard access ... ok
+test_sales_dashboard_organisor_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_sales_dashboard_organisor_access)
+Organisor user sales dashboard access ... ok
+test_update_view_admin_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_update_view_admin_access)
+Admin user update view access ... ok
+test_update_view_agent_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_update_view_agent_access)
+Agent user update view access ... ok
+test_update_view_organisor_access (ProductsAndStock.tests.test_views_simple.TestProductAndStockViewsSimple.test_update_view_organisor_access)
+Organisor user update view access ... ok
+test_agent_detail_url (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_agent_detail_url) ... ok
+test_lead_detail_url (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_lead_detail_url) ... ok
+test_order_detail_url (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_order_detail_url) ... ok
+test_organisor_detail_url (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_organisor_detail_url) ... ok
+test_product_detail_url (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_product_detail_url) ... ok
+test_returns_none_for_unknown_type (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_returns_none_for_unknown_type) ... ok
+test_returns_none_without_object_type (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_returns_none_without_object_type) ... ok
+test_task_detail_url (activity_log.tests.test_models.TestActivityLogGetDetailUrl.test_task_detail_url) ... ok
+test_affected_agent_set_null_on_delete (activity_log.tests.test_models.TestActivityLogModel.test_affected_agent_set_null_on_delete) ... ok
+test_all_action_choices (activity_log.tests.test_models.TestActivityLogModel.test_all_action_choices) ... ok
+test_auto_created_at (activity_log.tests.test_models.TestActivityLogModel.test_auto_created_at) ... ok
+test_create_log (activity_log.tests.test_models.TestActivityLogModel.test_create_log) ... ok
+test_details_default_empty_dict (activity_log.tests.test_models.TestActivityLogModel.test_details_default_empty_dict) ... ok
+test_details_json_field (activity_log.tests.test_models.TestActivityLogModel.test_details_json_field) ... ok
+test_ordering (activity_log.tests.test_models.TestActivityLogModel.test_ordering)
+Logs should be ordered by -created_at (newest first). Also verify pk ordering as fallback. ... ok
+test_organisation_set_null_on_delete (activity_log.tests.test_models.TestActivityLogModel.test_organisation_set_null_on_delete) ... ok
+test_str_representation (activity_log.tests.test_models.TestActivityLogModel.test_str_representation) ... ok
+test_str_with_deleted_user (activity_log.tests.test_models.TestActivityLogModel.test_str_with_deleted_user) ... ok
+test_str_with_full_name (activity_log.tests.test_models.TestActivityLogModel.test_str_with_full_name) ... ok
+test_user_set_null_on_delete (activity_log.tests.test_models.TestActivityLogModel.test_user_set_null_on_delete) ... ok
+test_verbose_names (activity_log.tests.test_models.TestActivityLogModel.test_verbose_names) ... ok
+test_creates_log (activity_log.tests.test_models.TestLogActivityHelper.test_creates_log) ... ok
+test_defaults (activity_log.tests.test_models.TestLogActivityHelper.test_defaults) ... ok
+test_returns_none_for_none_user (activity_log.tests.test_models.TestLogActivityHelper.test_returns_none_for_none_user) ... ok
+test_returns_none_for_unauthenticated (activity_log.tests.test_models.TestLogActivityHelper.test_returns_none_for_unauthenticated) ... ok
+test_truncates_long_object_repr (activity_log.tests.test_models.TestLogActivityHelper.test_truncates_long_object_repr) ... ok
+test_with_affected_agent (activity_log.tests.test_models.TestLogActivityHelper.test_with_affected_agent) ... ok
+test_with_details (activity_log.tests.test_models.TestLogActivityHelper.test_with_details) ... ok
+test_admin_context_has_filters (activity_log.tests.test_views.TestActivityLogListView.test_admin_context_has_filters) ... ok
+test_admin_filter_by_organisation (activity_log.tests.test_views.TestActivityLogListView.test_admin_filter_by_organisation) ... ok
+test_admin_filter_by_user (activity_log.tests.test_views.TestActivityLogListView.test_admin_filter_by_user) ... ok
+test_admin_sees_all_logs (activity_log.tests.test_views.TestActivityLogListView.test_admin_sees_all_logs) ... ok
+test_agent_sees_own_and_affected_logs (activity_log.tests.test_views.TestActivityLogListView.test_agent_sees_own_and_affected_logs) ... ok
+test_organisor_context_no_filter_users (activity_log.tests.test_views.TestActivityLogListView.test_organisor_context_no_filter_users) ... ok
+test_organisor_sees_own_and_org_logs (activity_log.tests.test_views.TestActivityLogListView.test_organisor_sees_own_and_org_logs) ... ok
+test_pagination (activity_log.tests.test_views.TestActivityLogListView.test_pagination)
+View should paginate at 30 items. ... ok
+test_template_used (activity_log.tests.test_views.TestActivityLogListView.test_template_used) ... ok
+test_unauthenticated_redirects (activity_log.tests.test_views.TestActivityLogListView.test_unauthenticated_redirects) ... ok
+test_form_initialization (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_initialization)
+Form initialization test ... ok
+test_form_organisation_field (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_organisation_field)
+Organisation field test ... ok
+test_form_organisation_queryset (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_organisation_queryset)
+Organisation queryset test ... ok
+test_form_required_fields (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_required_fields)
+Required fields test ... ok
+test_form_save_method (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_save_method)
+Form save method test ... ok
+test_form_valid_data (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_widget_attributes (agents.tests.test_forms.TestAdminAgentCreateForm.test_form_widget_attributes)
+Widget attributes test ... ok
+test_form_email_validation_unique (agents.tests.test_forms.TestAgentCreateForm.test_form_email_validation_unique)
+Email uniqueness validation test ... ok
+test_form_initialization (agents.tests.test_forms.TestAgentCreateForm.test_form_initialization)
+Form initialization test ... ok
+test_form_password_validation (agents.tests.test_forms.TestAgentCreateForm.test_form_password_validation)
+Password validation test ... ok
+test_form_phone_number_validation_unique (agents.tests.test_forms.TestAgentCreateForm.test_form_phone_number_validation_unique)
+Phone number uniqueness validation test ... ok
+test_form_required_fields (agents.tests.test_forms.TestAgentCreateForm.test_form_required_fields)
+Required fields test ... ok
+test_form_save_method (agents.tests.test_forms.TestAgentCreateForm.test_form_save_method)
+Form save method test ... ok
+test_form_username_validation_unique (agents.tests.test_forms.TestAgentCreateForm.test_form_username_validation_unique)
+Username uniqueness validation test ... ok
+test_form_valid_data (agents.tests.test_forms.TestAgentCreateForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_widget_attributes (agents.tests.test_forms.TestAgentCreateForm.test_form_widget_attributes)
+Widget attributes test ... ok
+test_admin_agent_create_form_with_organisation (agents.tests.test_forms.TestAgentFormIntegration.test_admin_agent_create_form_with_organisation)
+Admin agent create form with organisation test ... ok
+test_agent_create_form_with_existing_data_conflicts (agents.tests.test_forms.TestAgentFormIntegration.test_agent_create_form_with_existing_data_conflicts)
+Conflict with existing data test ... ok
+test_form_validation_with_empty_data (agents.tests.test_forms.TestAgentFormIntegration.test_form_validation_with_empty_data)
+Form validation with empty data test ... ok
+test_form_validation_with_partial_data (agents.tests.test_forms.TestAgentFormIntegration.test_form_validation_with_partial_data)
+Form validation with partial data test ... ok
+test_form_clean_methods (agents.tests.test_forms.TestAgentModelForm.test_form_clean_methods)
+Form clean methods test ... ok
+test_form_email_validation_unique (agents.tests.test_forms.TestAgentModelForm.test_form_email_validation_unique)
+Email uniqueness validation test ... ok
+test_form_field_help_texts (agents.tests.test_forms.TestAgentModelForm.test_form_field_help_texts)
+Form field help texts test ... ok
+test_form_field_widgets (agents.tests.test_forms.TestAgentModelForm.test_form_field_widgets)
+Form field widgets test ... ok
+test_form_initialization (agents.tests.test_forms.TestAgentModelForm.test_form_initialization)
+Form initialization test ... ok
+test_form_password_optional (agents.tests.test_forms.TestAgentModelForm.test_form_password_optional)
+Password fields optional test ... ok
+test_form_password_validation (agents.tests.test_forms.TestAgentModelForm.test_form_password_validation)
+Password validation test ... ok
+test_form_password_validation_common (agents.tests.test_forms.TestAgentModelForm.test_form_password_validation_common)
+Common password validation test ... ok
+test_form_password_validation_short (agents.tests.test_forms.TestAgentModelForm.test_form_password_validation_short)
+Short password validation test ... ok
+test_form_phone_number_validation_unique (agents.tests.test_forms.TestAgentModelForm.test_form_phone_number_validation_unique)
+Phone number uniqueness validation test ... ok
+test_form_required_fields (agents.tests.test_forms.TestAgentModelForm.test_form_required_fields)
+Required fields test ... ok
+test_form_save_method (agents.tests.test_forms.TestAgentModelForm.test_form_save_method)
+Form save method test ... ok
+test_form_save_without_password_change (agents.tests.test_forms.TestAgentModelForm.test_form_save_without_password_change)
+Form save without password change test ... ok
+test_form_username_validation_unique (agents.tests.test_forms.TestAgentModelForm.test_form_username_validation_unique)
+Username uniqueness validation test ... ok
+test_form_valid_data (agents.tests.test_forms.TestAgentModelForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_validation_edge_cases (agents.tests.test_forms.TestAgentModelForm.test_form_validation_edge_cases)
+Form validation edge cases test ... ok
+test_form_widget_attributes (agents.tests.test_forms.TestAgentModelForm.test_form_widget_attributes)
+Widget attributes test ... ok
+test_full_agent_lifecycle (agents.tests.test_integration.TestAgentLifecycleIntegration.test_full_agent_lifecycle)
+Create agent -> verify email -> update -> delete. ... ok
+test_organisor1_sees_only_own_agents (agents.tests.test_integration.TestAgentOrganisationIsolation.test_organisor1_sees_only_own_agents) ... ok
+test_organisor2_sees_only_own_agents (agents.tests.test_integration.TestAgentOrganisationIsolation.test_organisor2_sees_only_own_agents) ... ok
+test_normal_user_cannot_create_agent (agents.tests.test_integration.TestAgentPermissions.test_normal_user_cannot_create_agent) ... ok
+test_normal_user_cannot_list_agents (agents.tests.test_integration.TestAgentPermissions.test_normal_user_cannot_list_agents) ... ok
+test_agent_access (agents.tests.test_mixins.TestAgentAndOrganisorLoginRequiredMixin.test_agent_access)
+Agent access test ... ok
+test_normal_user_access_denied (agents.tests.test_mixins.TestAgentAndOrganisorLoginRequiredMixin.test_normal_user_access_denied)
+Normal user access denied test ... ok
+test_organisor_access (agents.tests.test_mixins.TestAgentAndOrganisorLoginRequiredMixin.test_organisor_access)
+Organisor access test ... ok
+test_superuser_access (agents.tests.test_mixins.TestAgentAndOrganisorLoginRequiredMixin.test_superuser_access)
+Superuser access test ... ok
+test_anonymous_user_access_denied (agents.tests.test_mixins.TestOrganisorAndLoginRequiredMixin.test_anonymous_user_access_denied)
+Anonymous user access denied test ... ok
+test_normal_user_access_denied (agents.tests.test_mixins.TestOrganisorAndLoginRequiredMixin.test_normal_user_access_denied)
+Normal user access denied test ... ok
+test_organisor_access (agents.tests.test_mixins.TestOrganisorAndLoginRequiredMixin.test_organisor_access)
+Organisor access test ... ok
+test_superuser_access (agents.tests.test_mixins.TestOrganisorAndLoginRequiredMixin.test_superuser_access)
+Superuser access test ... ok
+test_agent_access (agents.tests.test_mixins.TestProductsAndStockAccessMixin.test_agent_access)
+Agent access test ... ok
+test_normal_user_access_denied (agents.tests.test_mixins.TestProductsAndStockAccessMixin.test_normal_user_access_denied)
+Normal user access denied test ... ok
+test_organisor_access (agents.tests.test_mixins.TestProductsAndStockAccessMixin.test_organisor_access)
+Organisor access test ... ok
+test_superuser_access (agents.tests.test_mixins.TestProductsAndStockAccessMixin.test_superuser_access)
+Superuser access test ... ok
+test_agent_cascade_delete_organisation (agents.tests.test_models.TestAgentModel.test_agent_cascade_delete_organisation)
+Agent cascade delete organisation test ... ok
+test_agent_cascade_delete_user (agents.tests.test_models.TestAgentModel.test_agent_cascade_delete_user)
+Agent cascade delete user test ... ok
+test_agent_creation (agents.tests.test_models.TestAgentModel.test_agent_creation)
+Agent creation test ... ok
+test_agent_creation_with_different_organisations (agents.tests.test_models.TestAgentModel.test_agent_creation_with_different_organisations)
+Agent creation with different organisations test ... ok
+test_agent_creation_without_user_profile (agents.tests.test_models.TestAgentModel.test_agent_creation_without_user_profile)
+Agent creation without UserProfile test ... ok
+test_agent_organisation_relationship (agents.tests.test_models.TestAgentModel.test_agent_organisation_relationship)
+Agent-Organisation relationship test ... ok
+test_agent_str_representation (agents.tests.test_models.TestAgentModel.test_agent_str_representation)
+Agent __str__ method test ... ok
+test_agent_unique_user_constraint (agents.tests.test_models.TestAgentModel.test_agent_unique_user_constraint)
+Agent unique user constraint test ... ok
+test_agent_user_profile_creation (agents.tests.test_models.TestAgentModel.test_agent_user_profile_creation)
+UserProfile creation when agent is created test ... ok
+test_agent_user_relationship (agents.tests.test_models.TestAgentModel.test_agent_user_relationship)
+Agent-User relationship test ... ok
+test_agent_creation_with_verification_token (agents.tests.test_models.TestAgentModelIntegration.test_agent_creation_with_verification_token)
+Agent creation with verification token creation test ... ok
+test_agent_organisation_relationship_integrity (agents.tests.test_models.TestAgentModelIntegration.test_agent_organisation_relationship_integrity)
+Agent-organisation relationship integrity test ... ok
+test_agent_user_profile_consistency (agents.tests.test_models.TestAgentModelIntegration.test_agent_user_profile_consistency)
+Agent and UserProfile consistency test ... ok
+test_multiple_tokens_for_same_user (agents.tests.test_models.TestEmailVerificationTokenModel.test_multiple_tokens_for_same_user)
+Multiple tokens for same user test ... ok
+test_token_cascade_delete_user (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_cascade_delete_user)
+Token cascade delete user test ... ok
+test_token_creation (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_creation)
+Token creation test ... ok
+test_token_expiration (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_expiration)
+Token expiration test ... ok
+test_token_is_used_default (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_is_used_default)
+Token is_used default value test ... ok
+test_token_str_representation (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_str_representation)
+Token __str__ method test ... ok
+test_token_uniqueness (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_uniqueness)
+Token uniqueness test ... ok
+test_token_used_status_update (agents.tests.test_models.TestEmailVerificationTokenModel.test_token_used_status_update)
+Token used status update test ... ok
+test_create_sends_verification_email (agents.tests.test_views.TestAgentCreateView.test_create_sends_verification_email) ... ok
+test_organisor_create_agent (agents.tests.test_views.TestAgentCreateView.test_organisor_create_agent) ... ok
+test_organisor_get (agents.tests.test_views.TestAgentCreateView.test_organisor_get) ... ok
+test_unauthenticated_redirects (agents.tests.test_views.TestAgentCreateView.test_unauthenticated_redirects) ... ok
+test_organisor_delete (agents.tests.test_views.TestAgentDeleteView.test_organisor_delete) ... ok
+test_template_used (agents.tests.test_views.TestAgentDeleteView.test_template_used) ... ok
+test_unauthenticated_redirects (agents.tests.test_views.TestAgentDeleteView.test_unauthenticated_redirects) ... ok
+test_organisor_access (agents.tests.test_views.TestAgentDetailView.test_organisor_access) ... ok
+test_superuser_access (agents.tests.test_views.TestAgentDetailView.test_superuser_access) ... ok
+test_template_used (agents.tests.test_views.TestAgentDetailView.test_template_used) ... ok
+test_unauthenticated_redirects (agents.tests.test_views.TestAgentDetailView.test_unauthenticated_redirects) ... ok
+test_normal_user_no_access (agents.tests.test_views.TestAgentListView.test_normal_user_no_access) ... ok
+test_organisor_access (agents.tests.test_views.TestAgentListView.test_organisor_access) ... ok
+test_organisor_sees_only_org_agents (agents.tests.test_views.TestAgentListView.test_organisor_sees_only_org_agents) ... ok
+test_search_by_username (agents.tests.test_views.TestAgentListView.test_search_by_username) ... ok
+test_superuser_filter_by_organisation (agents.tests.test_views.TestAgentListView.test_superuser_filter_by_organisation) ... ok
+test_superuser_sees_all_agents (agents.tests.test_views.TestAgentListView.test_superuser_sees_all_agents) ... ok
+test_template_used (agents.tests.test_views.TestAgentListView.test_template_used) ... ok
+test_unauthenticated_redirects (agents.tests.test_views.TestAgentListView.test_unauthenticated_redirects) ... ok
+test_organisor_get (agents.tests.test_views.TestAgentUpdateView.test_organisor_get) ... ok
+test_organisor_post_update (agents.tests.test_views.TestAgentUpdateView.test_organisor_post_update) ... ok
+test_template_used (agents.tests.test_views.TestAgentUpdateView.test_template_used) ... ok
+test_agent_create_view_admin_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_create_view_admin_access)
+Admin agent create view access test ... ok
+test_agent_create_view_organisor_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_create_view_organisor_access)
+Organisor agent create view access test ... ok
+test_agent_create_view_valid_data_organisor (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_create_view_valid_data_organisor)
+Create agent with valid data as organisor test (profile_image required) ... ok
+test_agent_delete_view_admin_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_delete_view_admin_access)
+Admin agent delete view access test ... ok
+test_agent_delete_view_organisor_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_delete_view_organisor_access)
+Organisor agent delete view access test ... ok
+test_agent_delete_view_post (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_delete_view_post)
+Agent delete POST test ... ok
+test_agent_detail_view_admin_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_detail_view_admin_access)
+Admin agent detail view access test ... ok
+test_agent_detail_view_organisor_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_detail_view_organisor_access)
+Organisor agent detail view access test ... ok
+test_agent_list_view_admin_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_list_view_admin_access)
+Admin agent list view access test ... ok
+test_agent_list_view_organisor_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_list_view_organisor_access)
+Organisor agent list view access test ... ok
+test_agent_update_view_admin_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_update_view_admin_access)
+Admin agent update view access test ... ok
+test_agent_update_view_organisor_access (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_update_view_organisor_access)
+Organisor agent update view access test ... ok
+test_agent_update_view_post (agents.tests.test_views_simple.TestAgentViewsSimple.test_agent_update_view_post)
+Agent update POST test ... ok
+test_anonymous_user_redirect (agents.tests.test_views_simple.TestAgentViewsSimple.test_anonymous_user_redirect)
+Anonymous user redirect test ... ok
+test_normal_user_redirect (agents.tests.test_views_simple.TestAgentViewsSimple.test_normal_user_redirect)
+Normal user redirect test ... ok
+test_date_range_form_bound_vs_unbound (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_bound_vs_unbound)
+DateRangeForm bound vs unbound test ... ok
+test_date_range_form_clean_data_access (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_clean_data_access)
+DateRangeForm clean_data access test ... ok
+test_date_range_form_clean_method (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_clean_method)
+DateRangeForm clean method test ... ok
+test_date_range_form_clean_method_same_dates (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_clean_method_same_dates)
+DateRangeForm clean method same dates test ... ok
+test_date_range_form_clean_method_valid (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_clean_method_valid)
+DateRangeForm clean method valid test ... ok
+test_date_range_form_empty_data (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_empty_data)
+DateRangeForm empty data test ... ok
+test_date_range_form_end_date_before_start_date (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_end_date_before_start_date)
+DateRangeForm end_date before start_date test ... ok
+test_date_range_form_error_messages (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_error_messages)
+DateRangeForm error messages test ... ok
+test_date_range_form_field_labels (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_field_labels)
+DateRangeForm field labels test ... ok
+test_date_range_form_field_required (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_field_required)
+DateRangeForm field required test ... ok
+test_date_range_form_field_types (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_field_types)
+DateRangeForm field types test ... ok
+test_date_range_form_future_dates (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_future_dates)
+DateRangeForm future dates test ... ok
+test_date_range_form_initial_data (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_initial_data)
+DateRangeForm initial data test ... ok
+test_date_range_form_invalid_date_format (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_invalid_date_format)
+DateRangeForm invalid date format test ... ok
+test_date_range_form_missing_end_date (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_missing_end_date)
+DateRangeForm missing end_date test ... ok
+test_date_range_form_missing_start_date (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_missing_start_date)
+DateRangeForm missing start_date test ... ok
+test_date_range_form_past_dates (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_past_dates)
+DateRangeForm past dates test ... ok
+test_date_range_form_same_dates (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_same_dates)
+DateRangeForm same dates test ... ok
+test_date_range_form_valid_data (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_valid_data)
+DateRangeForm valid data test ... ok
+test_date_range_form_validation_error_format (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_validation_error_format)
+DateRangeForm validation error format test ... ok
+test_date_range_form_widget_type (finance.tests.test_forms.TestDateRangeForm.test_date_range_form_widget_type)
+DateRangeForm widget type test ... ok
+test_date_range_form_empty_strings (finance.tests.test_forms.TestDateRangeFormEdgeCases.test_date_range_form_empty_strings)
+DateRangeForm empty strings test ... ok
+test_date_range_form_extreme_date_range (finance.tests.test_forms.TestDateRangeFormEdgeCases.test_date_range_form_extreme_date_range)
+DateRangeForm extreme date range test ... ok
+test_date_range_form_leap_year_dates (finance.tests.test_forms.TestDateRangeFormEdgeCases.test_date_range_form_leap_year_dates)
+DateRangeForm leap year dates test ... ok
+test_date_range_form_none_values (finance.tests.test_forms.TestDateRangeFormEdgeCases.test_date_range_form_none_values)
+DateRangeForm None values test ... ok
+test_date_range_form_year_boundary (finance.tests.test_forms.TestDateRangeFormEdgeCases.test_date_range_form_year_boundary)
+DateRangeForm year boundary test ... ok
+test_finance_report_date_filtering_with_orders (finance.tests.test_integration.TestFinanceOrdersIntegration.test_finance_report_date_filtering_with_orders)
+Finance report date filtering integration with orders ... ok
+test_finance_report_organisation_filtering (finance.tests.test_integration.TestFinanceOrdersIntegration.test_finance_report_organisation_filtering)
+Finance report organisation filtering ... ok
+test_multiple_orders_finance_reports_aggregation (finance.tests.test_integration.TestFinanceOrdersIntegration.test_multiple_orders_finance_reports_aggregation)
+Multiple orders finance report aggregation ... ok
+test_order_cancellation_finance_report_impact (finance.tests.test_integration.TestFinanceOrdersIntegration.test_order_cancellation_finance_report_impact)
+Order cancellation finance report impact ... ok
+test_order_creation_with_finance_report (finance.tests.test_integration.TestFinanceOrdersIntegration.test_order_creation_with_finance_report)
+Order creation with finance report integration ... ok
+test_order_deletion_finance_report_cascade (finance.tests.test_integration.TestFinanceOrdersIntegration.test_order_deletion_finance_report_cascade)
+Order deletion finance report cascade test ... ok
+test_finance_report_multiple_products_profit (finance.tests.test_integration.TestFinanceProductsIntegration.test_finance_report_multiple_products_profit)
+Finance report multiple products profit calculation ... ok
+test_finance_report_product_profit_calculation (finance.tests.test_integration.TestFinanceProductsIntegration.test_finance_report_product_profit_calculation)
+Finance report product profit calculation integration ... ok
+test_finance_report_stock_movement_integration (finance.tests.test_integration.TestFinanceProductsIntegration.test_finance_report_stock_movement_integration)
+Finance report stock movement integration ... ok
+test_financial_report_view_form_integration (finance.tests.test_integration.TestFinanceViewsIntegration.test_financial_report_view_form_integration)
+FinancialReportView form integration ... ok
+test_financial_report_view_full_workflow (finance.tests.test_integration.TestFinanceViewsIntegration.test_financial_report_view_full_workflow)
+FinancialReportView full workflow test ... ok
+test_order_finance_report_cascade_delete_order (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_cascade_delete_order)
+OrderFinanceReport cascade delete order test ... ok
+test_order_finance_report_creation (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_creation)
+OrderFinanceReport creation test ... ok
+test_order_finance_report_default_report_date (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_default_report_date)
+OrderFinanceReport default report_date test ... ok
+test_order_finance_report_earned_amount_negative (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_earned_amount_negative)
+OrderFinanceReport earned_amount negative value test ... ok
+test_order_finance_report_earned_amount_positive (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_earned_amount_positive)
+OrderFinanceReport earned_amount positive value test ... ok
+test_order_finance_report_earned_amount_zero (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_earned_amount_zero)
+OrderFinanceReport earned_amount zero value test ... ok
+test_order_finance_report_float_precision (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_float_precision)
+OrderFinanceReport float precision test ... ok
+test_order_finance_report_large_amount (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_large_amount)
+OrderFinanceReport large amount test ... ok
+test_order_finance_report_manual_report_date (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_manual_report_date)
+OrderFinanceReport manual report_date test ... ok
+test_order_finance_report_one_to_one_relationship (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_one_to_one_relationship)
+OrderFinanceReport OneToOneField relationship test ... ok
+test_order_finance_report_str_representation (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_str_representation)
+OrderFinanceReport __str__ method test ... ok
+test_order_finance_report_unique_order_constraint (finance.tests.test_models.TestOrderFinanceReportModel.test_order_finance_report_unique_order_constraint)
+OrderFinanceReport unique order constraint test ... ok
+test_multiple_orders_finance_reports (finance.tests.test_models.TestOrderFinanceReportModelIntegration.test_multiple_orders_finance_reports)
+Multiple orders and finance report test ... ok
+test_order_finance_report_aggregation (finance.tests.test_models.TestOrderFinanceReportModelIntegration.test_order_finance_report_aggregation)
+OrderFinanceReport total calculation test ... ok
+test_order_finance_report_date_filtering (finance.tests.test_models.TestOrderFinanceReportModelIntegration.test_order_finance_report_date_filtering)
+OrderFinanceReport date filtering test ... ok
+test_order_finance_report_organisation_filtering (finance.tests.test_models.TestOrderFinanceReportModelIntegration.test_order_finance_report_organisation_filtering)
+OrderFinanceReport organisation filtering test ... ok
+test_order_finance_report_with_order_products (finance.tests.test_models.TestOrderFinanceReportModelIntegration.test_order_finance_report_with_order_products)
+OrderFinanceReport and OrderProduct integration test ... ok
+test_financial_report_view_aggregation (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_aggregation)
+FinancialReportView aggregation test ... ok
+test_financial_report_view_date_filter_order_day (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_date_filter_order_day)
+FinancialReportView filters by order_day when date_filter=order_day (not creation_date). ... ok
+test_financial_report_view_date_filtering_logic (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_date_filtering_logic)
+FinancialReportView date filtering logic test ... ok
+test_financial_report_view_empty_results_template (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_empty_results_template)
+FinancialReportView empty results template test ... ok
+test_financial_report_view_get (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_get)
+FinancialReportView GET request test ... ok
+test_financial_report_view_get_context (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_get_context)
+FinancialReportView GET context test ... ok
+test_financial_report_view_multiple_organisations (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_multiple_organisations)
+FinancialReportView multiple organisations test - superuser sees all orgs ... ok
+test_financial_report_view_organisor_filter_by_agent (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_organisor_filter_by_agent)
+Organisor can filter report by agent within their organisation. ... ok
+test_financial_report_view_post_all_dates (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_post_all_dates)
+FinancialReportView POST all dates test ... ok
+test_financial_report_view_post_date_range (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_post_date_range)
+FinancialReportView POST date range test ... ok
+test_financial_report_view_post_end_date_before_start_date (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_post_end_date_before_start_date)
+FinancialReportView POST end_date before start_date test ... ok
+test_financial_report_view_post_invalid_form (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_post_invalid_form)
+FinancialReportView POST invalid form test ... ok
+test_financial_report_view_post_no_results (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_post_no_results)
+FinancialReportView POST no results test ... ok
+test_financial_report_view_post_valid_dates (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_post_valid_dates)
+FinancialReportView POST valid dates test ... ok
+test_financial_report_view_select_related_optimization (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_select_related_optimization)
+FinancialReportView select_related optimization test - prevents N+1 queries ... ok
+test_financial_report_view_superuser_filter_by_agent (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_superuser_filter_by_agent)
+Superuser can filter report by agent. ... ok
+test_financial_report_view_superuser_filter_by_organisation (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_superuser_filter_by_organisation)
+Superuser can filter report by organisation. ... ok
+test_financial_report_view_template_rendering (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_template_rendering)
+FinancialReportView template rendering test ... ok
+test_financial_report_view_with_reports_template (finance.tests.test_views.TestFinancialReportView.test_financial_report_view_with_reports_template)
+FinancialReportView with reports template test ... ok
+test_financial_report_view_negative_earned_amount (finance.tests.test_views.TestFinancialReportViewEdgeCases.test_financial_report_view_negative_earned_amount)
+FinancialReportView negative earned amount test ... ok
+test_financial_report_view_no_orders (finance.tests.test_views.TestFinancialReportViewEdgeCases.test_financial_report_view_no_orders)
+FinancialReportView no orders test ... ok
+test_financial_report_view_orders_without_finance_reports (finance.tests.test_views.TestFinancialReportViewEdgeCases.test_financial_report_view_orders_without_finance_reports)
+FinancialReportView orders without finance reports test ... ok
+test_financial_report_view_zero_earned_amount (finance.tests.test_views.TestFinancialReportViewEdgeCases.test_financial_report_view_zero_earned_amount)
+FinancialReportView zero earned amount test ... ok
+test_form_case_insensitive_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_case_insensitive_email)
+Form case insensitive email test ... ok
+test_form_email_with_dots (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_email_with_dots)
+Form email with dots test ... ok
+test_form_email_with_hyphens (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_email_with_hyphens)
+Form email with hyphens test ... ok
+test_form_email_with_plus (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_email_with_plus)
+Form email with + symbol test ... ok
+test_form_email_with_underscores (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_email_with_underscores)
+Form email with underscores test ... ok
+test_form_empty_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_empty_email)
+Form empty email test ... ok
+test_form_initialization (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_initialization)
+Form initialization test ... ok
+test_form_invalid_email_format (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_invalid_email_format)
+Form invalid email format test ... ok
+test_form_long_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_long_email)
+Form very long email test ... ok
+test_form_multiple_at_symbols (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_multiple_at_symbols)
+Form email with multiple @ symbols test ... ok
+test_form_no_at_symbol (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_no_at_symbol)
+Form email without @ symbol test ... ok
+test_form_no_domain (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_no_domain)
+Form email without domain test ... ok
+test_form_no_local_part (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_no_local_part)
+Form email without local part test ... ok
+test_form_nonexistent_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_nonexistent_email)
+Form non-existent email test ... ok
+test_form_numeric_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_numeric_email)
+Form numeric email test ... ok
+test_form_special_characters_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_special_characters_email)
+Form email with special characters test ... ok
+test_form_unicode_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_unicode_email)
+Form email with Unicode characters test ... ok
+test_form_valid_data (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_valid_data)
+Form valid data test ... ok
+test_form_whitespace_email (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_whitespace_email)
+Form email with whitespace test ... ok
+test_form_widget_attributes (leads.tests.test_forget_password_forms.TestCustomPasswordResetForm.test_form_widget_attributes)
+Form widget attributes test ... ok
+test_form_common_password (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_common_password)
+Form common password test ... ok
+test_form_empty_passwords (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_empty_passwords)
+Form empty password test ... ok
+test_form_help_text (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_help_text)
+Form help text test ... ok
+test_form_initialization (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_initialization)
+Form initialization test ... ok
+test_form_long_password (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_long_password)
+Form long password test ... ok
+test_form_numeric_password (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_numeric_password)
+Form fully numeric password test ... ok
+test_form_password_mismatch (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_password_mismatch)
+Form password mismatch test ... ok
+test_form_save_functionality (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_save_functionality)
+Form save functionality test ... ok
+test_form_save_with_commit_false (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_save_with_commit_false)
+Form save with commit=False test ... ok
+test_form_short_password (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_short_password)
+Form short password test ... ok
+test_form_similar_to_email (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_similar_to_email)
+Form password similar to email test ... ok
+test_form_similar_to_first_name (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_similar_to_first_name)
+Form password similar to first name test ... ok
+test_form_similar_to_last_name (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_similar_to_last_name)
+Form password similar to last name test ... ok
+test_form_similar_to_username (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_similar_to_username)
+Form password similar to username test ... ok
+test_form_special_characters_passwords (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_special_characters_passwords)
+Form password with special characters test ... ok
+test_form_unicode_passwords (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_unicode_passwords)
+Form password with Unicode characters test ... ok
+test_form_valid_data (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_valid_data)
+Form valid data test ... ok
+test_form_whitespace_passwords (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_whitespace_passwords)
+Form password with whitespace test ... ok
+test_form_widget_attributes (leads.tests.test_forget_password_forms.TestCustomSetPasswordForm.test_form_widget_attributes)
+Form widget attributes test ... ok
+test_form_field_attributes (leads.tests.test_forget_password_forms.TestForgetPasswordFormIntegration.test_form_field_attributes)
+Form field attributes test ... ok
+test_form_validation_edge_cases (leads.tests.test_forget_password_forms.TestForgetPasswordFormIntegration.test_form_validation_edge_cases)
+Form validation edge cases test ... ok
+test_password_reset_form_with_existing_user (leads.tests.test_forget_password_forms.TestForgetPasswordFormIntegration.test_password_reset_form_with_existing_user)
+Password reset form test with existing user ... ok
+test_password_reset_form_with_nonexistent_user (leads.tests.test_forget_password_forms.TestForgetPasswordFormIntegration.test_password_reset_form_with_nonexistent_user)
+Password reset form test with non-existent user ... ok
+test_set_password_form_with_invalid_data (leads.tests.test_forget_password_forms.TestForgetPasswordFormIntegration.test_set_password_form_with_invalid_data)
+Set password form test with invalid data ... ok
+test_set_password_form_with_valid_data (leads.tests.test_forget_password_forms.TestForgetPasswordFormIntegration.test_set_password_form_with_valid_data)
+Set password form test with valid data ... ok
+test_password_reset_confirm_view_expired_token (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_expired_token)
+Password reset confirm expired token test ... ok
+test_password_reset_confirm_view_form_class (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_form_class)
+Form class test ... ok
+test_password_reset_confirm_view_get_valid_token (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_get_valid_token)
+Password reset confirm page GET request with valid token test ... ok
+test_password_reset_confirm_view_inactive_user (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_inactive_user)
+Password reset confirm inactive user test ... ok
+test_password_reset_confirm_view_invalid_token (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_invalid_token)
+Password reset confirm invalid token test ... ok
+test_password_reset_confirm_view_invalid_uid (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_invalid_uid)
+Password reset confirm invalid uid test ... ok
+test_password_reset_confirm_view_nonexistent_user (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_nonexistent_user)
+Password reset confirm non-existent user test ... ok
+test_password_reset_confirm_view_post_empty_passwords (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_post_empty_passwords)
+Password reset confirm POST request empty password test ... ok
+test_password_reset_confirm_view_post_password_mismatch (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_post_password_mismatch)
+Password reset confirm POST request password mismatch test ... ok
+test_password_reset_confirm_view_post_valid_data (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_post_valid_data)
+Password reset confirm POST request with valid data test ... ok
+test_password_reset_confirm_view_post_weak_password (leads.tests.test_forget_password_views.TestCustomPasswordResetConfirmView.test_password_reset_confirm_view_post_weak_password)
+Password reset confirm POST request weak password test ... ok
+test_password_reset_view_email_sending_details (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_email_sending_details)
+Email sending details test ... ok
+test_password_reset_view_form_class (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_form_class)
+Form class test ... ok
+test_password_reset_view_get (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_get)
+Password reset page GET request test ... ok
+test_password_reset_view_multiple_requests (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_multiple_requests)
+Multiple password reset requests test ... ok
+test_password_reset_view_post_case_insensitive_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_case_insensitive_email)
+Password reset POST request case insensitive email test ... FAIL
+test_password_reset_view_post_empty_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_empty_email)
+Password reset POST request with empty email test ... FAIL
+test_password_reset_view_post_invalid_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_invalid_email)
+Password reset POST request with invalid email test ... FAIL
+test_password_reset_view_post_nonexistent_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_nonexistent_email)
+Password reset POST request with non-existent email test ... FAIL
+test_password_reset_view_post_unverified_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_unverified_email)
+Password reset POST request with unverified email test ... FAIL
+test_password_reset_view_post_valid_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_valid_email)
+Password reset POST request with valid email test ... FAIL
+test_password_reset_view_post_whitespace_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_whitespace_email)
+Password reset POST request with whitespace in email test ... FAIL
+test_password_reset_view_template (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_template)
+Template test ... ok
+test_complete_forget_password_flow (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_complete_forget_password_flow)
+Full forget password flow test ... FAIL
+test_forget_password_form_validation (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_form_validation)
+Forget password form validation test ... FAIL
+test_forget_password_security_measures (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_security_measures)
+Forget password security measures test ... FAIL
+test_forget_password_with_invalid_email (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_with_invalid_email)
+Forget password with invalid email test ... FAIL
+test_forget_password_with_unverified_email (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_with_unverified_email)
+Forget password with unverified email test ... FAIL
+test_password_reset_complete_view_content (leads.tests.test_forget_password_views.TestPasswordResetCompleteView.test_password_reset_complete_view_content)
+Password reset complete page content test ... ok
+test_password_reset_complete_view_get (leads.tests.test_forget_password_views.TestPasswordResetCompleteView.test_password_reset_complete_view_get)
+Password reset complete page GET request test ... ok
+test_password_reset_done_view_content (leads.tests.test_forget_password_views.TestPasswordResetDoneView.test_password_reset_done_view_content)
+Password reset done page content test ... ok
+test_password_reset_done_view_get (leads.tests.test_forget_password_views.TestPasswordResetDoneView.test_password_reset_done_view_get)
+Password reset done page GET request test ... ok
+test_form_email_validation_unique (leads.tests.test_forms.TestAdminLeadModelForm.test_form_email_validation_unique)
+Email uniqueness validation test ... ok
+test_form_initial_querysets_empty (leads.tests.test_forms.TestAdminLeadModelForm.test_form_initial_querysets_empty)
+Form initial querysets test - auto-populated when organisation exists ... ok
+test_form_initialization (leads.tests.test_forms.TestAdminLeadModelForm.test_form_initialization)
+Form initialization test ... ok
+test_form_organisation_field (leads.tests.test_forms.TestAdminLeadModelForm.test_form_organisation_field)
+Organisation field test ... ok
+test_form_organisation_queryset (leads.tests.test_forms.TestAdminLeadModelForm.test_form_organisation_queryset)
+Organisation queryset test ... ok
+test_form_phone_number_validation_unique (leads.tests.test_forms.TestAdminLeadModelForm.test_form_phone_number_validation_unique)
+Phone number uniqueness validation test ... ok
+test_form_required_fields (leads.tests.test_forms.TestAdminLeadModelForm.test_form_required_fields)
+Required fields test ... ok
+test_form_save_method (leads.tests.test_forms.TestAdminLeadModelForm.test_form_save_method)
+Form save method test ... ok
+test_form_valid_data (leads.tests.test_forms.TestAdminLeadModelForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_with_instance_querysets_populated (leads.tests.test_forms.TestAdminLeadModelForm.test_form_with_instance_querysets_populated)
+Form instance with filled querysets test ... ok
+test_form_initialization (leads.tests.test_forms.TestAssignAgentForm.test_form_initialization)
+Form initialization test ... ok
+test_form_queryset_filtering (leads.tests.test_forms.TestAssignAgentForm.test_form_queryset_filtering)
+Form queryset filtering test ... ok
+test_form_valid_data (leads.tests.test_forms.TestAssignAgentForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_error_messages_removed (leads.tests.test_forms.TestCustomAuthenticationForm.test_form_error_messages_removed)
+Form error messages removed test ... ok
+test_form_initialization (leads.tests.test_forms.TestCustomAuthenticationForm.test_form_initialization)
+Form initialization test ... ok
+test_form_password_field_attributes (leads.tests.test_forms.TestCustomAuthenticationForm.test_form_password_field_attributes)
+Password field properties test ... ok
+test_form_username_field_attributes (leads.tests.test_forms.TestCustomAuthenticationForm.test_form_username_field_attributes)
+Username field properties test ... ok
+test_form_email_field_attributes (leads.tests.test_forms.TestCustomPasswordResetForm.test_form_email_field_attributes)
+Email field properties test ... ok
+test_form_initialization (leads.tests.test_forms.TestCustomPasswordResetForm.test_form_initialization)
+Form initialization test ... ok
+test_form_initialization (leads.tests.test_forms.TestCustomSetPasswordForm.test_form_initialization)
+Form initialization test ... ok
+test_form_new_password1_field_attributes (leads.tests.test_forms.TestCustomSetPasswordForm.test_form_new_password1_field_attributes)
+New password1 field properties test ... ok
+test_form_new_password2_field_attributes (leads.tests.test_forms.TestCustomSetPasswordForm.test_form_new_password2_field_attributes)
+New password2 field properties test ... ok
+test_form_email_validation_unique (leads.tests.test_forms.TestCustomUserCreationForm.test_form_email_validation_unique)
+Email uniqueness validation test ... ok
+test_form_gender_choices (leads.tests.test_forms.TestCustomUserCreationForm.test_form_gender_choices)
+Gender choices test ... ok
+test_form_initialization (leads.tests.test_forms.TestCustomUserCreationForm.test_form_initialization)
+Form initialization test ... ok
+test_form_password_validation (leads.tests.test_forms.TestCustomUserCreationForm.test_form_password_validation)
+Password validation test ... ok
+test_form_phone_number_validation_unique (leads.tests.test_forms.TestCustomUserCreationForm.test_form_phone_number_validation_unique)
+Phone number uniqueness validation test ... ok
+test_form_phone_number_widget (leads.tests.test_forms.TestCustomUserCreationForm.test_form_phone_number_widget)
+Phone number widget test ... ok
+test_form_required_fields (leads.tests.test_forms.TestCustomUserCreationForm.test_form_required_fields)
+Required fields test ... ok
+test_form_save_method (leads.tests.test_forms.TestCustomUserCreationForm.test_form_save_method)
+Form save method test ... ok
+test_form_username_validation_unique (leads.tests.test_forms.TestCustomUserCreationForm.test_form_username_validation_unique)
+Username uniqueness validation test ... ok
+test_form_valid_data (leads.tests.test_forms.TestCustomUserCreationForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_widget_attributes (leads.tests.test_forms.TestCustomUserCreationForm.test_form_widget_attributes)
+Widget properties test ... ok
+test_form_initialization (leads.tests.test_forms.TestLeadCategoryUpdateForm.test_form_initialization)
+Form initialization test ... ok
+test_form_queryset_filtering_agent (leads.tests.test_forms.TestLeadCategoryUpdateForm.test_form_queryset_filtering_agent)
+Queryset filtering test for agent ... ok
+test_form_queryset_filtering_organisor (leads.tests.test_forms.TestLeadCategoryUpdateForm.test_form_queryset_filtering_organisor)
+Queryset filtering test for organisor ... ok
+test_form_queryset_filtering_superuser (leads.tests.test_forms.TestLeadCategoryUpdateForm.test_form_queryset_filtering_superuser)
+Queryset filtering test for superuser ... ok
+test_form_valid_data (leads.tests.test_forms.TestLeadCategoryUpdateForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_age_validation (leads.tests.test_forms.TestLeadForm.test_form_age_validation)
+Age validation test ... ok
+test_form_initialization (leads.tests.test_forms.TestLeadForm.test_form_initialization)
+Form initialization test ... ok
+test_form_required_fields (leads.tests.test_forms.TestLeadForm.test_form_required_fields)
+Required fields test ... ok
+test_form_valid_data (leads.tests.test_forms.TestLeadForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_email_validation_unique (leads.tests.test_forms.TestLeadModelForm.test_form_email_validation_unique)
+Email uniqueness validation test ... ok
+test_form_initialization (leads.tests.test_forms.TestLeadModelForm.test_form_initialization)
+Form initialization test ... ok
+test_form_phone_number_validation_unique (leads.tests.test_forms.TestLeadModelForm.test_form_phone_number_validation_unique)
+Phone number uniqueness validation test ... ok
+test_form_queryset_filtering_agent (leads.tests.test_forms.TestLeadModelForm.test_form_queryset_filtering_agent)
+Queryset filtering test for agent ... ok
+test_form_queryset_filtering_organisor (leads.tests.test_forms.TestLeadModelForm.test_form_queryset_filtering_organisor)
+Queryset filtering test for organisor ... ok
+test_form_queryset_filtering_superuser (leads.tests.test_forms.TestLeadModelForm.test_form_queryset_filtering_superuser)
+Queryset filtering test for superuser ... ok
+test_form_required_fields (leads.tests.test_forms.TestLeadModelForm.test_form_required_fields)
+Required fields test ... ok
+test_form_save_method (leads.tests.test_forms.TestLeadModelForm.test_form_save_method)
+Form save method test ... ok
+test_form_valid_data (leads.tests.test_forms.TestLeadModelForm.test_form_valid_data)
+Form test with valid data ... ok
+test_form_widget_attributes (leads.tests.test_forms.TestLeadModelForm.test_form_widget_attributes)
+Widget properties test ... ok
+test_widget_decompress_with_value (leads.tests.test_forms.TestPhoneNumberWidget.test_widget_decompress_with_value)
+Widget decompress with value test ... ok
+test_widget_initialization (leads.tests.test_forms.TestPhoneNumberWidget.test_widget_initialization)
+Widget initialization test ... ok
+test_widget_value_from_datadict (leads.tests.test_forms.TestPhoneNumberWidget.test_widget_value_from_datadict)
+Widget value_from_datadict test ... ok
+test_lead_cascade_deletes (leads.tests.test_integration.TestDatabaseIntegration.test_lead_cascade_deletes)
+Lead cascade delete tests ... ok
+test_lead_default_categories_creation (leads.tests.test_integration.TestDatabaseIntegration.test_lead_default_categories_creation)
+Lead default categories creation test ... ok
+test_user_profile_auto_creation (leads.tests.test_integration.TestDatabaseIntegration.test_user_profile_auto_creation)
+UserProfile auto creation test ... ok
+test_lead_creation_email_sending (leads.tests.test_integration.TestEmailIntegration.test_lead_creation_email_sending)
+Lead creation test - lead creation logs activity, does not send email ... ok
+test_user_registration_email_sending (leads.tests.test_integration.TestEmailIntegration.test_user_registration_email_sending)
+User registration email sending test ... ok
+test_lead_form_queryset_filtering (leads.tests.test_integration.TestLeadFormIntegration.test_lead_form_queryset_filtering)
+Lead form queryset filtering test ... ok
+test_lead_form_with_duplicate_email (leads.tests.test_integration.TestLeadFormIntegration.test_lead_form_with_duplicate_email)
+Lead form with duplicate email test ... ok
+test_lead_form_with_invalid_data (leads.tests.test_integration.TestLeadFormIntegration.test_lead_form_with_invalid_data)
+Lead form with invalid data test ... ok
+test_lead_form_with_valid_data (leads.tests.test_integration.TestLeadFormIntegration.test_lead_form_with_valid_data)
+Lead form with valid data test ... ok
+test_agent_permissions (leads.tests.test_integration.TestLeadPermissionIntegration.test_agent_permissions)
+Agent permissions test ... ok
+test_organisor_permissions (leads.tests.test_integration.TestLeadPermissionIntegration.test_organisor_permissions)
+Organisor permissions test ... ok
+test_unauthenticated_permissions (leads.tests.test_integration.TestLeadPermissionIntegration.test_unauthenticated_permissions)
+Unauthenticated user permissions test ... ok
+test_complete_lead_workflow (leads.tests.test_integration.TestLeadWorkflowIntegration.test_complete_lead_workflow)
+Complete lead workflow test ... ok
+test_lead_assignment_workflow (leads.tests.test_integration.TestLeadWorkflowIntegration.test_lead_assignment_workflow)
+Lead assignment workflow test ... ok
+test_lead_category_update_workflow (leads.tests.test_integration.TestLeadWorkflowIntegration.test_lead_category_update_workflow)
+Lead category update workflow test ... ok
+test_complete_registration_workflow (leads.tests.test_integration.TestUserRegistrationWorkflow.test_complete_registration_workflow)
+Complete registration workflow test ... ok
+test_registration_with_existing_email (leads.tests.test_integration.TestUserRegistrationWorkflow.test_registration_with_existing_email)
+Registration with existing email test ... ok
+test_registration_with_existing_username (leads.tests.test_integration.TestUserRegistrationWorkflow.test_registration_with_existing_username)
+Registration with existing username test ... FAIL
+test_authenticate_case_insensitive_email (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_case_insensitive_email)
+Authentication test with case insensitive email ... ok
+test_authenticate_case_insensitive_username (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_case_insensitive_username)
+Authentication test with case insensitive username ... ok
+test_authenticate_empty_credentials (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_empty_credentials)
+Authentication test with empty credentials ... ok
+test_authenticate_multiple_users_same_email (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_multiple_users_same_email)
+Test for multiple users with same email ... ok
+test_authenticate_none_credentials (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_none_credentials)
+Authentication test with None credentials ... ok
+test_authenticate_nonexistent_user (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_nonexistent_user)
+Authentication test with non-existent user ... ok
+test_authenticate_timing_attack_protection (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_timing_attack_protection)
+Timing attack protection test ... ok
+test_authenticate_unverified_email (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_unverified_email)
+Authentication test with unverified email user ... ok
+test_authenticate_unverified_email_by_email (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_unverified_email_by_email)
+Authentication test with unverified email user by email ... ok
+test_authenticate_whitespace_email (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_whitespace_email)
+Authentication test with email containing whitespace ... ok
+test_authenticate_whitespace_username (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_whitespace_username)
+Authentication test with username containing whitespace ... ok
+test_authenticate_with_additional_kwargs (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_additional_kwargs)
+Authentication test with additional kwargs ... ok
+test_authenticate_with_agent_user (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_agent_user)
+Authentication test with agent user ... ok
+test_authenticate_with_email (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_email)
+Authentication test with email ... ok
+test_authenticate_with_inactive_user (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_inactive_user)
+Authentication test with inactive user ... ok
+test_authenticate_with_request_parameter (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_request_parameter)
+Authentication test with request parameter ... ok
+test_authenticate_with_superuser (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_superuser)
+Authentication test with superuser ... ok
+test_authenticate_with_username (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_with_username)
+Authentication test with username ... ok
+test_authenticate_wrong_password (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_authenticate_wrong_password)
+Authentication test with wrong password ... ok
+test_get_user_invalid_id (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_get_user_invalid_id)
+get_user test with invalid user ID ... ok
+test_get_user_none_id (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_get_user_none_id)
+get_user test with None ID ... ok
+test_get_user_string_id (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_get_user_string_id)
+get_user test with string ID ... ok
+test_get_user_valid_id (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_get_user_valid_id)
+get_user test with valid user ID ... ok
+test_user_can_authenticate (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackend.test_user_can_authenticate)
+user_can_authenticate method test ... ok
+test_authenticate_performance (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackendIntegration.test_authenticate_performance)
+Authentication performance test ... ok
+test_authenticate_with_different_username_formats (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackendIntegration.test_authenticate_with_different_username_formats)
+Authentication test with different username formats ... ok
+test_authenticate_with_special_characters (leads.tests.test_login_authentication.TestEmailOrUsernameModelBackendIntegration.test_authenticate_with_special_characters)
+Authentication test with username containing special characters ... ok
+test_form_autofocus_attribute (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_autofocus_attribute)
+Autofocus property test ... ok
+test_form_case_insensitive_email (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_case_insensitive_email)
+Case insensitive email test ... ok
+test_form_case_insensitive_username (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_case_insensitive_username)
+Case insensitive username test ... ok
+test_form_clean_methods (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_clean_methods)
+Form clean methods test ... ok
+test_form_error_messages (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_error_messages)
+Form error messages test ... ok
+test_form_field_labels (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_field_labels)
+Form field labels test ... ok
+test_form_field_max_lengths (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_field_max_lengths)
+Form field max lengths test ... ok
+test_form_field_widgets (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_field_widgets)
+Form field widgets test ... ok
+test_form_initialization (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_initialization)
+Form initialization test ... ok
+test_form_invalid_credentials (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_invalid_credentials)
+Form test with invalid credentials ... ok
+test_form_nonexistent_user (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_nonexistent_user)
+Form test with non-existent user ... ok
+test_form_password_field_attributes (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_password_field_attributes)
+Password field properties test ... ok
+test_form_required_fields (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_required_fields)
+Required fields test ... ok
+test_form_unverified_email_user (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_unverified_email_user)
+Form test with unverified email user ... ok
+test_form_username_field_attributes (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_username_field_attributes)
+Username field properties test ... ok
+test_form_valid_data_email (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_valid_data_email)
+Form test with valid email data ... ok
+test_form_valid_data_username (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_valid_data_username)
+Form test with valid username data ... ok
+test_form_validation_edge_cases (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_validation_edge_cases)
+Form validation edge cases test ... ok
+test_form_validation_with_special_characters (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_validation_with_special_characters)
+Validation test with special characters ... ok
+test_form_validation_with_unicode (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_validation_with_unicode)
+Validation test with Unicode characters ... ok
+test_form_whitespace_handling (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_whitespace_handling)
+Whitespace handling test ... ok
+test_form_widget_attributes (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_widget_attributes)
+Widget properties test ... ok
+test_form_with_request_context (leads.tests.test_login_forms.TestCustomAuthenticationForm.test_form_with_request_context)
+Form test with request context ... ok
+test_form_authentication_failure_scenarios (leads.tests.test_login_forms.TestLoginFormIntegration.test_form_authentication_failure_scenarios)
+Authentication failure scenarios test ... ok
+test_form_authentication_with_different_credentials (leads.tests.test_login_forms.TestLoginFormIntegration.test_form_authentication_with_different_credentials)
+Authentication test with different credential formats ... ok
+test_form_validation_with_empty_data (leads.tests.test_login_forms.TestLoginFormIntegration.test_form_validation_with_empty_data)
+Form validation test with empty data ... ok
+test_form_validation_with_partial_data (leads.tests.test_login_forms.TestLoginFormIntegration.test_form_validation_with_partial_data)
+Form validation test with partial data ... ok
+test_form_with_mock_authentication_backend (leads.tests.test_login_forms.TestLoginFormIntegration.test_form_with_mock_authentication_backend)
+Form test with mock authentication backend ... ok
+test_complete_login_flow_with_email (leads.tests.test_login_integration.TestLoginIntegration.test_complete_login_flow_with_email)
+Full login flow test with email ... ok
+test_complete_login_flow_with_username (leads.tests.test_login_integration.TestLoginIntegration.test_complete_login_flow_with_username)
+Full login flow test with username ... ok
+test_login_case_insensitive_credentials (leads.tests.test_login_integration.TestLoginIntegration.test_login_case_insensitive_credentials)
+Login test with case insensitive credentials ... ok
+test_login_csrf_protection (leads.tests.test_login_integration.TestLoginIntegration.test_login_csrf_protection)
+Login CSRF protection test ... FAIL
+test_login_flow_with_invalid_credentials (leads.tests.test_login_integration.TestLoginIntegration.test_login_flow_with_invalid_credentials)
+Login flow test with invalid credentials ... FAIL
+test_login_flow_with_nonexistent_user (leads.tests.test_login_integration.TestLoginIntegration.test_login_flow_with_nonexistent_user)
+Login flow test with non-existent user ... FAIL
+test_login_flow_with_unverified_email (leads.tests.test_login_integration.TestLoginIntegration.test_login_flow_with_unverified_email)
+Login flow test with unverified email user ... FAIL
+test_login_form_validation_errors (leads.tests.test_login_integration.TestLoginIntegration.test_login_form_validation_errors)
+Login form validation errors test ... FAIL
+test_login_logout_cycle (leads.tests.test_login_integration.TestLoginIntegration.test_login_logout_cycle)
+Login-logout cycle test ... FAIL
+test_login_performance (leads.tests.test_login_integration.TestLoginIntegration.test_login_performance)
+Login performance test ... FAIL
+test_login_redirect_after_login (leads.tests.test_login_integration.TestLoginIntegration.test_login_redirect_after_login)
+Redirect after login test ... ok
+test_login_redirect_authenticated_user (leads.tests.test_login_integration.TestLoginIntegration.test_login_redirect_authenticated_user)
+Redirect test for logged-in user ... ok
+test_login_session_management (leads.tests.test_login_integration.TestLoginIntegration.test_login_session_management)
+Login session management test ... ok
+test_login_whitespace_handling (leads.tests.test_login_integration.TestLoginIntegration.test_login_whitespace_handling)
+Login test with whitespace handling ... ok
+
+======================================================================
+FAIL: test_password_reset_view_post_case_insensitive_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_case_insensitive_email)
+Password reset POST request case insensitive email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 173, in test_password_reset_view_post_case_insensitive_email
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_password_reset_view_post_empty_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_empty_email)
+Password reset POST request with empty email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 159, in test_password_reset_view_post_empty_email
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_password_reset_view_post_invalid_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_invalid_email)
+Password reset POST request with invalid email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 122, in test_password_reset_view_post_invalid_email
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_password_reset_view_post_nonexistent_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_nonexistent_email)
+Password reset POST request with non-existent email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 135, in test_password_reset_view_post_nonexistent_email
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_password_reset_view_post_unverified_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_unverified_email)
+Password reset POST request with unverified email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 147, in test_password_reset_view_post_unverified_email
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_password_reset_view_post_valid_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_valid_email)
+Password reset POST request with valid email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 110, in test_password_reset_view_post_valid_email
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_password_reset_view_post_whitespace_email (leads.tests.test_forget_password_views.TestCustomPasswordResetView.test_password_reset_view_post_whitespace_email)
+Password reset POST request with whitespace in email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 186, in test_password_reset_view_post_whitespace_email
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_complete_forget_password_flow (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_complete_forget_password_flow)
+Full forget password flow test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 513, in test_complete_forget_password_flow
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_forget_password_form_validation (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_form_validation)
+Forget password form validation test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 595, in test_forget_password_form_validation
+    self.assertEqual(response.status_code, 200)  # Returns with form errors
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_forget_password_security_measures (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_security_measures)
+Forget password security measures test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 615, in test_forget_password_security_measures
+    self.assertEqual(response.status_code, 302)  # Success
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_forget_password_with_invalid_email (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_with_invalid_email)
+Forget password with invalid email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 555, in test_forget_password_with_invalid_email
+    self.assertEqual(response.status_code, 200)  # Returns with form errors
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_forget_password_with_unverified_email (leads.tests.test_forget_password_views.TestForgetPasswordIntegration.test_forget_password_with_unverified_email)
+Forget password with unverified email test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_forget_password_views.py", line 588, in test_forget_password_with_unverified_email
+    self.assertEqual(response.status_code, 302)  # Still redirects to success page
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_registration_with_existing_username (leads.tests.test_integration.TestUserRegistrationWorkflow.test_registration_with_existing_username)
+Registration with existing username test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_integration.py", line 322, in test_registration_with_existing_username
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_login_csrf_protection (leads.tests.test_login_integration.TestLoginIntegration.test_login_csrf_protection)
+Login CSRF protection test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 346, in test_login_csrf_protection
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_login_flow_with_invalid_credentials (leads.tests.test_login_integration.TestLoginIntegration.test_login_flow_with_invalid_credentials)
+Login flow test with invalid credentials
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 152, in test_login_flow_with_invalid_credentials
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_login_flow_with_nonexistent_user (leads.tests.test_login_integration.TestLoginIntegration.test_login_flow_with_nonexistent_user)
+Login flow test with non-existent user
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 171, in test_login_flow_with_nonexistent_user
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_login_flow_with_unverified_email (leads.tests.test_login_integration.TestLoginIntegration.test_login_flow_with_unverified_email)
+Login flow test with unverified email user
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 129, in test_login_flow_with_unverified_email
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_login_form_validation_errors (leads.tests.test_login_integration.TestLoginIntegration.test_login_form_validation_errors)
+Login form validation errors test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 318, in test_login_form_validation_errors
+    self.assertEqual(response.status_code, 200)
+AssertionError: 403 != 200
+
+======================================================================
+FAIL: test_login_logout_cycle (leads.tests.test_login_integration.TestLoginIntegration.test_login_logout_cycle)
+Login-logout cycle test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 195, in test_login_logout_cycle
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+======================================================================
+FAIL: test_login_performance (leads.tests.test_login_integration.TestLoginIntegration.test_login_performance)
+Login performance test
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/berkakidil/Desktop/Crm-Example/leads/tests/test_login_integration.py", line 402, in test_login_performance
+    self.assertEqual(response.status_code, 302)
+AssertionError: 403 != 302
+
+----------------------------------------------------------------------
+Ran 607 tests in 55.892s
+
+FAILED (failures=20)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

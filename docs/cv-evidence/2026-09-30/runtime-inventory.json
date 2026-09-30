@@ -1,0 +1,384 @@
+{
+  "models": [
+    {
+      "app": "leads",
+      "name": "User",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 10
+    },
+    {
+      "app": "leads",
+      "name": "UserProfile",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 37
+    },
+    {
+      "app": "leads",
+      "name": "Category",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 46
+    },
+    {
+      "app": "leads",
+      "name": "SourceCategory",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 53
+    },
+    {
+      "app": "leads",
+      "name": "ValueCategory",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 64
+    },
+    {
+      "app": "leads",
+      "name": "Lead",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 75
+    },
+    {
+      "app": "leads",
+      "name": "Agent",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 127
+    },
+    {
+      "app": "leads",
+      "name": "EmailVerificationToken",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/leads/models.py",
+      "line": 134
+    },
+    {
+      "app": "organisors",
+      "name": "Organisor",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/organisors/models.py",
+      "line": 4
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "Category",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 7
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "SubCategory",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 21
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "ProductsAndStock",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 37
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "StockMovement",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 438
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "PriceHistory",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 473
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "SalesStatistics",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 507
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "StockAlert",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 525
+    },
+    {
+      "app": "ProductsAndStock",
+      "name": "StockRecommendation",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/ProductsAndStock/models.py",
+      "line": 581
+    },
+    {
+      "app": "orders",
+      "name": "orders",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/orders/models.py",
+      "line": 8
+    },
+    {
+      "app": "orders",
+      "name": "OrderProduct",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/orders/models.py",
+      "line": 32
+    },
+    {
+      "app": "finance",
+      "name": "OrderFinanceReport",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/finance/models.py",
+      "line": 6
+    },
+    {
+      "app": "tasks",
+      "name": "Task",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/tasks/models.py",
+      "line": 6
+    },
+    {
+      "app": "tasks",
+      "name": "Notification",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/tasks/models.py",
+      "line": 70
+    },
+    {
+      "app": "activity_log",
+      "name": "ActivityLog",
+      "file": "/Users/berkakidil/Desktop/Crm-Example/activity_log/models.py",
+      "line": 66
+    }
+  ],
+  "routes": [
+    {
+      "path": "healthz/",
+      "name": "healthz"
+    },
+    {
+      "path": "media-proxy/<path:path>",
+      "name": "media-proxy"
+    },
+    {
+      "path": "",
+      "name": "landing-page"
+    },
+    {
+      "path": "leads/",
+      "name": "lead-list"
+    },
+    {
+      "path": "leads/<int:pk>/",
+      "name": "lead-detail"
+    },
+    {
+      "path": "leads/<int:pk>/update/",
+      "name": "lead-update"
+    },
+    {
+      "path": "leads/<int:pk>/delete/",
+      "name": "lead-delete"
+    },
+    {
+      "path": "leads/create/",
+      "name": "lead-create"
+    },
+    {
+      "path": "leads/<int:pk>/assign-agent/",
+      "name": "assign-agent"
+    },
+    {
+      "path": "leads/<int:pk>/category/",
+      "name": "lead-category-update"
+    },
+    {
+      "path": "leads/<int:pk>/activity/",
+      "name": "lead-activity"
+    },
+    {
+      "path": "leads/categories/",
+      "name": "category-list"
+    },
+    {
+      "path": "leads/categories/<int:pk>/",
+      "name": "category-detail"
+    },
+    {
+      "path": "leads/get-agents-by-org/<int:org_id>/",
+      "name": "get-agents-by-org"
+    },
+    {
+      "path": "agents/",
+      "name": "agent-list"
+    },
+    {
+      "path": "agents/<int:pk>/",
+      "name": "agent-detail"
+    },
+    {
+      "path": "agents/<int:pk>/update/",
+      "name": "agent-update"
+    },
+    {
+      "path": "agents/<int:pk>/delete/",
+      "name": "agent-delete"
+    },
+    {
+      "path": "agents/create/",
+      "name": "agent-create"
+    },
+    {
+      "path": "organisors/",
+      "name": "organisor-list"
+    },
+    {
+      "path": "organisors/create/",
+      "name": "organisor-create"
+    },
+    {
+      "path": "organisors/<int:pk>/",
+      "name": "organisor-detail"
+    },
+    {
+      "path": "organisors/<int:pk>/update/",
+      "name": "organisor-update"
+    },
+    {
+      "path": "organisors/<int:pk>/delete/",
+      "name": "organisor-delete"
+    },
+    {
+      "path": "ProductsAndStock/",
+      "name": "ProductAndStock-list"
+    },
+    {
+      "path": "ProductsAndStock/dashboard/",
+      "name": "sales-dashboard"
+    },
+    {
+      "path": "ProductsAndStock/<int:pk>/",
+      "name": "ProductAndStock-detail"
+    },
+    {
+      "path": "ProductsAndStock/create/",
+      "name": "ProductAndStock-create"
+    },
+    {
+      "path": "ProductsAndStock/<int:pk>/update/",
+      "name": "ProductAndStock-update"
+    },
+    {
+      "path": "ProductsAndStock/<int:pk>/delete/",
+      "name": "ProductAndStock-delete"
+    },
+    {
+      "path": "ProductsAndStock/bulk-price-update/",
+      "name": "bulk-price-update"
+    },
+    {
+      "path": "ProductsAndStock/charts/",
+      "name": "product-charts"
+    },
+    {
+      "path": "ProductsAndStock/get-subcategories/",
+      "name": "get-subcategories"
+    },
+    {
+      "path": "orders/",
+      "name": "order-list"
+    },
+    {
+      "path": "orders/order/<int:pk>/",
+      "name": "order-detail"
+    },
+    {
+      "path": "orders/order-create/",
+      "name": "order-create"
+    },
+    {
+      "path": "orders/order-update/<int:pk>/",
+      "name": "order-update"
+    },
+    {
+      "path": "orders/order-delete/<int:pk>/",
+      "name": "order-delete"
+    },
+    {
+      "path": "orders/order-cancel/<int:pk>/",
+      "name": "order-cancel"
+    },
+    {
+      "path": "finance/",
+      "name": "financial_report"
+    },
+    {
+      "path": "tasks/",
+      "name": "task-list"
+    },
+    {
+      "path": "tasks/create/",
+      "name": "task-create"
+    },
+    {
+      "path": "tasks/notifications/",
+      "name": "notification-list"
+    },
+    {
+      "path": "tasks/notifications/mark-all-read/",
+      "name": "notification-mark-all-read"
+    },
+    {
+      "path": "tasks/notifications/<int:pk>/read/",
+      "name": "notification-mark-read"
+    },
+    {
+      "path": "tasks/<int:pk>/",
+      "name": "task-detail"
+    },
+    {
+      "path": "tasks/<int:pk>/update/",
+      "name": "task-update"
+    },
+    {
+      "path": "tasks/<int:pk>/delete/",
+      "name": "task-delete"
+    },
+    {
+      "path": "activity-log/",
+      "name": "activity-log-list"
+    },
+    {
+      "path": "signup/",
+      "name": "signup"
+    },
+    {
+      "path": "verify-email-sent/",
+      "name": "verify-email-sent"
+    },
+    {
+      "path": "verify-email/<uuid:token>/",
+      "name": "verify-email"
+    },
+    {
+      "path": "verify-email-success/",
+      "name": "verify-email-success"
+    },
+    {
+      "path": "verify-email-failed/",
+      "name": "verify-email-failed"
+    },
+    {
+      "path": "reset-password/",
+      "name": "reset-password"
+    },
+    {
+      "path": "password-reset-done/",
+      "name": "password_reset_done"
+    },
+    {
+      "path": "password-reset-confirm/<uidb64>/<token>/",
+      "name": "password_reset_confirm"
+    },
+    {
+      "path": "password-reset-complete/",
+      "name": "password_reset_complete"
+    },
+    {
+      "path": "login/",
+      "name": "login"
+    },
+    {
+      "path": "logout/",
+      "name": "logout"
+    }
+  ]
+}

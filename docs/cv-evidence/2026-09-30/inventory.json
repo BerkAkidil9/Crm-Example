@@ -1,0 +1,5667 @@
+{
+  "commit": "20d197814e6491b0360f941e994d8be114b0bafd",
+  "models": {
+    "ProductsAndStock/models.py": [
+      {
+        "name": "Category",
+        "line": 7
+      },
+      {
+        "name": "SubCategory",
+        "line": 21
+      },
+      {
+        "name": "ProductsAndStock",
+        "line": 37
+      },
+      {
+        "name": "StockMovement",
+        "line": 438
+      },
+      {
+        "name": "PriceHistory",
+        "line": 473
+      },
+      {
+        "name": "SalesStatistics",
+        "line": 507
+      },
+      {
+        "name": "StockAlert",
+        "line": 525
+      },
+      {
+        "name": "StockRecommendation",
+        "line": 581
+      }
+    ],
+    "activity_log/models.py": [
+      {
+        "name": "ActivityLog",
+        "line": 66
+      }
+    ],
+    "agents/models.py": [],
+    "finance/models.py": [
+      {
+        "name": "OrderFinanceReport",
+        "line": 6
+      }
+    ],
+    "leads/models.py": [
+      {
+        "name": "User",
+        "line": 10
+      },
+      {
+        "name": "UserProfile",
+        "line": 37
+      },
+      {
+        "name": "Category",
+        "line": 46
+      },
+      {
+        "name": "SourceCategory",
+        "line": 53
+      },
+      {
+        "name": "ValueCategory",
+        "line": 64
+      },
+      {
+        "name": "Lead",
+        "line": 75
+      },
+      {
+        "name": "Agent",
+        "line": 127
+      },
+      {
+        "name": "EmailVerificationToken",
+        "line": 134
+      }
+    ],
+    "orders/models.py": [
+      {
+        "name": "orders",
+        "line": 8
+      },
+      {
+        "name": "OrderProduct",
+        "line": 32
+      }
+    ],
+    "organisors/models.py": [
+      {
+        "name": "Organisor",
+        "line": 4
+      }
+    ],
+    "tasks/models.py": [
+      {
+        "name": "Task",
+        "line": 6
+      },
+      {
+        "name": "Notification",
+        "line": 70
+      }
+    ]
+  },
+  "routes": {
+    "ProductsAndStock/urls.py": [
+      {
+        "route": "",
+        "line": 8,
+        "view": "ProductAndStockListView.as_view()"
+      },
+      {
+        "route": "dashboard/",
+        "line": 9,
+        "view": "SalesDashboardView.as_view()"
+      },
+      {
+        "route": "<int:pk>/",
+        "line": 10,
+        "view": "ProductAndStockDetailView.as_view()"
+      },
+      {
+        "route": "create/",
+        "line": 11,
+        "view": "ProductAndStockCreateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/update/",
+        "line": 12,
+        "view": "ProductAndStockUpdateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/delete/",
+        "line": 13,
+        "view": "ProductAndStockDeleteView.as_view()"
+      },
+      {
+        "route": "bulk-price-update/",
+        "line": 14,
+        "view": "BulkPriceUpdateView.as_view()"
+      },
+      {
+        "route": "charts/",
+        "line": 15,
+        "view": "ProductChartsView.as_view()"
+      },
+      {
+        "route": "get-subcategories/",
+        "line": 16,
+        "view": "get_subcategories"
+      }
+    ],
+    "activity_log/urls.py": [
+      {
+        "route": "",
+        "line": 7,
+        "view": "views.ActivityLogListView.as_view()"
+      }
+    ],
+    "agents/urls.py": [
+      {
+        "route": "",
+        "line": 8,
+        "view": "AgentListView.as_view()"
+      },
+      {
+        "route": "<int:pk>/",
+        "line": 9,
+        "view": "AgentDetailView.as_view()"
+      },
+      {
+        "route": "<int:pk>/update/",
+        "line": 10,
+        "view": "AgentUpdateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/delete/",
+        "line": 11,
+        "view": "AgentDeleteView.as_view()"
+      },
+      {
+        "route": "create/",
+        "line": 12,
+        "view": "AgentCreateView.as_view()"
+      }
+    ],
+    "djcrm/urls.py": [
+      {
+        "route": "healthz/",
+        "line": 11,
+        "view": "healthz"
+      },
+      {
+        "route": "media-proxy/<path:path>",
+        "line": 12,
+        "view": "media_proxy"
+      },
+      {
+        "route": "",
+        "line": 13,
+        "view": "LandingPageView.as_view()"
+      },
+      {
+        "route": "signup/",
+        "line": 22,
+        "view": "SignupView.as_view()"
+      },
+      {
+        "route": "verify-email-sent/",
+        "line": 23,
+        "view": "EmailVerificationSentView.as_view()"
+      },
+      {
+        "route": "verify-email/<uuid:token>/",
+        "line": 24,
+        "view": "EmailVerificationView.as_view()"
+      },
+      {
+        "route": "verify-email-success/",
+        "line": 25,
+        "view": "EmailVerificationSuccessView.as_view()"
+      },
+      {
+        "route": "verify-email-failed/",
+        "line": 26,
+        "view": "EmailVerificationFailedView.as_view()"
+      },
+      {
+        "route": "reset-password/",
+        "line": 27,
+        "view": "CustomPasswordResetView.as_view()"
+      },
+      {
+        "route": "password-reset-done/",
+        "line": 28,
+        "view": "CustomPasswordResetDoneView.as_view()"
+      },
+      {
+        "route": "password-reset-confirm/<uidb64>/<token>/",
+        "line": 29,
+        "view": "CustomPasswordResetConfirmView.as_view()"
+      },
+      {
+        "route": "password-reset-complete/",
+        "line": 30,
+        "view": "PasswordResetCompleteView.as_view()"
+      },
+      {
+        "route": "login/",
+        "line": 31,
+        "view": "CustomLoginView.as_view()"
+      },
+      {
+        "route": "logout/",
+        "line": 32,
+        "view": "LogoutView.as_view()"
+      }
+    ],
+    "finance/urls.py": [
+      {
+        "route": "",
+        "line": 8,
+        "view": "FinancialReportView.as_view()"
+      }
+    ],
+    "leads/urls.py": [
+      {
+        "route": "",
+        "line": 10,
+        "view": "LeadListView.as_view()"
+      },
+      {
+        "route": "<int:pk>/",
+        "line": 11,
+        "view": "LeadDetailView.as_view()"
+      },
+      {
+        "route": "<int:pk>/update/",
+        "line": 12,
+        "view": "LeadUpdateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/delete/",
+        "line": 13,
+        "view": "LeadDeleteView.as_view()"
+      },
+      {
+        "route": "create/",
+        "line": 14,
+        "view": "LeadCreateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/assign-agent/",
+        "line": 15,
+        "view": "AssignAgentView.as_view()"
+      },
+      {
+        "route": "<int:pk>/category/",
+        "line": 16,
+        "view": "LeadCategoryUpdateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/activity/",
+        "line": 17,
+        "view": "LeadActivityView.as_view()"
+      },
+      {
+        "route": "categories/",
+        "line": 18,
+        "view": "CategoryListView.as_view()"
+      },
+      {
+        "route": "categories/<int:pk>/",
+        "line": 19,
+        "view": "CategoryDetailView.as_view()"
+      },
+      {
+        "route": "get-agents-by-org/<int:org_id>/",
+        "line": 20,
+        "view": "get_agents_by_org"
+      }
+    ],
+    "orders/urls.py": [
+      {
+        "route": "",
+        "line": 7,
+        "view": "OrderListView.as_view()"
+      },
+      {
+        "route": "order/<int:pk>/",
+        "line": 8,
+        "view": "OrderDetailView.as_view()"
+      },
+      {
+        "route": "order-create/",
+        "line": 9,
+        "view": "OrderCreateView.as_view()"
+      },
+      {
+        "route": "order-update/<int:pk>/",
+        "line": 10,
+        "view": "OrderUpdateView.as_view()"
+      },
+      {
+        "route": "order-delete/<int:pk>/",
+        "line": 11,
+        "view": "OrderDeleteView.as_view()"
+      },
+      {
+        "route": "order-cancel/<int:pk>/",
+        "line": 12,
+        "view": "OrderCancelView.as_view()"
+      }
+    ],
+    "organisors/urls.py": [
+      {
+        "route": "",
+        "line": 13,
+        "view": "OrganisorListView.as_view()"
+      },
+      {
+        "route": "create/",
+        "line": 14,
+        "view": "OrganisorCreateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/",
+        "line": 15,
+        "view": "OrganisorDetailView.as_view()"
+      },
+      {
+        "route": "<int:pk>/update/",
+        "line": 16,
+        "view": "OrganisorUpdateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/delete/",
+        "line": 17,
+        "view": "OrganisorDeleteView.as_view()"
+      }
+    ],
+    "tasks/urls.py": [
+      {
+        "route": "",
+        "line": 16,
+        "view": "TaskListView.as_view()"
+      },
+      {
+        "route": "create/",
+        "line": 17,
+        "view": "TaskCreateView.as_view()"
+      },
+      {
+        "route": "notifications/",
+        "line": 18,
+        "view": "NotificationListView.as_view()"
+      },
+      {
+        "route": "notifications/mark-all-read/",
+        "line": 19,
+        "view": "NotificationMarkAllReadView.as_view()"
+      },
+      {
+        "route": "notifications/<int:pk>/read/",
+        "line": 20,
+        "view": "NotificationMarkReadView.as_view()"
+      },
+      {
+        "route": "<int:pk>/",
+        "line": 21,
+        "view": "TaskDetailView.as_view()"
+      },
+      {
+        "route": "<int:pk>/update/",
+        "line": 22,
+        "view": "TaskUpdateView.as_view()"
+      },
+      {
+        "route": "<int:pk>/delete/",
+        "line": 23,
+        "view": "TaskDeleteView.as_view()"
+      }
+    ]
+  },
+  "commands": {
+    "ProductsAndStock/management/commands/create_categories.py": [
+      {
+        "name": "Command",
+        "line": 10
+      }
+    ],
+    "ProductsAndStock/management/commands/create_sample_products.py": [
+      {
+        "name": "Command",
+        "line": 136
+      }
+    ],
+    "ProductsAndStock/management/commands/reassign_products_to_organisor.py": [
+      {
+        "name": "Command",
+        "line": 17
+      }
+    ],
+    "ProductsAndStock/management/commands/update_product_descriptions_english.py": [
+      {
+        "name": "Command",
+        "line": 16
+      }
+    ],
+    "ProductsAndStock/management/commands/update_products_for_dashboard.py": [
+      {
+        "name": "Command",
+        "line": 37
+      }
+    ],
+    "leads/management/commands/clean_duplicate_categories.py": [],
+    "leads/management/commands/create_default_categories.py": [
+      {
+        "name": "Command",
+        "line": 4
+      }
+    ],
+    "leads/management/commands/final_cleanup.py": [],
+    "leads/management/commands/force_clean_duplicates.py": [],
+    "tasks/management/commands/check_lead_no_order.py": [
+      {
+        "name": "Command",
+        "line": 18
+      }
+    ],
+    "tasks/management/commands/check_order_day.py": [
+      {
+        "name": "Command",
+        "line": 14
+      }
+    ],
+    "tasks/management/commands/check_task_deadlines.py": [
+      {
+        "name": "Command",
+        "line": 17
+      }
+    ],
+    "tasks/management/commands/create_fake_notifications.py": [
+      {
+        "name": "Command",
+        "line": 18
+      }
+    ]
+  },
+  "test_definitions": {
+    "ProductsAndStock/tests/test_commands.py": [
+      {
+        "name": "test_creates_categories_and_subcategories",
+        "line": 19
+      },
+      {
+        "name": "test_idempotent_run",
+        "line": 36
+      },
+      {
+        "name": "test_replace_removes_old_categories",
+        "line": 44
+      },
+      {
+        "name": "test_creates_products_for_organisor",
+        "line": 66
+      },
+      {
+        "name": "test_nonexistent_user_shows_error",
+        "line": 77
+      }
+    ],
+    "ProductsAndStock/tests/test_forms.py": [
+      {
+        "name": "test_form_initialization",
+        "line": 50
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 68
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 73
+      },
+      {
+        "name": "test_form_product_name_validation",
+        "line": 89
+      },
+      {
+        "name": "test_form_subcategory_validation",
+        "line": 111
+      },
+      {
+        "name": "test_form_dynamic_subcategory_queryset",
+        "line": 129
+      },
+      {
+        "name": "test_form_instance_with_category",
+        "line": 144
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 166
+      },
+      {
+        "name": "test_form_placeholder_attributes",
+        "line": 182
+      },
+      {
+        "name": "test_form_step_attributes",
+        "line": 194
+      },
+      {
+        "name": "test_form_max_attributes",
+        "line": 204
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 247
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 257
+      },
+      {
+        "name": "test_form_organisation_queryset",
+        "line": 262
+      },
+      {
+        "name": "test_form_product_name_validation",
+        "line": 276
+      },
+      {
+        "name": "test_form_subcategory_validation",
+        "line": 297
+      },
+      {
+        "name": "test_form_dynamic_subcategory_queryset",
+        "line": 315
+      },
+      {
+        "name": "test_form_instance_with_category",
+        "line": 330
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 371
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 387
+      },
+      {
+        "name": "test_form_update_type_choices",
+        "line": 392
+      },
+      {
+        "name": "test_form_category_filter_choices",
+        "line": 406
+      },
+      {
+        "name": "test_form_percentage_increase_validation",
+        "line": 418
+      },
+      {
+        "name": "test_form_percentage_decrease_validation",
+        "line": 431
+      },
+      {
+        "name": "test_form_fixed_amount_increase_validation",
+        "line": 444
+      },
+      {
+        "name": "test_form_fixed_amount_decrease_validation",
+        "line": 457
+      },
+      {
+        "name": "test_form_set_price_validation",
+        "line": 470
+      },
+      {
+        "name": "test_form_percentage_increase_valid",
+        "line": 483
+      },
+      {
+        "name": "test_form_percentage_decrease_valid",
+        "line": 495
+      },
+      {
+        "name": "test_form_fixed_amount_increase_valid",
+        "line": 507
+      },
+      {
+        "name": "test_form_fixed_amount_decrease_valid",
+        "line": 519
+      },
+      {
+        "name": "test_form_set_price_valid",
+        "line": 531
+      },
+      {
+        "name": "test_form_category_filter_category",
+        "line": 543
+      },
+      {
+        "name": "test_form_category_filter_subcategory",
+        "line": 556
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 575
+      },
+      {
+        "name": "test_form_placeholder_attributes",
+        "line": 591
+      },
+      {
+        "name": "test_form_step_attributes",
+        "line": 603
+      },
+      {
+        "name": "test_form_min_max_attributes",
+        "line": 614
+      },
+      {
+        "name": "test_form_save_product",
+        "line": 651
+      },
+      {
+        "name": "test_form_update_product",
+        "line": 686
+      },
+      {
+        "name": "test_form_validation_edge_cases",
+        "line": 730
+      },
+      {
+        "name": "test_form_discount_validation",
+        "line": 750
+      }
+    ],
+    "ProductsAndStock/tests/test_integration.py": [
+      {
+        "name": "test_complete_product_lifecycle",
+        "line": 76
+      },
+      {
+        "name": "test_bulk_price_update_workflow",
+        "line": 191
+      },
+      {
+        "name": "test_stock_alert_system",
+        "line": 233
+      },
+      {
+        "name": "test_discount_system",
+        "line": 271
+      },
+      {
+        "name": "test_profit_calculation_system",
+        "line": 312
+      },
+      {
+        "name": "test_category_subcategory_workflow",
+        "line": 342
+      },
+      {
+        "name": "test_user_permissions_workflow",
+        "line": 374
+      },
+      {
+        "name": "test_ajax_subcategory_loading",
+        "line": 410
+      },
+      {
+        "name": "test_form_validation_integration",
+        "line": 425
+      },
+      {
+        "name": "test_database_transactions",
+        "line": 445
+      },
+      {
+        "name": "test_performance_with_multiple_products",
+        "line": 465
+      },
+      {
+        "name": "test_product_creation_signals",
+        "line": 524
+      },
+      {
+        "name": "test_product_update_signals",
+        "line": 545
+      },
+      {
+        "name": "test_low_stock_alert_signals",
+        "line": 582
+      }
+    ],
+    "ProductsAndStock/tests/test_models.py": [
+      {
+        "name": "test_category_creation",
+        "line": 30
+      },
+      {
+        "name": "test_category_str_representation",
+        "line": 37
+      },
+      {
+        "name": "test_category_ordering",
+        "line": 41
+      },
+      {
+        "name": "test_category_unique_name",
+        "line": 48
+      },
+      {
+        "name": "test_subcategory_creation",
+        "line": 66
+      },
+      {
+        "name": "test_subcategory_str_representation",
+        "line": 73
+      },
+      {
+        "name": "test_subcategory_unique_together",
+        "line": 78
+      },
+      {
+        "name": "test_subcategory_ordering",
+        "line": 86
+      },
+      {
+        "name": "test_product_creation",
+        "line": 132
+      },
+      {
+        "name": "test_product_str_representation",
+        "line": 143
+      },
+      {
+        "name": "test_product_unique_together",
+        "line": 147
+      },
+      {
+        "name": "test_total_value_property",
+        "line": 162
+      },
+      {
+        "name": "test_is_low_stock_property",
+        "line": 168
+      },
+      {
+        "name": "test_stock_status_property",
+        "line": 181
+      },
+      {
+        "name": "test_profit_margin_amount_property",
+        "line": 194
+      },
+      {
+        "name": "test_profit_margin_percentage_property",
+        "line": 200
+      },
+      {
+        "name": "test_discounted_price_property",
+        "line": 206
+      },
+      {
+        "name": "test_is_discount_active_property",
+        "line": 222
+      },
+      {
+        "name": "test_total_profit_property",
+        "line": 247
+      },
+      {
+        "name": "test_clean_method",
+        "line": 253
+      },
+      {
+        "name": "test_send_low_stock_alert",
+        "line": 265
+      },
+      {
+        "name": "test_stock_movement_creation",
+        "line": 321
+      },
+      {
+        "name": "test_stock_movement_str_representation",
+        "line": 332
+      },
+      {
+        "name": "test_movement_direction_property",
+        "line": 337
+      },
+      {
+        "name": "test_price_history_creation",
+        "line": 393
+      },
+      {
+        "name": "test_price_history_str_representation",
+        "line": 404
+      },
+      {
+        "name": "test_change_percentage_property",
+        "line": 409
+      },
+      {
+        "name": "test_sales_statistics_creation",
+        "line": 459
+      },
+      {
+        "name": "test_sales_statistics_str_representation",
+        "line": 468
+      },
+      {
+        "name": "test_stock_alert_creation",
+        "line": 515
+      },
+      {
+        "name": "test_stock_alert_str_representation",
+        "line": 526
+      },
+      {
+        "name": "test_stock_recommendation_creation",
+        "line": 573
+      },
+      {
+        "name": "test_stock_recommendation_str_representation",
+        "line": 584
+      },
+      {
+        "name": "test_category_subcategory_relationship",
+        "line": 622
+      },
+      {
+        "name": "test_product_category_relationship",
+        "line": 627
+      },
+      {
+        "name": "test_product_organisation_relationship",
+        "line": 632
+      },
+      {
+        "name": "test_cascade_deletion",
+        "line": 636
+      }
+    ],
+    "ProductsAndStock/tests/test_signals.py": [
+      {
+        "name": "test_notification_created_on_new_stock_alert",
+        "line": 43
+      },
+      {
+        "name": "test_notification_content_includes_product_name",
+        "line": 55
+      },
+      {
+        "name": "test_notification_has_action_url",
+        "line": 67
+      },
+      {
+        "name": "test_no_notification_on_alert_update",
+        "line": 80
+      }
+    ],
+    "ProductsAndStock/tests/test_views.py": [
+      {
+        "name": "test_list_view_anonymous_user",
+        "line": 115
+      },
+      {
+        "name": "test_list_view_admin_user",
+        "line": 120
+      },
+      {
+        "name": "test_list_view_organisor_user",
+        "line": 128
+      },
+      {
+        "name": "test_list_view_agent_user",
+        "line": 136
+      },
+      {
+        "name": "test_list_view_category_filter",
+        "line": 143
+      },
+      {
+        "name": "test_list_view_subcategory_filter",
+        "line": 154
+      },
+      {
+        "name": "test_list_view_context_data",
+        "line": 165
+      },
+      {
+        "name": "test_detail_view_anonymous_user",
+        "line": 247
+      },
+      {
+        "name": "test_detail_view_admin_user",
+        "line": 254
+      },
+      {
+        "name": "test_detail_view_organisor_user",
+        "line": 264
+      },
+      {
+        "name": "test_detail_view_context_data",
+        "line": 273
+      },
+      {
+        "name": "test_create_view_anonymous_user",
+        "line": 322
+      },
+      {
+        "name": "test_create_view_get_admin",
+        "line": 327
+      },
+      {
+        "name": "test_create_view_get_organisor",
+        "line": 334
+      },
+      {
+        "name": "test_create_view_post_admin",
+        "line": 341
+      },
+      {
+        "name": "test_create_view_post_organisor",
+        "line": 365
+      },
+      {
+        "name": "test_create_view_invalid_data",
+        "line": 389
+      },
+      {
+        "name": "test_update_view_anonymous_user",
+        "line": 456
+      },
+      {
+        "name": "test_update_view_get_admin",
+        "line": 463
+      },
+      {
+        "name": "test_update_view_get_organisor",
+        "line": 472
+      },
+      {
+        "name": "test_update_view_post_admin",
+        "line": 481
+      },
+      {
+        "name": "test_update_view_post_organisor",
+        "line": 510
+      },
+      {
+        "name": "test_delete_view_anonymous_user",
+        "line": 584
+      },
+      {
+        "name": "test_delete_view_get_admin",
+        "line": 591
+      },
+      {
+        "name": "test_delete_view_post_admin",
+        "line": 600
+      },
+      {
+        "name": "test_delete_view_post_organisor",
+        "line": 612
+      },
+      {
+        "name": "test_get_subcategories_valid_category",
+        "line": 652
+      },
+      {
+        "name": "test_get_subcategories_invalid_category",
+        "line": 668
+      },
+      {
+        "name": "test_get_subcategories_no_category",
+        "line": 679
+      },
+      {
+        "name": "test_bulk_price_update_view_anonymous_user",
+        "line": 747
+      },
+      {
+        "name": "test_bulk_price_update_view_get_admin",
+        "line": 752
+      },
+      {
+        "name": "test_bulk_price_update_percentage_increase",
+        "line": 759
+      },
+      {
+        "name": "test_bulk_price_update_fixed_amount_increase",
+        "line": 787
+      },
+      {
+        "name": "test_bulk_price_update_set_price",
+        "line": 808
+      },
+      {
+        "name": "test_bulk_price_update_category_filter",
+        "line": 829
+      },
+      {
+        "name": "test_sales_dashboard_view_anonymous_user",
+        "line": 932
+      },
+      {
+        "name": "test_sales_dashboard_view_admin_user",
+        "line": 937
+      },
+      {
+        "name": "test_sales_dashboard_view_organisor_user",
+        "line": 944
+      },
+      {
+        "name": "test_sales_dashboard_context_data",
+        "line": 951
+      },
+      {
+        "name": "test_anonymous_user_redirected",
+        "line": 1006
+      },
+      {
+        "name": "test_admin_can_access",
+        "line": 1010
+      },
+      {
+        "name": "test_organisor_can_access",
+        "line": 1015
+      },
+      {
+        "name": "test_uses_correct_template",
+        "line": 1020
+      }
+    ],
+    "ProductsAndStock/tests/test_views_simple.py": [
+      {
+        "name": "test_list_view_admin_access",
+        "line": 105
+      },
+      {
+        "name": "test_list_view_organisor_access",
+        "line": 111
+      },
+      {
+        "name": "test_list_view_agent_access",
+        "line": 117
+      },
+      {
+        "name": "test_list_view_anonymous_redirect",
+        "line": 123
+      },
+      {
+        "name": "test_detail_view_admin_access",
+        "line": 128
+      },
+      {
+        "name": "test_detail_view_organisor_access",
+        "line": 134
+      },
+      {
+        "name": "test_detail_view_agent_access",
+        "line": 140
+      },
+      {
+        "name": "test_create_view_admin_access",
+        "line": 146
+      },
+      {
+        "name": "test_create_view_organisor_access",
+        "line": 152
+      },
+      {
+        "name": "test_create_view_agent_access",
+        "line": 158
+      },
+      {
+        "name": "test_update_view_admin_access",
+        "line": 164
+      },
+      {
+        "name": "test_update_view_organisor_access",
+        "line": 170
+      },
+      {
+        "name": "test_update_view_agent_access",
+        "line": 176
+      },
+      {
+        "name": "test_delete_view_admin_access",
+        "line": 182
+      },
+      {
+        "name": "test_delete_view_organisor_access",
+        "line": 188
+      },
+      {
+        "name": "test_delete_view_agent_access",
+        "line": 194
+      },
+      {
+        "name": "test_sales_dashboard_admin_access",
+        "line": 200
+      },
+      {
+        "name": "test_sales_dashboard_organisor_access",
+        "line": 206
+      },
+      {
+        "name": "test_sales_dashboard_agent_access",
+        "line": 212
+      }
+    ],
+    "activity_log/tests/test_models.py": [
+      {
+        "name": "test_create_log",
+        "line": 44
+      },
+      {
+        "name": "test_str_representation",
+        "line": 55
+      },
+      {
+        "name": "test_str_with_full_name",
+        "line": 63
+      },
+      {
+        "name": "test_str_with_deleted_user",
+        "line": 77
+      },
+      {
+        "name": "test_user_set_null_on_delete",
+        "line": 84
+      },
+      {
+        "name": "test_organisation_set_null_on_delete",
+        "line": 91
+      },
+      {
+        "name": "test_affected_agent_set_null_on_delete",
+        "line": 103
+      },
+      {
+        "name": "test_details_json_field",
+        "line": 115
+      },
+      {
+        "name": "test_details_default_empty_dict",
+        "line": 124
+      },
+      {
+        "name": "test_ordering",
+        "line": 130
+      },
+      {
+        "name": "test_auto_created_at",
+        "line": 139
+      },
+      {
+        "name": "test_verbose_names",
+        "line": 143
+      },
+      {
+        "name": "test_all_action_choices",
+        "line": 147
+      },
+      {
+        "name": "test_lead_detail_url",
+        "line": 157
+      },
+      {
+        "name": "test_order_detail_url",
+        "line": 164
+      },
+      {
+        "name": "test_task_detail_url",
+        "line": 171
+      },
+      {
+        "name": "test_product_detail_url",
+        "line": 178
+      },
+      {
+        "name": "test_agent_detail_url",
+        "line": 188
+      },
+      {
+        "name": "test_organisor_detail_url",
+        "line": 195
+      },
+      {
+        "name": "test_returns_none_without_object_type",
+        "line": 205
+      },
+      {
+        "name": "test_returns_none_for_unknown_type",
+        "line": 211
+      },
+      {
+        "name": "test_creates_log",
+        "line": 224
+      },
+      {
+        "name": "test_with_details",
+        "line": 237
+      },
+      {
+        "name": "test_with_affected_agent",
+        "line": 245
+      },
+      {
+        "name": "test_returns_none_for_unauthenticated",
+        "line": 253
+      },
+      {
+        "name": "test_returns_none_for_none_user",
+        "line": 258
+      },
+      {
+        "name": "test_truncates_long_object_repr",
+        "line": 262
+      },
+      {
+        "name": "test_defaults",
+        "line": 270
+      }
+    ],
+    "activity_log/tests/test_views.py": [
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 45
+      },
+      {
+        "name": "test_admin_sees_all_logs",
+        "line": 50
+      },
+      {
+        "name": "test_admin_filter_by_user",
+        "line": 64
+      },
+      {
+        "name": "test_admin_filter_by_organisation",
+        "line": 76
+      },
+      {
+        "name": "test_organisor_sees_own_and_org_logs",
+        "line": 93
+      },
+      {
+        "name": "test_agent_sees_own_and_affected_logs",
+        "line": 114
+      },
+      {
+        "name": "test_template_used",
+        "line": 141
+      },
+      {
+        "name": "test_admin_context_has_filters",
+        "line": 146
+      },
+      {
+        "name": "test_organisor_context_no_filter_users",
+        "line": 152
+      },
+      {
+        "name": "test_pagination",
+        "line": 157
+      }
+    ],
+    "agents/tests/test_forms.py": [
+      {
+        "name": "test_form_initialization",
+        "line": 76
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 91
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 96
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 109
+      },
+      {
+        "name": "test_form_username_validation_unique",
+        "line": 127
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 145
+      },
+      {
+        "name": "test_form_password_validation",
+        "line": 165
+      },
+      {
+        "name": "test_form_password_optional",
+        "line": 177
+      },
+      {
+        "name": "test_form_password_validation_short",
+        "line": 187
+      },
+      {
+        "name": "test_form_password_validation_common",
+        "line": 197
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 207
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 217
+      },
+      {
+        "name": "test_form_save_without_password_change",
+        "line": 237
+      },
+      {
+        "name": "test_form_clean_methods",
+        "line": 251
+      },
+      {
+        "name": "test_form_validation_edge_cases",
+        "line": 265
+      },
+      {
+        "name": "test_form_field_help_texts",
+        "line": 279
+      },
+      {
+        "name": "test_form_field_widgets",
+        "line": 287
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 324
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 339
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 344
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 365
+      },
+      {
+        "name": "test_form_username_validation_unique",
+        "line": 383
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 401
+      },
+      {
+        "name": "test_form_password_validation",
+        "line": 421
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 433
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 449
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 496
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 512
+      },
+      {
+        "name": "test_form_organisation_field",
+        "line": 518
+      },
+      {
+        "name": "test_form_organisation_queryset",
+        "line": 528
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 538
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 559
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 576
+      },
+      {
+        "name": "test_agent_create_form_with_existing_data_conflicts",
+        "line": 612
+      },
+      {
+        "name": "test_admin_agent_create_form_with_organisation",
+        "line": 676
+      },
+      {
+        "name": "test_form_validation_with_empty_data",
+        "line": 707
+      },
+      {
+        "name": "test_form_validation_with_partial_data",
+        "line": 717
+      }
+    ],
+    "agents/tests/test_integration.py": [
+      {
+        "name": "test_full_agent_lifecycle",
+        "line": 34
+      },
+      {
+        "name": "test_organisor1_sees_only_own_agents",
+        "line": 115
+      },
+      {
+        "name": "test_organisor2_sees_only_own_agents",
+        "line": 123
+      },
+      {
+        "name": "test_normal_user_cannot_list_agents",
+        "line": 155
+      },
+      {
+        "name": "test_normal_user_cannot_create_agent",
+        "line": 160
+      }
+    ],
+    "agents/tests/test_mixins.py": [
+      {
+        "name": "test_organisor_access",
+        "line": 78
+      },
+      {
+        "name": "test_superuser_access",
+        "line": 90
+      },
+      {
+        "name": "test_normal_user_access_denied",
+        "line": 102
+      },
+      {
+        "name": "test_anonymous_user_access_denied",
+        "line": 116
+      },
+      {
+        "name": "test_organisor_access",
+        "line": 198
+      },
+      {
+        "name": "test_agent_access",
+        "line": 210
+      },
+      {
+        "name": "test_superuser_access",
+        "line": 222
+      },
+      {
+        "name": "test_normal_user_access_denied",
+        "line": 234
+      },
+      {
+        "name": "test_organisor_access",
+        "line": 317
+      },
+      {
+        "name": "test_agent_access",
+        "line": 329
+      },
+      {
+        "name": "test_superuser_access",
+        "line": 341
+      },
+      {
+        "name": "test_normal_user_access_denied",
+        "line": 353
+      }
+    ],
+    "agents/tests/test_models.py": [
+      {
+        "name": "test_agent_creation",
+        "line": 60
+      },
+      {
+        "name": "test_agent_str_representation",
+        "line": 71
+      },
+      {
+        "name": "test_agent_user_relationship",
+        "line": 81
+      },
+      {
+        "name": "test_agent_organisation_relationship",
+        "line": 94
+      },
+      {
+        "name": "test_agent_unique_user_constraint",
+        "line": 105
+      },
+      {
+        "name": "test_agent_cascade_delete_user",
+        "line": 120
+      },
+      {
+        "name": "test_agent_cascade_delete_organisation",
+        "line": 137
+      },
+      {
+        "name": "test_agent_creation_with_different_organisations",
+        "line": 152
+      },
+      {
+        "name": "test_agent_user_profile_creation",
+        "line": 199
+      },
+      {
+        "name": "test_agent_creation_without_user_profile",
+        "line": 217
+      },
+      {
+        "name": "test_token_creation",
+        "line": 269
+      },
+      {
+        "name": "test_token_str_representation",
+        "line": 278
+      },
+      {
+        "name": "test_token_uniqueness",
+        "line": 285
+      },
+      {
+        "name": "test_token_expiration",
+        "line": 296
+      },
+      {
+        "name": "test_token_is_used_default",
+        "line": 311
+      },
+      {
+        "name": "test_token_cascade_delete_user",
+        "line": 317
+      },
+      {
+        "name": "test_multiple_tokens_for_same_user",
+        "line": 331
+      },
+      {
+        "name": "test_token_used_status_update",
+        "line": 346
+      },
+      {
+        "name": "test_agent_creation_with_verification_token",
+        "line": 384
+      },
+      {
+        "name": "test_agent_organisation_relationship_integrity",
+        "line": 415
+      },
+      {
+        "name": "test_agent_user_profile_consistency",
+        "line": 458
+      }
+    ],
+    "agents/tests/test_views.py": [
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 61
+      },
+      {
+        "name": "test_organisor_access",
+        "line": 65
+      },
+      {
+        "name": "test_organisor_sees_only_org_agents",
+        "line": 70
+      },
+      {
+        "name": "test_superuser_sees_all_agents",
+        "line": 77
+      },
+      {
+        "name": "test_superuser_filter_by_organisation",
+        "line": 83
+      },
+      {
+        "name": "test_search_by_username",
+        "line": 93
+      },
+      {
+        "name": "test_normal_user_no_access",
+        "line": 100
+      },
+      {
+        "name": "test_template_used",
+        "line": 112
+      },
+      {
+        "name": "test_organisor_access",
+        "line": 123
+      },
+      {
+        "name": "test_superuser_access",
+        "line": 128
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 133
+      },
+      {
+        "name": "test_template_used",
+        "line": 137
+      },
+      {
+        "name": "test_organisor_get",
+        "line": 148
+      },
+      {
+        "name": "test_organisor_create_agent",
+        "line": 154
+      },
+      {
+        "name": "test_create_sends_verification_email",
+        "line": 172
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 186
+      },
+      {
+        "name": "test_organisor_get",
+        "line": 196
+      },
+      {
+        "name": "test_organisor_post_update",
+        "line": 201
+      },
+      {
+        "name": "test_template_used",
+        "line": 214
+      },
+      {
+        "name": "test_organisor_delete",
+        "line": 225
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 235
+      },
+      {
+        "name": "test_template_used",
+        "line": 239
+      }
+    ],
+    "agents/tests/test_views_simple.py": [
+      {
+        "name": "test_agent_list_view_organisor_access",
+        "line": 77
+      },
+      {
+        "name": "test_agent_list_view_admin_access",
+        "line": 85
+      },
+      {
+        "name": "test_agent_detail_view_organisor_access",
+        "line": 93
+      },
+      {
+        "name": "test_agent_detail_view_admin_access",
+        "line": 101
+      },
+      {
+        "name": "test_agent_create_view_organisor_access",
+        "line": 113
+      },
+      {
+        "name": "test_agent_create_view_admin_access",
+        "line": 120
+      },
+      {
+        "name": "test_agent_create_view_valid_data_organisor",
+        "line": 128
+      },
+      {
+        "name": "test_agent_update_view_organisor_access",
+        "line": 165
+      },
+      {
+        "name": "test_agent_update_view_admin_access",
+        "line": 172
+      },
+      {
+        "name": "test_agent_delete_view_organisor_access",
+        "line": 183
+      },
+      {
+        "name": "test_agent_delete_view_admin_access",
+        "line": 190
+      },
+      {
+        "name": "test_agent_delete_view_post",
+        "line": 201
+      },
+      {
+        "name": "test_agent_update_view_post",
+        "line": 219
+      },
+      {
+        "name": "test_anonymous_user_redirect",
+        "line": 253
+      },
+      {
+        "name": "test_normal_user_redirect",
+        "line": 260
+      }
+    ],
+    "finance/tests/test_forms.py": [
+      {
+        "name": "test_date_range_form_valid_data",
+        "line": 16
+      },
+      {
+        "name": "test_date_range_form_same_dates",
+        "line": 31
+      },
+      {
+        "name": "test_date_range_form_end_date_before_start_date",
+        "line": 45
+      },
+      {
+        "name": "test_date_range_form_empty_data",
+        "line": 59
+      },
+      {
+        "name": "test_date_range_form_missing_start_date",
+        "line": 68
+      },
+      {
+        "name": "test_date_range_form_missing_end_date",
+        "line": 81
+      },
+      {
+        "name": "test_date_range_form_invalid_date_format",
+        "line": 94
+      },
+      {
+        "name": "test_date_range_form_future_dates",
+        "line": 106
+      },
+      {
+        "name": "test_date_range_form_past_dates",
+        "line": 121
+      },
+      {
+        "name": "test_date_range_form_widget_type",
+        "line": 136
+      },
+      {
+        "name": "test_date_range_form_clean_method",
+        "line": 156
+      },
+      {
+        "name": "test_date_range_form_clean_method_valid",
+        "line": 172
+      },
+      {
+        "name": "test_date_range_form_clean_method_same_dates",
+        "line": 189
+      },
+      {
+        "name": "test_date_range_form_field_types",
+        "line": 205
+      },
+      {
+        "name": "test_date_range_form_field_required",
+        "line": 213
+      },
+      {
+        "name": "test_date_range_form_field_labels",
+        "line": 221
+      },
+      {
+        "name": "test_date_range_form_initial_data",
+        "line": 230
+      },
+      {
+        "name": "test_date_range_form_bound_vs_unbound",
+        "line": 246
+      },
+      {
+        "name": "test_date_range_form_clean_data_access",
+        "line": 262
+      },
+      {
+        "name": "test_date_range_form_error_messages",
+        "line": 285
+      },
+      {
+        "name": "test_date_range_form_validation_error_format",
+        "line": 303
+      },
+      {
+        "name": "test_date_range_form_extreme_date_range",
+        "line": 324
+      },
+      {
+        "name": "test_date_range_form_leap_year_dates",
+        "line": 339
+      },
+      {
+        "name": "test_date_range_form_year_boundary",
+        "line": 354
+      },
+      {
+        "name": "test_date_range_form_none_values",
+        "line": 369
+      },
+      {
+        "name": "test_date_range_form_empty_strings",
+        "line": 381
+      }
+    ],
+    "finance/tests/test_integration.py": [
+      {
+        "name": "test_order_creation_with_finance_report",
+        "line": 90
+      },
+      {
+        "name": "test_order_cancellation_finance_report_impact",
+        "line": 133
+      },
+      {
+        "name": "test_order_deletion_finance_report_cascade",
+        "line": 165
+      },
+      {
+        "name": "test_multiple_orders_finance_reports_aggregation",
+        "line": 190
+      },
+      {
+        "name": "test_finance_report_date_filtering_with_orders",
+        "line": 234
+      },
+      {
+        "name": "test_finance_report_organisation_filtering",
+        "line": 278
+      },
+      {
+        "name": "test_finance_report_product_profit_calculation",
+        "line": 404
+      },
+      {
+        "name": "test_finance_report_multiple_products_profit",
+        "line": 438
+      },
+      {
+        "name": "test_finance_report_stock_movement_integration",
+        "line": 483
+      },
+      {
+        "name": "test_financial_report_view_full_workflow",
+        "line": 585
+      },
+      {
+        "name": "test_financial_report_view_form_integration",
+        "line": 627
+      },
+      {
+        "name": "test_finance_report_data_consistency",
+        "line": 712
+      },
+      {
+        "name": "test_finance_report_unique_constraint",
+        "line": 749
+      }
+    ],
+    "finance/tests/test_models.py": [
+      {
+        "name": "test_order_finance_report_creation",
+        "line": 80
+      },
+      {
+        "name": "test_order_finance_report_str_representation",
+        "line": 91
+      },
+      {
+        "name": "test_order_finance_report_default_report_date",
+        "line": 101
+      },
+      {
+        "name": "test_order_finance_report_manual_report_date",
+        "line": 115
+      },
+      {
+        "name": "test_order_finance_report_earned_amount_positive",
+        "line": 127
+      },
+      {
+        "name": "test_order_finance_report_earned_amount_zero",
+        "line": 136
+      },
+      {
+        "name": "test_order_finance_report_earned_amount_negative",
+        "line": 145
+      },
+      {
+        "name": "test_order_finance_report_one_to_one_relationship",
+        "line": 154
+      },
+      {
+        "name": "test_order_finance_report_unique_order_constraint",
+        "line": 167
+      },
+      {
+        "name": "test_order_finance_report_cascade_delete_order",
+        "line": 182
+      },
+      {
+        "name": "test_order_finance_report_float_precision",
+        "line": 199
+      },
+      {
+        "name": "test_order_finance_report_large_amount",
+        "line": 209
+      },
+      {
+        "name": "test_order_finance_report_with_order_products",
+        "line": 285
+      },
+      {
+        "name": "test_multiple_orders_finance_reports",
+        "line": 325
+      },
+      {
+        "name": "test_order_finance_report_date_filtering",
+        "line": 363
+      },
+      {
+        "name": "test_order_finance_report_aggregation",
+        "line": 434
+      },
+      {
+        "name": "test_order_finance_report_organisation_filtering",
+        "line": 462
+      }
+    ],
+    "finance/tests/test_views.py": [
+      {
+        "name": "test_financial_report_view_get",
+        "line": 137
+      },
+      {
+        "name": "test_financial_report_view_get_context",
+        "line": 148
+      },
+      {
+        "name": "test_financial_report_view_post_valid_dates",
+        "line": 160
+      },
+      {
+        "name": "test_financial_report_view_post_date_range",
+        "line": 180
+      },
+      {
+        "name": "test_financial_report_view_post_all_dates",
+        "line": 198
+      },
+      {
+        "name": "test_financial_report_view_post_no_results",
+        "line": 217
+      },
+      {
+        "name": "test_financial_report_view_post_invalid_form",
+        "line": 233
+      },
+      {
+        "name": "test_financial_report_view_post_end_date_before_start_date",
+        "line": 246
+      },
+      {
+        "name": "test_financial_report_view_template_rendering",
+        "line": 262
+      },
+      {
+        "name": "test_financial_report_view_with_reports_template",
+        "line": 269
+      },
+      {
+        "name": "test_financial_report_view_empty_results_template",
+        "line": 284
+      },
+      {
+        "name": "test_financial_report_view_date_filter_order_day",
+        "line": 298
+      },
+      {
+        "name": "test_financial_report_view_date_filtering_logic",
+        "line": 350
+      },
+      {
+        "name": "test_financial_report_view_aggregation",
+        "line": 370
+      },
+      {
+        "name": "test_financial_report_view_select_related_optimization",
+        "line": 401
+      },
+      {
+        "name": "test_financial_report_view_multiple_organisations",
+        "line": 416
+      },
+      {
+        "name": "test_financial_report_view_superuser_filter_by_organisation",
+        "line": 471
+      },
+      {
+        "name": "test_financial_report_view_superuser_filter_by_agent",
+        "line": 536
+      },
+      {
+        "name": "test_financial_report_view_organisor_filter_by_agent",
+        "line": 629
+      },
+      {
+        "name": "test_financial_report_view_no_orders",
+        "line": 747
+      },
+      {
+        "name": "test_financial_report_view_orders_without_finance_reports",
+        "line": 761
+      },
+      {
+        "name": "test_financial_report_view_zero_earned_amount",
+        "line": 785
+      },
+      {
+        "name": "test_financial_report_view_negative_earned_amount",
+        "line": 814
+      }
+    ],
+    "leads/tests/test_forget_password_forms.py": [
+      {
+        "name": "test_form_initialization",
+        "line": 44
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 53
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 64
+      },
+      {
+        "name": "test_form_invalid_email_format",
+        "line": 74
+      },
+      {
+        "name": "test_form_empty_email",
+        "line": 85
+      },
+      {
+        "name": "test_form_nonexistent_email",
+        "line": 96
+      },
+      {
+        "name": "test_form_case_insensitive_email",
+        "line": 106
+      },
+      {
+        "name": "test_form_whitespace_email",
+        "line": 116
+      },
+      {
+        "name": "test_form_long_email",
+        "line": 127
+      },
+      {
+        "name": "test_form_special_characters_email",
+        "line": 138
+      },
+      {
+        "name": "test_form_multiple_at_symbols",
+        "line": 148
+      },
+      {
+        "name": "test_form_no_at_symbol",
+        "line": 159
+      },
+      {
+        "name": "test_form_no_domain",
+        "line": 170
+      },
+      {
+        "name": "test_form_no_local_part",
+        "line": 181
+      },
+      {
+        "name": "test_form_unicode_email",
+        "line": 192
+      },
+      {
+        "name": "test_form_numeric_email",
+        "line": 206
+      },
+      {
+        "name": "test_form_email_with_dots",
+        "line": 216
+      },
+      {
+        "name": "test_form_email_with_plus",
+        "line": 226
+      },
+      {
+        "name": "test_form_email_with_hyphens",
+        "line": 236
+      },
+      {
+        "name": "test_form_email_with_underscores",
+        "line": 246
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 276
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 286
+      },
+      {
+        "name": "test_form_help_text",
+        "line": 303
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 313
+      },
+      {
+        "name": "test_form_password_mismatch",
+        "line": 325
+      },
+      {
+        "name": "test_form_empty_passwords",
+        "line": 337
+      },
+      {
+        "name": "test_form_short_password",
+        "line": 351
+      },
+      {
+        "name": "test_form_common_password",
+        "line": 363
+      },
+      {
+        "name": "test_form_numeric_password",
+        "line": 375
+      },
+      {
+        "name": "test_form_similar_to_username",
+        "line": 387
+      },
+      {
+        "name": "test_form_similar_to_email",
+        "line": 399
+      },
+      {
+        "name": "test_form_similar_to_first_name",
+        "line": 411
+      },
+      {
+        "name": "test_form_similar_to_last_name",
+        "line": 426
+      },
+      {
+        "name": "test_form_whitespace_passwords",
+        "line": 441
+      },
+      {
+        "name": "test_form_unicode_passwords",
+        "line": 454
+      },
+      {
+        "name": "test_form_special_characters_passwords",
+        "line": 466
+      },
+      {
+        "name": "test_form_long_password",
+        "line": 478
+      },
+      {
+        "name": "test_form_save_functionality",
+        "line": 490
+      },
+      {
+        "name": "test_form_save_with_commit_false",
+        "line": 508
+      },
+      {
+        "name": "test_password_reset_form_with_existing_user",
+        "line": 554
+      },
+      {
+        "name": "test_password_reset_form_with_nonexistent_user",
+        "line": 562
+      },
+      {
+        "name": "test_set_password_form_with_valid_data",
+        "line": 571
+      },
+      {
+        "name": "test_set_password_form_with_invalid_data",
+        "line": 589
+      },
+      {
+        "name": "test_form_validation_edge_cases",
+        "line": 606
+      },
+      {
+        "name": "test_form_field_attributes",
+        "line": 624
+      }
+    ],
+    "leads/tests/test_forget_password_views.py": [
+      {
+        "name": "test_password_reset_view_get",
+        "line": 73
+      },
+      {
+        "name": "test_password_reset_view_template",
+        "line": 84
+      },
+      {
+        "name": "test_password_reset_view_form_class",
+        "line": 93
+      },
+      {
+        "name": "test_password_reset_view_post_valid_email",
+        "line": 101
+      },
+      {
+        "name": "test_password_reset_view_post_invalid_email",
+        "line": 113
+      },
+      {
+        "name": "test_password_reset_view_post_nonexistent_email",
+        "line": 126
+      },
+      {
+        "name": "test_password_reset_view_post_unverified_email",
+        "line": 138
+      },
+      {
+        "name": "test_password_reset_view_post_empty_email",
+        "line": 150
+      },
+      {
+        "name": "test_password_reset_view_post_case_insensitive_email",
+        "line": 163
+      },
+      {
+        "name": "test_password_reset_view_post_whitespace_email",
+        "line": 176
+      },
+      {
+        "name": "test_password_reset_view_email_sending_details",
+        "line": 189
+      },
+      {
+        "name": "test_password_reset_view_multiple_requests",
+        "line": 201
+      },
+      {
+        "name": "test_password_reset_done_view_get",
+        "line": 228
+      },
+      {
+        "name": "test_password_reset_done_view_content",
+        "line": 235
+      },
+      {
+        "name": "test_password_reset_confirm_view_get_valid_token",
+        "line": 275
+      },
+      {
+        "name": "test_password_reset_confirm_view_form_class",
+        "line": 284
+      },
+      {
+        "name": "test_password_reset_confirm_view_post_valid_data",
+        "line": 296
+      },
+      {
+        "name": "test_password_reset_confirm_view_post_password_mismatch",
+        "line": 313
+      },
+      {
+        "name": "test_password_reset_confirm_view_post_weak_password",
+        "line": 333
+      },
+      {
+        "name": "test_password_reset_confirm_view_post_empty_passwords",
+        "line": 352
+      },
+      {
+        "name": "test_password_reset_confirm_view_invalid_token",
+        "line": 371
+      },
+      {
+        "name": "test_password_reset_confirm_view_invalid_uid",
+        "line": 382
+      },
+      {
+        "name": "test_password_reset_confirm_view_expired_token",
+        "line": 393
+      },
+      {
+        "name": "test_password_reset_confirm_view_nonexistent_user",
+        "line": 425
+      },
+      {
+        "name": "test_password_reset_confirm_view_inactive_user",
+        "line": 438
+      },
+      {
+        "name": "test_password_reset_complete_view_get",
+        "line": 460
+      },
+      {
+        "name": "test_password_reset_complete_view_content",
+        "line": 467
+      },
+      {
+        "name": "test_complete_forget_password_flow",
+        "line": 504
+      },
+      {
+        "name": "test_forget_password_with_invalid_email",
+        "line": 550
+      },
+      {
+        "name": "test_forget_password_with_unverified_email",
+        "line": 562
+      },
+      {
+        "name": "test_forget_password_form_validation",
+        "line": 590
+      },
+      {
+        "name": "test_forget_password_security_measures",
+        "line": 609
+      }
+    ],
+    "leads/tests/test_forms.py": [
+      {
+        "name": "test_widget_initialization",
+        "line": 30
+      },
+      {
+        "name": "test_widget_decompress_with_value",
+        "line": 43
+      },
+      {
+        "name": "test_widget_value_from_datadict",
+        "line": 63
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 173
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 192
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 200
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 219
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 245
+      },
+      {
+        "name": "test_form_queryset_filtering_organisor",
+        "line": 271
+      },
+      {
+        "name": "test_form_queryset_filtering_agent",
+        "line": 292
+      },
+      {
+        "name": "test_form_queryset_filtering_superuser",
+        "line": 307
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 326
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 342
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 451
+      },
+      {
+        "name": "test_form_organisation_field",
+        "line": 468
+      },
+      {
+        "name": "test_form_organisation_queryset",
+        "line": 478
+      },
+      {
+        "name": "test_form_initial_querysets_empty",
+        "line": 488
+      },
+      {
+        "name": "test_form_with_instance_querysets_populated",
+        "line": 497
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 518
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 526
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 542
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 565
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 588
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 608
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 617
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 622
+      },
+      {
+        "name": "test_form_age_validation",
+        "line": 634
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 672
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 687
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 692
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 713
+      },
+      {
+        "name": "test_form_username_validation_unique",
+        "line": 731
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 749
+      },
+      {
+        "name": "test_form_password_validation",
+        "line": 769
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 781
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 801
+      },
+      {
+        "name": "test_form_phone_number_widget",
+        "line": 813
+      },
+      {
+        "name": "test_form_gender_choices",
+        "line": 821
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 875
+      },
+      {
+        "name": "test_form_queryset_filtering",
+        "line": 891
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 902
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 967
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 978
+      },
+      {
+        "name": "test_form_queryset_filtering_organisor",
+        "line": 986
+      },
+      {
+        "name": "test_form_queryset_filtering_agent",
+        "line": 1002
+      },
+      {
+        "name": "test_form_queryset_filtering_superuser",
+        "line": 1033
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 1070
+      },
+      {
+        "name": "test_form_username_field_attributes",
+        "line": 1078
+      },
+      {
+        "name": "test_form_password_field_attributes",
+        "line": 1091
+      },
+      {
+        "name": "test_form_error_messages_removed",
+        "line": 1100
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 1112
+      },
+      {
+        "name": "test_form_email_field_attributes",
+        "line": 1119
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 1136
+      },
+      {
+        "name": "test_form_new_password1_field_attributes",
+        "line": 1150
+      },
+      {
+        "name": "test_form_new_password2_field_attributes",
+        "line": 1172
+      }
+    ],
+    "leads/tests/test_integration.py": [
+      {
+        "name": "test_complete_lead_workflow",
+        "line": 82
+      },
+      {
+        "name": "test_lead_assignment_workflow",
+        "line": 144
+      },
+      {
+        "name": "test_lead_category_update_workflow",
+        "line": 169
+      },
+      {
+        "name": "test_complete_registration_workflow",
+        "line": 231
+      },
+      {
+        "name": "test_registration_with_existing_email",
+        "line": 285
+      },
+      {
+        "name": "test_registration_with_existing_username",
+        "line": 306
+      },
+      {
+        "name": "test_organisor_permissions",
+        "line": 387
+      },
+      {
+        "name": "test_agent_permissions",
+        "line": 415
+      },
+      {
+        "name": "test_unauthenticated_permissions",
+        "line": 445
+      },
+      {
+        "name": "test_lead_form_with_valid_data",
+        "line": 523
+      },
+      {
+        "name": "test_lead_form_with_invalid_data",
+        "line": 548
+      },
+      {
+        "name": "test_lead_form_with_duplicate_email",
+        "line": 569
+      },
+      {
+        "name": "test_lead_form_queryset_filtering",
+        "line": 603
+      },
+      {
+        "name": "test_lead_creation_email_sending",
+        "line": 653
+      },
+      {
+        "name": "test_user_registration_email_sending",
+        "line": 674
+      },
+      {
+        "name": "test_lead_cascade_deletes",
+        "line": 724
+      },
+      {
+        "name": "test_lead_default_categories_creation",
+        "line": 766
+      },
+      {
+        "name": "test_user_profile_auto_creation",
+        "line": 790
+      }
+    ],
+    "leads/tests/test_login_authentication.py": [
+      {
+        "name": "test_authenticate_with_username",
+        "line": 65
+      },
+      {
+        "name": "test_authenticate_with_email",
+        "line": 77
+      },
+      {
+        "name": "test_authenticate_case_insensitive_username",
+        "line": 89
+      },
+      {
+        "name": "test_authenticate_case_insensitive_email",
+        "line": 100
+      },
+      {
+        "name": "test_authenticate_wrong_password",
+        "line": 112
+      },
+      {
+        "name": "test_authenticate_nonexistent_user",
+        "line": 122
+      },
+      {
+        "name": "test_authenticate_unverified_email",
+        "line": 132
+      },
+      {
+        "name": "test_authenticate_unverified_email_by_email",
+        "line": 142
+      },
+      {
+        "name": "test_authenticate_empty_credentials",
+        "line": 152
+      },
+      {
+        "name": "test_authenticate_none_credentials",
+        "line": 162
+      },
+      {
+        "name": "test_authenticate_whitespace_username",
+        "line": 172
+      },
+      {
+        "name": "test_authenticate_whitespace_email",
+        "line": 184
+      },
+      {
+        "name": "test_authenticate_with_request_parameter",
+        "line": 197
+      },
+      {
+        "name": "test_authenticate_with_additional_kwargs",
+        "line": 213
+      },
+      {
+        "name": "test_authenticate_timing_attack_protection",
+        "line": 225
+      },
+      {
+        "name": "test_get_user_valid_id",
+        "line": 253
+      },
+      {
+        "name": "test_get_user_invalid_id",
+        "line": 261
+      },
+      {
+        "name": "test_get_user_none_id",
+        "line": 267
+      },
+      {
+        "name": "test_get_user_string_id",
+        "line": 273
+      },
+      {
+        "name": "test_user_can_authenticate",
+        "line": 283
+      },
+      {
+        "name": "test_authenticate_with_inactive_user",
+        "line": 298
+      },
+      {
+        "name": "test_authenticate_with_superuser",
+        "line": 312
+      },
+      {
+        "name": "test_authenticate_with_agent_user",
+        "line": 336
+      },
+      {
+        "name": "test_authenticate_multiple_users_same_email",
+        "line": 364
+      },
+      {
+        "name": "test_authenticate_with_different_username_formats",
+        "line": 398
+      },
+      {
+        "name": "test_authenticate_with_special_characters",
+        "line": 424
+      },
+      {
+        "name": "test_authenticate_performance",
+        "line": 456
+      }
+    ],
+    "leads/tests/test_login_forms.py": [
+      {
+        "name": "test_form_initialization",
+        "line": 64
+      },
+      {
+        "name": "test_form_valid_data_username",
+        "line": 72
+      },
+      {
+        "name": "test_form_valid_data_email",
+        "line": 80
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 88
+      },
+      {
+        "name": "test_form_invalid_credentials",
+        "line": 110
+      },
+      {
+        "name": "test_form_nonexistent_user",
+        "line": 120
+      },
+      {
+        "name": "test_form_unverified_email_user",
+        "line": 129
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 138
+      },
+      {
+        "name": "test_form_field_labels",
+        "line": 152
+      },
+      {
+        "name": "test_form_field_max_lengths",
+        "line": 159
+      },
+      {
+        "name": "test_form_field_widgets",
+        "line": 166
+      },
+      {
+        "name": "test_form_clean_methods",
+        "line": 176
+      },
+      {
+        "name": "test_form_validation_edge_cases",
+        "line": 187
+      },
+      {
+        "name": "test_form_case_insensitive_username",
+        "line": 210
+      },
+      {
+        "name": "test_form_case_insensitive_email",
+        "line": 218
+      },
+      {
+        "name": "test_form_whitespace_handling",
+        "line": 226
+      },
+      {
+        "name": "test_form_error_messages",
+        "line": 234
+      },
+      {
+        "name": "test_form_autofocus_attribute",
+        "line": 242
+      },
+      {
+        "name": "test_form_password_field_attributes",
+        "line": 249
+      },
+      {
+        "name": "test_form_username_field_attributes",
+        "line": 257
+      },
+      {
+        "name": "test_form_with_request_context",
+        "line": 265
+      },
+      {
+        "name": "test_form_validation_with_special_characters",
+        "line": 277
+      },
+      {
+        "name": "test_form_validation_with_unicode",
+        "line": 287
+      },
+      {
+        "name": "test_form_authentication_with_different_credentials",
+        "line": 323
+      },
+      {
+        "name": "test_form_authentication_failure_scenarios",
+        "line": 339
+      },
+      {
+        "name": "test_form_with_mock_authentication_backend",
+        "line": 362
+      },
+      {
+        "name": "test_form_validation_with_empty_data",
+        "line": 379
+      },
+      {
+        "name": "test_form_validation_with_partial_data",
+        "line": 387
+      }
+    ],
+    "leads/tests/test_login_integration.py": [
+      {
+        "name": "test_complete_login_flow_with_username",
+        "line": 69
+      },
+      {
+        "name": "test_complete_login_flow_with_email",
+        "line": 93
+      },
+      {
+        "name": "test_login_flow_with_unverified_email",
+        "line": 116
+      },
+      {
+        "name": "test_login_flow_with_invalid_credentials",
+        "line": 139
+      },
+      {
+        "name": "test_login_flow_with_nonexistent_user",
+        "line": 158
+      },
+      {
+        "name": "test_login_redirect_authenticated_user",
+        "line": 177
+      },
+      {
+        "name": "test_login_logout_cycle",
+        "line": 188
+      },
+      {
+        "name": "test_login_with_different_user_types",
+        "line": 211
+      },
+      {
+        "name": "test_login_with_superuser",
+        "line": 242
+      },
+      {
+        "name": "test_login_case_insensitive_credentials",
+        "line": 269
+      },
+      {
+        "name": "test_login_whitespace_handling",
+        "line": 290
+      },
+      {
+        "name": "test_login_form_validation_errors",
+        "line": 311
+      },
+      {
+        "name": "test_login_csrf_protection",
+        "line": 337
+      },
+      {
+        "name": "test_login_session_management",
+        "line": 348
+      },
+      {
+        "name": "test_login_redirect_after_login",
+        "line": 366
+      },
+      {
+        "name": "test_login_with_remember_me",
+        "line": 378
+      },
+      {
+        "name": "test_login_performance",
+        "line": 390
+      },
+      {
+        "name": "test_login_with_special_characters",
+        "line": 408
+      }
+    ],
+    "leads/tests/test_login_views.py": [
+      {
+        "name": "test_login_view_get",
+        "line": 69
+      },
+      {
+        "name": "test_login_view_post_valid_username",
+        "line": 80
+      },
+      {
+        "name": "test_login_view_post_valid_email",
+        "line": 94
+      },
+      {
+        "name": "test_login_view_post_invalid_credentials",
+        "line": 108
+      },
+      {
+        "name": "test_login_view_post_unverified_email",
+        "line": 122
+      },
+      {
+        "name": "test_login_view_post_nonexistent_user",
+        "line": 136
+      },
+      {
+        "name": "test_login_view_post_empty_credentials",
+        "line": 150
+      },
+      {
+        "name": "test_login_view_template",
+        "line": 164
+      },
+      {
+        "name": "test_login_view_form_class",
+        "line": 176
+      },
+      {
+        "name": "test_login_view_redirect_authenticated_user",
+        "line": 184
+      },
+      {
+        "name": "test_login_view_success_redirect",
+        "line": 195
+      },
+      {
+        "name": "test_login_view_form_validation",
+        "line": 206
+      },
+      {
+        "name": "test_login_view_csrf_protection",
+        "line": 226
+      },
+      {
+        "name": "test_login_view_remember_me_functionality",
+        "line": 237
+      },
+      {
+        "name": "test_login_view_case_insensitive_username",
+        "line": 249
+      },
+      {
+        "name": "test_login_view_case_insensitive_email",
+        "line": 260
+      },
+      {
+        "name": "test_login_view_whitespace_handling",
+        "line": 271
+      },
+      {
+        "name": "test_complete_login_flow",
+        "line": 311
+      },
+      {
+        "name": "test_login_with_different_credentials_formats",
+        "line": 332
+      },
+      {
+        "name": "test_login_after_logout",
+        "line": 350
+      }
+    ],
+    "leads/tests/test_logout_integration.py": [
+      {
+        "name": "test_complete_logout_flow",
+        "line": 49
+      },
+      {
+        "name": "test_login_logout_login_cycle",
+        "line": 82
+      },
+      {
+        "name": "test_logout_from_different_pages",
+        "line": 114
+      },
+      {
+        "name": "test_logout_with_active_session_data",
+        "line": 134
+      },
+      {
+        "name": "test_logout_with_multiple_browser_sessions",
+        "line": 158
+      },
+      {
+        "name": "test_logout_redirect_behavior",
+        "line": 188
+      },
+      {
+        "name": "test_logout_after_password_change",
+        "line": 207
+      },
+      {
+        "name": "test_logout_with_remember_me",
+        "line": 238
+      },
+      {
+        "name": "test_logout_performance",
+        "line": 252
+      },
+      {
+        "name": "test_logout_with_different_user_types",
+        "line": 277
+      },
+      {
+        "name": "test_logout_session_hijacking_protection",
+        "line": 359
+      },
+      {
+        "name": "test_logout_csrf_protection_integration",
+        "line": 383
+      },
+      {
+        "name": "test_logout_no_information_leakage",
+        "line": 396
+      },
+      {
+        "name": "test_logout_session_fixation_protection_integration",
+        "line": 413
+      }
+    ],
+    "leads/tests/test_logout_views.py": [
+      {
+        "name": "test_logout_view_post_authenticated_user",
+        "line": 49
+      },
+      {
+        "name": "test_logout_view_get_authenticated_user",
+        "line": 67
+      },
+      {
+        "name": "test_logout_view_unauthenticated_user",
+        "line": 84
+      },
+      {
+        "name": "test_logout_view_redirect_url",
+        "line": 99
+      },
+      {
+        "name": "test_logout_view_session_cleanup",
+        "line": 111
+      },
+      {
+        "name": "test_logout_view_protected_page_access_after_logout",
+        "line": 131
+      },
+      {
+        "name": "test_logout_view_multiple_logout_calls",
+        "line": 147
+      },
+      {
+        "name": "test_logout_view_csrf_protection",
+        "line": 167
+      },
+      {
+        "name": "test_logout_view_next_parameter",
+        "line": 179
+      },
+      {
+        "name": "test_logout_view_with_different_user_types",
+        "line": 191
+      },
+      {
+        "name": "test_logout_view_with_superuser",
+        "line": 222
+      },
+      {
+        "name": "test_logout_view_session_data_cleanup",
+        "line": 246
+      },
+      {
+        "name": "test_logout_view_concurrent_sessions",
+        "line": 267
+      },
+      {
+        "name": "test_logout_view_url_pattern",
+        "line": 289
+      },
+      {
+        "name": "test_logout_view_with_ajax_request",
+        "line": 295
+      },
+      {
+        "name": "test_logout_view_session_fixation_protection",
+        "line": 339
+      },
+      {
+        "name": "test_logout_view_no_session_hijacking",
+        "line": 358
+      },
+      {
+        "name": "test_logout_view_token_invalidation",
+        "line": 375
+      },
+      {
+        "name": "test_logout_view_no_caching",
+        "line": 390
+      }
+    ],
+    "leads/tests/test_models.py": [
+      {
+        "name": "test_user_creation",
+        "line": 39
+      },
+      {
+        "name": "test_user_str_representation",
+        "line": 54
+      },
+      {
+        "name": "test_user_email_unique",
+        "line": 59
+      },
+      {
+        "name": "test_user_username_unique",
+        "line": 71
+      },
+      {
+        "name": "test_user_phone_number_unique",
+        "line": 83
+      },
+      {
+        "name": "test_user_gender_choices",
+        "line": 96
+      },
+      {
+        "name": "test_user_default_values",
+        "line": 110
+      },
+      {
+        "name": "test_userprofile_creation",
+        "line": 144
+      },
+      {
+        "name": "test_userprofile_one_to_one_relationship",
+        "line": 153
+      },
+      {
+        "name": "test_userprofile_unique_constraint",
+        "line": 164
+      },
+      {
+        "name": "test_userprofile_cascade_delete_user",
+        "line": 178
+      },
+      {
+        "name": "test_lead_creation",
+        "line": 253
+      },
+      {
+        "name": "test_lead_str_representation",
+        "line": 284
+      },
+      {
+        "name": "test_lead_email_unique",
+        "line": 299
+      },
+      {
+        "name": "test_lead_phone_number_unique",
+        "line": 325
+      },
+      {
+        "name": "test_lead_organisation_relationship",
+        "line": 351
+      },
+      {
+        "name": "test_lead_agent_relationship",
+        "line": 367
+      },
+      {
+        "name": "test_lead_cascade_delete_organisation",
+        "line": 384
+      },
+      {
+        "name": "test_lead_agent_set_null_on_delete",
+        "line": 405
+      },
+      {
+        "name": "test_lead_save_method_default_categories",
+        "line": 426
+      },
+      {
+        "name": "test_lead_save_method_existing_categories",
+        "line": 458
+      },
+      {
+        "name": "test_agent_creation",
+        "line": 525
+      },
+      {
+        "name": "test_agent_str_representation",
+        "line": 536
+      },
+      {
+        "name": "test_agent_user_relationship",
+        "line": 546
+      },
+      {
+        "name": "test_agent_organisation_relationship",
+        "line": 558
+      },
+      {
+        "name": "test_agent_unique_user_constraint",
+        "line": 569
+      },
+      {
+        "name": "test_agent_cascade_delete_user",
+        "line": 584
+      },
+      {
+        "name": "test_agent_cascade_delete_organisation",
+        "line": 601
+      },
+      {
+        "name": "test_token_creation",
+        "line": 635
+      },
+      {
+        "name": "test_token_str_representation",
+        "line": 644
+      },
+      {
+        "name": "test_token_uniqueness",
+        "line": 651
+      },
+      {
+        "name": "test_token_expiration",
+        "line": 662
+      },
+      {
+        "name": "test_token_is_used_default",
+        "line": 676
+      },
+      {
+        "name": "test_token_cascade_delete_user",
+        "line": 682
+      },
+      {
+        "name": "test_multiple_tokens_for_same_user",
+        "line": 696
+      },
+      {
+        "name": "test_token_used_status_update",
+        "line": 711
+      },
+      {
+        "name": "test_category_creation",
+        "line": 751
+      },
+      {
+        "name": "test_source_category_creation",
+        "line": 762
+      },
+      {
+        "name": "test_value_category_creation",
+        "line": 773
+      },
+      {
+        "name": "test_category_organisation_relationship",
+        "line": 784
+      },
+      {
+        "name": "test_category_cascade_delete_organisation",
+        "line": 794
+      },
+      {
+        "name": "test_source_category_cascade_delete_organisation",
+        "line": 809
+      },
+      {
+        "name": "test_value_category_cascade_delete_organisation",
+        "line": 824
+      },
+      {
+        "name": "test_user_created_signal",
+        "line": 864
+      },
+      {
+        "name": "test_lead_with_all_relationships",
+        "line": 947
+      },
+      {
+        "name": "test_lead_agent_lead_relationship",
+        "line": 979
+      },
+      {
+        "name": "test_lead_category_lead_relationship",
+        "line": 1016
+      }
+    ],
+    "leads/tests/test_signup_forms.py": [
+      {
+        "name": "test_form_initialization",
+        "line": 40
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 55
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 60
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 84
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 102
+      },
+      {
+        "name": "test_form_username_validation_unique",
+        "line": 124
+      },
+      {
+        "name": "test_form_password_validation",
+        "line": 142
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 153
+      },
+      {
+        "name": "test_form_date_field_type",
+        "line": 163
+      },
+      {
+        "name": "test_form_gender_choices",
+        "line": 171
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 183
+      },
+      {
+        "name": "test_form_clean_methods",
+        "line": 199
+      },
+      {
+        "name": "test_form_validation_edge_cases",
+        "line": 219
+      },
+      {
+        "name": "test_form_field_help_texts",
+        "line": 246
+      },
+      {
+        "name": "test_form_field_max_lengths",
+        "line": 257
+      },
+      {
+        "name": "test_form_field_widgets",
+        "line": 264
+      },
+      {
+        "name": "test_form_meta_class",
+        "line": 282
+      },
+      {
+        "name": "test_form_save_and_user_creation",
+        "line": 310
+      },
+      {
+        "name": "test_form_with_existing_data_conflicts",
+        "line": 331
+      }
+    ],
+    "leads/tests/test_signup_integration.py": [
+      {
+        "name": "test_complete_signup_and_verification_flow",
+        "line": 49
+      },
+      {
+        "name": "test_signup_flow_with_invalid_data",
+        "line": 117
+      },
+      {
+        "name": "test_signup_flow_with_duplicate_data",
+        "line": 148
+      },
+      {
+        "name": "test_email_verification_success_flow",
+        "line": 202
+      },
+      {
+        "name": "test_email_verification_invalid_token_flow",
+        "line": 222
+      },
+      {
+        "name": "test_email_verification_expired_token_flow",
+        "line": 240
+      },
+      {
+        "name": "test_email_verification_used_token_flow",
+        "line": 260
+      },
+      {
+        "name": "test_signup_model_creation_and_relationships",
+        "line": 298
+      },
+      {
+        "name": "test_signup_model_data_consistency",
+        "line": 339
+      },
+      {
+        "name": "test_form_save_and_model_creation",
+        "line": 390
+      },
+      {
+        "name": "test_form_validation_with_existing_data",
+        "line": 415
+      },
+      {
+        "name": "test_signup_view_form_integration",
+        "line": 479
+      },
+      {
+        "name": "test_signup_view_form_validation_integration",
+        "line": 515
+      }
+    ],
+    "leads/tests/test_signup_models.py": [
+      {
+        "name": "test_user_creation",
+        "line": 32
+      },
+      {
+        "name": "test_user_creation_with_organisor_flag",
+        "line": 47
+      },
+      {
+        "name": "test_user_creation_with_agent_flag",
+        "line": 57
+      },
+      {
+        "name": "test_user_email_verification_default",
+        "line": 70
+      },
+      {
+        "name": "test_user_email_verification_set",
+        "line": 76
+      },
+      {
+        "name": "test_user_gender_choices",
+        "line": 85
+      },
+      {
+        "name": "test_user_str_method",
+        "line": 95
+      },
+      {
+        "name": "test_user_get_full_name",
+        "line": 101
+      },
+      {
+        "name": "test_user_get_short_name",
+        "line": 107
+      },
+      {
+        "name": "test_user_unique_constraints",
+        "line": 113
+      },
+      {
+        "name": "test_userprofile_creation",
+        "line": 147
+      },
+      {
+        "name": "test_userprofile_get_or_create",
+        "line": 161
+      },
+      {
+        "name": "test_userprofile_unique_constraint",
+        "line": 182
+      },
+      {
+        "name": "test_userprofile_str_method",
+        "line": 198
+      },
+      {
+        "name": "test_email_verification_token_creation",
+        "line": 223
+      },
+      {
+        "name": "test_email_verification_token_str_method",
+        "line": 232
+      },
+      {
+        "name": "test_email_verification_token_is_expired_false",
+        "line": 239
+      },
+      {
+        "name": "test_email_verification_token_is_expired_true",
+        "line": 246
+      },
+      {
+        "name": "test_email_verification_token_is_expired_boundary",
+        "line": 257
+      },
+      {
+        "name": "test_email_verification_token_multiple_tokens_per_user",
+        "line": 269
+      },
+      {
+        "name": "test_email_verification_token_mark_as_used",
+        "line": 281
+      },
+      {
+        "name": "test_email_verification_token_cascade_delete",
+        "line": 294
+      },
+      {
+        "name": "test_organisor_creation",
+        "line": 312
+      },
+      {
+        "name": "test_organisor_str_method",
+        "line": 331
+      },
+      {
+        "name": "test_organisor_cascade_delete",
+        "line": 348
+      },
+      {
+        "name": "test_complete_signup_model_creation",
+        "line": 388
+      },
+      {
+        "name": "test_signup_model_relationships",
+        "line": 420
+      },
+      {
+        "name": "test_signup_model_cascade_operations",
+        "line": 447
+      },
+      {
+        "name": "test_signup_model_data_integrity",
+        "line": 473
+      },
+      {
+        "name": "test_signup_model_validation",
+        "line": 495
+      }
+    ],
+    "leads/tests/test_signup_views.py": [
+      {
+        "name": "test_signup_view_get",
+        "line": 48
+      },
+      {
+        "name": "test_signup_view_post_valid_data",
+        "line": 59
+      },
+      {
+        "name": "test_signup_view_post_invalid_data",
+        "line": 95
+      },
+      {
+        "name": "test_signup_view_duplicate_email",
+        "line": 109
+      },
+      {
+        "name": "test_signup_view_duplicate_username",
+        "line": 132
+      },
+      {
+        "name": "test_signup_view_password_mismatch",
+        "line": 155
+      },
+      {
+        "name": "test_signup_view_email_sending",
+        "line": 171
+      },
+      {
+        "name": "test_signup_view_template",
+        "line": 186
+      },
+      {
+        "name": "test_signup_view_form_class",
+        "line": 195
+      },
+      {
+        "name": "test_signup_view_success_url",
+        "line": 203
+      },
+      {
+        "name": "test_email_verification_sent_view_get",
+        "line": 218
+      },
+      {
+        "name": "test_email_verification_sent_view_content",
+        "line": 225
+      },
+      {
+        "name": "test_email_verification_valid_token",
+        "line": 257
+      },
+      {
+        "name": "test_email_verification_invalid_token",
+        "line": 275
+      },
+      {
+        "name": "test_email_verification_used_token",
+        "line": 291
+      },
+      {
+        "name": "test_email_verification_expired_token",
+        "line": 309
+      },
+      {
+        "name": "test_email_verification_already_verified",
+        "line": 328
+      },
+      {
+        "name": "test_email_verification_failed_view_get",
+        "line": 355
+      },
+      {
+        "name": "test_email_verification_failed_view_content",
+        "line": 362
+      },
+      {
+        "name": "test_complete_signup_flow",
+        "line": 394
+      },
+      {
+        "name": "test_signup_with_duplicate_data",
+        "line": 435
+      },
+      {
+        "name": "test_signup_form_validation",
+        "line": 462
+      },
+      {
+        "name": "test_get_returns_200",
+        "line": 501
+      },
+      {
+        "name": "test_uses_correct_template",
+        "line": 505
+      }
+    ],
+    "leads/tests/test_views.py": [
+      {
+        "name": "test_landing_page_view_get",
+        "line": 37
+      },
+      {
+        "name": "test_landing_page_function",
+        "line": 45
+      },
+      {
+        "name": "test_signup_view_get",
+        "line": 75
+      },
+      {
+        "name": "test_signup_view_post_valid",
+        "line": 82
+      },
+      {
+        "name": "test_signup_view_post_invalid",
+        "line": 107
+      },
+      {
+        "name": "test_signup_view_user_creation",
+        "line": 119
+      },
+      {
+        "name": "test_signup_view_email_sending",
+        "line": 138
+      },
+      {
+        "name": "test_email_verification_sent_view",
+        "line": 178
+      },
+      {
+        "name": "test_email_verification_view_valid_token",
+        "line": 185
+      },
+      {
+        "name": "test_email_verification_view_invalid_token",
+        "line": 201
+      },
+      {
+        "name": "test_email_verification_view_used_token",
+        "line": 211
+      },
+      {
+        "name": "test_email_verification_view_expired_token",
+        "line": 223
+      },
+      {
+        "name": "test_email_verification_failed_view",
+        "line": 238
+      },
+      {
+        "name": "test_login_view_get",
+        "line": 266
+      },
+      {
+        "name": "test_login_view_post_valid",
+        "line": 273
+      },
+      {
+        "name": "test_login_view_post_invalid",
+        "line": 283
+      },
+      {
+        "name": "test_login_view_email_authentication",
+        "line": 294
+      },
+      {
+        "name": "test_login_view_unverified_email",
+        "line": 304
+      },
+      {
+        "name": "test_lead_list_view_organisor",
+        "line": 390
+      },
+      {
+        "name": "test_lead_list_view_agent",
+        "line": 408
+      },
+      {
+        "name": "test_lead_list_view_superuser",
+        "line": 433
+      },
+      {
+        "name": "test_lead_list_view_unauthenticated",
+        "line": 457
+      },
+      {
+        "name": "test_lead_list_function",
+        "line": 464
+      },
+      {
+        "name": "test_lead_detail_view_organisor",
+        "line": 531
+      },
+      {
+        "name": "test_lead_detail_view_agent",
+        "line": 543
+      },
+      {
+        "name": "test_lead_detail_view_superuser",
+        "line": 567
+      },
+      {
+        "name": "test_lead_detail_view_unauthenticated",
+        "line": 585
+      },
+      {
+        "name": "test_lead_detail_view_not_found",
+        "line": 592
+      },
+      {
+        "name": "test_lead_detail_function",
+        "line": 600
+      },
+      {
+        "name": "test_lead_create_view_organisor_get",
+        "line": 680
+      },
+      {
+        "name": "test_lead_create_view_organisor_post",
+        "line": 688
+      },
+      {
+        "name": "test_lead_create_view_agent_unauthorized",
+        "line": 701
+      },
+      {
+        "name": "test_lead_create_view_unauthenticated",
+        "line": 709
+      },
+      {
+        "name": "test_lead_create_view_superuser",
+        "line": 716
+      },
+      {
+        "name": "test_lead_create_function",
+        "line": 730
+      },
+      {
+        "name": "test_lead_update_view_organisor_get",
+        "line": 788
+      },
+      {
+        "name": "test_lead_update_view_organisor_post",
+        "line": 796
+      },
+      {
+        "name": "test_lead_update_view_agent_unauthorized",
+        "line": 810
+      },
+      {
+        "name": "test_lead_update_view_unauthenticated",
+        "line": 831
+      },
+      {
+        "name": "test_lead_update_function",
+        "line": 838
+      },
+      {
+        "name": "test_lead_delete_view_organisor_get",
+        "line": 885
+      },
+      {
+        "name": "test_lead_delete_view_organisor_post",
+        "line": 893
+      },
+      {
+        "name": "test_lead_delete_view_agent_unauthorized",
+        "line": 905
+      },
+      {
+        "name": "test_lead_delete_view_unauthenticated",
+        "line": 926
+      },
+      {
+        "name": "test_lead_delete_function",
+        "line": 933
+      },
+      {
+        "name": "test_assign_agent_view_organisor_get",
+        "line": 1000
+      },
+      {
+        "name": "test_assign_agent_view_organisor_post",
+        "line": 1008
+      },
+      {
+        "name": "test_assign_agent_view_agent_unauthorized",
+        "line": 1023
+      },
+      {
+        "name": "test_assign_agent_view_unauthenticated",
+        "line": 1031
+      },
+      {
+        "name": "test_category_list_view_organisor",
+        "line": 1076
+      },
+      {
+        "name": "test_category_list_view_superuser",
+        "line": 1092
+      },
+      {
+        "name": "test_category_list_view_unauthenticated",
+        "line": 1112
+      },
+      {
+        "name": "test_get_agents_by_org_superuser",
+        "line": 1183
+      },
+      {
+        "name": "test_get_agents_by_org_non_superuser",
+        "line": 1201
+      },
+      {
+        "name": "test_get_agents_by_org_invalid_org",
+        "line": 1209
+      },
+      {
+        "name": "test_lead_activity_view_unauthenticated",
+        "line": 1274
+      },
+      {
+        "name": "test_lead_activity_view_organisor",
+        "line": 1280
+      },
+      {
+        "name": "test_lead_activity_view_agent_own_lead",
+        "line": 1291
+      },
+      {
+        "name": "test_lead_activity_view_agent_other_lead_404",
+        "line": 1301
+      },
+      {
+        "name": "test_lead_activity_view_superuser",
+        "line": 1330
+      },
+      {
+        "name": "test_lead_activity_view_nonexistent_lead",
+        "line": 1343
+      },
+      {
+        "name": "test_category_detail_view_unauthenticated",
+        "line": 1384
+      },
+      {
+        "name": "test_category_detail_view_organisor",
+        "line": 1390
+      },
+      {
+        "name": "test_category_detail_view_superuser",
+        "line": 1402
+      },
+      {
+        "name": "test_category_detail_view_other_org_category_404",
+        "line": 1415
+      },
+      {
+        "name": "test_category_detail_view_nonexistent",
+        "line": 1431
+      },
+      {
+        "name": "test_lead_category_update_view_unauthenticated",
+        "line": 1492
+      },
+      {
+        "name": "test_lead_category_update_view_organisor_get",
+        "line": 1498
+      },
+      {
+        "name": "test_lead_category_update_view_organisor_post",
+        "line": 1508
+      },
+      {
+        "name": "test_lead_category_update_view_agent_own_lead",
+        "line": 1530
+      },
+      {
+        "name": "test_lead_category_update_view_agent_other_lead_404",
+        "line": 1538
+      },
+      {
+        "name": "test_lead_category_update_view_superuser",
+        "line": 1568
+      },
+      {
+        "name": "test_lead_category_update_view_nonexistent_lead",
+        "line": 1581
+      }
+    ],
+    "orders/tests/test_forms.py": [
+      {
+        "name": "test_order_model_form_valid_data",
+        "line": 53
+      },
+      {
+        "name": "test_order_model_form_invalid_data",
+        "line": 65
+      },
+      {
+        "name": "test_order_model_form_clean_order_day_naive_datetime",
+        "line": 79
+      },
+      {
+        "name": "test_order_model_form_clean_order_day_aware_datetime",
+        "line": 100
+      },
+      {
+        "name": "test_order_model_form_fields",
+        "line": 119
+      },
+      {
+        "name": "test_order_model_form_lead_queryset",
+        "line": 128
+      },
+      {
+        "name": "test_order_model_form_save",
+        "line": 154
+      },
+      {
+        "name": "test_order_form_valid_data",
+        "line": 229
+      },
+      {
+        "name": "test_order_form_invalid_data",
+        "line": 239
+      },
+      {
+        "name": "test_order_form_product_quantity_validation_sufficient_stock",
+        "line": 249
+      },
+      {
+        "name": "test_order_form_product_quantity_validation_insufficient_stock",
+        "line": 259
+      },
+      {
+        "name": "test_order_form_product_quantity_validation_no_product",
+        "line": 273
+      },
+      {
+        "name": "test_order_form_fields",
+        "line": 286
+      },
+      {
+        "name": "test_order_form_meta_model",
+        "line": 295
+      },
+      {
+        "name": "test_order_form_meta_fields",
+        "line": 299
+      },
+      {
+        "name": "test_order_form_save",
+        "line": 304
+      },
+      {
+        "name": "test_order_product_formset_valid_data",
+        "line": 396
+      },
+      {
+        "name": "test_order_product_formset_invalid_data",
+        "line": 416
+      },
+      {
+        "name": "test_order_product_formset_empty_forms",
+        "line": 432
+      },
+      {
+        "name": "test_order_product_formset_insufficient_stock",
+        "line": 452
+      },
+      {
+        "name": "test_order_product_formset_save",
+        "line": 467
+      },
+      {
+        "name": "test_order_product_formset_extra_forms",
+        "line": 501
+      },
+      {
+        "name": "test_order_product_formset_can_delete",
+        "line": 510
+      },
+      {
+        "name": "test_order_product_formset_existing_order_products",
+        "line": 518
+      },
+      {
+        "name": "test_order_creation_with_forms_and_formset",
+        "line": 606
+      },
+      {
+        "name": "test_form_validation_consistency",
+        "line": 667
+      },
+      {
+        "name": "test_formset_with_mixed_valid_invalid_forms",
+        "line": 692
+      }
+    ],
+    "orders/tests/test_integration.py": [
+      {
+        "name": "test_complete_order_workflow",
+        "line": 91
+      },
+      {
+        "name": "test_order_update_workflow",
+        "line": 194
+      },
+      {
+        "name": "test_order_delete_workflow",
+        "line": 237
+      },
+      {
+        "name": "test_order_stock_reduction_signal_integration",
+        "line": 307
+      },
+      {
+        "name": "test_order_cancellation_stock_restoration_signal_integration",
+        "line": 344
+      },
+      {
+        "name": "test_order_product_deletion_stock_restoration_signal_integration",
+        "line": 395
+      },
+      {
+        "name": "test_order_finance_report_creation_integration",
+        "line": 510
+      },
+      {
+        "name": "test_order_total_price_calculation_integration",
+        "line": 555
+      },
+      {
+        "name": "test_order_organisation_isolation",
+        "line": 681
+      },
+      {
+        "name": "test_order_product_organisation_isolation",
+        "line": 734
+      }
+    ],
+    "orders/tests/test_models.py": [
+      {
+        "name": "test_order_creation",
+        "line": 79
+      },
+      {
+        "name": "test_order_str_representation",
+        "line": 88
+      },
+      {
+        "name": "test_order_creation_without_lead",
+        "line": 92
+      },
+      {
+        "name": "test_order_is_cancelled_default",
+        "line": 104
+      },
+      {
+        "name": "test_order_creation_date_auto_set",
+        "line": 108
+      },
+      {
+        "name": "test_order_organisation_relationship",
+        "line": 123
+      },
+      {
+        "name": "test_order_lead_relationship",
+        "line": 128
+      },
+      {
+        "name": "test_order_cascade_delete_organisation",
+        "line": 133
+      },
+      {
+        "name": "test_order_cascade_delete_lead",
+        "line": 143
+      },
+      {
+        "name": "test_order_products_relationship",
+        "line": 153
+      },
+      {
+        "name": "test_order_product_creation",
+        "line": 238
+      },
+      {
+        "name": "test_order_product_str_representation",
+        "line": 245
+      },
+      {
+        "name": "test_order_product_save_method",
+        "line": 250
+      },
+      {
+        "name": "test_order_product_quantity_positive",
+        "line": 265
+      },
+      {
+        "name": "test_order_product_total_price_default",
+        "line": 278
+      },
+      {
+        "name": "test_order_product_cascade_delete_order",
+        "line": 290
+      },
+      {
+        "name": "test_order_product_cascade_delete_product",
+        "line": 300
+      },
+      {
+        "name": "test_order_product_reduce_stock_success",
+        "line": 310
+      },
+      {
+        "name": "test_order_product_reduce_stock_insufficient",
+        "line": 331
+      },
+      {
+        "name": "test_order_product_reduce_stock_cancelled_order",
+        "line": 349
+      },
+      {
+        "name": "test_order_product_restore_stock",
+        "line": 365
+      },
+      {
+        "name": "test_order_product_created_signal",
+        "line": 440
+      },
+      {
+        "name": "test_order_product_deleted_signal",
+        "line": 462
+      },
+      {
+        "name": "test_order_cancelled_signal",
+        "line": 495
+      },
+      {
+        "name": "test_order_with_multiple_products",
+        "line": 597
+      },
+      {
+        "name": "test_order_total_price_calculation",
+        "line": 624
+      },
+      {
+        "name": "test_order_finance_report_integration",
+        "line": 646
+      },
+      {
+        "name": "test_order_stock_movement_integration",
+        "line": 670
+      },
+      {
+        "name": "test_order_cancellation_full_workflow",
+        "line": 708
+      }
+    ],
+    "orders/tests/test_signals.py": [
+      {
+        "name": "test_stock_reduced_on_order_product_create",
+        "line": 61
+      },
+      {
+        "name": "test_stock_movement_created_on_order_product_create",
+        "line": 70
+      },
+      {
+        "name": "test_no_stock_reduction_for_cancelled_order",
+        "line": 84
+      },
+      {
+        "name": "test_stock_restored_on_cancellation",
+        "line": 98
+      },
+      {
+        "name": "test_multiple_products_restored_on_cancellation",
+        "line": 114
+      },
+      {
+        "name": "test_stock_movement_created_on_cancellation",
+        "line": 134
+      }
+    ],
+    "orders/tests/test_views.py": [
+      {
+        "name": "test_order_list_view_requires_login",
+        "line": 79
+      },
+      {
+        "name": "test_order_list_view_authenticated_user",
+        "line": 85
+      },
+      {
+        "name": "test_order_list_view_template",
+        "line": 95
+      },
+      {
+        "name": "test_order_list_view_context",
+        "line": 102
+      },
+      {
+        "name": "test_order_list_view_filtered_by_organisation",
+        "line": 114
+      },
+      {
+        "name": "test_order_detail_view_requires_login",
+        "line": 216
+      },
+      {
+        "name": "test_order_detail_view_authenticated_user",
+        "line": 221
+      },
+      {
+        "name": "test_order_detail_view_template",
+        "line": 230
+      },
+      {
+        "name": "test_order_detail_view_context",
+        "line": 237
+      },
+      {
+        "name": "test_order_detail_view_access_denied_other_organisation",
+        "line": 254
+      },
+      {
+        "name": "test_order_detail_view_nonexistent_order",
+        "line": 270
+      },
+      {
+        "name": "test_order_create_view_requires_login",
+        "line": 334
+      },
+      {
+        "name": "test_order_create_view_get",
+        "line": 339
+      },
+      {
+        "name": "test_order_create_view_post_success",
+        "line": 353
+      },
+      {
+        "name": "test_order_create_view_post_insufficient_stock",
+        "line": 392
+      },
+      {
+        "name": "test_order_create_view_post_invalid_form",
+        "line": 422
+      },
+      {
+        "name": "test_order_update_view_requires_login",
+        "line": 508
+      },
+      {
+        "name": "test_order_update_view_get",
+        "line": 513
+      },
+      {
+        "name": "test_order_update_view_post_success",
+        "line": 526
+      },
+      {
+        "name": "test_order_update_view_access_denied_other_organisation",
+        "line": 564
+      },
+      {
+        "name": "test_order_cancel_view_post_success",
+        "line": 655
+      },
+      {
+        "name": "test_order_cancel_view_post_already_cancelled",
+        "line": 672
+      },
+      {
+        "name": "test_order_cancel_view_nonexistent_order",
+        "line": 687
+      },
+      {
+        "name": "test_order_delete_view_requires_login",
+        "line": 739
+      },
+      {
+        "name": "test_order_delete_view_get",
+        "line": 744
+      },
+      {
+        "name": "test_order_delete_view_post_success",
+        "line": 756
+      },
+      {
+        "name": "test_order_delete_view_access_denied_other_organisation",
+        "line": 770
+      },
+      {
+        "name": "test_order_delete_view_cancel_order_action",
+        "line": 786
+      }
+    ],
+    "organisors/tests/test_forms.py": [
+      {
+        "name": "test_form_initialization",
+        "line": 64
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 79
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 84
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 104
+      },
+      {
+        "name": "test_form_username_validation_unique",
+        "line": 122
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 140
+      },
+      {
+        "name": "test_form_password_validation",
+        "line": 160
+      },
+      {
+        "name": "test_form_password_optional",
+        "line": 171
+      },
+      {
+        "name": "test_form_password_required_together",
+        "line": 180
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 202
+      },
+      {
+        "name": "test_form_gender_choices",
+        "line": 214
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 228
+      },
+      {
+        "name": "test_form_save_without_password_change",
+        "line": 251
+      },
+      {
+        "name": "test_form_clean_methods",
+        "line": 263
+      },
+      {
+        "name": "test_form_validation_edge_cases",
+        "line": 279
+      },
+      {
+        "name": "test_form_field_help_texts",
+        "line": 300
+      },
+      {
+        "name": "test_form_meta_class",
+        "line": 309
+      },
+      {
+        "name": "test_form_initialization",
+        "line": 337
+      },
+      {
+        "name": "test_form_valid_data",
+        "line": 352
+      },
+      {
+        "name": "test_form_required_fields",
+        "line": 357
+      },
+      {
+        "name": "test_form_email_validation_unique",
+        "line": 377
+      },
+      {
+        "name": "test_form_username_validation_unique",
+        "line": 395
+      },
+      {
+        "name": "test_form_phone_number_validation_unique",
+        "line": 413
+      },
+      {
+        "name": "test_form_password_validation",
+        "line": 433
+      },
+      {
+        "name": "test_form_password_required",
+        "line": 444
+      },
+      {
+        "name": "test_form_save_method",
+        "line": 456
+      },
+      {
+        "name": "test_form_widget_attributes",
+        "line": 475
+      },
+      {
+        "name": "test_form_meta_class",
+        "line": 487
+      },
+      {
+        "name": "test_organisor_model_form_with_existing_user",
+        "line": 499
+      },
+      {
+        "name": "test_organisor_create_form_user_creation",
+        "line": 550
+      }
+    ],
+    "organisors/tests/test_integration.py": [
+      {
+        "name": "test_complete_organisor_lifecycle",
+        "line": 95
+      },
+      {
+        "name": "test_organisor_permission_system",
+        "line": 188
+      },
+      {
+        "name": "test_organisor_form_validation_integration",
+        "line": 277
+      },
+      {
+        "name": "test_organisor_model_relationships_integration",
+        "line": 338
+      },
+      {
+        "name": "test_organisor_email_verification_integration",
+        "line": 362
+      },
+      {
+        "name": "test_organisor_bulk_operations_integration",
+        "line": 405
+      },
+      {
+        "name": "test_organisor_error_handling_integration",
+        "line": 456
+      }
+    ],
+    "organisors/tests/test_mixins.py": [
+      {
+        "name": "test_is_admin_user_method",
+        "line": 48
+      },
+      {
+        "name": "test_admin_user_characteristics",
+        "line": 57
+      },
+      {
+        "name": "test_normal_user_characteristics",
+        "line": 65
+      },
+      {
+        "name": "test_is_admin_user_method",
+        "line": 106
+      },
+      {
+        "name": "test_organisor_user_characteristics",
+        "line": 115
+      },
+      {
+        "name": "test_agent_user_characteristics",
+        "line": 123
+      },
+      {
+        "name": "test_is_admin_user_method",
+        "line": 182
+      },
+      {
+        "name": "test_organisor_relationships",
+        "line": 191
+      },
+      {
+        "name": "test_organisor_creation",
+        "line": 201
+      },
+      {
+        "name": "test_user_role_hierarchy",
+        "line": 256
+      },
+      {
+        "name": "test_mixin_imports",
+        "line": 267
+      },
+      {
+        "name": "test_mixin_methods_exist",
+        "line": 277
+      }
+    ],
+    "organisors/tests/test_models.py": [
+      {
+        "name": "test_organisor_creation",
+        "line": 43
+      },
+      {
+        "name": "test_organisor_str_representation",
+        "line": 49
+      },
+      {
+        "name": "test_organisor_verbose_names",
+        "line": 53
+      },
+      {
+        "name": "test_organisor_user_relationship",
+        "line": 58
+      },
+      {
+        "name": "test_organisor_organisation_relationship",
+        "line": 64
+      },
+      {
+        "name": "test_organisor_user_one_to_one",
+        "line": 69
+      },
+      {
+        "name": "test_organisor_cascade_delete_user",
+        "line": 78
+      },
+      {
+        "name": "test_organisor_cascade_delete_organisation",
+        "line": 90
+      },
+      {
+        "name": "test_organisor_multiple_organisations",
+        "line": 115
+      },
+      {
+        "name": "test_organisor_model_fields",
+        "line": 133
+      },
+      {
+        "name": "test_organisor_foreign_key_constraints",
+        "line": 140
+      },
+      {
+        "name": "test_organisor_organisation_hierarchy",
+        "line": 206
+      },
+      {
+        "name": "test_organisor_user_profile_consistency",
+        "line": 212
+      },
+      {
+        "name": "test_organisor_organisation_access",
+        "line": 222
+      },
+      {
+        "name": "test_organisor_user_queries",
+        "line": 230
+      },
+      {
+        "name": "test_organisor_organisation_queries",
+        "line": 240
+      },
+      {
+        "name": "test_organisor_with_deleted_user",
+        "line": 256
+      },
+      {
+        "name": "test_organisor_with_deleted_organisation",
+        "line": 281
+      },
+      {
+        "name": "test_organisor_model_meta_options",
+        "line": 306
+      },
+      {
+        "name": "test_organisor_model_constraints",
+        "line": 319
+      }
+    ],
+    "organisors/tests/test_views.py": [
+      {
+        "name": "test_organisor_list_view_admin_access",
+        "line": 93
+      },
+      {
+        "name": "test_organisor_list_view_agent_access",
+        "line": 104
+      },
+      {
+        "name": "test_organisor_list_view_unauthenticated_access",
+        "line": 114
+      },
+      {
+        "name": "test_organisor_list_view_template",
+        "line": 123
+      },
+      {
+        "name": "test_organisor_list_view_context",
+        "line": 131
+      },
+      {
+        "name": "test_organisor_list_view_excludes_superuser",
+        "line": 144
+      },
+      {
+        "name": "test_organisor_create_view_admin_access",
+        "line": 231
+      },
+      {
+        "name": "test_organisor_create_view_agent_access",
+        "line": 239
+      },
+      {
+        "name": "test_organisor_create_view_unauthenticated_access",
+        "line": 249
+      },
+      {
+        "name": "test_organisor_create_view_template",
+        "line": 258
+      },
+      {
+        "name": "test_organisor_create_view_form_class",
+        "line": 266
+      },
+      {
+        "name": "test_organisor_create_view_post_valid_data",
+        "line": 276
+      },
+      {
+        "name": "test_organisor_create_view_post_invalid_data",
+        "line": 302
+      },
+      {
+        "name": "test_organisor_create_view_post_duplicate_email",
+        "line": 319
+      },
+      {
+        "name": "test_organisor_create_view_post_duplicate_username",
+        "line": 336
+      },
+      {
+        "name": "test_organisor_create_view_post_password_mismatch",
+        "line": 353
+      },
+      {
+        "name": "test_organisor_create_view_success_redirect",
+        "line": 370
+      },
+      {
+        "name": "test_organisor_detail_view_admin_access_own_profile",
+        "line": 449
+      },
+      {
+        "name": "test_organisor_detail_view_admin_access_other_profile",
+        "line": 460
+      },
+      {
+        "name": "test_organisor_detail_view_organisor_access_own_profile",
+        "line": 471
+      },
+      {
+        "name": "test_organisor_detail_view_organisor_access_other_profile",
+        "line": 482
+      },
+      {
+        "name": "test_organisor_detail_view_agent_access",
+        "line": 490
+      },
+      {
+        "name": "test_organisor_detail_view_unauthenticated_access",
+        "line": 498
+      },
+      {
+        "name": "test_organisor_detail_view_template",
+        "line": 507
+      },
+      {
+        "name": "test_organisor_detail_view_nonexistent_organisor",
+        "line": 516
+      },
+      {
+        "name": "test_organisor_update_view_admin_access_own_profile",
+        "line": 593
+      },
+      {
+        "name": "test_organisor_update_view_admin_access_other_profile",
+        "line": 603
+      },
+      {
+        "name": "test_organisor_update_view_organisor_access_own_profile",
+        "line": 613
+      },
+      {
+        "name": "test_organisor_update_view_organisor_access_other_profile",
+        "line": 623
+      },
+      {
+        "name": "test_organisor_update_view_template",
+        "line": 631
+      },
+      {
+        "name": "test_organisor_update_view_form_class",
+        "line": 639
+      },
+      {
+        "name": "test_organisor_update_view_post_valid_data",
+        "line": 648
+      },
+      {
+        "name": "test_organisor_update_view_post_invalid_data",
+        "line": 665
+      },
+      {
+        "name": "test_organisor_update_view_success_redirect",
+        "line": 679
+      },
+      {
+        "name": "test_organisor_delete_view_admin_access",
+        "line": 758
+      },
+      {
+        "name": "test_organisor_delete_view_agent_access",
+        "line": 768
+      },
+      {
+        "name": "test_organisor_delete_view_unauthenticated_access",
+        "line": 778
+      },
+      {
+        "name": "test_organisor_delete_view_template",
+        "line": 787
+      },
+      {
+        "name": "test_organisor_delete_view_post_confirm",
+        "line": 795
+      },
+      {
+        "name": "test_organisor_delete_view_success_redirect",
+        "line": 812
+      },
+      {
+        "name": "test_complete_organisor_management_flow",
+        "line": 855
+      }
+    ],
+    "tasks/tests/test_commands.py": [
+      {
+        "name": "test_dry_run_does_not_create_notifications",
+        "line": 42
+      },
+      {
+        "name": "test_creates_notification_when_lead_has_no_order",
+        "line": 57
+      },
+      {
+        "name": "test_does_not_notify_twice_same_month",
+        "line": 79
+      },
+      {
+        "name": "test_dry_run_does_not_create_notifications",
+        "line": 128
+      },
+      {
+        "name": "test_creates_notification_when_order_day_is_today",
+        "line": 142
+      },
+      {
+        "name": "test_dry_run_does_not_create_notifications",
+        "line": 183
+      },
+      {
+        "name": "test_creates_notification_for_task_due_tomorrow",
+        "line": 206
+      },
+      {
+        "name": "test_creates_fake_notifications_for_first_user_when_no_username",
+        "line": 275
+      },
+      {
+        "name": "test_creates_fake_notifications_for_given_username",
+        "line": 298
+      },
+      {
+        "name": "test_nonexistent_user_shows_error",
+        "line": 321
+      }
+    ],
+    "tasks/tests/test_context_processors.py": [
+      {
+        "name": "test_authenticated_user_no_notifications",
+        "line": 36
+      },
+      {
+        "name": "test_authenticated_user_with_unread_notifications",
+        "line": 41
+      },
+      {
+        "name": "test_read_notifications_not_counted",
+        "line": 54
+      },
+      {
+        "name": "test_other_users_notifications_not_counted",
+        "line": 67
+      },
+      {
+        "name": "test_anonymous_user_returns_zero",
+        "line": 81
+      }
+    ],
+    "tasks/tests/test_forms.py": [
+      {
+        "name": "test_valid_data",
+        "line": 51
+      },
+      {
+        "name": "test_required_fields",
+        "line": 55
+      },
+      {
+        "name": "test_content_not_required",
+        "line": 62
+      },
+      {
+        "name": "test_end_date_before_start_date",
+        "line": 68
+      },
+      {
+        "name": "test_same_start_and_end_date",
+        "line": 76
+      },
+      {
+        "name": "test_status_choices",
+        "line": 83
+      },
+      {
+        "name": "test_priority_choices",
+        "line": 90
+      },
+      {
+        "name": "test_invalid_status",
+        "line": 97
+      },
+      {
+        "name": "test_invalid_priority",
+        "line": 103
+      },
+      {
+        "name": "test_fields_in_meta",
+        "line": 109
+      },
+      {
+        "name": "test_widgets_have_css_classes",
+        "line": 114
+      },
+      {
+        "name": "test_valid_data",
+        "line": 137
+      },
+      {
+        "name": "test_assigned_to_field_present",
+        "line": 145
+      },
+      {
+        "name": "test_assigned_to_queryset_filtered_by_org",
+        "line": 149
+      },
+      {
+        "name": "test_assigned_to_required",
+        "line": 155
+      },
+      {
+        "name": "test_end_date_validation",
+        "line": 164
+      },
+      {
+        "name": "test_fields_include_assigned_to",
+        "line": 173
+      },
+      {
+        "name": "test_organisation_queryset",
+        "line": 182
+      },
+      {
+        "name": "test_assigned_to_pk_choices_with_org",
+        "line": 190
+      },
+      {
+        "name": "test_assigned_to_pk_empty_without_org",
+        "line": 201
+      },
+      {
+        "name": "test_clean_assigned_to_pk_self_assign_rejected",
+        "line": 208
+      },
+      {
+        "name": "test_end_date_before_start_date",
+        "line": 229
+      },
+      {
+        "name": "test_organisation_field_present",
+        "line": 249
+      }
+    ],
+    "tasks/tests/test_models.py": [
+      {
+        "name": "test_create_task",
+        "line": 68
+      },
+      {
+        "name": "test_str_representation",
+        "line": 73
+      },
+      {
+        "name": "test_default_status",
+        "line": 77
+      },
+      {
+        "name": "test_default_priority",
+        "line": 81
+      },
+      {
+        "name": "test_status_choices",
+        "line": 85
+      },
+      {
+        "name": "test_priority_choices",
+        "line": 90
+      },
+      {
+        "name": "test_assigned_to_relationship",
+        "line": 95
+      },
+      {
+        "name": "test_assigned_by_relationship",
+        "line": 100
+      },
+      {
+        "name": "test_assigned_by_nullable",
+        "line": 105
+      },
+      {
+        "name": "test_organisation_relationship",
+        "line": 109
+      },
+      {
+        "name": "test_cascade_delete_assigned_to",
+        "line": 114
+      },
+      {
+        "name": "test_set_null_on_assigned_by_delete",
+        "line": 124
+      },
+      {
+        "name": "test_cascade_delete_organisation",
+        "line": 134
+      },
+      {
+        "name": "test_auto_timestamps",
+        "line": 145
+      },
+      {
+        "name": "test_ordering",
+        "line": 150
+      },
+      {
+        "name": "test_verbose_names",
+        "line": 159
+      },
+      {
+        "name": "test_content_blank",
+        "line": 163
+      },
+      {
+        "name": "test_title_max_length",
+        "line": 167
+      },
+      {
+        "name": "test_create_notification",
+        "line": 182
+      },
+      {
+        "name": "test_str_representation",
+        "line": 190
+      },
+      {
+        "name": "test_default_is_read",
+        "line": 196
+      },
+      {
+        "name": "test_unique_key",
+        "line": 202
+      },
+      {
+        "name": "test_key_nullable",
+        "line": 211
+      },
+      {
+        "name": "test_cascade_delete_user",
+        "line": 217
+      },
+      {
+        "name": "test_cascade_delete_task",
+        "line": 226
+      },
+      {
+        "name": "test_task_nullable",
+        "line": 235
+      },
+      {
+        "name": "test_ordering",
+        "line": 241
+      },
+      {
+        "name": "test_auto_created_at",
+        "line": 248
+      },
+      {
+        "name": "test_display_url_with_action_url",
+        "line": 260
+      },
+      {
+        "name": "test_display_url_fallback_to_task",
+        "line": 267
+      },
+      {
+        "name": "test_display_url_none_when_no_task_or_action",
+        "line": 275
+      },
+      {
+        "name": "test_display_label_with_action_label",
+        "line": 281
+      },
+      {
+        "name": "test_display_label_fallback_to_view_task",
+        "line": 288
+      },
+      {
+        "name": "test_display_label_none_when_no_task_or_label",
+        "line": 295
+      },
+      {
+        "name": "test_task_with_multiple_notifications",
+        "line": 309
+      },
+      {
+        "name": "test_user_tasks_and_notifications",
+        "line": 318
+      },
+      {
+        "name": "test_multiple_tasks_same_organisation",
+        "line": 326
+      }
+    ],
+    "tasks/tests/test_views.py": [
+      {
+        "name": "test_unauthenticated_redirects_to_login",
+        "line": 76
+      },
+      {
+        "name": "test_organisor_sees_org_tasks",
+        "line": 81
+      },
+      {
+        "name": "test_agent_sees_only_assigned_tasks",
+        "line": 91
+      },
+      {
+        "name": "test_superuser_sees_all_tasks",
+        "line": 103
+      },
+      {
+        "name": "test_filter_by_status",
+        "line": 112
+      },
+      {
+        "name": "test_filter_by_priority",
+        "line": 121
+      },
+      {
+        "name": "test_search_by_title",
+        "line": 129
+      },
+      {
+        "name": "test_template_used",
+        "line": 138
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 150
+      },
+      {
+        "name": "test_organisor_access",
+        "line": 155
+      },
+      {
+        "name": "test_agent_access_own_task",
+        "line": 162
+      },
+      {
+        "name": "test_agent_cannot_see_other_org_task",
+        "line": 177
+      },
+      {
+        "name": "test_template_used",
+        "line": 188
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 201
+      },
+      {
+        "name": "test_organisor_get",
+        "line": 205
+      },
+      {
+        "name": "test_agent_get",
+        "line": 211
+      },
+      {
+        "name": "test_organisor_create_task",
+        "line": 216
+      },
+      {
+        "name": "test_agent_self_assign",
+        "line": 231
+      },
+      {
+        "name": "test_create_sends_notification",
+        "line": 253
+      },
+      {
+        "name": "test_invalid_date_range",
+        "line": 273
+      },
+      {
+        "name": "test_organisor_update",
+        "line": 295
+      },
+      {
+        "name": "test_organisor_post_update",
+        "line": 301
+      },
+      {
+        "name": "test_agent_cannot_update_other_task",
+        "line": 319
+      },
+      {
+        "name": "test_organisor_delete",
+        "line": 335
+      },
+      {
+        "name": "test_agent_cannot_delete_other_task",
+        "line": 342
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 351
+      },
+      {
+        "name": "test_template_used",
+        "line": 357
+      },
+      {
+        "name": "test_unauthenticated_redirects",
+        "line": 370
+      },
+      {
+        "name": "test_user_sees_own_notifications",
+        "line": 374
+      },
+      {
+        "name": "test_template_used",
+        "line": 384
+      },
+      {
+        "name": "test_mark_single_read",
+        "line": 393
+      },
+      {
+        "name": "test_mark_read_redirects_to_task",
+        "line": 406
+      },
+      {
+        "name": "test_mark_read_without_task_redirects_to_list",
+        "line": 421
+      },
+      {
+        "name": "test_cannot_mark_other_user_notification",
+        "line": 435
+      },
+      {
+        "name": "test_mark_all_read_post",
+        "line": 449
+      },
+      {
+        "name": "test_mark_all_read_get_redirects",
+        "line": 459
+      },
+      {
+        "name": "test_does_not_affect_other_users",
+        "line": 468
+      }
+    ]
+  },
+  "file_hashes": {
+    ".env.example": "841b1a1ea1666ae6d002a604d7cc02ec4ee2b4bd9570ec6a5c1eb214697611ea",
+    ".gitignore": "76a03aa88cfa86b3e4c73082df4011128512cdd0d9e42d4c3596b5664d8f9a8a",
+    "LICENSE": "b4b13e84cc535eaf2c002f3eca5e0b4e44fd8dc52ce582f01c26151e581fbb51",
+    "ProductsAndStock/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ProductsAndStock/admin.py": "2f24873aa53e9dabc59e84056396eed6743f832972e2c8f1640883677b8d49e1",
+    "ProductsAndStock/apps.py": "4bd1d0d7afc39c00b0c7a7eb69410ec6549190936d2d7275849fc3d0b108172e",
+    "ProductsAndStock/bulk_price_form.py": "fe76d78b22916c2023d71931cc79e86c3bef3351d7abeea9e2463cbee6296c67",
+    "ProductsAndStock/forms.py": "0e7fc6997ab66752c8e3d506ac4a3dead1aa5de285ed3fc3c5f1de83459dbefb",
+    "ProductsAndStock/management/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ProductsAndStock/management/commands/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ProductsAndStock/management/commands/create_categories.py": "f990289c4ed68a80957c56a723cab421b4f8ea1769a0229da818ab1bddda3cca",
+    "ProductsAndStock/management/commands/create_sample_products.py": "f2db918037e287bf7f22b15e3e560fa0641581732d758b0eeb7e21a31f4247eb",
+    "ProductsAndStock/management/commands/reassign_products_to_organisor.py": "e6e805d9cceee64e9cb4e637d24fc6a22dba63759aad326f3e55b4716cf45afa",
+    "ProductsAndStock/management/commands/update_product_descriptions_english.py": "df604d08bc7dffab7105f9194a43ee1e4e67d645db406ea6b7f7717bc466a68e",
+    "ProductsAndStock/management/commands/update_products_for_dashboard.py": "175c71fc91bdd0329c47c76216dca7262aae491946272e31435009460d5ddbdf",
+    "ProductsAndStock/migrations/0001_initial.py": "9c96871f9cd93f37494231d7c42e35c0199287b454a37cc27336fab32df8ce3f",
+    "ProductsAndStock/migrations/0002_productsandstock_organisation.py": "a37cc4f4c760dcedbffae8837af90f18c9f62c18bfc20f20076f24714ba21200",
+    "ProductsAndStock/migrations/0003_alter_productsandstock_unique_together.py": "8938a0798794d8f8b25f6e21d409c1cdac16c85683feb8935bec8be7250cd2fd",
+    "ProductsAndStock/migrations/0004_productsandstock_minimum_stock_level.py": "d333a2ba1fb09462d4845b8d91320ba870fbf19570a85944294fe01f89048c80",
+    "ProductsAndStock/migrations/0005_stockmovement.py": "8ca14c9f2e53e3bac012da5961ca0a06dc9609dd845f70d0169f64b8bdb3cf0b",
+    "ProductsAndStock/migrations/0006_category_productsandstock_category_subcategory_and_more.py": "f63d8bdddf67a70511f5597e856a5da36fa26db56ad5f81d4cdc4f552315ec61",
+    "ProductsAndStock/migrations/0007_make_category_required.py": "d99b814f4989754588b62247447a711a7d286bcb5e3aae45e2d77c4653c542de",
+    "ProductsAndStock/migrations/0008_productsandstock_cost_price_and_more.py": "7e3b360da3e7936491045bfc81d550e5a7fa5aa6b988b1900f3f360673f82e42",
+    "ProductsAndStock/migrations/0009_stockalert_stockrecommendation_salesstatistics.py": "6f05059e4d9acb2bfa410ef6db13bafec7d44f62bc8d7561130b151a6c3b470e",
+    "ProductsAndStock/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ProductsAndStock/models.py": "93202a4443a343c35036d593b2e044743ed04e3e99da1e187da566fa06b20cb6",
+    "ProductsAndStock/templates/ProductsAndStock/ProductAndStock_create.html": "674590d6a4e7e22bf30ddfb84c695f73866cbe2398aebc02150826b90f3c7dc4",
+    "ProductsAndStock/templates/ProductsAndStock/ProductAndStock_delete.html": "76df69f5f2fd8367e5a8a5c0b9256990e5f5233172d268f7eaff37875677e75f",
+    "ProductsAndStock/templates/ProductsAndStock/ProductAndStock_detail.html": "cd1324fcf8c0e87c10971549e2aeacca13d46df89c90392d2c8cb38004bbbbfa",
+    "ProductsAndStock/templates/ProductsAndStock/ProductAndStock_list.html": "6998cbcfcc1deb5b6e301376241faab6ade135fb8ac42059adacf021cd09dc83",
+    "ProductsAndStock/templates/ProductsAndStock/ProductAndStock_update.html": "20c2b05585a20581775cc8b58111c1c09b0d1f0efa8d63f9880c80e238ea66e2",
+    "ProductsAndStock/templates/ProductsAndStock/bulk_price_update.html": "2f23da13d9e47701ccb391092ac4c3d569852b6ab25ae72a4d448c00a7ad4f2a",
+    "ProductsAndStock/templates/ProductsAndStock/product_charts.html": "084da8d26c9579250b038b22c8dccbd0d1445f711125589952d850bed784d783",
+    "ProductsAndStock/templates/ProductsAndStock/sales_dashboard.html": "bdfe63e57d3a707e973dc6e252146ca0a9693927ec61ce1a6abd269461c69033",
+    "ProductsAndStock/tests/__init__.py": "b620b272d0a06d282f81a8c1f066528e5a5715e55cd5e0ce20162b0ca65e862e",
+    "ProductsAndStock/tests/test_commands.py": "61c819c0139d541b08c35fac8d547f5902f06a53fd8b8d57bab14c62b8665a06",
+    "ProductsAndStock/tests/test_forms.py": "eda643244261bd161b7f23052e3264b5fdc36be2f66b100ed9aed64f57b27d08",
+    "ProductsAndStock/tests/test_integration.py": "85a90bb7209490d98e4e51f536f26ec2bd8dc038c32d5a99483d1ee8070104ce",
+    "ProductsAndStock/tests/test_models.py": "b33af3a807fbd36fe287a8a0b9b71001a48ebf85551454f92afc6ead8cb67ebc",
+    "ProductsAndStock/tests/test_signals.py": "08be850eda2d0203f66be4c807a35f67274ee7feb45317584c182c5be4886553",
+    "ProductsAndStock/tests/test_views.py": "8393514ab59caaf63739806f6e06f069e59a13d80ce1bac8b738531b3f8ab297",
+    "ProductsAndStock/tests/test_views_simple.py": "d64447e219504e0e140b6c0e3d3c0c0b4bc2bda649f1860aff3e05ea241b6c50",
+    "ProductsAndStock/urls.py": "be56bc88f3b028166033688a79e09ca202c61d3ec11210e94e44d161a3d702f7",
+    "ProductsAndStock/views.py": "c50fb2b81c217e66c2c23e3f18d750ab2efa9a1c46e4439b51ad162b656f3564",
+    "README.md": "33d7e0acd057c4a24d08f0f5df5db0c6a2081d216566b497deceded33b8cf97b",
+    "activity_log/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "activity_log/admin.py": "c6a2f737f30bcb2c9d5300270717c4cfd0457f37f60d027f5af35744fbe577e2",
+    "activity_log/apps.py": "49a73d02aa4688fed668dcedf31e3287aefb823771b2d379b773902b0216a6a2",
+    "activity_log/migrations/0001_initial.py": "db464dfa95e3bca2ff9d5864f53225fcf00954147615b0f23592abc3e4c2a1e6",
+    "activity_log/migrations/0002_add_affected_agent.py": "3b07baa00e10bc7191157b62b3b4d6eb4ed1dc32757b75a28898d15940b2f118",
+    "activity_log/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "activity_log/models.py": "1e44f1b366f842425e43d7f7cdd3d9e8041347d3a1fd1b4d5080cb67e0e24204",
+    "activity_log/templates/activity_log/activity_log_list.html": "0f0f212dffba471655e38fba5d8a44b7b9dc88d3b8e57618654b5a1997cb7189",
+    "activity_log/tests/__init__.py": "e836c5ff724e5b9f4c0de08c96a19d4de969a6044a419fc03374e2657b7a68f5",
+    "activity_log/tests/test_models.py": "0e16c7e9a2db0c88105f7c54d8c1d5c0e8592c0742acd3db766577879eefb639",
+    "activity_log/tests/test_views.py": "4684be75e73ac63fb04509b78117dfe34bf1d0b2188e1934377a43d185fc7036",
+    "activity_log/urls.py": "2031109b4115f7a87d819eda4789979b377b0464664f8b1b6e6e420fac1c7f84",
+    "activity_log/views.py": "a57fc92afacfda26fdd6eea6c94b08caf9ea636665200450ab82f2580eed88ee",
+    "agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/admin.py": "b2e328e31f08dc907100505521d13ee6a9ea67a240655d051120011ce49cfaf8",
+    "agents/apps.py": "71852f6e9435e96bb3905010fbebd1d9049f6497e2a68b23d023d45131ba7e8b",
+    "agents/forms.py": "3949e34013301c89ba1b5a2188c28622a0c0b7cd5504133f2ece9b2c9c0cb80d",
+    "agents/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/mixins.py": "bc8c1728921f6aba4a0294efb820b581ca78db9a71981461796d6b127163227d",
+    "agents/models.py": "5f4ef6c265747cfe52f18a52fb798a57f47bc6d3116a0de96e212772f71c87d8",
+    "agents/templates/agents/agent_create.html": "2ae1aeec591e6074e42bebf6b289d745d2e72e8ad3f51330af0c2e1dad44e332",
+    "agents/templates/agents/agent_delete.html": "324085beb11ae08d6120474ae5f767ef5a9f078b60f6f8cebc70845bc4a85ea9",
+    "agents/templates/agents/agent_detail.html": "b8882c8db2324fa532ab6dd8487c03a8d2bbe2a4f8f2749c2d59f100aeb4c53d",
+    "agents/templates/agents/agent_list.html": "db29f40164943f0458cf78b08c3279536a822409b6a39aec821bad690cb7eeda",
+    "agents/templates/agents/agent_update.html": "58977a13d53e290a9d4b7e1f8f2fe51751103460874b400b3679a9899d823bd4",
+    "agents/tests/__init__.py": "cd8c05b9ab7065a027621a75447177faaf2e9336aa078371863f8d3663a08677",
+    "agents/tests/test_forms.py": "40687d305e1cbb84e448e7f5a2961b5ec94ab42e7f1bb318309ed370558b3a45",
+    "agents/tests/test_integration.py": "64005d25581a83e1eaa8ab4ab1865279046356a97e85061d09df338675dd43d9",
+    "agents/tests/test_mixins.py": "f92a5f6e8303faf9017f2912f731a513c6d013f919ffcf9897dba858f87dbd85",
+    "agents/tests/test_models.py": "8b743e0ecc4cc6aa6b62b3f4601299cca3d72b1c207744dc4c9d90ddb17007d3",
+    "agents/tests/test_views.py": "602b0987c23694809bf6fcc909dc91078411779fec9cb3f868f7267737146a8e",
+    "agents/tests/test_views_simple.py": "3b40fb369027ec18a414f3299fd91a6d882572211e1f096464b76d36ce7a24a4",
+    "agents/urls.py": "bcd5cb11e78032540e848dd0999c320b0134eee88d43d365d7d7fbf50013ba13",
+    "agents/views.py": "0a144f21981bd0b20e14e20bc1e2e1649bc65e2e316e1c0d7f6104b0eb6805d8",
+    "build.sh": "c44ba07ff242fcb85e529d80efa9db6b5538c747563f8cf639bb132016792fc6",
+    "djcrm/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "djcrm/asgi.py": "2e60f4441baa1a598088e376efde7fdcbd0e78f2c05080d000c8778502cb6b03",
+    "djcrm/settings.py": "89f648c1dfba836043dd093d7f56bb2cdb13e894d2c4b02ebe21768e8d0c16a2",
+    "djcrm/storage.py": "998802f589f12adb36f1f1a94a9d9340f0c16652b6a948afa2dd6370a4d18bec",
+    "djcrm/urls.py": "b2498a3418270cddc35d960216727dbbdfa33267cd251e34ef0f49d11143e57c",
+    "djcrm/views.py": "b48a5d942c9eeb3ad63d85415cba3f106fe630d049f6f56c0a8f43fa9ce8d8fb",
+    "djcrm/wsgi.py": "bda927f61409bcf7921cda3022fa7729e7880a6d1bae249b0f1d51fad47d98b7",
+    "docs/CLOUDFLARE_R2.md": "34629f13ec5c7a3af468c11d2a11488916a183eea056fb416c63c6687c3518ca",
+    "docs/GMAIL_API_SETUP.md": "2205cf1520164f0f08afedb9df6778ff24eadff2cb602e28bf5a80f65c910aa4",
+    "finance/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finance/admin.py": "808e619a34f6aa9edc3b26e94284f00064614a71a130e783407beb48c2414c1a",
+    "finance/apps.py": "be5562265622d080edab435bf31b9cdeaf3791514e4d385b4096866d67562958",
+    "finance/forms.py": "4d82f990ffcd039ac59b026a972db6adc042e56eb8e80b19d8a0266844a6b228",
+    "finance/migrations/0001_initial.py": "697b4427499af314773bc6460d95b669dbbba7d828b20fbfb3c52e83ebb0fdb0",
+    "finance/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finance/models.py": "845fb77f45622c0260bc2822d7d518b93f6679fe28f22d0e40fb4329fc916567",
+    "finance/templates/finance/financial_report.html": "c1817aa58811a677ec1e3e0b134eaa6186b9aca1be3b82ab1acec6c6c5f00167",
+    "finance/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finance/tests/test_forms.py": "c0bfe78ae8aeb3fcb089347d94ea80cadb84daefabfeb99baa26aecb2b89ae62",
+    "finance/tests/test_integration.py": "d0dd53921bf34ae82f76b899e74ab35bc276b5cc76bf8172b22783f2bf81cea1",
+    "finance/tests/test_models.py": "c421cccc3067dff292dd3f61b14535cffaf206c598392edfab94fd22520b9822",
+    "finance/tests/test_views.py": "fa7ea73bf7b2128e630ce458c3473648f27d3f6ce451d2dcc6c6652208d1242d",
+    "finance/urls.py": "8f114a342db9cd1a3c883d85484ac6c6880044f55ceaa9e5d910cbda457858b4",
+    "finance/views.py": "408300da334b492c0b066348b67fd69c67602aaf44fc5df3e7c5471d55148377",
+    "leads/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "leads/admin.py": "883725671f9638b82af907acc3e2e692cd6d2e84f91019fb77380aed63b0d42d",
+    "leads/apps.py": "77ca3ce7a4859ed5939a667808bb8d2b1d61bae335f5cb9ff5861088aca0b66c",
+    "leads/authentication.py": "72e6a61e573695a2cbd96063b08fa34082a553cb47afcb06cd5feb5d1256e3e0",
+    "leads/forms.py": "cb706178f3cae89e10e64f5a86439d2bdf03b6abef5813a9ae8734217d5333dd",
+    "leads/management/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "leads/management/commands/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "leads/management/commands/clean_duplicate_categories.py": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+    "leads/management/commands/create_default_categories.py": "310cf460d8156cf82578f42991d0b31fa94cbf5df5282e8599d38f30b225f127",
+    "leads/management/commands/final_cleanup.py": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+    "leads/management/commands/force_clean_duplicates.py": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+    "leads/migrations/0001_initial.py": "75ea494de3ec8fec8a2adf3031aa4c47ce993d3ed816745af8d2edd3707376ac",
+    "leads/migrations/0002_userprofile_agent_organisation.py": "59d92ec7effd0c58b84bed74e52f1063aef7df0e75d9580027e526cf0ef314c1",
+    "leads/migrations/0003_user_is_agent_user_is_organiser.py": "8db28d0cd4d2e2d04e431d33ade4dcc11d84255f0ea5e3da017187eeb52c406a",
+    "leads/migrations/0004_rename_is_organiser_user_is_organisor.py": "c73f818b213d48a81d834ffb07fe2415f67989643b585c4e359bbfdc4958208a",
+    "leads/migrations/0005_alter_lead_agent.py": "57346a45630d1847d21b2b3293b9a154fc2bd196b6fbc65d0a507b0f080c8454",
+    "leads/migrations/0006_lead_organisation.py": "0b60a58e666a1db4a89951d71a40dd90a5665bbc22a98fd3f04bcce712b73990",
+    "leads/migrations/0007_category_lead_category.py": "c859731e7647ef79581ab479125cbe67da012301cafcc651bcb0fee3be03b86e",
+    "leads/migrations/0008_category_organisation.py": "8e6a422c514e453edbc30993c506a14ec5de1dbbbada5968028b53e8ade76108",
+    "leads/migrations/0009_alter_category_organisation.py": "6226d4142557f6d3ee994fa7ee6e9d2d94288cc313a87a018d656fa5510a7218",
+    "leads/migrations/0010_alter_lead_category.py": "2676cd47bb7a3ba736365091100c3d8b99ebcea1a81363f1ddfe961cd2a689d6",
+    "leads/migrations/0011_lead_date_added_lead_description_lead_email_and_more.py": "628510bffcaa941f9f29bafcd56bbab7965665d288bc32edbba0198dba954c2d",
+    "leads/migrations/0012_lead_address.py": "a58d95f7ea563160a8343ef7818b9a58c0ac559cc09fa3c27d94d3f76de097af",
+    "leads/migrations/0013_user_address_user_age_user_description_and_more.py": "9c6d8d0db2f1818089db2db97dd5577b833f0953e785e88d85cffd8ab5e078b0",
+    "leads/migrations/0014_remove_user_address_remove_user_age_and_more.py": "5ad6bd41ec7a16b90820ff3ee85d2533e98810b2b2ba4043235a45a519717f60",
+    "leads/migrations/0015_alter_userprofile_user.py": "69c86b3c7390ac93cdc9994dd6854b75a53ab1f649e14a6ca1e7c97370a43613",
+    "leads/migrations/0016_alter_userprofile_unique_together.py": "99217ab0fd7cd68ea47150a1ae203ce5d43f25171f31086c22f7c521ad0c194f",
+    "leads/migrations/0017_user_email_verified_emailverificationtoken.py": "8fed998f49787796f3bcaaf09780302688aa7979896009e10cd08ec8c766e13e",
+    "leads/migrations/0018_sourcecategory_lead_source_category_valuecategory_and_more.py": "640d454c0547427a4d5c12e73a14db2f90da0d69a48ce34526c6067e688ba196",
+    "leads/migrations/0019_user_phone_number.py": "d2e343f7a8db751cae4997fd939788f9312f129715b376af1beccd0b6b0e125a",
+    "leads/migrations/0020_user_age_user_gender.py": "728d9f4d93a61381cada7d965cc6f34eee0964acf9b87b21795e34d50bedd237",
+    "leads/migrations/0021_remove_user_age_user_date_of_birth_alter_user_gender.py": "d513c1b6af7de7d6bb2d0caddeb647198b0999ac868c28ce48c8a873de20e381",
+    "leads/migrations/0022_alter_user_phone_number.py": "431f58096a149114223fd3ea7fe98e2363a1853736eb04e86de6fb68adb5242b",
+    "leads/migrations/0023_alter_lead_email_alter_lead_phone_number_and_more.py": "c191c0c4ae65c690f00b19b98cab23898b1260461d45f1b7d662b922c5bab75e",
+    "leads/migrations/0024_user_profile_image.py": "f866458476439362b1208e241dad1c91538f627bf3ff53a01ef179450de7b4d9",
+    "leads/migrations/0025_add_lead_profile_image.py": "b47cd126603f4cdc91db83732f8d1845414b54af15378f62b3e830f20897e0f0",
+    "leads/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "leads/models.py": "7a99344e143c055226fc85d6c54530319de78307e7183f3446fd4b138d592810",
+    "leads/templates/leads/assign_agent.html": "f531492bc70d887a42453a4fd0a6df06c7f395d786b7c83319fbf0d442f2d4f2",
+    "leads/templates/leads/category_detail.html": "9d0d0f910bd699ac531d6136848db919dd522dbddde3f4308dc72c22242887c4",
+    "leads/templates/leads/category_list.html": "44fd269215c8c508f69a99c9add8bbdd2549b0e88455d3acd3cdf41f7e68e991",
+    "leads/templates/leads/lead_activity.html": "089b3c0c158404beae75f95ccce33eb46250b3c3166f35eebccec46ec28668e7",
+    "leads/templates/leads/lead_category_update.html": "1a2bc38256fc523bf1f304682dfc81e009f5ace7eebbe3afc4a4ff589211bf4a",
+    "leads/templates/leads/lead_create.html": "fe7cd1239a62f553caf2b00b774ec6c8c57205abdaa731a09c30e1f4c51aaca9",
+    "leads/templates/leads/lead_delete.html": "dff4811d96458f6100f3f8645e4fb575adf1adfee0a0af8e81c512d6b13ebfa2",
+    "leads/templates/leads/lead_detail.html": "07020f69b14e500667f4161eecacf05abd20dbe3b618d24dde0a4b0a5b926326",
+    "leads/templates/leads/lead_list.html": "797a080c06300df4250ca52291da43b1df8e78cd9736dd797756eb203d38d830",
+    "leads/templates/leads/lead_update.html": "9dc7feaf6459e5c5382883701cd5869537dfbe45dfcc834aa3b3d55769c41b1a",
+    "leads/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "leads/tests/test_forget_password_forms.py": "45294acc53bf28e97dca6630333bd54040f384496e034871324054cb72d8a4ad",
+    "leads/tests/test_forget_password_views.py": "54387be64834b7b68f23874c63197612d261ccdaf13e2e294209189350c52e25",
+    "leads/tests/test_forms.py": "e05c9082aaa579393214503fd5495e006cddde05a4362e0e8905335ce3f2bf40",
+    "leads/tests/test_integration.py": "7e42ef89d9ca5d87691959f72ff72ea937f31bb8563efc72363198b321398f85",
+    "leads/tests/test_login_authentication.py": "dd6b24f0e4b76708f30cbea00eb9f72ace2d4780a54655cf5a6386616b7d314c",
+    "leads/tests/test_login_forms.py": "5db90e1c8ceb63bc2ec9d6b1dae7b61e489269d9a2a12450024d996275bd29f4",
+    "leads/tests/test_login_integration.py": "4c1993e1d8592b6435dc1c728970c005caa40502bfeb4a62b763f03f0f8afa75",
+    "leads/tests/test_login_views.py": "755018d0334aef9114f74cbff0a458cbf2550425da75939db4fe9bb2098e8cca",
+    "leads/tests/test_logout_integration.py": "10b9b275904a10b0f17c66ebf2150b48c34631a2b2253c5cc2cb4c75a3571281",
+    "leads/tests/test_logout_views.py": "be5f480cded3bbaaa441cb7350e3123eb5bba2c43e74cb7fb05df58f8243c5d0",
+    "leads/tests/test_models.py": "bf1ca415076650de74a9829c2dd98911bc2f9962cf7097bc3bc80f806a12b6b2",
+    "leads/tests/test_signup_forms.py": "d3727757725799908179123264826cb7356696d9d1b2cfcdd707d774051115a6",
+    "leads/tests/test_signup_integration.py": "9b3ff2b8158ca9243b11b9f7525ce68337b73f7e2e307a07a9557b9ae8b862a6",
+    "leads/tests/test_signup_models.py": "a892730f6f38a58125021b3c42ad46af9114ae98815f9d24b23903afe74a2990",
+    "leads/tests/test_signup_views.py": "4ec6c146b5ad8dbaa3d53e8fce0f9a80583328abf018c15dd3de6f6887013bd5",
+    "leads/tests/test_views.py": "947e3f497fe13f6189ff76eea287d082792acb44f27b711fb4789d121e5935d9",
+    "leads/urls.py": "9a2886f6597fa5d84e53b95cefb486d6b65282b8cdd3b7c22342a78d2907e6df",
+    "leads/views.py": "827642a7c8039463359f9aa685fe771f95b600afeee6f71180268d79d62efd7f",
+    "manage.py": "bcef7f103e9e488316b441bbe848649a3f8527b93618359cf4ed5f78f181606d",
+    "orders/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "orders/admin.py": "dc814f7e5d7234c166fb06995f2a681d0c2161eb0cb545fe0e2ea7dbc698347a",
+    "orders/apps.py": "318d553b2000ea18f4534b0e918f47f7c4a7f432e6ed18801d8320731a9cb91d",
+    "orders/forms.py": "bcc13d97c2d087f75a2509cc91a376720142610adfa1c1add2053e33a4644d2d",
+    "orders/migrations/0001_initial.py": "9f202cdd3ba97c4cb60e8a9a4d3e2d22068a6337eec06999b19a46d774b42ef2",
+    "orders/migrations/0002_rename_orderday_orders_order_day_and_more.py": "553484a0b5282ec76dcc376278e95ada0e7cdc874661326e176e7436e0f79f5f",
+    "orders/migrations/0003_orders_lead.py": "517de60c1905f1ffce0a9623b8cfff4517dc1170ac2e74c2464addeebd2ac1dc",
+    "orders/migrations/0004_orders_product.py": "25b850e2d2d1d03ab75f3b70c50991682bc0b6c9f45144df403d1c805d0f06d3",
+    "orders/migrations/0005_orders_product_quantity.py": "837d54da376d092f3cb3527ba34bacfd327532b04fcf4c44b1c85850bb97f1ad",
+    "orders/migrations/0006_orders_order_amount.py": "50460293e0cebab3c519f73e53b975311915b8c8f4fd5a0191ef7bfb6fe98e11",
+    "orders/migrations/0007_remove_orders_order_amount.py": "75f44aeda31a5d7bc1661b7fe707c481580ef2c49f774e22b549840f1eb402aa",
+    "orders/migrations/0008_orders_is_cancelled.py": "013cc8d38605fe1c43967f5e3d38d48b5a66dca7e679c4ec85c7eb316035c106",
+    "orders/migrations/0009_remove_orders_product_remove_orders_product_quantity_and_more.py": "e1b3545d277171e0eed387857a050b36866070cb287a087a81169bcc32edc92b",
+    "orders/migrations/0010_orderproduct_total_price.py": "e0e797e9ab65c89ef25acb4d2d9662e01b0a3f59ee19919f5e7dfc99a2d5a693",
+    "orders/migrations/0011_orders_creation_date.py": "7d37acea6a5d0c9f2b98840574c8a9405fb48b7fe170b7f7fbc8e8df74533403",
+    "orders/migrations/0012_alter_orders_creation_date.py": "58d92c8ae00741adce40050f66a70e6fae2df80c61304d33ac903cf8890abd94",
+    "orders/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "orders/models.py": "f2bbe5a569483b04f0dbbfb802db961187d2026efe88b8bf31ebc2a18927966d",
+    "orders/templates/orders/order_create.html": "3ba004a8bdf37e867658e227288904d681896d2d848682a5c06aac509041aed5",
+    "orders/templates/orders/order_delete.html": "4cfc814ab33109bf379df3bc398089fe1d4b44912d09d88fec5f62a1f023c8dc",
+    "orders/templates/orders/order_detail.html": "814ce1ad30da3a08192bbb07670388a0a206db91b4370a3bf88dd65752eb6f45",
+    "orders/templates/orders/order_list.html": "196c23d6823181ddf52a31329cea182f06562243ceb260dda6091e6bfbbb36ce",
+    "orders/templates/orders/order_update.html": "d4fd8294c6e2c7dcb0e5a02ed3ee716df68de0eaae5e4840c2da4d0cfd29a66e",
+    "orders/tests/__init__.py": "0263061a0d7b187120609cfcd1231df78174436e96ede595134b0b7a9851a6eb",
+    "orders/tests/test_forms.py": "10d5e5f783dce4bd2f359158895202064a32ed7b068f100d77448427ca1b5403",
+    "orders/tests/test_integration.py": "26042d49442342736c9471efc8e3d8c365f7a4217bf2e365e09d4e8446c361da",
+    "orders/tests/test_models.py": "12e49f48111a2fe16ecd58400ed3e7d03f95424e67aa89669d2816f393954dbf",
+    "orders/tests/test_signals.py": "471f5dcf7dd24d85d6691e91dd05784e847d819a6e724813216a46ecbc1ac006",
+    "orders/tests/test_views.py": "307ee409bdee773ae3660b141a43c0a97c97f3596b1ef37cfdeb9f4175557a3f",
+    "orders/urls.py": "b22a5bfd62ffbcce2f2cf3e6a952d8986ef830fabac2a5cffd5568c1bdb18e0f",
+    "orders/views.py": "17f0550179423d7d3a33fed74f35c4466a2517774699d1e9dd2404d27cdb910b",
+    "organisors/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "organisors/admin.py": "b2e328e31f08dc907100505521d13ee6a9ea67a240655d051120011ce49cfaf8",
+    "organisors/apps.py": "f507b0c293644b3a5843328e61aca18759c4588b5317b1829009df0a3b7087e3",
+    "organisors/forms.py": "2c2bcc4a4e048ebacb4400db4346a7f04efbe01c75936aa40822f35ac953bfa5",
+    "organisors/migrations/0001_initial.py": "bd5a7fb82786b0ea4bb6efd87731eb7fa03b8c86d6fa364bf1a1cb6ee229e767",
+    "organisors/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "organisors/mixins.py": "57e4f9b2be92b563a8d8dd33a56545ad406de045fc48e2b7ae287f6572fe984c",
+    "organisors/models.py": "7e2801610f81a65f51f4a9d2182b037d5a4f07cca982b9eb4fb68fa81ca0dc1b",
+    "organisors/templates/organisors/organisor_create.html": "1ccfc21a6b495b345efe09f5ef787966fe803bf66af3181f67be31892cdd7497",
+    "organisors/templates/organisors/organisor_delete.html": "2f632b9adf1720ec8de6c36cd4a031837b45c52bf655bf228af789a6c989e3aa",
+    "organisors/templates/organisors/organisor_detail.html": "15d8f784ed33f181b1467e57e50726d7394eac54f61e8176c2966ecbc37a9b88",
+    "organisors/templates/organisors/organisor_list.html": "d2ddd344b3059aef73affa7cd277d84b639d9864c367dc173e17af8fb067d881",
+    "organisors/templates/organisors/organisor_update.html": "b66dfd4f76c0fa338c6fa76cf7ff094c104c82d52f02615fdc49e6740b1efa99",
+    "organisors/tests/__init__.py": "9e170b31c18ffc0c88d2cd1e5a7524027bbf7a4bbdd0431376e79d015fe6a32f",
+    "organisors/tests/test_forms.py": "1d875e445b770e5e1ab9d3781bf15f140418f90fb1b92880d81ffe726f565e71",
+    "organisors/tests/test_integration.py": "523cf9c8b71b75b9210abc8a7cce4b434ede2efc254cc91589708ffecdb623bf",
+    "organisors/tests/test_mixins.py": "83072164d7fae8a05a3318238a05a5b01ce953aee59afcade64d08f8863bdbaa",
+    "organisors/tests/test_models.py": "ae66ed7a0fa1fc2f789bab788111853827fc2cda94220b7e4b475c36cb33fa2d",
+    "organisors/tests/test_views.py": "97def46ce2502d86fdaf871900e43e96cff5192b35e4e08d99d8ce30516640d6",
+    "organisors/urls.py": "8297c30b295e685b6859e77c408301d51338b94f7fb9a7491987f47765b37cae",
+    "organisors/views.py": "e2f5b1414b96bd37f28f8a4bedfb55681c9a63694f7c9b311f42d59d18688ba2",
+    "render.yaml": "bbc71e2470b367d2a190cc0e0dc285bca00528395254713ee4018541b1d5d6e8",
+    "requirements.txt": "087f8436ff594c25a2ff23da551bd19c09a4898c328d6e5868d36b999e44452a",
+    "static/images/crm-logo.png": "02444ed0c3600a20b3f1592f42f436ffb800e4cbe13c7b7051f0b66cc51bf69f",
+    "static/images/crm.jpeg": "8201873762527e1efe8c6e321b0d9d54d3ce8ba7910cef1fd4ce15fb8b7d1755",
+    "static/images/favicon.ico": "002a65875bad0cfff25ff68fd45b29fcdf5eacb0eca0dba3bd45301200f8b2b6",
+    "static/main.js": "42fd52de4bf03ef95f7dbecc11652c18980597c7060f3423d575f1b0daeb2230",
+    "static/styles.css": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/admin.py": "8f573e6f554f3cb6b646e998236e62dbc0e482eefcca8bda2eaedd243b804a83",
+    "tasks/apps.py": "d2b0764855ea40a2ab1b7abb310b69271bcf48cbecbd4ad6623a5b4cd4909ad1",
+    "tasks/context_processors.py": "c017047b5752b9a2b3de3312568e48ec6b7b4d04f70718a53d694d2a0b1836cf",
+    "tasks/forms.py": "cb4d9ba44a7b5b987c92f5c5266c19c6f58214cf3e43fcefc451d5e61a5c5d7e",
+    "tasks/management/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/management/commands/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/management/commands/check_lead_no_order.py": "436d2e37cf03f485eb2504c74486b4dc5463fe652ed07378f59fe44c3121f091",
+    "tasks/management/commands/check_order_day.py": "0aa5b05d4c9ef056e04086625afce1e690513c04022d1fdefcc706cfb3eec2b5",
+    "tasks/management/commands/check_task_deadlines.py": "15d01122529a1778afd7fdf8bb6d0ff0b21e88738236f93020705b3176456a97",
+    "tasks/management/commands/create_fake_notifications.py": "e8ea084742ed291d4b13b554106ec57b012d7d68d15ab41a476fd9dd57af327e",
+    "tasks/migrations/0001_initial.py": "e4059116c6cc5374cb0d78785a6f1142d017cb18f29a4569107d25de0f893481",
+    "tasks/migrations/0002_add_task_priority.py": "99c43932580fda48f6602e9cb43050976a03b71b65235b2d4824adad192a4410",
+    "tasks/migrations/0003_add_notification_model.py": "ede9501c162c79e18b1f90ba0a29661a24ca381145f0d48c0039ffa0979dbeb6",
+    "tasks/migrations/0004_add_notification_action_link.py": "0883a399e9324e0154815ac418516965367d043ffe8172bf456c52800c19047a",
+    "tasks/migrations/0005_backfill_notification_action_url.py": "b055aa7a44869e10728d448d7c656542815c72b1b9104375f158004cee585b9d",
+    "tasks/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/models.py": "fc9dab7bb6dded9f401593bf37eba3c6877630a4140e1b264300694da36afc9a",
+    "tasks/templates/tasks/notification_list.html": "1ae2b01d71247f567c333101d1e6c8b1937ebb2ef991f3b38128212e6caa369e",
+    "tasks/templates/tasks/task_create.html": "6287635aef755801f028eaecb8b57627c3b3507b423884e38c08bdf01332b767",
+    "tasks/templates/tasks/task_delete.html": "9a6c956c471eab664e83fc4c025712f1db0e42c1d95429ff543541bce4135f94",
+    "tasks/templates/tasks/task_detail.html": "347fe741ad8cb697595573c9f08c433a397c3fa70d7563c1162fdd1884969c96",
+    "tasks/templates/tasks/task_list.html": "dd6b8052e540b4435a5b82741b803d4e6d8a171272aec234fb85927dece39f73",
+    "tasks/templates/tasks/task_update.html": "3c2bc097ab17a437a75a363a3a8532dd893d16f9abd6fef8d26261724d25d9db",
+    "tasks/tests/__init__.py": "c292bc370c20f692da01cf1b9a3f1f65bb381b2be1a29277c3d8021e3bc87a9d",
+    "tasks/tests/test_commands.py": "dd737f1aa6622d6bf5c794ed97810d0e4a1e3716c1d31650081913f843a92b3e",
+    "tasks/tests/test_context_processors.py": "374fdd342a416c1c2dc6a16cc639a18841744efa468ee87767e5bcf45224b815",
+    "tasks/tests/test_forms.py": "ff7756dda91accca03b1a38cecea3c2ffa93605fedef1e6b39fff4b9b8410e64",
+    "tasks/tests/test_models.py": "e45f9147641b85abb11c11ff6ec5669f5ad1c53f8a88858c8068cf8d7749f1bf",
+    "tasks/tests/test_views.py": "8b7faf40fac50dde6d4abfed4b3ef9d2c8aeb490d09d52804734d4801bc63bc9",
+    "tasks/urls.py": "73fceefb82e3eb6bee12a08637ff51acb0276c337c27ef61ec4e826c0526c93c",
+    "tasks/views.py": "0c21c68f31621bb243481304d2a206fa4dd9fe9eb6d5ed42d7ca4a0179cf1fd4",
+    "templates/base.html": "1e3f9296ca2ee34bcc7cbfdf46b3d0307247b84b0231352b6bbcda0c1b7a69e3",
+    "templates/landing.html": "3653ed5aa89b01074706c4bcf045ff6ba5a21d820aa90d7f951bdea256442556",
+    "templates/navbar.html": "07bfe989ea3a52a82e390219b07be8e6e607a77b719ed047e8c87b85f804125a",
+    "templates/registration/login.html": "7a17da273a0e7d174367492ca827f7d4342fca03b05ac24a3fdd934ae05a16b4",
+    "templates/registration/password_reset_complete.html": "54423733b35adc6a6dad58c6cf6c359276ed1b86791580a2852c5ceb4aab4750",
+    "templates/registration/password_reset_confirm.html": "e95d34ca5297db27fb705f99030719bf5f0e908703a924816440105f7f88288e",
+    "templates/registration/password_reset_done.html": "49efa720ca6970fdd1ff56f8aee07dd3cc3ed5e9b699250608d48ef9764732a6",
+    "templates/registration/password_reset_email.html": "a7599f4b0ad10a42e5223caae9c523cd433104287ad1c3095e0639f23be657bd",
+    "templates/registration/password_reset_form.html": "12bd8bb732fb82f09507187f3b748bf8fc88179d1246f0369930d80df17e6df1",
+    "templates/registration/signup.html": "505e658526d1787ed0a4725840868705dbe77ee5415158f6bb5fa70a158f5941",
+    "templates/registration/verify_email_failed.html": "026abd745509e05fc20aff01194cca1581d69dfb2bf10660e27ce50e884bedb0",
+    "templates/registration/verify_email_sent.html": "48101c34e396d46ab4b29c3112f93b065d278c34457660b85b5b9d52d2b309f9",
+    "templates/registration/verify_email_success.html": "6ab93d27b303b0e49fc199be6c1b679cecc739c717860b368f1b49c3d65b3c3c",
+    "templates/scripts.html": "e8f29657b151eb86b0277f292aa24d372bc629e7bfd9ead2eb8b5a4d6338249d",
+    "templates/second_page.html": "8aa2aca94b3cb786c4b4951a31d16c6601ea9ecbfd39da1a682426246b009363"
+  }
+}

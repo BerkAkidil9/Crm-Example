@@ -1,0 +1,56 @@
+{
+  "ProductsAndStock": {
+    "models": 8,
+    "routes": 9,
+    "test_files": 7,
+    "test_definitions": 164
+  },
+  "activity_log": {
+    "models": 1,
+    "routes": 1,
+    "test_files": 2,
+    "test_definitions": 38
+  },
+  "agents": {
+    "models": 0,
+    "routes": 5,
+    "test_files": 6,
+    "test_definitions": 112
+  },
+  "finance": {
+    "models": 1,
+    "routes": 1,
+    "test_files": 4,
+    "test_definitions": 79
+  },
+  "leads": {
+    "models": 8,
+    "routes": 11,
+    "test_files": 16,
+    "test_definitions": 482
+  },
+  "orders": {
+    "models": 2,
+    "routes": 6,
+    "test_files": 5,
+    "test_definitions": 100
+  },
+  "organisors": {
+    "models": 1,
+    "routes": 5,
+    "test_files": 5,
+    "test_definitions": 110
+  },
+  "tasks": {
+    "models": 2,
+    "routes": 8,
+    "test_files": 5,
+    "test_definitions": 112
+  },
+  "djcrm": {
+    "models": 0,
+    "routes": 14,
+    "test_files": 0,
+    "test_definitions": 0
+  }
+}
