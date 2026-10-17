@@ -73,6 +73,22 @@ class TestActivityLogListView(TestCase):
         self.assertEqual(len(logs), 1)
         self.assertEqual(logs[0].user, self.organisor_user)
 
+    def test_deleted_user_activity_remains_readable(self):
+        actor = User.objects.create_user(username='deleted-log-actor', email='deleted-log-actor@example.com')
+        log = ActivityLog.objects.create(
+            user=actor, action=ACTION_LEAD_CREATED, organisation=self.organisation,
+            object_repr='Retained customer history',
+        )
+        actor.delete()
+        for reader in [self.admin, self.organisor_user]:
+            with self.subTest(reader=reader.username):
+                self.client.force_login(reader)
+                response = self.client.get(reverse('activity_log:activity-log-list'))
+                self.assertContains(response, 'Retained customer history')
+                self.assertContains(response, 'Deleted user')
+        log.refresh_from_db()
+        self.assertIsNone(log.user)
+
     def test_admin_filter_by_organisation(self):
         ActivityLog.objects.create(
             user=self.organisor_user, action=ACTION_LEAD_CREATED,

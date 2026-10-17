@@ -45,7 +45,7 @@
           {% for log in activity_logs %}
           <tr class="border-t border-gray-200 hover:bg-gray-50">
             <td class="px-4 py-2 text-sm text-gray-600">{{ log.created_at|date:"M d, Y H:i" }}</td>
-            <td class="px-4 py-2 text-sm">{{ log.user.get_full_name|default:log.user.username }}{% if log.user.email %} ({{ log.user.email }}){% endif %}</td>
+            <td class="px-4 py-2 text-sm">{% if log.user %}{{ log.user.get_full_name|default:log.user.username }}{% if log.user.email %} ({{ log.user.email }}){% endif %}{% else %}Deleted user{% endif %}</td>
             <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ log.get_action_display }}</td>
             <td class="px-4 py-2 text-sm text-gray-700">{{ log.object_repr|default:"-" }}</td>
             {% if request.user.is_superuser or request.user.is_organisor %}
