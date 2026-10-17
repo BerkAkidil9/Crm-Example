@@ -165,7 +165,7 @@ tasks/             Tasks, notifications and reminder commands
 activity_log/      Business activity records
 templates/         Shared layout, landing and authentication templates
 static/            Styles, JavaScript and favicon
-docs/              Integration guides, screenshots and historical analysis
+docs/              Integration guides and screenshots
 scripts/           Isolated project checks
 ```
 
@@ -175,7 +175,6 @@ Each application keeps its models, forms, views, URLs, migrations, templates and
 
 - [Gmail API setup](docs/GMAIL_API_SETUP.md)
 - [Cloudflare R2 storage](docs/CLOUDFLARE_R2.md)
-- [Historical repository and test metrics, in Turkish](docs/CV_METRICS_ANALYSIS_TR.md) — dated measurements with their original evidence and limits.
 
 ## License
 

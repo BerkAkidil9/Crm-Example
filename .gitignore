@@ -80,13 +80,10 @@ pip-delete-this-directory.txt
 TURKCE_BULUNAN_YERLER.md
 TURKCE_INGILIZCE_CEVIRI_LISTESI.md
 TURKISH_TO_ENGLISH_AUDIT.md
-# Keep local SQL utilities private; allow maintained documentation and evidence.
+# Keep local utilities and reports private; allow maintained guides and images.
 docs/*
 !docs/CLOUDFLARE_R2.md
 !docs/GMAIL_API_SETUP.md
-!docs/CV_METRICS_ANALYSIS_TR.md
-!docs/cv-evidence/
-!docs/cv-evidence/**
 !docs/images/
 !docs/images/**
 START_PROJECT.md
