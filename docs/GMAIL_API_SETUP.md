@@ -1,115 +1,119 @@
 # Google Cloud Console & Gmail API Setup
 
-This project can send email (signup verification, password reset) via **Gmail API** using OAuth 2.0. This is required on **Render** because Render blocks outbound SMTP ports (25, 465, 587). For local development you can use either Gmail API or SMTP (App Password).
+The CRM uses Gmail API for signup verification, account invitations, password reset and scheduled task deadline emails when Gmail API is selected. For local development, Gmail SMTP with an App Password is also supported; see [Email Configuration](../README.md#email-configuration).
 
----
+Render's **free web services** block outbound SMTP ports 25, 465 and 587. Gmail API sends through HTTPS, so the included free-service Blueprint selects it. This is a hosting-plan restriction, not a general requirement for every Render service. See [Render's free-service limits](https://render.com/docs/free#outbound-port-restrictions).
 
-## Why Gmail API on Render?
+## 1. Create a Google Cloud project and enable Gmail API
 
-- On Render, SMTP ports are blocked, so `EMAIL_HOST`/`EMAIL_HOST_PASSWORD` (SMTP) will not work.
-- Gmail API uses HTTPS and works on Render. Set `USE_GMAIL_API=true` and provide the OAuth credentials and refresh token below.
+1. Open [Google Cloud Console](https://console.cloud.google.com/) and create or select a project.
+2. Open **APIs & Services → Library**.
+3. Find **Gmail API** and enable it for that project.
 
----
+## 2. Configure OAuth consent
 
-## Step 1: Create a Google Cloud project
+In **Google Auth Platform** (or **APIs & Services → OAuth consent screen**), configure the application name, support email, audience and developer contact.
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Click the project dropdown → **New Project**.
-3. Name it (e.g. `crm-email`) and create.
+For an external application in **Testing**, add the sending Gmail account as a test user. Request the send-only scope:
 
----
+```text
+https://www.googleapis.com/auth/gmail.send
+```
 
-## Step 2: Enable Gmail API
+Google may require verification depending on the audience and requested access. Refresh tokens for external applications in Testing generally expire after seven days when Gmail scopes are used. Before relying on unattended email, configure the appropriate publishing status and review [Google's refresh-token expiration rules](https://developers.google.com/identity/protocols/oauth2#expiration). Tokens can also be revoked or invalidated later.
 
-1. In the project, go to **APIs & Services** → **Library**.
-2. Search for **Gmail API** and open it.
-3. Click **Enable**.
+## 3. Create OAuth credentials
 
----
+1. Open **Clients** in Google Auth Platform, or **APIs & Services → Credentials**.
+2. Create an **OAuth client ID** with application type **Desktop app**.
+3. Download its client JSON and keep it outside the repository.
+4. Retain the client ID and client secret for the application's environment settings.
 
-## Step 3: Configure OAuth consent screen
+Use the same client and sending Gmail account when generating the refresh token.
 
-1. Go to **APIs & Services** → **OAuth consent screen**.
-2. Choose **External** (unless you use a Google Workspace org) → **Create**.
-3. Fill **App name**, **User support email**, and **Developer contact**. Save.
-4. **Scopes:** Add scope `https://www.googleapis.com/auth/gmail.send` (send email only). Save.
-5. **Test users** (if app is in Testing): Add the Gmail address you will use to send mail. Save.
+## 4. Generate a refresh token
 
----
+Activate the project's virtual environment and install `requirements.txt` first. It already includes `django-gmailapi-backend` and its `google-auth-oauthlib` dependency.
 
-## Step 4: Create OAuth 2.0 credentials
+The backend package's legacy `gmail_oauth2 --generate_oauth2_token` helper uses Google's retired out-of-band redirect. In the inspected package version **0.3.4**, the alternative `--ugo2t` branch refers to an unregistered `credentials_path` option. Use the supported local-server flow directly instead of relying on those helper commands.
 
-1. Go to **APIs & Services** → **Credentials**.
-2. **Create Credentials** → **OAuth client ID**.
-3. Application type: **Desktop app**.
-4. Name it (e.g. `CRM Desktop`) and create.
-5. Copy the **Client ID** and **Client secret** (you will use these as `GMAIL_API_CLIENT_ID` and `GMAIL_API_CLIENT_SECRET`).
+Start `python` on a computer with a browser, then run the following Python code. Enter the path to your downloaded Desktop client JSON when prompted:
 
----
+```python
+from google_auth_oauthlib.flow import InstalledAppFlow
 
-## Step 5: Get a refresh token
+flow = InstalledAppFlow.from_client_secrets_file(
+    input("OAuth client JSON path: "),
+    scopes=["https://www.googleapis.com/auth/gmail.send"],
+)
+credentials = flow.run_local_server(
+    port=0,
+    access_type="offline",
+    prompt="consent",
+)
+print(credentials.refresh_token)
+```
 
-The app uses a **refresh token** to get access tokens and send email. You generate it once using the same Gmail account that will send mail.
+Sign in as the Gmail account that will send application email and approve the requested access. Store the returned refresh token privately as `GMAIL_API_REFRESH_TOKEN`. Do not commit the client JSON or token, or paste either into documentation. If no refresh token is returned, repeat the consent flow and check the client's audience and account permissions.
 
-### Option A: Using `gmail_oauth2` (recommended)
+The helper uses a temporary loopback callback; it is run locally to obtain credentials, not inside the deployed web service. See [Google's desktop OAuth flow](https://developers.google.com/identity/protocols/oauth2/native-app) and the [library reference](https://google-auth-oauthlib.readthedocs.io/en/latest/reference/google_auth_oauthlib.flow.html).
 
-1. Install the package used by the project:
-   ```bash
-   pip install django-gmailapi-backend
-   ```
-2. Run (replace with your Client ID and Client secret from Step 4):
-   ```bash
-   gmail_oauth2 --generate_oauth2_token --client_id="YOUR_CLIENT_ID.apps.googleusercontent.com" --client_secret="YOUR_CLIENT_SECRET" --scope="https://www.googleapis.com/auth/gmail.send"
-   ```
-3. A browser window opens. Log in with the **Gmail account that will send mail** and allow the app.
-4. Copy the **refresh token** from the script output (starts with `1//...`). This is `GMAIL_API_REFRESH_TOKEN`.
-5. The sending address is `DEFAULT_FROM_EMAIL` — use that same Gmail address.
+## 5. Configure the application
 
-### Option B: Manual / other tools
+Set these in the root `.env` for local development, or in your deployment environment:
 
-You can use any OAuth 2.0 flow that requests the scope `https://www.googleapis.com/auth/gmail.send` and returns a refresh token for the sending Gmail account. Store that as `GMAIL_API_REFRESH_TOKEN`.
+| Variable | Value |
+| --- | --- |
+| `USE_GMAIL_API` | `true` to select Gmail API locally. |
+| `GMAIL_API_CLIENT_ID` | Client ID from the Desktop OAuth client. |
+| `GMAIL_API_CLIENT_SECRET` | Secret from that same client. |
+| `GMAIL_API_REFRESH_TOKEN` | Token from the authorised sending account. |
+| `DEFAULT_FROM_EMAIL` | Gmail address used during consent. |
 
----
-
-## Step 6: Environment variables
-
-Add these to your `.env` (local) or to your host’s environment (e.g. Render Dashboard):
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `USE_GMAIL_API` | Yes | Set to `true` to use Gmail API instead of SMTP. |
-| `GMAIL_API_CLIENT_ID` | Yes | OAuth 2.0 Client ID (from Step 4). |
-| `GMAIL_API_CLIENT_SECRET` | Yes | OAuth 2.0 Client secret (from Step 4). |
-| `GMAIL_API_REFRESH_TOKEN` | Yes | Refresh token from Step 5. |
-| `DEFAULT_FROM_EMAIL` | Yes | Gmail address that sends mail (same as the account used for the refresh token). |
-
-**Example:**
+Example with placeholders:
 
 ```env
 USE_GMAIL_API=true
-GMAIL_API_CLIENT_ID=123456789-xxxx.apps.googleusercontent.com
-GMAIL_API_CLIENT_SECRET=GOCSPX-xxxxxxxxxxxx
-GMAIL_API_REFRESH_TOKEN=1//0xxxxxxxxxxxxxxxxxxxxxxxx
-DEFAULT_FROM_EMAIL=your-sender@gmail.com
+GMAIL_API_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GMAIL_API_CLIENT_SECRET=your-client-secret
+GMAIL_API_REFRESH_TOKEN=your-refresh-token
+DEFAULT_FROM_EMAIL=sender@example.com
 ```
 
-On **Render**, `USE_GMAIL_API` is set to `true` in `render.yaml`; you only need to add the four variables above in the Dashboard.
+The Blueprint sets `USE_GMAIL_API=true`; provide the other four values in the Render Dashboard. Settings also select Gmail API whenever `RENDER_EXTERNAL_HOSTNAME` is present, even if `USE_GMAIL_API=false`.
 
----
+Settings load a root `.env` with `override=True`. On deployment, keep actual configuration in the host environment and do not ship a development `.env` that would override it.
 
-## How the project uses Gmail API
+For links sent by scheduled commands, set `SITE_URL` to the application's public origin. It defaults to the Render hostname when available, otherwise `http://127.0.0.1:8000`. Views build their verification and reset links from the incoming request.
 
-- When `USE_GMAIL_API=true` (or when `RENDER_EXTERNAL_HOSTNAME` is set, for Render), Django uses the `gmailapi_backend` email backend.
-- It reads `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN`, and `DEFAULT_FROM_EMAIL` from the environment and sends mail via Gmail API.
+## 6. Verify delivery
 
----
+From the repository root with the virtual environment activated, run:
 
-## Summary checklist
+```bash
+python manage.py shell
+```
 
-1. Create a Google Cloud project and enable Gmail API.
-2. Configure OAuth consent screen and add scope `https://www.googleapis.com/auth/gmail.send`.
-3. Create OAuth 2.0 Client ID (Desktop app) and copy Client ID and Client secret.
-4. Generate a refresh token with that client and the Gmail account you will use for sending.
-5. Set `USE_GMAIL_API=true`, `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN`, and `DEFAULT_FROM_EMAIL` in your environment.
+Then send to a mailbox you control:
 
-For **local** development you can instead use SMTP with a Gmail App Password; see the main [README](../README.md) → Email Configuration (Option A).
+```python
+from django.conf import settings
+from django.core.mail import send_mail
+
+send_mail(
+    "CRM email configuration check",
+    "Gmail API is configured for this environment.",
+    settings.DEFAULT_FROM_EMAIL,
+    [input("Recipient email: ")],
+    fail_silently=False,
+)
+```
+
+Check the return value and recipient inbox. This sends a real email. The application test suite uses Django's in-memory email backend and does not establish real Gmail delivery.
+
+## Failure behaviour
+
+- Missing or mismatched client credentials, expired/revoked refresh tokens and insufficient scopes can prevent the backend from obtaining access or sending mail. Check application logs and repeat consent with the correct client/account if needed.
+- The backend can raise delivery errors when `fail_silently=False`. Account creation views send after saving records, so a send failure does not imply that no account was created; check the account before retrying registration.
+- `check_task_deadlines` logs a failed delivery and skips creating that reminder's notification. It requires a separately configured scheduler; the Blueprint does not schedule it.
+- Changing `USE_GMAIL_API` alone cannot select SMTP on Render while `RENDER_EXTERNAL_HOSTNAME` is present. For local SMTP, leave that variable unset and configure the SMTP values documented in the README.

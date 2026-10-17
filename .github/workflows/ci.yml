@@ -1,0 +1,102 @@
+name: CI (native)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crm-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  quality:
+    name: Dependency audit and Django checks
+    # Only owner-controlled source may execute on the owner's computer.
+    if: >-
+      github.actor == github.repository_owner &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, macOS, ARM64, crm-ci]
+    timeout-minutes: 20
+    env:
+      PIP_NO_CACHE_DIR: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          clean: true
+          persist-credentials: false
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install dependencies in a disposable environment
+        run: |
+          python -m venv "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check --upgrade pip
+          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Run native checks
+        run: '"$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" scripts/ci.py quality'
+      - name: Remove disposable environment
+        if: always()
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import shutil
+          folder = Path(os.environ['RUNNER_TEMP']) / f"crm-venv-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
+          shutil.rmtree(folder, ignore_errors=True)
+          PY
+
+  tests:
+    name: Tests (${{ matrix.shard }}, 2 workers)
+    needs: quality
+    if: >-
+      github.actor == github.repository_owner &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, macOS, ARM64, crm-ci]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: ['1/2', '2/2']
+    env:
+      PIP_NO_CACHE_DIR: '1'
+      CRM_TEST_SHARD: ${{ matrix.shard }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          clean: true
+          persist-credentials: false
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install dependencies in a disposable environment
+        run: |
+          python -m venv "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check --upgrade pip
+          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Run test shard with two workers
+        run: '"$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" scripts/ci.py test --shard "$CRM_TEST_SHARD" --workers 2'
+      - name: Remove disposable environment
+        if: always()
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import shutil
+          folder = Path(os.environ['RUNNER_TEMP']) / f"crm-venv-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
+          shutil.rmtree(folder, ignore_errors=True)
+          PY

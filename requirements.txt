@@ -1,12 +1,12 @@
 asgiref==3.8.1
 crispy-tailwind==1.0.3
-Django==5.0.7
+Django==5.2.18
 django-crispy-forms==2.3
 django-phonenumber-field==8.0.0
 phonenumbers==8.13.50
-sqlparse==0.5.1
+sqlparse==0.6.0
 tzdata==2024.1
-python-dotenv==1.1.1
+python-dotenv==1.2.4
 
 # PostgreSQL
 psycopg[binary]>=3.1.0

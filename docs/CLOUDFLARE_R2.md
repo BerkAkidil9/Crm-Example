@@ -1,75 +1,43 @@
 # Cloudflare R2 – Media Storage Setup
 
-This project can store uploaded files (profile photos, lead images, etc.) in **Cloudflare R2** so they persist across deploys on platforms like Render, where the filesystem is ephemeral.
+The application can store uploaded profile images and lead photos in Cloudflare R2 through its S3-compatible API. This keeps new uploads independent of the web service's local filesystem. Render's free web-service disk is ephemeral, so local uploads are lost across deploys or restarts.
 
----
-
-## Why R2?
-
-On Render (and similar PaaS):
-
-1. **Ephemeral disk** — The server disk is reset on each deploy or restart. Files written to `media/` are lost.
-2. **Broken images** — The database keeps the file path (e.g. `profile_images/abc.jpg`), but the file no longer exists on the server, so images return 404.
-
-**Solution:** Store media in cloud storage. This project is configured to use **Cloudflare R2** (S3-compatible API, 10 GB free tier).
-
----
+R2 is optional. Without a complete R2 configuration, Django uses the local `media/` directory. Local debug serving and production media delivery have different requirements, described below.
 
 ## Prerequisites
 
-- A [Cloudflare](https://cloudflare.com/) account
-- The project already includes `django-storages[s3]` and `boto3` in `requirements.txt` — no extra install needed.
+- A [Cloudflare account](https://dash.cloudflare.com/) with R2 enabled.
+- Project dependencies installed from `requirements.txt`, including `django-storages[s3]` and `boto3`.
+- Access to the application's environment configuration and a test account authorised to view the uploaded image.
 
----
+## 1. Create a bucket and credentials
 
-## Step 1: Create an R2 bucket
+1. Open **R2 Object Storage** in the Cloudflare Dashboard and create a bucket, for example `crm-media`.
+2. Under R2 API token management, create credentials with **Object Read & Write** access scoped to that bucket.
+3. Save the **Access Key ID** and **Secret Access Key** privately.
+4. Copy the account's S3 API endpoint. For a standard bucket it is `https://<account-id>.r2.cloudflarestorage.com`.
 
-1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) and open **R2 Object Storage**.
-2. Click **Create bucket**.
-3. Choose a name (e.g. `crm-media`) and create the bucket.
+For a different endpoint, including a jurisdiction-specific endpoint, set `R2_ENDPOINT_URL` explicitly. See [Cloudflare's S3 API reference](https://developers.cloudflare.com/r2/api/s3/api/) for endpoint and credential details.
 
----
+## 2. Set environment variables
 
-## Step 2: Create an R2 API token
+Use the root `.env` locally or your host's environment settings in production:
 
-1. In R2, go to **Manage R2 API Tokens** (or **Overview** → **Manage API Tokens**).
-2. Click **Create API token**.
-3. Name it (e.g. `crm-media-token`).
-4. Permissions: **Object Read & Write**. Scope: this bucket only, or “Apply to all buckets”.
-5. Create the token and **copy** the **Access Key ID** and **Secret Access Key** (the secret is shown only once).
+| Variable | Requirement and behaviour |
+| --- | --- |
+| `USE_R2` | Set to `true`. Disabled automatically during `manage.py test`. |
+| `R2_BUCKET_NAME` | Required bucket name. |
+| `R2_ACCESS_KEY_ID` | Required R2 access key. |
+| `R2_SECRET_ACCESS_KEY` | Required R2 secret key. |
+| `R2_ACCOUNT_ID` | Used to construct the endpoint unless `R2_ENDPOINT_URL` is set. |
+| `R2_ENDPOINT_URL` | Optional explicit S3 API endpoint; takes precedence over the account-derived endpoint. |
+| `R2_REGION_NAME` | Defaults to `auto`. |
+| `USE_R2_MEDIA_PROXY` | Defaults to `true`; controls the URL and delivery mode below. |
+| `SITE_URL` | Application origin for proxy URLs; defaults to the Render hostname or local development URL. |
+| `R2_PUBLIC_DOMAIN` | Hostname without scheme, for direct public delivery. |
+| `R2_PUBLIC_URL` | Optional full URL used to construct `MEDIA_URL` in direct mode; see its limitation below. |
 
----
-
-## Step 3: Get your Account ID and optional public URL
-
-- **Account ID:** In the R2 section, the URL is like `https://dash.cloudflare.com/<ACCOUNT_ID>/r2`. That `<ACCOUNT_ID>` is your `R2_ACCOUNT_ID`. You can also find it in the dashboard footer.
-- **Endpoint:** The app builds it as `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`. You can override with `R2_ENDPOINT_URL` if needed.
-- **Public access (optional):** If you want direct URLs to files:
-  - Open your bucket → **Settings** → **Public access** → **Allow Access**.
-  - Note the public URL (e.g. `https://pub-xxxx.r2.dev`). Use either the host as `R2_PUBLIC_DOMAIN` (e.g. `pub-xxxx.r2.dev`) or the full URL as `R2_PUBLIC_URL`.
-
-If you skip public access, the app can still serve files via **USE_R2_MEDIA_PROXY** (see below).
-
----
-
-## Step 4: Environment variables
-
-Add these to your `.env` (local) or to your host’s environment (e.g. Render Dashboard):
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `USE_R2` | Yes | Set to `true` to enable R2. |
-| `R2_ACCOUNT_ID` | Yes | Your Cloudflare account ID. |
-| `R2_BUCKET_NAME` | Yes | Bucket name (e.g. `crm-media`). |
-| `R2_ACCESS_KEY_ID` | Yes | From the R2 API token. |
-| `R2_SECRET_ACCESS_KEY` | Yes | From the R2 API token. |
-| `R2_PUBLIC_DOMAIN` | Optional | Public host only (e.g. `pub-xxxx.r2.dev`). |
-| `R2_PUBLIC_URL` | Optional | Full public URL (e.g. `https://pub-xxxx.r2.dev`). Use one of `R2_PUBLIC_DOMAIN` or `R2_PUBLIC_URL`. |
-| `R2_ENDPOINT_URL` | Optional | Override endpoint (default: `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`). |
-| `R2_REGION_NAME` | Optional | Default `auto`. |
-| `USE_R2_MEDIA_PROXY` | Optional | Default `true`. See below. |
-
-**Example (minimal):**
+Minimal configuration with placeholders:
 
 ```env
 USE_R2=true
@@ -77,44 +45,57 @@ R2_ACCOUNT_ID=your-account-id
 R2_BUCKET_NAME=crm-media
 R2_ACCESS_KEY_ID=your-access-key-id
 R2_SECRET_ACCESS_KEY=your-secret-access-key
+USE_R2_MEDIA_PROXY=true
+SITE_URL=https://your-app.example.com
 ```
 
-If you enabled public access on the bucket, add either:
+`USE_R2=true` alone is insufficient. The bucket, endpoint and both credentials must be present; otherwise settings fall back to local filesystem storage rather than failing startup. The application does not test credentials or create the bucket on startup, so populated but invalid values can fail on the first upload or read.
+
+The root `.env` overrides existing environment values. Keep deployment secrets in the hosting environment and avoid shipping a development `.env` with conflicting settings.
+
+## 3. Choose how images are delivered
+
+### Application proxy (default)
+
+With `USE_R2_MEDIA_PROXY=true`, Django uses `djcrm.storage.R2ProxyStorage`. Uploads go to R2, while generated URLs point to `SITE_URL/media-proxy/<object-key>`.
+
+- The bucket does not need public access or a custom domain.
+- Requests pass through the application and require login.
+- The view checks ownership/organisation or agent access for `lead_photos/` and `profile_images/`. Unknown prefixes, unauthorised access and missing objects return 404; anonymous requests redirect to login. Only GET is accepted.
+- Set `SITE_URL` to the correct reachable application origin, especially when using a custom domain.
+- R2 read/open errors can result in a 404 or server error, depending on where the storage operation fails; inspect server logs as well as the browser response.
+
+The proxy currently sends `Cache-Control: public, max-age=86400`. If a reverse proxy or CDN is used, exclude protected media responses from shared caching; application authorisation alone does not establish safe shared-cache behaviour.
+
+### Direct public URLs
+
+With `USE_R2_MEDIA_PROXY=false`, uploads use the standard S3 storage backend and image requests go directly to storage. Configure public bucket access through a Cloudflare custom domain or an enabled `r2.dev` URL, then set its hostname:
 
 ```env
-R2_PUBLIC_DOMAIN=pub-xxxx.r2.dev
+USE_R2_MEDIA_PROXY=false
+R2_PUBLIC_DOMAIN=media.example.com
 ```
 
-or:
+`R2_PUBLIC_DOMAIN` must omit `https://` and any path. Direct access bypasses the application's media permission checks, so use it only for files intended to be public. The current storage configuration disables signed URL query parameters.
 
-```env
-R2_PUBLIC_URL=https://pub-xxxx.r2.dev
-```
+`R2_PUBLIC_URL` changes `MEDIA_URL`, but the standard S3 backend generates `FileField.url` independently. Setting `R2_PUBLIC_URL` alone does not configure the backend's public custom domain. Set `R2_PUBLIC_DOMAIN` for working direct image URLs; without it the backend can return the S3 endpoint, which is not a public bucket URL.
 
----
+See [Cloudflare public bucket configuration](https://developers.cloudflare.com/r2/buckets/public-buckets/). An S3 API endpoint and a public delivery domain serve different purposes.
 
-## USE_R2_MEDIA_PROXY (default: true)
+## 4. Verify an upload
 
-Some networks block or reset connections to `pub-xxx.r2.dev`. When `USE_R2_MEDIA_PROXY=true` (default):
+1. Restart or redeploy the application with the selected environment settings.
+2. Sign in and upload a new profile image or lead photo through the application.
+3. Confirm the object appears under `profile_images/` or `lead_photos/` in the configured bucket.
+4. Open the image from an authorised account and inspect its URL. Proxy mode should use the application origin; direct mode should use the configured public hostname.
+5. On a disposable deployment, confirm that the same image remains available after a restart.
 
-- Media is served through your app at a path like `/media-proxy/...`.
-- No need for a custom domain or Worker for R2.
-- Set to `false` if you prefer direct R2 public URLs.
+The test suite disables R2 and uses local test storage; it does not verify bucket connectivity or production permissions.
 
----
+## Existing files and operational limits
 
-## How the project uses R2
+Enabling R2 affects subsequent storage operations. It does **not** copy files already stored in local `media/` or in another bucket. Copy existing files separately while preserving their relative keys, such as `profile_images/example.jpg`, because the database retains those keys. Preserve a backup before changing storage.
 
-- **Django settings** read the env vars above and configure `storages.backends.s3.S3Storage` (S3-compatible) for the default file storage when `USE_R2=true` and required vars are set.
-- **Models and forms** do not need changes; uploads go to R2 automatically when R2 is enabled.
-- **Locally:** Set `USE_R2=true` and the same env vars in `.env` to test R2 on your machine.
+Storage uses `file_overwrite=True`: uploading an object with the same key may replace it. Do not use a shared bucket/prefix for unrelated environments unless overwrites and access are intentionally managed.
 
----
-
-## Summary checklist
-
-1. Create R2 bucket (e.g. `crm-media`).
-2. Create R2 API token (Read & Write); save Access Key ID and Secret Access Key.
-3. Note Account ID; optionally enable public access and note `R2_PUBLIC_DOMAIN` or `R2_PUBLIC_URL`.
-4. Set `USE_R2=true` and all required `R2_*` variables in `.env` or host environment.
-5. Deploy or run locally; new uploads will be stored in R2 and persist across deploys.
+With R2 disabled, Django's `/media/` helper serves files only when `DEBUG=True`. A production deployment using local filesystem storage needs persistent storage and a separately configured media server; WhiteNoise handles static assets, not these uploads.

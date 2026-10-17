@@ -1,323 +1,182 @@
 # Darkenyas CRM
 
-**Live demo:** [https://darkenyas-crm.onrender.com/](https://darkenyas-crm.onrender.com/)
+A Django CRM for managing leads, agents, products, stock, orders and finances across organisations. Administrators oversee the system, organisors manage their organisation, and agents work with assigned records.
 
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/Django-5.0-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[Live demo](https://darkenyas-crm.onrender.com/)
 
-A multi-tenant Django CRM with role-based access for organisations and agents.
-
----
-
-## Table of Contents
-
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Local Setup](#local-setup)
-- [Quick Start](#quick-start)
-- [Email Configuration](#email-configuration)
-- [Deploy on Render](#deploy-on-render)
-- [Cron Jobs (Render)](#cron-jobs-optional)
-- [Project Structure](#project-structure)
-- [Management Commands](#management-commands)
-- [Testing](#testing)
-- [Admin](#admin)
-- [Documentation](#documentation)
-- [Security](#security)
-- [License](#license)
-
----
-
-## Tech Stack
-
-**Backend:** Django 5.0 · Python 3.12 · Crispy Forms · crispy-tailwind · django-phonenumber-field · django-ratelimit · django-storages · boto3 · python-dotenv
-
-**Frontend:** Tailwind CSS · Chart.js · Flatpickr
-
-**Database:** PostgreSQL (development & production)
-
-**Email:** Gmail API (Render) or SMTP (local)
-
----
+![Darkenyas CRM product and stock overview with sample data](docs/images/products-and-stock.png)
 
 ## Features
 
-### Roles
+- **Organisation and team management:** administrator, organisor and agent roles, with organisation and assignment filters for business records.
+- **Lead management:** create and update customer records, assign agents, classify leads by source and value, upload photos, and review activity history.
+- **Products and inventory:** categories, stock movements, minimum stock levels, price history, discounts, bulk price changes, stock alerts and recommendations, plus sales dashboards and charts.
+- **Orders and finance:** orders with multiple product lines, stock deductions on creation and restoration on cancellation, and date-filtered revenue, cost and profit reports.
+- **Tasks and notifications:** assign work, track status and priority, and receive in-app updates. Management commands provide task deadline emails, delivery-day reminders and follow-ups for inactive leads when scheduled separately.
+- **Accounts and activity:** email verification, login by username or email, password reset, profile editing, and activity logs for changes to business records.
 
-| Role | Access |
-|------|--------|
-| **Administrator** | Full system: all organisors, agents, leads, products, orders, finance, tasks, notifications, activity log |
-| **Organisor** | Own organisation: profile, agents, leads, products, orders, finance, tasks, notifications, activity within org |
-| **Agent** | Assigned leads, own orders, products (view only), personal tasks, notifications, activity affecting them |
+## Tech Stack
 
-### Modules
-
-| Module | Features |
-|--------|----------|
-| **Leads** | CRUD, agent assignment; source & value categories; personal info (first name, last name, age, email, address, phone, profile photo); activity history; org/agent filters |
-| **Agents** | CRUD, personal info (first name, last name, email, username, phone, date of birth, gender, profile photo); list by organisation |
-| **Organisors** | Organisation CRUD; Admin manages all, Organisor manages own profile |
-| **Products & Stock** | Category/subcategory; stock levels, minimum threshold; discounts (%, fixed, date range); bulk price update; sales dashboard; charts; stock movements; price history; stock alerts (low/out/overstock); stock recommendations |
-| **Orders** | Orders linked to leads; product line items; auto stock reduce on order; stock restore on cancel; org/agent filters |
-| **Finance** | Date range reports; filter by order creation date or order delivery date; org/agent filters; earnings, cost, profit |
-| **Tasks** | Status, priority; assign to agents; org/agent filters; notifications — **Organisor:** order created, sale completed today, stock alert; **Agent:** task assigned, lead assigned, order created (for their leads), sale completed today, deadline reminders (1 or 3 days before), lead no order in 30 days |
-| **Activity Log** | Audit trail for leads, orders, tasks, agents, organisors, products; org/agent filters |
-
-### Authentication
-
-Signup · Email verification · Login (email or username) · Password reset · Profile photo · Phone number
-
----
+- **Backend:** Python 3.12, Django 5.2 LTS, Django Crispy Forms and crispy-tailwind.
+- **Frontend:** Django templates, Tailwind CSS, Chart.js and Flatpickr; no Node.js build step.
+- **Database:** SQLite for a minimal local setup, or PostgreSQL through psycopg and dj-database-url.
+- **Email and uploads:** Gmail SMTP or Gmail API; local file storage or Cloudflare R2.
+- **Serving:** Gunicorn and WhiteNoise; a Render Blueprint is included.
 
 ## Local Setup
 
-**Prerequisites:**
+Use **Python 3.12** and Git. The upload validator uses `imghdr`, which was removed in Python 3.13. PostgreSQL is needed only if you choose it instead of SQLite.
 
-- **Python** 3.12+
-- **Git** — for cloning the repo
-- **PostgreSQL** 12+ (default DB; or use [SQLite](#local-sqlite-optional) by commenting out `DB_ENGINE` and `DB_*` in `.env`)
+Run the following commands from the repository root after cloning.
 
-### 1. Clone and enter project
-
-Replace `YOUR_USERNAME` with your GitHub username:
+### 1. Clone and create a virtual environment
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Crm-Example.git
+git clone https://github.com/BerkAkidil9/Crm-Example.git
 cd Crm-Example
+python3.12 -m venv .venv
+source .venv/bin/activate
 ```
 
-### 2. Create virtual environment
+On Windows, create the environment with `py -3.12 -m venv .venv` and activate it with `.venv\Scripts\activate.bat` in Command Prompt or `.venv\Scripts\Activate.ps1` in PowerShell.
+
+### 2. Install dependencies and configure the environment
 
 ```bash
-python -m venv venv
+python -m pip install -r requirements.txt
+cp .env.example .env
 ```
 
-Activate it:
+On Windows, use `copy .env.example .env` in Command Prompt or `Copy-Item .env.example .env` in PowerShell.
 
-- **Windows:** `venv\Scripts\activate`
-- **Mac/Linux:** `source venv/bin/activate`
+Edit `.env` before starting:
 
-### 3. Install dependencies
+- Replace `SECRET_KEY` with the output of `python -c "import secrets; print(secrets.token_urlsafe(50))"`.
+- Keep `DEBUG=True` for local development.
+- For **SQLite**, change `DB_ENGINE` to `django.db.backends.sqlite3` and leave `DATABASE_URL` unset. SQLite requires no database server.
+- For **PostgreSQL**, keep the example's `DB_ENGINE=django.db.backends.postgresql`, create the database, and set `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` and `DB_PORT`. Set `DB_SSL=true` if your database requires TLS.
 
-```bash
-pip install -r requirements.txt
-```
+Database selection is `DATABASE_URL` first, then `DB_ENGINE`/`DB_*`, then SQLite if neither is set. The example file selects PostgreSQL. Settings read the root `.env` with `override=True`, so its values override existing environment variables.
 
-### 4. Environment variables
+Account verification, invitations and password reset require working email settings; see [Email Configuration](#email-configuration). Leave `USE_R2=false` to keep local uploads in `media/`.
 
-Copy the example file and edit it:
+### 3. Initialise the database and run
 
-- **Windows:** `copy .env.example .env`
-- **Mac/Linux:** `cp .env.example .env`
-
-For local development:
-
-- `SECRET_KEY` — generate: `python -c "import secrets; print(secrets.token_urlsafe(50))"`
-- `DEBUG=True` — leave as is for development
-- `DB_NAME`, `DB_USER`, `DB_PASSWORD` — PostgreSQL credentials (create DB: `createdb djcrm`)
-- `DB_HOST`, `DB_PORT`, `DB_SSL` — optional; defaults: `localhost`, `5432`, `false`. Set for remote PostgreSQL (e.g. Neon).
-
-For signup & password reset: either SMTP (`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`) or Gmail API (`USE_GMAIL_API=true` + Gmail API vars) — see [Email Configuration](#email-configuration).
-
-For persistent profile/media uploads in production (e.g. Render), see [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) (Cloudflare R2 setup). When R2 is enabled with `USE_R2_MEDIA_PROXY=true` (default), media files are served through `/media-proxy/` on your app.
-
-The app uses **PostgreSQL** by default (matches production).
-
-### 5. Database and run
-
-Create the PostgreSQL database (if not exists), then migrate:
+For PostgreSQL, create the configured database first, for example `createdb djcrm` with a PostgreSQL account that can create databases. Then run:
 
 ```bash
-createdb djcrm   # or create via pgAdmin
 python manage.py migrate
-python manage.py createsuperuser   # Create admin (email, username, password)
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Open **http://127.0.0.1:8000/** and log in with your superuser credentials.
+Open **http://127.0.0.1:8000/**. The superuser can log in without email verification. Django administration is available at **http://127.0.0.1:8000/admin/**.
 
-### Local SQLite (optional)
+### 4. Start using the CRM
 
-To use SQLite instead of PostgreSQL, comment out `DB_ENGINE` and all `DB_*` lines in `.env` (e.g. `# DB_ENGINE=...`, `# DB_NAME=...`, `# DB_USER=...`). The app will fall back to SQLite.
+1. Sign in as the administrator and create an organisor through the Organisors screen.
+2. Complete email verification for that account, then sign in as the organisor to manage its agents and leads.
+3. Create product categories before adding products. To populate a development organisation with sample products, run:
 
----
+   ```bash
+   python manage.py create_categories
+   python manage.py create_sample_products --username ORGANISOR_USERNAME
+   ```
 
-## Quick Start
+   Replace `ORGANISOR_USERNAME` with the organisor account you created. The sample command skips products that already exist and categories it cannot find.
 
-After setting up locally and running the app:
-
-1. Open **http://127.0.0.1:8000/** and log in with your superuser credentials
-2. Create an **Organisor** (Admin → Organisors or via the app)
-3. Create an **Agent** and assign it to an organisation
-4. Create a **Lead** and assign it to an agent
-5. Add sample products: `python manage.py create_sample_products`
-
----
+4. Create orders for leads, review inventory and financial reports, and assign tasks to team members.
 
 ## Email Configuration
 
-Email is used for: signup verification, password reset, organisor/agent invitation (verification), and task deadline reminders (cron). For all of these you can use either option below.
+For **local Gmail SMTP**, set `USE_GMAIL_API=false`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` and `DEFAULT_FROM_EMAIL` in `.env`. Use a Gmail App Password from an account with two-step verification. The SMTP host, port and TLS setting are fixed in `djcrm/settings.py`.
 
-**Option A – Local (SMTP)**  
-1. Enable **2-Step Verification** in your Gmail account  
-2. Create an **App Password**: Google Account → Security → App passwords → Mail → Other  
-3. In `.env`: set `USE_GMAIL_API=false` (or leave unset) and add `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`
+For **Gmail API**, set `USE_GMAIL_API=true` and configure `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN` and `DEFAULT_FROM_EMAIL`. Follow the [Gmail API guide](docs/GMAIL_API_SETUP.md) for the OAuth setup and a test email.
 
-**Option B – Gmail API (needed on Render; SMTP ports are blocked)**  
-For step-by-step setup (Google Cloud project, Gmail API, OAuth consent screen, OAuth 2.0 Client ID, refresh token), see **[docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md)**.  
-Then in `.env`: set `USE_GMAIL_API=true` and add `GMAIL_API_CLIENT_ID`, `GMAIL_API_CLIENT_SECRET`, `GMAIL_API_REFRESH_TOKEN`, `DEFAULT_FROM_EMAIL` (the Gmail address used for the refresh token).
-
----
-
-## Deploy on Render
-
-The project uses Gunicorn and WhiteNoise. Deploy via the included `render.yaml` Blueprint.
-
-### 1. Create a PostgreSQL database
-
-Use [Neon](https://neon.tech/) (recommended) or any PostgreSQL provider. Copy the **pooled connection string** (Neon: Connection Details → Pooled connection).
-
-### 2. Create a new Web Service on Render
-
-1. Connect your GitHub repo
-2. Render will detect `render.yaml` — use **Apply** to create the service
-3. In **Environment** → **Environment Variables**, add the variables below
-
-### 3. Environment variables (Render Dashboard)
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | ✅ Yes | PostgreSQL connection string (e.g. Neon pooled URL with `?sslmode=require`) |
-| `SECRET_KEY` | ✅ Yes | Random string (Render can auto-generate) |
-| `DEBUG` | ✅ Yes | Set to `False` for production |
-| `GMAIL_API_CLIENT_ID` | ✅ Yes | From Google Cloud Console (OAuth 2.0 Client ID). See [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) |
-| `GMAIL_API_CLIENT_SECRET` | ✅ Yes | From Google Cloud Console. See [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) |
-| `GMAIL_API_REFRESH_TOKEN` | ✅ Yes | From `gmail_oauth2 --generate_oauth2_token`. See [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) |
-| `DEFAULT_FROM_EMAIL` | ✅ Yes | Gmail address that sends mail (same as the account used for the refresh token) |
-| `DJANGO_SUPERUSER_EMAIL` | Optional | Email for first admin (created on first deploy) |
-| `DJANGO_SUPERUSER_USERNAME` | Optional | Username for first admin |
-| `DJANGO_SUPERUSER_PASSWORD` | Optional | Password for first admin |
-| R2 (media) | Optional | For persistent uploads: `USE_R2`, `R2_ACCOUNT_ID`, `R2_BUCKET_NAME`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_DOMAIN`. See [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) |
-
-`USE_GMAIL_API`, `PYTHON_VERSION`, `WEB_CONCURRENCY`, and `RENDER_EXTERNAL_HOSTNAME` are set automatically by `render.yaml` or Render.
-
-### 4. Deploy
-
-After saving env vars, Render will build and deploy. The first deploy runs migrations and creates a superuser if `DJANGO_SUPERUSER_*` vars are set.
-
-### Cron Jobs (optional)
-
-Scheduled notifications (task deadlines, order-day reminders, lead-no-order alerts) require Cron Jobs. Configure a Cron Job on Render using either method below.
-
-**Method A – Manual (Dashboard):**
-
-1. Render Dashboard → **New** → **Cron Job**
-2. Connect the same GitHub repo
-3. **Build Command:** `pip install -r requirements.txt`
-4. **Start Command:** `python manage.py check_task_deadlines` (or a script that runs all three commands)
-5. **Schedule:** `0 9 * * *` (daily at 09:00 UTC). For `check_lead_no_order`, use weekly: `0 9 * * 1`
-6. **Environment Variables:** Same as Web Service (`DATABASE_URL`, `SECRET_KEY`, Gmail API vars, etc.)
-
-**Method B – Blueprint (render.yaml):**
-
-Add a `type: cron` service to `render.yaml` with `schedule`, `buildCommand`, `startCommand`, and `envVars`. After push, sync and apply the Blueprint in Render; Render will create the Cron Job service.
-
-**Commands to run:**
-
-| Command | Purpose | Suggested schedule |
-|---------|---------|--------------------|
-| `check_task_deadlines` | Task deadline reminders (1 and 3 days before) | Daily |
-| `check_order_day` | Order delivery-day notifications | Daily |
-| `check_lead_no_order` | Remind agents about leads with no orders in 30 days | Weekly |
-
----
-
-## Project Structure
-
-```
-├── agents/            # Agent CRUD, profile
-├── organisors/        # Organisor (organisation) management
-├── djcrm/             # Main project (settings, urls)
-├── finance/           # Financial reports (date range, org/agent filters)
-├── leads/             # Lead management, auth, categories
-├── orders/            # Order management (products, leads)
-├── ProductsAndStock/  # Products, stock, dashboard, charts, alerts
-├── tasks/             # Tasks and notifications
-├── activity_log/      # Audit log of user actions
-├── docs/              # GMAIL_API_SETUP.md, CLOUDFLARE_R2.md (see Email / Deploy sections)
-├── static/            # Static files
-├── templates/         # Base, landing, registration templates
-├── .env.example       # Environment variables template (copy to .env and fill in)
-├── .gitignore         # Files and folders excluded from version control
-├── build.sh           # Render build script
-├── LICENSE            # MIT license terms
-├── manage.py          # Django CLI entry point (runserver, migrate, test, etc.)
-├── README.md          # Project overview, setup, features, deployment
-├── render.yaml        # Render deployment config
-└── requirements.txt  # Python dependencies (pip install -r requirements.txt)
-```
-
----
-
-## Management Commands
-
-**Scheduled Notifications** (configure a Cron Job on Render — see [Deploy on Render](#deploy-on-render)):
-
-- `check_task_deadlines` — Create notifications for upcoming task deadlines (1 or 3 days before)
-- `check_order_day` — Create reminders when order delivery date is today
-- `check_lead_no_order` — Remind agents about leads with no orders in last 30 days
-
-**Setup / Sample Data**
-
-- `create_categories` — Create product categories and subcategories
-- `create_sample_products` — Create sample product data
-- `update_products_for_dashboard` — Update product data for dashboard
-- `create_default_categories` — Create default lead categories (e.g. Unassigned)
-
-**Maintenance / Migration**
-
-- `update_product_descriptions_english` — Update sample product descriptions to English
-- `reassign_products_to_organisor` — Move products from one organisation to another
-
-**Development / Test** (dev/test environments only)
-
-- `create_fake_notifications` — Create fake notifications for testing
-
----
+The application also selects Gmail API whenever `RENDER_EXTERNAL_HOSTNAME` is present. Render's free web services block outbound SMTP ports, so the included free-service Blueprint uses Gmail API.
 
 ## Testing
 
-Tests run **locally** only (not during production deploy). From the project root:
+From the project root, with dependencies installed and the development environment configured:
 
 ```bash
 python manage.py test
 ```
 
----
+Django discovers the tests under the eight application packages. They cover models, forms, views, authentication, role and organisation filters, signals and management commands. The test command selects an in-memory SQLite database, disables rate limiting and uses Django's test email backend. It does not verify PostgreSQL behaviour, real email delivery, R2 access or browser interactions.
 
-## Admin
+For checks in a separate checkout **without a `.env` file**, install `requirements-dev.txt` and run:
 
-**Local:** `http://127.0.0.1:8000/admin/` — **Production:** `<your-app-url>/admin/` (e.g. https://darkenyas-crm.onrender.com/admin/). Login with superuser credentials.
+```bash
+python -m pip install -r requirements-dev.txt
+python scripts/ci.py
+```
 
----
+This runs the dependency audit, Django checks, production configuration checks, migration consistency checks, static collection and tests. Database, email, media and static outputs use disposable settings. Use `python scripts/ci.py test` to run only the tests.
+
+## Deployment
+
+[render.yaml](render.yaml) defines a Python web service using Gunicorn. Create a Render **Blueprint** from the repository and supply a PostgreSQL database through `DATABASE_URL`.
+
+| Setting | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection URL; the URL configuration requires SSL. |
+| `SECRET_KEY` | Generated by the Blueprint, or set to a strong secret. |
+| `DEBUG=False` | Production mode; set by the Blueprint. |
+| Gmail API variables | Configure the four email values described above; the Blueprint sets `USE_GMAIL_API=true`. |
+| `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `SITE_URL` | Set for a custom domain. The Render hostname is added automatically; trusted origins include the URL scheme. |
+| R2 variables | Optional persistent upload storage; see the [R2 guide](docs/CLOUDFLARE_R2.md). |
+
+[build.sh](build.sh) installs dependencies, collects static files, applies migrations and attempts to create a superuser using `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` and `DJANGO_SUPERUSER_PASSWORD` if supplied. Its final `createsuperuser` failure is ignored, so verify administrator access after deployment. For an existing database, back it up before applying migrations.
+
+To collect static assets separately:
+
+```bash
+python manage.py collectstatic --noinput
+```
+
+There is no frontend compilation step. The build script changes the configured database; use it with the intended deployment settings. `/healthz/` returns `ok` but does not check database or external-service connectivity.
+
+Render's local disk is ephemeral. Configure R2 for persistent uploads; switching storage does not migrate existing files. Local `/media/` serving is for debug mode, so production uploads need R2 or a separately configured media server.
+
+### Scheduled notifications
+
+The Blueprint does not define a cron service. Configure a scheduler separately, using the same database and environment as the web service. The available notification commands are:
+
+```bash
+python manage.py check_task_deadlines
+python manage.py check_order_day
+python manage.py check_lead_no_order
+```
+
+Run them daily if you want deadline reminders, delivery-day notifications and inactive-lead follow-ups. `check_task_deadlines --dry-run` previews deadline emails without sending them. These commands are separate from deployment and tests.
+
+## Project Structure
+
+```text
+djcrm/             Project settings, URLs, WSGI/ASGI and media proxy
+leads/             Accounts, leads, organisation profiles and the Agent model
+agents/            Agent management forms, views and templates
+organisors/        Organisor management
+ProductsAndStock/  Products, categories, inventory and sales dashboards
+orders/            Orders and product lines
+finance/           Financial reporting
+tasks/             Tasks, notifications and reminder commands
+activity_log/      Business activity records
+templates/         Shared layout, landing and authentication templates
+static/            Styles, JavaScript and favicon
+docs/              Integration guides, screenshots and historical analysis
+scripts/           Isolated project checks
+```
+
+Each application keeps its models, forms, views, URLs, migrations, templates and tests together. Edit shared navigation and page layout in `templates/`; business screens are in each application's `templates/` directory. Keep the existing `ProductsAndStock` spelling when referencing that application.
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [docs/GMAIL_API_SETUP.md](docs/GMAIL_API_SETUP.md) | Gmail API setup (OAuth 2.0, refresh token) — required for email on Render |
-| [docs/CLOUDFLARE_R2.md](docs/CLOUDFLARE_R2.md) | Cloudflare R2 media storage — persistent uploads in production |
-
----
-
-## Security
-
-- Never commit `.env` or secrets. Only `.env.example` is committed; copy it to `.env` and fill in your values locally.
-- Use environment variables for production
-- Enable HTTPS in production
-
----
+- [Gmail API setup](docs/GMAIL_API_SETUP.md)
+- [Cloudflare R2 storage](docs/CLOUDFLARE_R2.md)
+- [Historical repository and test metrics, in Turkish](docs/CV_METRICS_ANALYSIS_TR.md) — dated measurements with their original evidence and limits.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+[MIT](LICENSE).

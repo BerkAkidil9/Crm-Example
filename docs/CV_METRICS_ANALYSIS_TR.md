@@ -13,6 +13,8 @@ Bu belge, Full-Stack veya Backend Software Engineer CV'sinde kullanılabilecek r
 
 Bu bir tarihli ölçüm kaydıdır. Yeni commit'lerde metrikleri otomatik olarak geçerli kabul etmeyin. Kaynak bağlantıları repository içindeki dosyalara gider; belirtilen satırlar incelenen commit'e aittir. Arşivdeki mutlak dosya yolları ve geçici dizinler ölçümün tarihsel kaydı olarak korunmuştur. Belgedeki göreli kanıt bağlantıları `/private/tmp` dizinine bağımlı değildir.
 
+**17 Ekim 2026 güncellik notu:** Bu raporun Django 5.0.7 ile alınmış ölçümleri ve CI bulunmadığına ilişkin değerlendirmeleri yukarıdaki commit'e aittir. Mevcut bakım çalışmasında bağımlılıklar ve README güncellendi, yerel ortamda çalışan bir GitHub Actions iş akışı eklendi. Bu değişiklikler arşivdeki sonuçları yeni sürümün ölçümü yapmaz. Güncel kurulum ve test komutları için [README](../README.md), bağımlılıklar için [requirements.txt](../requirements.txt), kontrol adımları için [CI yapılandırması](../.github/workflows/ci.yml) esas alınmalıdır. Kanıt dosyaları ve tarihsel dosya yolları değiştirilmemiştir.
+
 ## A Yeni ölçülen sonuçlar
 
 | Metric | Değer | Ne ifade ediyor | Repository veya ölçüm kanıtı | Impact/Scope | CV değeri | Neden |

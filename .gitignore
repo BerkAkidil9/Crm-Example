@@ -8,6 +8,8 @@ db.sqlite3
 db.sqlite3-journal
 *.sqlite3
 *.sqlite
+*.sqlite3-*
+*.sqlite-*
 media/
 
 # Environment variables - catch-all (keep .env.example in repo)
@@ -30,9 +32,9 @@ celerybeat.pid
 
 # Virtual environment
 venv/
+.venv/
 env/
 new_env/
-Scripts/
 pyvenv.cfg
 
 # IDE
@@ -49,12 +51,9 @@ Thumbs.db
 static_root/
 staticfiles/
 
-# Migration files (optional - uncomment if you want to ignore migrations)
-# */migrations/*.py
-# !*/migrations/__init__.py
-
 # Test / coverage
 .coverage
+.coverage.*
 htmlcov/
 coverage.xml
 *.lcov
@@ -62,6 +61,7 @@ coverage.xml
 .mypy_cache/
 .tox/
 ruff_cache/
+.ruff_cache/
 
 # Python build
 *.egg-info/
@@ -80,13 +80,15 @@ pip-delete-this-directory.txt
 TURKCE_BULUNAN_YERLER.md
 TURKCE_INGILIZCE_CEVIRI_LISTESI.md
 TURKISH_TO_ENGLISH_AUDIT.md
-# docs: ignore all; only the two below are tracked (add !docs/NAME.md to track more)
+# Keep local SQL utilities private; allow maintained documentation and evidence.
 docs/*
 !docs/CLOUDFLARE_R2.md
 !docs/GMAIL_API_SETUP.md
 !docs/CV_METRICS_ANALYSIS_TR.md
 !docs/cv-evidence/
 !docs/cv-evidence/**
+!docs/images/
+!docs/images/**
 START_PROJECT.md
 
 # Personal / local utility scripts
@@ -109,6 +111,8 @@ requirements.py
 # Secret config files
 secrets.json
 credentials.json
+client_secret*.json
+token.json
 
 # IDE
 .cursor/
