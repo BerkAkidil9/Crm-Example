@@ -105,13 +105,7 @@ class ProductsAndStock(models.Model):
 		"""Calculate final price after discount"""
 		from django.utils import timezone
 		
-		# Check if discount is active
-		is_discount_active = True
-		if self.discount_start_date and self.discount_end_date:
-			now = timezone.now()
-			is_discount_active = self.discount_start_date <= now <= self.discount_end_date
-		
-		if not is_discount_active:
+		if not self.is_discount_active:
 			return self.product_price
 		
 		# Apply percentage discount
@@ -135,11 +129,12 @@ class ProductsAndStock(models.Model):
 		if not (self.discount_percentage > 0 or self.discount_amount > 0):
 			return False
 		
-		if self.discount_start_date and self.discount_end_date:
-			now = timezone.now()
-			return self.discount_start_date <= now <= self.discount_end_date
-		
-		return True  # If no date restrictions, discount is always active
+		now = timezone.now()
+		if self.discount_start_date and now < self.discount_start_date:
+			return False
+		if self.discount_end_date and now > self.discount_end_date:
+			return False
+		return True
 	
 	@property
 	def total_profit(self):
@@ -281,7 +276,7 @@ def store_previous_data(sender, instance, **kwargs):
 def create_stock_movement(sender, instance, created, **kwargs):
 	"""Create stock movement record after save. Skip when order already created one (avoid duplicate)."""
 	if not created:
-		# OrderProduct.reduce_stock/restore_stock create their own StockMovement; skip duplicate
+		# Order reservation changes create their own StockMovement; skip duplicate
 		if getattr(instance, '_skip_stock_movement_signal', False):
 			if instance.pk in _previous_data:
 				del _previous_data[instance.pk]

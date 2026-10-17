@@ -1,5 +1,5 @@
 import logging
-from django.core.mail import send_mail
+from leads.services import AccountEmailError, creating_account, send_account_mail as send_mail
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
@@ -56,7 +56,7 @@ class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):
         user.email_verified = False
         
         try:
-            with transaction.atomic():
+            with creating_account(user):
                 user.save()
                 logger.info(f"User {user.username} created successfully")
 
@@ -85,7 +85,10 @@ class OrganisorCreateView(AdminOnlyMixin, generic.CreateView):
                 self.send_verification_email(user, verification_token.token)
                 messages.success(self.request, "Organisor created successfully.")
                 
-            return super().form_valid(form)
+            return HttpResponseRedirect(self.get_success_url())
+        except AccountEmailError as error:
+            form.add_error(None, str(error))
+            return self.form_invalid(form)
         except IntegrityError as e:
             logger.error(f"IntegrityError while creating organisor: {e}", exc_info=True)
             form.add_error(None, "An error occurred while creating the organisor. Please try again.")

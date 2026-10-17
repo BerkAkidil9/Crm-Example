@@ -445,7 +445,11 @@ class TestFinancialReportView(TestCase):
             order_name='Org2 Order',
             order_description='Order for org2',
             organisation=org2_profile,
-            lead=self.lead,
+            lead=Lead.objects.create(
+                first_name='Org2', last_name='Lead', age=30,
+                email='org2-lead@example.com', phone_number='2025550198',
+                organisation=org2_profile,
+            ),
             creation_date=self.today
         )
         

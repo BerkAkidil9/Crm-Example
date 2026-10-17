@@ -1,6 +1,6 @@
 import logging
 import random
-from django.core.mail import send_mail
+from leads.services import AccountEmailError, creating_account, send_account_mail as send_mail
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import reverse
@@ -86,7 +86,7 @@ class AgentCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
         # Password is set in the form, no need to set it here again
 
         try:
-            with transaction.atomic():
+            with creating_account(user):
                 user.save()
                 logger.info(f"User {user.username} created successfully")
 
@@ -129,7 +129,10 @@ class AgentCreateView(OrganisorAndLoginRequiredMixin, generic.CreateView):
                 # Send email
                 self.send_verification_email(user, verification_token.token)
                 messages.success(self.request, "Agent created successfully.")
-            return super().form_valid(form)
+            return HttpResponseRedirect(self.get_success_url())
+        except AccountEmailError as error:
+            form.add_error(None, str(error))
+            return self.form_invalid(form)
         except IntegrityError as e:
             logger.error(f"IntegrityError while creating agent: {e}", exc_info=True)
             form.add_error(None, "An error occurred while creating the agent. Please try again.")

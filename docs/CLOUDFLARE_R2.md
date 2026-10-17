@@ -65,7 +65,7 @@ With `USE_R2_MEDIA_PROXY=true`, Django uses `djcrm.storage.R2ProxyStorage`. Uplo
 - Set `SITE_URL` to the correct reachable application origin, especially when using a custom domain.
 - R2 read/open errors can result in a 404 or server error, depending on where the storage operation fails; inspect server logs as well as the browser response.
 
-The proxy currently sends `Cache-Control: public, max-age=86400`. If a reverse proxy or CDN is used, exclude protected media responses from shared caching; application authorisation alone does not establish safe shared-cache behaviour.
+The proxy sends `Cache-Control: private, no-store, no-cache, max-age=0, must-revalidate` and `Vary: Cookie` so protected images are not stored for reuse by a browser or shared cache. Keep any reverse proxy/CDN configured to respect these headers. When upgrading from a version that sent `public, max-age=86400`, purge existing cached `/media-proxy/` responses as part of deployment; new response headers cannot remove copies already cached upstream.
 
 ### Direct public URLs
 

@@ -11,7 +11,7 @@ A Django CRM for managing leads, agents, products, stock, orders and finances ac
 - **Organisation and team management:** administrator, organisor and agent roles, with organisation and assignment filters for business records.
 - **Lead management:** create and update customer records, assign agents, classify leads by source and value, upload photos, and review activity history.
 - **Products and inventory:** categories, stock movements, minimum stock levels, price history, discounts, bulk price changes, stock alerts and recommendations, plus sales dashboards and charts.
-- **Orders and finance:** orders with multiple product lines, stock deductions on creation and restoration on cancellation, and date-filtered revenue, cost and profit reports.
+- **Orders and finance:** orders with multiple product lines and recorded discounted unit prices and costs, stock adjustments on creation, editing, cancellation and deletion, and date-filtered revenue, cost and profit reports.
 - **Tasks and notifications:** assign work, track status and priority, and receive in-app updates. Management commands provide task deadline emails, delivery-day reminders and follow-ups for inactive leads when scheduled separately.
 - **Accounts and activity:** email verification, login by username or email, password reset, profile editing, and activity logs for changes to business records.
 
@@ -128,6 +128,8 @@ This runs the dependency audit, Django checks, production configuration checks, 
 | R2 variables | Optional persistent upload storage; see the [R2 guide](docs/CLOUDFLARE_R2.md). |
 
 [build.sh](build.sh) installs dependencies, collects static files, applies migrations and attempts to create a superuser using `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` and `DJANGO_SUPERUSER_PASSWORD` if supplied. Its final `createsuperuser` failure is ignored, so verify administrator access after deployment. For an existing database, back it up before applying migrations.
+
+The order migrations preserve existing line totals to derive recorded unit prices. Earlier versions did not store historical costs, so existing lines retain an unknown cost rather than using today's product cost. Reports show unavailable cost and profit for those orders and for totals that include them; revenue remains available. New order lines record both price and cost, which later catalog changes do not alter.
 
 To collect static assets separately:
 

@@ -99,6 +99,9 @@
     <!-- Stats Cards -->
     {% if total_earned is not None %}
     <p class="text-sm text-gray-500 mb-2">Showing data filtered by <strong>{% if selected_date_filter == 'order_day' %}Order Date{% else %}Creation Date{% endif %}</strong></p>
+    {% if total_cost is None %}
+    <p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800" role="status">Historical costs were not recorded for some order lines. Their cost and profit, and the combined cost and profit totals, are unavailable. Revenue is unaffected.</p>
+    {% endif %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
             <div class="flex items-center gap-4">
@@ -118,7 +121,7 @@
                 </div>
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Cost</p>
-                    <p class="text-2xl font-bold text-gray-800">${{ total_cost|floatformat:2 }}</p>
+                    <p class="text-2xl font-bold text-gray-800">{% if total_cost is not None %}${{ total_cost|floatformat:2 }}{% else %}Unavailable{% endif %}</p>
                 </div>
             </div>
         </div>
@@ -129,7 +132,7 @@
                 </div>
                 <div>
                     <p class="text-gray-500 text-sm font-medium">Total Profit</p>
-                    <p class="text-2xl font-bold {% if total_profit >= 0 %}text-purple-600{% else %}text-red-600{% endif %}">${{ total_profit|floatformat:2 }}</p>
+                    <p class="text-2xl font-bold {% if total_profit is None %}text-gray-600{% elif total_profit >= 0 %}text-purple-600{% else %}text-red-600{% endif %}">{% if total_profit is not None %}${{ total_profit|floatformat:2 }}{% else %}Unavailable{% endif %}</p>
                 </div>
             </div>
         </div>
@@ -184,8 +187,8 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-sm font-semibold text-emerald-600">${{ row.report.earned_amount|floatformat:2 }}</span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${{ row.cost|floatformat:2 }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {% if row.profit >= 0 %}text-purple-600{% else %}text-red-600{% endif %}">${{ row.profit|floatformat:2 }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{% if row.cost is not None %}${{ row.cost|floatformat:2 }}{% else %}Unavailable{% endif %}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {% if row.profit is None %}text-gray-600{% elif row.profit >= 0 %}text-purple-600{% else %}text-red-600{% endif %}">{% if row.profit is not None %}${{ row.profit|floatformat:2 }}{% else %}Unavailable{% endif %}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ row.report.order.creation_date|date:"d M Y H:i" }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ row.report.order.order_day|date:"d M Y H:i" }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">

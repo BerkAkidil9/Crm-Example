@@ -1,6 +1,6 @@
 import logging
 from typing import Any
-from django.core.mail import send_mail
+from .services import AccountEmailError, creating_account, send_account_mail as send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -40,6 +40,14 @@ class CustomLoginView(LoginView):
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
     template_name = 'registration/password_reset_form.html'
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except Exception:
+            logger.exception('Password reset email delivery failed')
+            form.add_error(None, 'Email delivery is temporarily unavailable. Please try again later.')
+            return self.form_invalid(form)
     
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -49,16 +57,6 @@ class CustomPasswordResetView(PasswordResetView):
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = CustomSetPasswordForm
     template_name = 'registration/password_reset_confirm.html'
-
-
-class CustomPasswordResetDoneView(generic.TemplateView):
-    """Show different message when no user was found (email not in DB)."""
-    template_name = 'registration/password_reset_done.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['email_sent'] = self.request.session.pop('password_reset_email_sent', None)
-        return context
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -75,37 +73,29 @@ If you did not perform this action, please contact support immediately.
 Best regards,
 Darkenyas CRM Team
 """
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except AccountEmailError:
+            # The password has already changed; a notification failure must not
+            # turn a successful reset into an error or invite a second reset.
+            messages.warning(self.request, 'Your password was changed, but the confirmation email could not be sent.')
         return response
-    
-    def form_invalid(self, form):
-        # Only show errors on actual form submission
-        if self.request.method == 'POST':
-            username = form.cleaned_data.get('username', '')
-            if username:
-                try:
-                    from django.db import models
-                    user = User.objects.filter(
-                        models.Q(username__iexact=username) | models.Q(email__iexact=username)
-                    ).first()
-                    
-                    if user and not user.email_verified:
-                        messages.error(self.request, "Please verify your account by clicking the verification link sent to your email address.")
-                        return super().form_invalid(form)
-                except (User.DoesNotExist, ValueError):
-                    pass
-            
-            # Only show error message when both username and password are filled
-            if username and form.cleaned_data.get('password', ''):
-                messages.error(self.request, "Invalid username/email or password.")
-        
-        return super().form_invalid(form)
+
+
+class CustomPasswordResetDoneView(generic.TemplateView):
+    """Display the outcome of requesting a password-reset email."""
+    template_name = 'registration/password_reset_done.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email_sent'] = self.request.session.pop('password_reset_email_sent', None)
+        return context
 
 @method_decorator(ratelimit(key='ip', rate='3/m', method='POST', block=True), name='post')
 class SignupView(generic.CreateView):
@@ -125,24 +115,27 @@ class SignupView(generic.CreateView):
         user.email = form.cleaned_data.get('email')
         user.first_name = form.cleaned_data.get('first_name')
         user.last_name = form.cleaned_data.get('last_name')
-        user.is_organisor = True  # Set the user as an organisor (company owner)
+        user.is_organisor = True
         user.is_agent = False
-        user.email_verified = False  # Start with email unverified
-        user.save()
+        user.email_verified = False
+        try:
+            with creating_account(user):
+                user.save()
+                user_profile, _ = UserProfile.objects.get_or_create(user=user)
+                from organisors.models import Organisor
+                Organisor.objects.create(user=user, organisation=user_profile)
+                verification_token = EmailVerificationToken.objects.create(user=user)
+                self.send_verification_email(user, verification_token.token)
+        except AccountEmailError as error:
+            form.add_error(None, str(error))
+            return self.form_invalid(form)
+        except Exception:
+            logger.exception('Signup account creation failed')
+            form.add_error(None, 'Your account could not be created. Please try again later.')
+            return self.form_invalid(form)
+        self.object = user
+        return redirect(self.get_success_url())
 
-        # Create UserProfile and Organisor
-        user_profile, created = UserProfile.objects.get_or_create(user=user)
-        from organisors.models import Organisor
-        Organisor.objects.create(user=user, organisation=user_profile)
-
-        # Create email verification token
-        verification_token = EmailVerificationToken.objects.create(user=user)
-        
-        # Send verification email
-        self.send_verification_email(user, verification_token.token)
-
-        return super().form_valid(form)
-    
     def send_verification_email(self, user, token):
         subject = 'Darkenyas CRM - Email Verification'
         message = f"""

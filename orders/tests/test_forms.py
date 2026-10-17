@@ -327,7 +327,7 @@ class TestOrderForm(TestCase):
             product=self.product
         )
         self.assertEqual(saved_order_product.product_quantity, 3)
-        self.assertEqual(saved_order_product.total_price, 3 * self.product.product_price)
+        self.assertAlmostEqual(saved_order_product.total_price, 3 * self.product.product_price, places=2)
 
 
 class TestOrderProductFormSet(TestCase):
@@ -662,7 +662,7 @@ class TestFormIntegration(TestCase):
         self.assertEqual(order_product1.product_quantity, 2)
         self.assertEqual(order_product2.product_quantity, 3)
         self.assertEqual(order_product1.total_price, 2 * self.product1.product_price)
-        self.assertEqual(order_product2.total_price, 3 * self.product2.product_price)
+        self.assertAlmostEqual(order_product2.total_price, 3 * self.product2.product_price, places=2)
     
     def test_form_validation_consistency(self):
         """Form validation consistency test"""

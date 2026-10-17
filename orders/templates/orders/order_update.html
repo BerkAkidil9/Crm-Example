@@ -135,14 +135,18 @@
 				{% for form in product_formset %}
 				<div class="product-form-row flex flex-wrap gap-4 items-end p-4 bg-gray-50 rounded-lg border border-gray-200">
 					{{ form.id }}
+					{{ form.id.errors }}
+					{{ form.non_field_errors }}
 					<div class="flex-1 min-w-[200px]">
 						<label for="{{ form.product.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Product</label>
 						<select name="{{ form.product.html_name }}" id="{{ form.product.id_for_label }}" class="order-product-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
 							<option value="">---------</option>
 							{% for product in form.fields.product.queryset %}
-							<option value="{{ product.pk }}" data-category-id="{{ product.category_id }}" data-subcategory-id="{{ product.subcategory_id }}" data-price="{{ product.product_price }}" data-stock="{{ product.product_quantity|default:0 }}" {% if form.product.value == product.pk %}selected{% endif %}>{{ product.product_name }} ({{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}) — ${{ product.product_price|floatformat:2 }}, {{ product.product_quantity|default:"0" }} in stock</option>
+							<option value="{{ product.pk }}" data-category-id="{{ product.category_id }}" data-subcategory-id="{{ product.subcategory_id }}" data-price="{{ product.discounted_price|floatformat:"2u" }}"{% if form.instance.pk and form.instance.product_id == product.pk %} data-recorded-price="{{ form.instance.unit_price }}"{% endif %} data-stock="{{ product.product_quantity|default:0 }}" {% if form.product.value|stringformat:"s" == product.pk|stringformat:"s" %}selected{% endif %}>{{ product.product_name }} ({{ product.category.name }}{% if product.subcategory %} / {{ product.subcategory.name }}{% endif %}) — ${{ product.discounted_price|floatformat:2 }}, {{ product.product_quantity|default:"0" }} in stock</option>
 							{% endfor %}
 						</select>
+						{{ form.product.errors }}
+						{% if form.instance.pk %}<p data-recorded-unit-price class="text-xs text-gray-500 mt-1">Recorded unit price: ${{ form.instance.unit_price|floatformat:2 }}</p>{% endif %}
 					</div>
 					<div class="w-28">{{ form.product_quantity|as_crispy_field }}</div>
 					<div class="flex items-center">
@@ -252,6 +256,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				var id = el.getAttribute('id');
 				if (id) el.setAttribute('id', id.replace(/id_orderproduct_set-\d+-/, newIdPrefix));
 			});
+			clone.querySelectorAll('[data-recorded-unit-price]').forEach(function(el) { el.remove(); });
+			clone.querySelectorAll('[data-recorded-price]').forEach(function(el) { el.removeAttribute('data-recorded-price'); });
 			clone.querySelectorAll('label').forEach(function(lbl) {
 				var forAttr = lbl.getAttribute('for');
 				if (forAttr) lbl.setAttribute('for', forAttr.replace(/id_orderproduct_set-\d+-/, newIdPrefix));
@@ -281,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			var qtyInput = row.querySelector('input[name*="-product_quantity"]');
 			if (!sel || !qtyInput) return;
 			var opt = sel.options[sel.selectedIndex];
-			var price = opt && opt.getAttribute('data-price') ? parsePrice(opt.getAttribute('data-price')) : 0;
+			var price = opt ? parsePrice(opt.getAttribute('data-recorded-price') || opt.getAttribute('data-price')) : 0;
 			var qty = parsePrice(qtyInput.value) || 0;
 			total += price * qty;
 		});

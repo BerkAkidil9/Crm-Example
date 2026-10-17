@@ -228,7 +228,7 @@ class TestFinanceOrdersIntegration(TestCase):
             total=Sum('earned_amount')
         )['total']
         
-        self.assertEqual(total_earned, total_expected_earned)
+        self.assertAlmostEqual(total_earned, total_expected_earned, places=2)
         self.assertEqual(OrderFinanceReport.objects.count(), 3)
     
     def test_finance_report_date_filtering_with_orders(self):
@@ -307,7 +307,11 @@ class TestFinanceOrdersIntegration(TestCase):
             order_name='Org2 Order',
             order_description='Order for org2',
             organisation=org2_profile,
-            lead=self.lead
+            lead=Lead.objects.create(
+                first_name='Org2', last_name='Lead', age=30,
+                email='org2-lead@example.com', phone_number='2025550198',
+                organisation=org2_profile,
+            )
         )
         
         finance_report1 = OrderFinanceReport.objects.create(

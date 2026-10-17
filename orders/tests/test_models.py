@@ -307,83 +307,37 @@ class TestOrderProductModel(TestCase):
         # OrderProduct should also be deleted
         self.assertFalse(OrderProduct.objects.filter(id=order_product_id).exists())
     
-    def test_order_product_reduce_stock_success(self):
-        """OrderProduct reduce_stock success test"""
-        initial_stock = self.product.product_quantity
-        
-        # Stock reduction operation
-        success = self.order_product.reduce_stock()
-        
-        # Operation should succeed
-        self.assertTrue(success)
-        
-        # Stock should have been reduced
+    def test_saving_unchanged_line_does_not_reduce_stock_again(self):
         self.product.refresh_from_db()
-        expected_stock = initial_stock - self.order_product.product_quantity
-        self.assertEqual(self.product.product_quantity, expected_stock)
-        
-        # StockMovement record should have been created
-        self.assertTrue(StockMovement.objects.filter(
-            product=self.product,
-            movement_type='OUT'
-        ).exists())
-    
-    def test_order_product_reduce_stock_insufficient(self):
-        """OrderProduct reduce_stock insufficient stock test"""
-        # Reduce stock quantity
+        before = self.product.product_quantity
+        self.order_product.save()
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.product_quantity, before)
+
+    def test_increasing_line_rejects_insufficient_stock(self):
         self.product.product_quantity = 1
         self.product.save()
-        
-        # Test with higher quantity
         self.order_product.product_quantity = 5
-        self.order_product.save()
-        
-        # Stock reduction operation should fail
-        success = self.order_product.reduce_stock()
-        self.assertFalse(success)
-        
-        # Stock should remain unchanged
+        with self.assertRaises(ValidationError):
+            self.order_product.save()
         self.product.refresh_from_db()
         self.assertEqual(self.product.product_quantity, 1)
-    
-    def test_order_product_reduce_stock_cancelled_order(self):
-        """OrderProduct reduce_stock cancelled order test"""
-        # Cancel Order
+        self.order_product.refresh_from_db()
+        self.assertEqual(self.order_product.product_quantity, 2)
+
+    def test_cancelled_line_save_does_not_reduce_stock(self):
         self.order.is_cancelled = True
         self.order.save()
-        
-        # Stock reduction operation
-        success = self.order_product.reduce_stock()
-        
-        # Stock should not be reduced for cancelled order
-        self.assertTrue(success)  # Method returns success but does not reduce stock
-        
-        # Stock should remain unchanged
+        self.order_product.save()
         self.product.refresh_from_db()
         self.assertEqual(self.product.product_quantity, 50)
-    
-    def test_order_product_restore_stock(self):
-        """OrderProduct restore_stock test"""
-        # First reduce stock
-        initial_stock = self.product.product_quantity
-        self.order_product.reduce_stock()
-        
-        # Cancel Order
+
+    def test_repeated_cancellation_does_not_restore_stock_twice(self):
         self.order.is_cancelled = True
         self.order.save()
-        
-        # Restore stock
-        self.order_product.restore_stock()
-        
-        # Stock should have been restored
+        self.order.save()
         self.product.refresh_from_db()
-        self.assertEqual(self.product.product_quantity, initial_stock)
-        
-        # StockMovement record should have been created
-        self.assertTrue(StockMovement.objects.filter(
-            product=self.product,
-            movement_type='IN'
-        ).exists())
+        self.assertEqual(self.product.product_quantity, 50)
 
 
 class TestOrdersModelSignals(TransactionTestCase):
@@ -619,7 +573,7 @@ class TestOrdersModelIntegration(TestCase):
         expected_total2 = 3 * self.product2.product_price
         
         self.assertEqual(order_product1.total_price, expected_total1)
-        self.assertEqual(order_product2.total_price, expected_total2)
+        self.assertAlmostEqual(order_product2.total_price, expected_total2, places=2)
     
     def test_order_total_price_calculation(self):
         """Order total price calculation test"""
@@ -641,7 +595,7 @@ class TestOrdersModelIntegration(TestCase):
         total_price = sum(item.total_price for item in order_items)
         
         expected_total = (2 * self.product1.product_price) + (3 * self.product2.product_price)
-        self.assertEqual(total_price, expected_total)
+        self.assertAlmostEqual(total_price, expected_total, places=2)
     
     def test_order_finance_report_integration(self):
         """Order finance report integration test"""

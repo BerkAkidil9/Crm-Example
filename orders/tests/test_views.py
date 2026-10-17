@@ -654,6 +654,7 @@ class TestOrderCancelView(TestCase):
     
     def test_order_cancel_view_post_success(self):
         """Order cancel view POST success test"""
+        self.product.refresh_from_db()
         initial_stock = self.product.product_quantity
         
         response = self.client.post(reverse('orders:order-cancel', kwargs={'pk': self.order.pk}))

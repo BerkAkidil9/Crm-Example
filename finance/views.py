@@ -38,7 +38,7 @@ class FinancialReportView(LoginRequiredMixin, View):
         }
         qs = OrderFinanceReport.objects.filter(**filter_kwargs).select_related(
             'order', 'order__lead', 'order__organisation', 'order__organisation__user'
-        ).prefetch_related('order__orderproduct_set__product')
+        ).prefetch_related('order__orderproduct_set')
 
         user = self.request.user
         org_id = self.request.GET.get('organisation') or self.request.POST.get('organisation')
@@ -120,7 +120,7 @@ class FinancialReportView(LoginRequiredMixin, View):
             average_per_order = round(total_earned / order_count, 2) if order_count else None
             order_ids = list(reports.values_list('order_id', flat=True))
             total_cost = self._get_total_cost(order_ids)
-            total_profit = round(total_earned - total_cost, 2)
+            total_profit = round(total_earned - total_cost, 2) if total_cost is not None else None
         else:
             total_earned = None
             total_cost = None
@@ -148,17 +148,20 @@ class FinancialReportView(LoginRequiredMixin, View):
         if not order_ids:
             return 0
         result = OrderProduct.objects.filter(order_id__in=order_ids).annotate(
-            line_cost=ExpressionWrapper(F('product_quantity') * F('product__cost_price'), output_field=FloatField())
-        ).aggregate(total=Sum('line_cost'))
+            line_cost=ExpressionWrapper(F('product_quantity') * F('unit_cost'), output_field=FloatField())
+        ).aggregate(total=Sum('line_cost'), lines=Count('pk'), known_costs=Count('unit_cost'))
+        if result['lines'] != result['known_costs']:
+            return None
         return round(result['total'] or 0, 2)
 
     def _get_report_rows(self, reports):
         """Return list of dicts with report, cost, profit for each order."""
         rows = []
         for r in reports:
-            cost = sum(op.product_quantity * op.product.cost_price for op in r.order.orderproduct_set.all())
-            profit = round(r.earned_amount - cost, 2)
-            rows.append({'report': r, 'cost': round(cost, 2), 'profit': profit})
+            items = list(r.order.orderproduct_set.all())
+            cost = round(sum(op.product_quantity * op.unit_cost for op in items), 2) if all(op.unit_cost is not None for op in items) else None
+            profit = round(r.earned_amount - cost, 2) if cost is not None else None
+            rows.append({'report': r, 'cost': cost, 'profit': profit})
         return rows
 
     def post(self, request, *args, **kwargs):
@@ -179,7 +182,7 @@ class FinancialReportView(LoginRequiredMixin, View):
             average_per_order = round(total_earned / order_count, 2) if order_count else None
             order_ids = list(reports.values_list('order_id', flat=True))
             total_cost = self._get_total_cost(order_ids)
-            total_profit = round(total_earned - total_cost, 2)
+            total_profit = round(total_earned - total_cost, 2) if total_cost is not None else None
 
             report_rows = self._get_report_rows(reports) if reports else []
             context = {

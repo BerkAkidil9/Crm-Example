@@ -7,8 +7,9 @@ to have permission to the owning lead or user (IDOR prevention).
 import logging
 import mimetypes
 from django.http import FileResponse, Http404, HttpResponse
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
+from django.views.decorators.vary import vary_on_cookie
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 
@@ -64,9 +65,10 @@ def _user_can_access_media_path(user, path):
     return False
 
 
+@never_cache
+@vary_on_cookie
 @require_GET
 @login_required
-@cache_control(public=True, max_age=86400)  # 1 day
 def media_proxy(request, path: str):
     """Stream a file from default storage (R2 or filesystem) by path. Path must not contain '..'."""
     if ".." in path or path.startswith("/"):
