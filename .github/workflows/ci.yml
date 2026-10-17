@@ -36,26 +36,24 @@ jobs:
           clean: true
           persist-credentials: false
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: '3.12'
+          version: '0.13.1'
+          enable-cache: false
+          cache-local-path: ${{ runner.temp }}/crm-uv-cache-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Install dependencies in a disposable environment
         run: |
-          python -m venv "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check --upgrade pip
-          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check -r requirements-dev.txt
+          export UV_PYTHON_INSTALL_DIR="$RUNNER_TOOL_CACHE/crm-python"
+          uv venv --python 3.12 --seed "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          uv pip install --python "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -r requirements-dev.txt
       - name: Run native checks
         run: '"$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" scripts/ci.py quality'
       - name: Remove disposable environment
         if: always()
         run: |
-          python - <<'PY'
-          import os
-          from pathlib import Path
-          import shutil
-          folder = Path(os.environ['RUNNER_TEMP']) / f"crm-venv-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
-          shutil.rmtree(folder, ignore_errors=True)
-          PY
+          test -n "$RUNNER_TEMP"
+          rm -rf -- "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            "$RUNNER_TEMP/crm-uv-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
 
   tests:
     name: Tests (${{ matrix.shard }}, 2 workers)
@@ -80,23 +78,21 @@ jobs:
           clean: true
           persist-credentials: false
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: '3.12'
+          version: '0.13.1'
+          enable-cache: false
+          cache-local-path: ${{ runner.temp }}/crm-uv-cache-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Install dependencies in a disposable environment
         run: |
-          python -m venv "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check --upgrade pip
-          "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -m pip install --disable-pip-version-check -r requirements-dev.txt
+          export UV_PYTHON_INSTALL_DIR="$RUNNER_TOOL_CACHE/crm-python"
+          uv venv --python 3.12 --seed "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          uv pip install --python "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" -r requirements-dev.txt
       - name: Run test shard with two workers
         run: '"$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/bin/python" scripts/ci.py test --shard "$CRM_TEST_SHARD" --workers 2'
       - name: Remove disposable environment
         if: always()
         run: |
-          python - <<'PY'
-          import os
-          from pathlib import Path
-          import shutil
-          folder = Path(os.environ['RUNNER_TEMP']) / f"crm-venv-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
-          shutil.rmtree(folder, ignore_errors=True)
-          PY
+          test -n "$RUNNER_TEMP"
+          rm -rf -- "$RUNNER_TEMP/crm-venv-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            "$RUNNER_TEMP/crm-uv-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
